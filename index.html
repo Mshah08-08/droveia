@@ -4,10 +4,11 @@
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Droveia — Tools Delivered by Drone</title>
+
     <link rel="preconnect" href="https://fonts.googleapis.com"/>
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+
     <style>
-        /* ── Reset & Base ─────────────────────────────────────── */
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
         :root{
           --blue:#1a6ef0;
@@ -28,1724 +29,446 @@
           --font:'Sora',sans-serif;
         }
         html{scroll-behavior:smooth}
-        body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
-        ::-webkit-scrollbar{width:4px}
-        ::-webkit-scrollbar-track{background:transparent}
-        ::-webkit-scrollbar-thumb{background:var(--dim);border-radius:4px}
+        body{
+          font-family:var(--font);
+          background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(26,110,240,0.12) 0%,transparent 70%), var(--bg);
+          color:var(--text);
+          min-height:100vh;
+          overflow-x:hidden;
+          -webkit-font-smoothing:antialiased
+        }
         a{text-decoration:none;color:inherit}
         button{font-family:var(--font);cursor:pointer}
         input,textarea,select{font-family:var(--font)}
-
-        /* ── Animations ──────────────────────────────────────── */
-        @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
-        @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-        @keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
-        @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.25}}
-        @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-        @keyframes droneFloat{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-8px) rotate(1deg)}}
-        @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
-        @keyframes scaleIn{from{opacity:0;transform:scale(0.96)}to{opacity:1;transform:scale(1)}}
-
-        .fade-up{animation:fadeUp 0.5s ease both}
-        .fade-in{animation:fadeIn 0.3s ease both}
-
-        /* ── Utility ─────────────────────────────────────────── */
         .hidden{display:none!important}
         .page{display:none}
         .page.active{display:block}
+        ::-webkit-scrollbar{width:4px}
+        ::-webkit-scrollbar-thumb{background:var(--dim);border-radius:4px}
 
-        /* ── Noise overlay ───────────────────────────────────── */
-        body::before{
-          content:'';position:fixed;inset:0;
-          background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-          pointer-events:none;z-index:0;opacity:0.4;
-        }
-
-        /* ── Glow blobs ──────────────────────────────────────── */
-        .glow-blob{position:fixed;border-radius:50%;filter:blur(120px);pointer-events:none;z-index:0}
-        .glow-1{width:500px;height:500px;background:rgba(26,110,240,0.08);top:-100px;right:-100px}
-        .glow-2{width:400px;height:400px;background:rgba(26,110,240,0.05);bottom:100px;left:-100px}
-
-        /* ── Nav ─────────────────────────────────────────────── */
         nav{
           position:fixed;top:0;left:0;right:0;z-index:100;
           display:flex;align-items:center;justify-content:space-between;
-          padding:0 40px;height:64px;
+          padding:0 22px;height:64px;
           background:rgba(9,8,15,0.85);
-          backdrop-filter:blur(20px);
+          backdrop-filter:blur(16px);
           border-bottom:1px solid var(--border);
         }
-        .nav-logo{display:flex;align-items:center;gap:10px}
+        .nav-logo{display:flex;align-items:center;gap:10px;cursor:pointer}
         .nav-logo-mark{
           width:32px;height:32px;border-radius:9px;
           background:linear-gradient(135deg,#1558d0,var(--blue));
           display:flex;align-items:center;justify-content:center;
           box-shadow:0 4px 16px rgba(26,110,240,0.35);
         }
-        .nav-wordmark{font-size:17px;font-weight:700;letter-spacing:-0.3px;color:var(--text)}
+        .nav-wordmark{font-size:17px;font-weight:800;letter-spacing:-0.3px}
         .nav-links{display:flex;align-items:center;gap:4px}
         .nav-link{
           padding:7px 14px;border-radius:8px;font-size:14px;font-weight:500;color:var(--muted);
-          background:none;border:none;cursor:pointer;transition:all 0.15s;
+          background:none;border:none;transition:all 0.15s;
         }
         .nav-link:hover,.nav-link.active{color:var(--text);background:var(--surface)}
         .nav-right{display:flex;align-items:center;gap:10px}
-        .nav-live{
-          display:flex;align-items:center;gap:6px;
-          border:1px solid rgba(26,110,240,0.4);border-radius:20px;padding:5px 12px;
-          background:var(--blue-dim);font-size:11px;font-weight:600;color:#93c5fd;letter-spacing:0.05em;
-        }
-        .live-dot{width:6px;height:6px;border-radius:50%;background:var(--blue);animation:pulse 1.8s ease-in-out infinite}
         .nav-btn-ghost{
-          padding:8px 16px;border-radius:9px;font-size:14px;font-weight:500;
+          padding:8px 16px;border-radius:9px;font-size:14px;font-weight:600;
           background:none;border:1px solid var(--border2);color:var(--muted);transition:all 0.15s;
         }
         .nav-btn-ghost:hover{color:var(--text);border-color:rgba(255,255,255,0.2)}
         .nav-btn-solid{
-          padding:8px 18px;border-radius:9px;font-size:14px;font-weight:600;
+          padding:8px 18px;border-radius:9px;font-size:14px;font-weight:700;
           background:var(--blue);border:none;color:#fff;transition:all 0.15s;
         }
-        .nav-btn-solid:hover{filter:brightness(1.1);transform:translateY(-1px)}
+        .nav-btn-solid:hover{filter:brightness(1.08);transform:translateY(-1px)}
         .cart-btn{position:relative}
         .cart-badge{
           position:absolute;top:-4px;right:-4px;width:16px;height:16px;border-radius:50%;
-          background:var(--blue);color:#fff;font-size:9px;font-weight:700;
-          display:flex;align-items:center;justify-content:center;display:none;
+          background:var(--blue);color:#fff;font-size:9px;font-weight:800;
+          display:none;align-items:center;justify-content:center;
         }
 
-        /* ── Hero ─────────────────────────────────────────────── */
-        #page-home{padding-top:64px}
-        .hero{
-          position:relative;min-height:92vh;
-          display:flex;align-items:center;justify-content:center;
-          text-align:center;overflow:hidden;
-          background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(26,110,240,0.12) 0%,transparent 70%);
-          padding:80px 24px 60px;
+        .wrap{padding-top:64px}
+        .section{padding:52px 22px;max-width:1100px;margin:0 auto}
+        .card{
+          background:var(--surface);border:1px solid var(--border);
+          border-radius:16px;padding:18px;
         }
-        .hero-content{position:relative;z-index:1;max-width:760px}
-        .hero-badge{
-          display:inline-flex;align-items:center;gap:8px;
-          background:var(--blue-dim);border:1px solid var(--blue-mid);
-          border-radius:20px;padding:6px 14px;font-size:12px;font-weight:600;
-          color:#93c5fd;letter-spacing:0.04em;margin-bottom:28px;
-          animation:fadeUp 0.5s ease both;
+        .grid{display:grid;gap:14px}
+        .tools-grid{grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
+        .tool-card{cursor:pointer;transition:transform .15s,border-color .15s}
+        .tool-card:hover{transform:translateY(-2px);border-color:rgba(26,110,240,0.25)}
+        .tool-name{font-size:15px;font-weight:800;margin-bottom:6px}
+        .tool-desc{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:10px}
+        .row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+        .pill{
+          font-size:11px;font-weight:800;letter-spacing:.04em;
+          padding:6px 10px;border-radius:999px;
+          border:1px solid rgba(26,110,240,0.35);
+          background:var(--blue-dim);color:#93c5fd;
+          display:inline-flex;gap:6px;align-items:center;
         }
-        .hero-badge svg{flex-shrink:0}
-        .hero-h1{
-          font-size:clamp(42px,7vw,76px);font-weight:800;line-height:1.05;
-          letter-spacing:-2px;color:var(--text);margin-bottom:22px;
-          animation:fadeUp 0.5s 0.08s ease both;
-        }
-        .hero-h1 span{
-          background:linear-gradient(135deg,var(--blue),#60a5fa,#93c5fd);
-          -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-        }
-        .hero-sub{
-          font-size:18px;font-weight:300;color:var(--muted);line-height:1.7;
-          max-width:520px;margin:0 auto 36px;
-          animation:fadeUp 0.5s 0.14s ease both;
-        }
-        .hero-ctas{
-          display:flex;gap:12px;justify-content:center;flex-wrap:wrap;
-          animation:fadeUp 0.5s 0.2s ease both;margin-bottom:56px;
-        }
+
         .btn-primary{
           display:inline-flex;align-items:center;gap:8px;
-          padding:14px 28px;border-radius:12px;font-size:15px;font-weight:600;
-          background:var(--blue);border:none;color:#fff;
-          transition:all 0.18s;box-shadow:0 8px 32px rgba(26,110,240,0.3);
+          padding:12px 18px;border-radius:12px;font-size:14px;font-weight:700;
+          background:var(--blue);border:none;color:#fff;transition:all 0.18s;
+          box-shadow:0 8px 28px rgba(26,110,240,0.28);
         }
-        .btn-primary:hover{filter:brightness(1.1);transform:translateY(-2px);box-shadow:0 12px 40px rgba(26,110,240,0.4)}
+        .btn-primary:hover{filter:brightness(1.1);transform:translateY(-1px)}
         .btn-secondary{
           display:inline-flex;align-items:center;gap:8px;
-          padding:14px 28px;border-radius:12px;font-size:15px;font-weight:500;
+          padding:12px 18px;border-radius:12px;font-size:14px;font-weight:600;
           background:var(--surface2);border:1px solid var(--border2);color:var(--text);
           transition:all 0.18s;
         }
-        .btn-secondary:hover{background:rgba(255,255,255,0.1);transform:translateY(-2px)}
-        .hero-stats{
-          display:flex;gap:0;justify-content:center;
-          background:var(--surface);border:1px solid var(--border);border-radius:16px;
-          padding:0;overflow:hidden;max-width:540px;margin:0 auto;
-          animation:fadeUp 0.5s 0.26s ease both;
-        }
-        .hero-stat{flex:1;padding:20px 24px;text-align:center;border-right:1px solid var(--border)}
-        .hero-stat:last-child{border-right:none}
-        .hero-stat-num{font-size:26px;font-weight:800;color:var(--text);letter-spacing:-0.5px}
-        .hero-stat-label{font-size:11px;color:var(--muted);margin-top:3px;font-weight:400}
+        .btn-secondary:hover{background:rgba(255,255,255,0.1)}
 
-        /* Drone illustration */
-        .drone-illustration{
-          position:absolute;right:6%;top:50%;transform:translateY(-50%);
-          opacity:0.12;animation:droneFloat 4s ease-in-out infinite;
+        .hero{
+          padding:58px 0 18px;
+          text-align:center;
         }
+        .hero h1{
+          font-size:clamp(36px,6vw,58px);
+          font-weight:900;
+          letter-spacing:-1.4px;
+          margin-bottom:12px;
+        }
+        .hero h1 span{
+          background:linear-gradient(135deg,var(--blue),#60a5fa,#93c5fd);
+          -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+        }
+        .hero p{
+          max-width:720px;margin:0 auto;
+          color:var(--muted);line-height:1.7;font-weight:300;
+        }
+        .hero-ctas{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:18px}
 
-        /* ── Section wrapper ─────────────────────────────────── */
-        .section{padding:80px 40px;max-width:1200px;margin:0 auto;position:relative;z-index:1}
-        .section-label{font-size:11px;font-weight:600;color:var(--blue);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px}
-        .section-title{font-size:clamp(28px,4vw,42px);font-weight:800;letter-spacing:-1px;color:var(--text);margin-bottom:12px;line-height:1.15}
-        .section-sub{font-size:16px;color:var(--muted);font-weight:300;line-height:1.7;max-width:520px}
-
-        /* ── How it works ────────────────────────────────────── */
-        #page-home .how{
-          background:linear-gradient(180deg,transparent,rgba(26,110,240,0.04) 50%,transparent);
-          border-top:1px solid var(--border);border-bottom:1px solid var(--border);
-          padding:80px 40px;
-        }
-        .steps-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-top:48px}
-        .step-card{
-          background:var(--surface);border:1px solid var(--border);border-radius:16px;
-          padding:24px;position:relative;transition:border-color 0.2s,transform 0.2s;
-        }
-        .step-card:hover{border-color:rgba(26,110,240,0.3);transform:translateY(-3px)}
-        .step-num{
-          font-size:11px;font-weight:700;color:var(--blue);letter-spacing:0.08em;
-          margin-bottom:14px;
-        }
-        .step-icon{
-          width:44px;height:44px;border-radius:12px;
-          background:linear-gradient(135deg,rgba(26,110,240,0.2),rgba(26,110,240,0.06));
-          display:flex;align-items:center;justify-content:center;margin-bottom:14px;
-        }
-        .step-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px}
-        .step-desc{font-size:13px;color:var(--muted);line-height:1.6;font-weight:300}
-
-        /* ── Tools catalog ───────────────────────────────────── */
-        #page-browse{padding-top:80px}
-        .browse-header{
-          padding:40px 40px 0;max-width:1200px;margin:0 auto;
-        }
-        .browse-toolbar{
-          display:flex;align-items:center;gap:12px;margin-top:24px;flex-wrap:wrap;
-        }
-        .search-wrap{
-          position:relative;flex:1;min-width:240px;max-width:400px;
-        }
-        .search-wrap input{
-          width:100%;padding:11px 16px 11px 42px;
-          background:var(--surface);border:1px solid var(--border);
-          border-radius:10px;color:var(--text);font-size:14px;outline:none;
-          transition:border-color 0.15s;
-        }
-        .search-wrap input:focus{border-color:rgba(26,110,240,0.5)}
-        .search-wrap input::placeholder{color:var(--dim)}
-        .search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);opacity:0.4;pointer-events:none}
-        .cat-pills{display:flex;gap:7px;flex-wrap:wrap}
-        .cat-pill{
-          padding:8px 16px;border-radius:20px;font-size:13px;font-weight:500;
-          background:var(--surface);border:1px solid var(--border);color:var(--muted);
-          cursor:pointer;transition:all 0.13s;white-space:nowrap;
-        }
-        .cat-pill:hover{color:var(--text);border-color:var(--border2)}
-        .cat-pill.active{background:var(--blue);border-color:var(--blue);color:#fff}
-        .tools-grid{
-          display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
-          gap:16px;padding:28px 40px 60px;max-width:1200px;margin:0 auto;
-        }
-        .tool-card{
-          background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
-          padding:20px;cursor:pointer;transition:all 0.18s;position:relative;overflow:hidden;
-        }
-        .tool-card::before{
-          content:'';position:absolute;inset:0;
-          background:linear-gradient(135deg,rgba(26,110,240,0.06),transparent);
-          opacity:0;transition:opacity 0.2s;
-        }
-        .tool-card:hover{border-color:rgba(26,110,240,0.3);transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,0.3)}
-        .tool-card:hover::before{opacity:1}
-        .tool-card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
-        .tool-icon{
-          width:44px;height:44px;border-radius:11px;
-          background:linear-gradient(135deg,rgba(26,110,240,0.2),rgba(26,110,240,0.06));
-          display:flex;align-items:center;justify-content:center;
-        }
-        .save-badge{
-          background:var(--green-dim);color:var(--green);
-          font-size:10px;font-weight:700;border-radius:6px;padding:3px 7px;
-        }
-        .tool-name{font-size:15px;font-weight:700;color:var(--text);margin-bottom:3px;line-height:1.3}
-        .tool-desc{font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.5;font-weight:300}
-        .tool-stars{display:flex;align-items:center;gap:6px;margin-bottom:14px}
-        .stars{display:flex;gap:2px}
-        .star{font-size:11px;color:#f5a623}
-        .star.empty{color:var(--dim)}
-        .rating-text{font-size:11px;color:var(--muted)}
-        .tool-pricing{display:flex;align-items:flex-end;justify-content:space-between}
-        .price-from{font-size:11px;color:var(--muted);margin-bottom:1px;font-weight:300}
-        .price-val{font-size:20px;font-weight:800;color:var(--text);letter-spacing:-0.5px;line-height:1}
-        .price-unit{font-size:11px;color:var(--muted);font-weight:300}
-        .retail-cross{font-size:11px;color:var(--dim);text-decoration:line-through;margin-top:2px}
-        .add-btn{
-          width:36px;height:36px;border-radius:10px;background:var(--blue);border:none;
-          display:flex;align-items:center;justify-content:center;
-          transition:all 0.15s;flex-shrink:0;
-        }
-        .add-btn:hover{filter:brightness(1.15);transform:scale(1.08)}
-        .tool-eta{font-size:11px;color:var(--dim);margin-top:10px;display:flex;align-items:center;gap:5px}
-
-        /* ── Modal ────────────────────────────────────────────── */
-        .modal-overlay{
-          position:fixed;inset:0;z-index:200;
-          background:rgba(0,0,0,0.7);backdrop-filter:blur(12px);
-          display:flex;align-items:center;justify-content:center;padding:24px;
-          animation:fadeIn 0.2s ease;
-        }
-        .modal-box{
-          background:#13121e;border:1px solid var(--border2);border-radius:20px;
-          padding:32px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;
-          animation:scaleIn 0.22s ease;position:relative;
-        }
-        .modal-close{
-          position:absolute;top:16px;right:16px;
-          width:32px;height:32px;border-radius:8px;
-          background:var(--surface);border:1px solid var(--border);
-          color:var(--muted);font-size:18px;display:flex;align-items:center;justify-content:center;
-          cursor:pointer;transition:all 0.13s;
-        }
-        .modal-close:hover{color:var(--text);background:var(--surface2)}
-        .modal-icon{
-          width:60px;height:60px;border-radius:15px;
-          background:linear-gradient(135deg,rgba(26,110,240,0.25),rgba(26,110,240,0.08));
-          display:flex;align-items:center;justify-content:center;margin-bottom:16px;
-        }
-        .modal-title{font-size:24px;font-weight:800;letter-spacing:-0.5px;margin-bottom:4px}
-        .modal-meta{font-size:13px;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:10px}
-        .modal-desc{font-size:14px;color:var(--muted);line-height:1.7;font-weight:300;margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border)}
-        .dur-label{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:0.05em;margin-bottom:10px}
-        .dur-presets{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:14px}
-        .dur-preset{
-          padding:10px 0;border-radius:9px;font-size:13px;font-weight:600;
-          background:var(--surface);border:1px solid var(--border);color:var(--muted);
-          cursor:pointer;transition:all 0.13s;
-        }
-        .dur-preset:hover{color:var(--text);border-color:var(--border2)}
-        .dur-preset.active{background:var(--blue);border-color:var(--blue);color:#fff}
-        .dur-stepper{
-          display:flex;align-items:center;gap:12px;
-          background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 14px;
-          margin-bottom:20px;
-        }
-        .step-btn{
-          width:36px;height:36px;border-radius:9px;border:none;
-          font-size:20px;display:flex;align-items:center;justify-content:center;
-          cursor:pointer;transition:all 0.13s;
-        }
-        .step-minus{background:var(--surface2);color:var(--text)}
-        .step-minus:hover{background:rgba(255,255,255,0.12)}
-        .step-plus{background:var(--blue);color:#fff}
-        .step-plus:hover{filter:brightness(1.1)}
-        .step-display{flex:1;text-align:center}
-        .step-val{font-size:28px;font-weight:800;color:var(--text);line-height:1}
-        .step-unit{font-size:12px;color:var(--muted);margin-top:3px}
-        .modal-summary{
-          display:flex;justify-content:space-between;align-items:center;
-          padding:16px 0;border-top:1px solid var(--border);margin-top:4px;margin-bottom:16px;
-        }
-        .modal-total-label{font-size:12px;color:var(--muted);margin-bottom:4px}
-        .modal-total-val{font-size:32px;font-weight:800;letter-spacing:-1px;color:var(--text)}
-        .modal-total-cross{font-size:12px;color:var(--dim)}
-        .modal-right{text-align:right;font-size:13px;color:var(--muted);line-height:2}
-        .modal-add-btn{
-          width:100%;padding:15px;border-radius:12px;background:var(--blue);border:none;
-          color:#fff;font-size:16px;font-weight:600;cursor:pointer;transition:all 0.15s;
-          font-family:var(--font);
-        }
-        .modal-add-btn:hover{filter:brightness(1.1);transform:translateY(-1px);box-shadow:0 8px 28px rgba(26,110,240,0.35)}
-
-        /* ── Cart page ───────────────────────────────────────── */
-        #page-cart{padding-top:80px}
-        .cart-layout{
-          display:grid;grid-template-columns:1fr 360px;gap:24px;
-          padding:40px;max-width:1200px;margin:0 auto;align-items:start;
-        }
-        .cart-items{display:flex;flex-direction:column;gap:12px}
-        .cart-item{
-          display:flex;align-items:center;gap:16px;
-          background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;
-          transition:border-color 0.15s;
-        }
-        .cart-item:hover{border-color:var(--border2)}
-        .cart-item-icon{
-          width:48px;height:48px;border-radius:12px;flex-shrink:0;
-          background:linear-gradient(135deg,rgba(26,110,240,0.2),rgba(26,110,240,0.06));
-          display:flex;align-items:center;justify-content:center;
-        }
-        .cart-item-info{flex:1;min-width:0}
-        .cart-item-name{font-size:15px;font-weight:600;color:var(--text);margin-bottom:3px}
-        .cart-item-sub{font-size:13px;color:var(--muted)}
-        .cart-item-price{font-size:16px;font-weight:700;color:var(--text);white-space:nowrap}
-        .cart-item-remove{font-size:12px;color:var(--dim);background:none;border:none;cursor:pointer;margin-top:3px;display:block;transition:color 0.13s}
-        .cart-item-remove:hover{color:var(--muted)}
-        .cart-empty{
-          padding:80px 24px;text-align:center;
-          background:var(--surface);border:1px solid var(--border);border-radius:16px;
-        }
-        .cart-empty-icon{
-          width:72px;height:72px;border-radius:20px;margin:0 auto 20px;
-          background:linear-gradient(135deg,rgba(26,110,240,0.18),rgba(26,110,240,0.04));
-          display:flex;align-items:center;justify-content:center;
-        }
-        .cart-empty h3{font-size:20px;font-weight:700;margin-bottom:8px}
-        .cart-empty p{font-size:14px;color:var(--muted);line-height:1.7;font-weight:300;margin-bottom:24px}
-        .order-summary{
-          background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;
-          position:sticky;top:84px;
-        }
-        .summary-title{font-size:16px;font-weight:700;margin-bottom:18px}
-        .summary-row{display:flex;justify-content:space-between;font-size:14px;margin-bottom:12px}
-        .summary-row span:first-child{color:var(--muted);font-weight:300}
-        .summary-row span:last-child{font-weight:500}
-        .summary-green{color:var(--green)!important;font-weight:600!important}
-        .summary-divider{height:1px;background:var(--border);margin:14px 0}
-        .summary-total{display:flex;justify-content:space-between;font-size:18px;font-weight:800;margin-bottom:18px}
-        .checkout-btn{
-          width:100%;padding:15px;border-radius:12px;background:var(--blue);border:none;
-          color:#fff;font-size:16px;font-weight:600;cursor:pointer;transition:all 0.15s;
-          font-family:var(--font);
-        }
-        .checkout-btn:hover{filter:brightness(1.1);transform:translateY(-1px);box-shadow:0 8px 28px rgba(26,110,240,0.35)}
-        .checkout-note{font-size:11px;color:var(--dim);text-align:center;margin-top:10px}
-        .address-pill{
-          display:flex;align-items:center;gap:8px;
-          background:var(--blue-dim);border:1px solid rgba(26,110,240,0.2);
-          border-radius:10px;padding:10px 14px;margin-bottom:18px;font-size:13px;color:#93c5fd;
-        }
-
-        /* ── Orders page ─────────────────────────────────────── */
-        #page-orders{padding-top:80px}
-        .orders-layout{padding:40px;max-width:900px;margin:0 auto}
-        .active-order{
-          background:linear-gradient(135deg,rgba(26,110,240,0.14) 0%,rgba(26,110,240,0.04) 100%);
-          border:1px solid rgba(26,110,240,0.3);border-radius:18px;padding:24px;margin-bottom:32px;
-        }
-        .order-status-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px}
-        .order-badge{display:flex;align-items:center;gap:7px;margin-bottom:6px}
-        .order-badge-dot{width:6px;height:6px;border-radius:50%;background:var(--blue);animation:pulse 1.4s infinite}
-        .order-badge-text{font-size:11px;font-weight:700;color:var(--blue);letter-spacing:0.06em}
-        .order-name{font-size:20px;font-weight:700;margin-bottom:4px}
-        .order-id{font-size:13px;color:var(--muted)}
-        .drone-anim{animation:droneFloat 2.5s ease-in-out infinite;text-align:center}
-        .progress-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:8px}
-        .progress-bar{height:5px;background:rgba(255,255,255,0.07);border-radius:10px;overflow:hidden}
-        .progress-fill{height:100%;border-radius:10px;background:linear-gradient(90deg,#1558d0,var(--blue))}
-        .past-orders{display:flex;flex-direction:column;gap:10px}
-        .past-order{
-          display:flex;align-items:center;gap:16px;
-          background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px 20px;
-          transition:border-color 0.15s;
-        }
-        .past-order:hover{border-color:var(--border2)}
-        .delivered-badge{font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;background:var(--green-dim);color:var(--green);white-space:nowrap}
-
-        /* ── Account page ────────────────────────────────────── */
-        #page-account{padding-top:80px}
-        .account-layout{display:grid;grid-template-columns:280px 1fr;gap:24px;padding:40px;max-width:1100px;margin:0 auto;align-items:start}
-        .account-sidebar{position:sticky;top:84px}
-        .account-profile{
-          background:linear-gradient(135deg,rgba(26,110,240,0.14),rgba(26,110,240,0.04));
-          border:1px solid rgba(26,110,240,0.2);border-radius:16px;padding:24px;margin-bottom:12px;
-        }
-        .avatar-ring{position:relative;width:56px;height:56px;margin-bottom:14px}
-        .avatar-ring-border{position:absolute;inset:-2px;border-radius:50%;background:conic-gradient(#1558d0,#60a5fa,#38bdf8,#1558d0);animation:spin 5s linear infinite}
-        .avatar-inner{position:absolute;inset:2px;border-radius:50%;background:#1c1a2e;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#60a5fa}
-        .profile-name{font-size:17px;font-weight:700;margin-bottom:3px}
-        .profile-email{font-size:12px;color:var(--muted);margin-bottom:10px}
-        .verified-pill{display:inline-flex;align-items:center;gap:5px;background:var(--blue-dim);border-radius:8px;padding:4px 10px;font-size:11px;color:#93c5fd;font-weight:500}
-        .sidebar-nav{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}
-        .sidebar-nav-item{
-          display:flex;align-items:center;gap:12px;padding:13px 16px;
-          cursor:pointer;transition:background 0.13s;border-bottom:1px solid var(--border);
-          font-size:14px;font-weight:500;color:var(--muted);
-        }
-        .sidebar-nav-item:last-child{border-bottom:none}
-        .sidebar-nav-item:hover{background:var(--surface2);color:var(--text)}
-        .sidebar-nav-item.active{background:var(--blue-dim);color:var(--blue)}
-        .sidebar-nav-icon{width:30px;height:30px;border-radius:7px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-        .account-panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px}
-        .panel-title{font-size:18px;font-weight:700;margin-bottom:4px}
-        .panel-sub{font-size:13px;color:var(--muted);font-weight:300;margin-bottom:24px}
-        .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
-        .form-group{display:flex;flex-direction:column;gap:6px}
-        .form-group.full{grid-column:1/-1}
-        .form-label{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:0.05em}
-        .form-input{
-          padding:12px 14px;background:rgba(255,255,255,0.05);
-          border:1px solid var(--border);border-radius:10px;
-          color:var(--text);font-size:14px;outline:none;transition:border-color 0.15s;
-        }
-        .form-input:focus{border-color:rgba(26,110,240,0.5)}
-        .form-input::placeholder{color:var(--dim)}
-        .form-save{
-          padding:12px 24px;border-radius:10px;background:var(--blue);border:none;
-          color:#fff;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.15s;
-          font-family:var(--font);
-        }
-        .form-save:hover{filter:brightness(1.1)}
-        .toggle-row{
-          display:flex;align-items:center;justify-content:space-between;
-          padding:14px 0;border-bottom:1px solid var(--border);
-        }
-        .toggle-row:last-child{border-bottom:none}
-        .toggle-info h4{font-size:14px;font-weight:500;margin-bottom:2px}
-        .toggle-info p{font-size:12px;color:var(--muted);font-weight:300}
-        .toggle{position:relative;display:inline-block;width:44px;height:24px;flex-shrink:0}
-        .toggle input{opacity:0;width:0;height:0}
-        .slider{position:absolute;inset:0;background:#2a2a3a;border-radius:24px;transition:background 0.2s;cursor:pointer}
-        .slider:before{content:'';position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:white;border-radius:50%;transition:transform 0.2s}
-        input:checked+.slider{background:var(--blue)}
-        input:checked+.slider:before{transform:translateX(20px)}
-        .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px}
-        .stat-card{
-          background:linear-gradient(135deg,rgba(26,110,240,0.1),rgba(26,110,240,0.03));
-          border:1px solid rgba(26,110,240,0.15);border-radius:12px;padding:16px;text-align:center;
-        }
-        .stat-val{font-size:22px;font-weight:800;color:#93c5fd;letter-spacing:-0.5px}
-        .stat-label{font-size:11px;color:var(--muted);margin-top:3px;font-weight:300}
-        .payment-card{
-          display:flex;align-items:center;gap:14px;
-          padding:14px 16px;background:var(--surface);border:1px solid var(--border);
-          border-radius:12px;margin-bottom:10px;cursor:pointer;transition:all 0.13s;
-        }
-        .payment-card:hover{border-color:var(--border2)}
-        .payment-card.selected{background:var(--blue-dim);border-color:rgba(26,110,240,0.35)}
-        .payment-logo{width:44px;height:28px;border-radius:5px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-        .add-payment{
-          display:flex;align-items:center;gap:8px;padding:12px 16px;
-          background:none;border:1px dashed var(--border);border-radius:12px;
-          color:var(--muted);font-size:13px;font-weight:500;cursor:pointer;
-          width:100%;font-family:var(--font);transition:all 0.13s;margin-top:4px;
-        }
-        .add-payment:hover{border-color:var(--border2);color:var(--text)}
-        .support-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:24px}
-        .support-quick{
-          display:flex;flex-direction:column;gap:10px;
-          padding:16px;background:var(--surface);border:1px solid var(--border);
-          border-radius:12px;cursor:pointer;transition:all 0.15s;
-        }
-        .support-quick:hover{border-color:var(--border2);transform:translateY(-2px)}
-        .support-quick-icon{width:36px;height:36px;border-radius:9px;background:var(--blue-dim);display:flex;align-items:center;justify-content:center}
-        .support-quick-label{font-size:13px;font-weight:600;color:var(--text)}
-        .support-textarea{
-          width:100%;padding:14px;background:rgba(255,255,255,0.04);
-          border:1px solid var(--border);border-radius:12px;
-          color:var(--text);font-size:14px;outline:none;resize:none;
-          min-height:120px;line-height:1.6;transition:border-color 0.15s;
-          font-family:var(--font);
-        }
-        .support-textarea:focus{border-color:rgba(26,110,240,0.5)}
-        .support-textarea::placeholder{color:var(--dim)}
-        .refer-link-row{display:flex;gap:10px;margin-bottom:20px}
-        .refer-link-input{
-          flex:1;padding:12px 14px;background:rgba(255,255,255,0.04);
-          border:1px solid var(--border);border-radius:10px;
-          color:var(--muted);font-size:13px;outline:none;
-        }
-        .copy-btn{
-          padding:12px 20px;border-radius:10px;background:var(--blue);border:none;
-          color:#fff;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;
-          font-family:var(--font);transition:all 0.15s;
-        }
-        .copy-btn:hover{filter:brightness(1.1)}
-        .copy-btn.copied{background:rgba(34,197,94,0.2);border:1px solid rgba(34,197,94,0.3);color:var(--green)}
-        .refer-credit{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:var(--surface);border:1px solid var(--border);border-radius:12px}
-        .signout-btn{
-          width:100%;padding:12px;border-radius:10px;
-          background:rgba(255,50,50,0.06);border:1px solid rgba(255,80,80,0.12);
-          color:#f87171;font-size:14px;font-weight:500;cursor:pointer;font-family:var(--font);
-          transition:all 0.13s;margin-top:12px;
-        }
-        .signout-btn:hover{background:rgba(255,50,50,0.1)}
-
-        /* ── Toast ───────────────────────────────────────────── */
         .toast{
-          position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);
+          position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
           background:#13121e;border:1px solid var(--border2);border-radius:12px;
-          padding:12px 20px;font-size:14px;font-weight:500;color:var(--text);
-          z-index:300;transition:transform 0.3s ease,opacity 0.3s ease;
-          opacity:0;white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,0.4);
-          display:flex;align-items:center;gap:8px;
+          padding:12px 16px;font-size:14px;font-weight:700;color:var(--text);
+          z-index:300;transition:transform 0.25s ease,opacity 0.25s ease;
+          opacity:0;white-space:nowrap;
+          box-shadow:0 10px 28px rgba(0,0,0,0.4);
         }
         .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
 
-        /* ── Login overlay ────────────────────────────────────── */
+        /* Auth overlay */
         .auth-overlay{
           position:fixed;inset:0;z-index:150;
           background:rgba(0,0,0,0.75);backdrop-filter:blur(14px);
-          display:flex;align-items:center;justify-content:center;
-          padding:24px;overflow-y:auto;
+          display:flex;align-items:center;justify-content:center;padding:24px;
         }
         .auth-box{
           background:#13121e;border:1px solid var(--border2);border-radius:22px;
-          padding:32px;width:100%;max-width:480px;
-          animation:scaleIn 0.22s ease;
-          overflow:hidden;
+          padding:28px;width:100%;max-width:460px;
         }
-        .auth-logo{display:flex;align-items:center;gap:10px;margin-bottom:24px}
-        .auth-title{font-size:26px;font-weight:800;letter-spacing:-0.5px;margin-bottom:6px}
-        .auth-sub{font-size:14px;color:var(--muted);font-weight:300;margin-bottom:26px}
-        .auth-tabs{display:flex;background:var(--surface);border-radius:10px;padding:3px;margin-bottom:22px}
-        .auth-tab{flex:1;padding:9px;border-radius:8px;border:none;font-size:14px;font-weight:500;cursor:pointer;transition:all 0.15s;font-family:var(--font);background:none;color:var(--muted)}
+        .auth-title{font-size:24px;font-weight:900;letter-spacing:-0.5px;margin-bottom:6px}
+        .auth-sub{font-size:13px;color:var(--muted);font-weight:400;margin-bottom:18px;line-height:1.6}
+        .auth-tabs{display:flex;background:var(--surface);border-radius:10px;padding:3px;margin-bottom:14px}
+        .auth-tab{flex:1;padding:9px;border-radius:8px;border:none;font-size:14px;font-weight:800;background:none;color:var(--muted)}
         .auth-tab.active{background:#1d1c2e;color:var(--text)}
-        .auth-form{display:flex;flex-direction:column;gap:11px;width:100%}
-        .auth-fields-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}
-        .auth-fields-row .form-group{min-width:0}
-        .auth-fields-row .form-input{width:100%;min-width:0}
+        .form-group{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+        .form-label{font-size:11px;font-weight:800;color:var(--dim);letter-spacing:0.08em}
+        .form-input{
+          width:100%;
+          padding:12px 12px;
+          border-radius:12px;
+          border:1px solid var(--border2);
+          background:rgba(255,255,255,0.04);
+          color:var(--text);
+          outline:none;
+        }
+        .auth-submit{width:100%;margin-top:10px}
+        .auth-divider{display:flex;align-items:center;gap:10px;margin:14px 0;color:var(--dim);font-size:12px;font-weight:800}
+        .auth-divider::before,.auth-divider::after{content:"";flex:1;height:1px;background:var(--border)}
         .apple-btn{
+          width:100%;
           display:flex;align-items:center;justify-content:center;gap:10px;
-          width:100%;padding:13px;border-radius:11px;
-          background:var(--surface2);border:1px solid var(--border2);
-          color:var(--text);font-size:14px;font-weight:500;cursor:pointer;font-family:var(--font);
-          transition:all 0.13s;
+          padding:12px 14px;border-radius:12px;
+          border:1px solid var(--border2);background:rgba(255,255,255,0.06);
+          color:var(--text);font-weight:800;
         }
-        .apple-btn:hover{background:rgba(255,255,255,0.1)}
-        .auth-divider{display:flex;align-items:center;gap:12px;color:var(--dim);font-size:12px}
-        .auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--border)}
-        .auth-submit{
-          width:100%;padding:14px;border-radius:11px;background:var(--blue);border:none;
-          color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:var(--font);
-          transition:all 0.15s;margin-top:2px;
-        }
-        .auth-submit:hover{filter:brightness(1.1);transform:translateY(-1px);box-shadow:0 8px 24px rgba(26,110,240,0.35)}
-        .auth-footer{text-align:center;font-size:13px;color:var(--muted);margin-top:4px}
-        .auth-footer a{color:var(--blue);font-weight:600;cursor:pointer}
-        @media(max-width:520px){
-          .auth-box{padding:24px 20px}
-          .auth-fields-row{grid-template-columns:1fr}
-        }
+        .auth-footer{margin-top:14px;font-size:13px;color:var(--muted);text-align:center}
+        .auth-footer a{color:#93c5fd;font-weight:900;cursor:pointer}
 
-        /* ── Responsive ───────────────────────────────────────── */
-        @media(max-width:900px){
-          nav{padding:0 20px}
-          .nav-links{display:none}
-          .steps-grid{grid-template-columns:repeat(2,1fr)}
-          .cart-layout{grid-template-columns:1fr}
-          .account-layout{grid-template-columns:1fr}
-          .account-sidebar{position:static}
-          .tools-grid{padding:20px}
-          .section{padding:60px 20px}
+        /* Orders list */
+        .past-order{
+          display:flex;align-items:center;gap:14px;
+          background:var(--surface);border:1px solid var(--border);border-radius:14px;
+          padding:14px 16px;
         }
-        @media(max-width:600px){
-          .hero-stats{flex-direction:column;max-width:100%}
-          .hero-stat{border-right:none;border-bottom:1px solid var(--border)}
-          .hero-stat:last-child{border-bottom:none}
-          .form-row{grid-template-columns:1fr}
-          .stats-grid{grid-template-columns:1fr 1fr}
+        .delivered-badge{
+          font-size:11px;font-weight:900;padding:5px 10px;border-radius:999px;
+          background:var(--green-dim);color:var(--green);
+          border:1px solid rgba(34,197,94,0.2);
+        }
+        .muted{color:var(--muted)}
+        .tiny{font-size:12px}
+        .two-col{display:grid;grid-template-columns:1.2fr 0.8fr;gap:14px}
+        @media (max-width:900px){
+          .two-col{grid-template-columns:1fr}
+          .nav-links{display:none}
         }
     </style>
 </head>
+
 <body>
-
-<!-- Atmosphere -->
-<div class="glow-blob glow-1"></div>
-<div class="glow-blob glow-2"></div>
-
-<!-- Toast -->
-<div class="toast" id="toast"></div>
-
-<!-- Auth Modal -->
-<div class="auth-overlay hidden" id="auth-overlay" onclick="if(event.target===this)this.classList.add('hidden')">
-    <div class="auth-box">
-        <!-- Header row -->
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px">
-            <div class="auth-logo" style="margin-bottom:0">
-                <div class="nav-logo-mark"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="2.5"/><path d="M4.5 4.5l3.5 3.5M19.5 4.5l-3.5 3.5M4.5 19.5l3.5-3.5M19.5 19.5l-3.5-3.5"/><circle cx="3.5" cy="3.5" r="1.5" fill="white" stroke="none"/><circle cx="20.5" cy="3.5" r="1.5" fill="white" stroke="none"/><circle cx="3.5" cy="20.5" r="1.5" fill="white" stroke="none"/><circle cx="20.5" cy="20.5" r="1.5" fill="white" stroke="none"/></svg></div>
-                <span class="nav-wordmark">Droveia</span>
-            </div>
-            <button onclick="document.getElementById('auth-overlay').classList.add('hidden')" style="width:30px;height:30px;border-radius:8px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1">✕</button>
-        </div>
-
-        <div class="auth-tabs">
-            <button class="auth-tab active" onclick="switchAuth('login')">Sign In</button>
-            <button class="auth-tab" onclick="switchAuth('signup')">Create Account</button>
-        </div>
-
-        <!-- Login form -->
-        <div id="auth-login">
-            <div class="auth-form">
-                <div class="form-group"><label class="form-label">EMAIL</label><input id="si-email" class="form-input" type="email" placeholder="you@university.edu" onkeydown="if(event.key==='Enter')doSignIn()"/></div>
-                <div class="form-group"><label class="form-label">PASSWORD</label><input id="si-pass" class="form-input" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doSignIn()"/></div>
-                <div style="text-align:right;margin-top:-2px">
-                    <button style="background:none;border:none;font-size:13px;color:var(--blue);cursor:pointer;font-family:var(--font)" onclick="doForgotPassword()">Forgot password?</button>
-                </div>
-                <button class="auth-submit" onclick="doSignIn()">Sign In</button>
-                <div class="auth-divider">or</div>
-                <button class="apple-btn" onclick="doGoogleSignIn()">
-                    <svg width="18" height="18" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-                    Continue with Google
-                </button>
-                <div class="auth-footer">No account? <a onclick="switchAuth('signup')">Sign up free →</a></div>
-            </div>
-        </div>
-
-        <!-- Signup form -->
-        <div id="auth-signup" class="hidden">
-            <div class="auth-form">
-                <!-- Name row -->
-                <div class="auth-fields-row">
-                    <div class="form-group">
-                        <label class="form-label">FIRST NAME</label>
-                        <input id="su-first" class="form-input" type="text" placeholder="Jamie"/>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">LAST NAME</label>
-                        <input id="su-last" class="form-input" type="text" placeholder="Chen"/>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">UNIVERSITY EMAIL</label>
-                    <input id="su-email" class="form-input" type="email" placeholder="you@university.edu"/>
-                </div>
-                <div class="auth-fields-row">
-                    <div class="form-group">
-                        <label class="form-label">BUILDING / HALL</label>
-                        <input id="su-building" class="form-input" type="text" placeholder="Buchanan Hall"/>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">ROOM #</label>
-                        <input id="su-room" class="form-input" type="text" placeholder="412"/>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">PASSWORD</label>
-                    <input id="su-pass" class="form-input" type="password" placeholder="Min. 8 characters"/>
-                </div>
-                <!-- .edu notice -->
-                <div style="background:var(--blue-dim);border:1px solid var(--blue-mid);border-radius:9px;padding:10px 13px;font-size:12px;color:#93c5fd;line-height:1.6;display:flex;align-items:flex-start;gap:8px">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#93c5fd" stroke-width="2" stroke-linecap="round" style="margin-top:1px;flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                    Must be a valid .edu address — verified automatically.
-                </div>
-                <button class="auth-submit" onclick="doSignUp()">Create Account</button>
-                <div class="auth-footer" style="font-size:11px;color:var(--dim)">
-                    By signing up you agree to our <span style="color:var(--blue)">Terms</span> & <span style="color:var(--blue)">Privacy Policy</span>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Nav -->
 <nav>
-    <div class="nav-logo" style="cursor:pointer" onclick="showPage('home')">
+    <div class="nav-logo" onclick="showPage('home')">
         <div class="nav-logo-mark">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round">
-                <circle cx="12" cy="12" r="2.5"/>
-                <path d="M4.5 4.5l3.5 3.5M19.5 4.5l-3.5 3.5M4.5 19.5l3.5-3.5M19.5 19.5l-3.5-3.5"/>
-                <circle cx="3.5" cy="3.5" r="1.5" fill="white" stroke="none"/>
-                <circle cx="20.5" cy="3.5" r="1.5" fill="white" stroke="none"/>
-                <circle cx="3.5" cy="20.5" r="1.5" fill="white" stroke="none"/>
-                <circle cx="20.5" cy="20.5" r="1.5" fill="white" stroke="none"/>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                <path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7l3-7z"/>
             </svg>
         </div>
-        <span class="nav-wordmark">Droveia</span>
+        <div class="nav-wordmark">Droveia</div>
     </div>
+
     <div class="nav-links">
         <button class="nav-link active" id="nav-home" onclick="showPage('home')">Home</button>
-        <button class="nav-link" id="nav-browse" onclick="showPage('browse')">Browse Tools</button>
+        <button class="nav-link" id="nav-browse" onclick="showPage('browse')">Browse</button>
         <button class="nav-link" id="nav-orders" onclick="showPage('orders')">Orders</button>
         <button class="nav-link" id="nav-account" onclick="showPage('account')">Account</button>
     </div>
+
     <div class="nav-right">
-        <div class="nav-live"><span class="live-dot"></span>CAMPUS LIVE</div>
-        <button class="nav-btn-ghost cart-btn" id="cart-nav-btn" onclick="showPage('cart')">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
-            Cart <span class="cart-badge" id="cart-badge">0</span>
+        <button class="nav-btn-ghost cart-btn" id="nav-cart" onclick="showPage('cart')">
+            Cart
+            <span class="cart-badge" id="cart-badge">0</span>
         </button>
-        <button class="nav-btn-solid" id="nav-auth-btn" onclick="showAuth()">Sign In</button>
+        <button class="nav-btn-solid" id="nav-auth-btn">Sign In</button>
     </div>
 </nav>
 
-<!-- ══ HOME PAGE ══════════════════════════════════════════════════════════ -->
-<div class="page active" id="page-home">
-
-    <!-- Hero -->
-    <section class="hero">
-        <div class="hero-content">
-            <div class="hero-badge">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="2.5"/><path d="M4.5 4.5l3.5 3.5M19.5 4.5l-3.5 3.5"/></svg>
-                Drone delivery · Campus only · Avg 7 min
+<div class="wrap">
+    <!-- HOME -->
+    <div class="page active" id="page-home">
+        <div class="section hero">
+            <div class="pill" style="margin:0 auto 16px;">
+                <span style="width:7px;height:7px;border-radius:50%;background:var(--blue);display:inline-block"></span>
+                LIVE IN CAMPUS ZONES
             </div>
-            <h1 class="hero-h1">The tool you need,<br/><span>dropped in minutes.</span></h1>
-            <p class="hero-sub">Rent any tool for as long as you need it — delivered by drone straight to your dorm. No ownership. No clutter. Just use it and return.</p>
+            <h1>Tools delivered <span>by drone</span>.</h1>
+            <p>Rent heat guns, soldering irons, multimeters, and more. Delivered in minutes, picked up when you’re done.</p>
             <div class="hero-ctas">
-                <button class="btn-primary" onclick="showPage('browse')">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-                    Browse Tools
-                </button>
-                <button class="btn-secondary" onclick="showAuth()">
-                    Create Free Account
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </button>
-            </div>
-            <div class="hero-stats">
-                <div class="hero-stat"><div class="hero-stat-num">200+</div><div class="hero-stat-label">Tools available</div></div>
-                <div class="hero-stat"><div class="hero-stat-num">~7 min</div><div class="hero-stat-label">Avg delivery</div></div>
-                <div class="hero-stat"><div class="hero-stat-num">95%</div><div class="hero-stat-label">Savings vs buying</div></div>
-                <div class="hero-stat"><div class="hero-stat-num">Free</div><div class="hero-stat-label">Returns</div></div>
+                <button class="btn-primary" onclick="showPage('browse')">Browse tools</button>
+                <button class="btn-secondary" onclick="showPage('account')">Set delivery info</button>
             </div>
         </div>
 
-        <!-- Drone SVG illustration -->
-        <div class="drone-illustration">
-            <svg width="260" height="260" viewBox="0 0 100 100" fill="none" stroke="white" stroke-width="1.2" stroke-linecap="round">
-                <circle cx="50" cy="50" r="10"/>
-                <path d="M20 20l14 14M80 20L66 34M20 80l14-14M80 80L66 66"/>
-                <circle cx="18" cy="18" r="6"/><circle cx="82" cy="18" r="6"/>
-                <circle cx="18" cy="82" r="6"/><circle cx="82" cy="82" r="6"/>
-                <line x1="18" y1="18" x2="18" y2="10"/><line x1="14" y1="18" x2="22" y2="18"/>
-                <line x1="82" y1="18" x2="82" y2="10"/><line x1="78" y1="18" x2="86" y2="18"/>
-                <line x1="18" y1="82" x2="18" y2="90"/><line x1="14" y1="82" x2="22" y2="82"/>
-                <line x1="82" y1="82" x2="82" y2="90"/><line x1="78" y1="82" x2="86" y2="82"/>
-                <rect x="44" y="58" width="12" height="16" rx="2" fill="rgba(26,110,240,0.3)" stroke="rgba(26,110,240,0.6)"/>
-            </svg>
-        </div>
-    </section>
+        <div class="section">
+            <div class="two-col">
+                <div class="card">
+                    <div style="font-size:16px;font-weight:900;margin-bottom:8px">How it works</div>
+                    <div class="muted tiny" style="line-height:1.7">
+                        1) Pick a tool and rental hours.<br/>
+                        2) Request delivery from the cart.<br/>
+                        3) Drone drops it at your saved address.<br/>
+                        4) Free pickup when you're done.
+                    </div>
+                </div>
 
-    <!-- How it works -->
-    <div class="how" style="position:relative;z-index:1">
-        <div style="max-width:1200px;margin:0 auto;padding:0 40px">
-            <div class="section-label">How it works</div>
-            <div class="section-title">Four steps to any tool</div>
-            <div class="steps-grid">
-                <div class="step-card fade-up" style="animation-delay:0s">
-                    <div class="step-num">01</div>
-                    <div class="step-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a6ef0" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></div>
-                    <div class="step-title">Browse & pick</div>
-                    <div class="step-desc">Search our catalog of 200+ tools. Filter by category, see pricing by the hour.</div>
-                </div>
-                <div class="step-card fade-up" style="animation-delay:0.08s">
-                    <div class="step-num">02</div>
-                    <div class="step-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a6ef0" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="2.5"/><path d="M4.5 4.5l3.5 3.5M19.5 4.5l-3.5 3.5M4.5 19.5l3.5-3.5M19.5 19.5l-3.5-3.5"/></svg></div>
-                    <div class="step-title">Drone dispatched</div>
-                    <div class="step-desc">Confirm your order. A drone launches from our campus hub in under 60 seconds.</div>
-                </div>
-                <div class="step-card fade-up" style="animation-delay:0.14s">
-                    <div class="step-num">03</div>
-                    <div class="step-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a6ef0" stroke-width="1.8" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
-                    <div class="step-title">Dropped to your door</div>
-                    <div class="step-desc">Average delivery is 7 minutes. You'll get a live ETA on your order page.</div>
-                </div>
-                <div class="step-card fade-up" style="animation-delay:0.2s">
-                    <div class="step-num">04</div>
-                    <div class="step-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a6ef0" stroke-width="1.8" stroke-linecap="round"><path d="M3 12a9 9 0 1010-9"/><path d="M3 3v9h9"/></svg></div>
-                    <div class="step-title">Free return pickup</div>
-                    <div class="step-desc">When you're done, just request pickup. Drone comes back to collect at no charge.</div>
+                <div class="card">
+                    <div style="font-size:16px;font-weight:900;margin-bottom:8px">Fast ETA</div>
+                    <div class="muted tiny" style="line-height:1.7">
+                        Most deliveries arrive in 6–12 minutes inside supported zones.
+                        Track orders in the Orders tab.
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Featured tools preview -->
-    <div class="section">
-        <div class="section-label">Popular right now</div>
-        <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:28px;flex-wrap:gap">
-            <div class="section-title" style="margin-bottom:0">Most rented this week</div>
-            <button class="btn-secondary" onclick="showPage('browse')" style="padding:10px 20px;font-size:13px">View all tools</button>
-        </div>
-        <div class="tools-grid" style="padding:0" id="featured-tools"></div>
-    </div>
-
-</div>
-
-<!-- ══ BROWSE PAGE ════════════════════════════════════════════════════════ -->
-<div class="page" id="page-browse">
-    <div class="browse-header">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px">
-            <div>
-                <div class="section-label">Catalog</div>
-                <div class="section-title" style="margin-bottom:4px">Browse Tools</div>
-                <div style="font-size:14px;color:var(--muted);font-weight:300">Drone-delivered to Buchanan Hall · Avg 7 min</div>
-            </div>
-            <div class="nav-live" style="align-self:flex-end"><span class="live-dot"></span>12 drones available</div>
-        </div>
-        <div class="browse-toolbar">
-            <div class="search-wrap">
-                <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
-                <input type="text" id="search-input" placeholder="Search tools..." oninput="filterTools()"/>
-            </div>
-            <div class="cat-pills" id="cat-pills">
-                <button class="cat-pill active" onclick="setCat(this,'All')">All</button>
-                <button class="cat-pill" onclick="setCat(this,'Workshop')">Workshop</button>
-                <button class="cat-pill" onclick="setCat(this,'Crafts')">Crafts</button>
-                <button class="cat-pill" onclick="setCat(this,'Office')">Office</button>
-                <button class="cat-pill" onclick="setCat(this,'Electronics')">Electronics</button>
-            </div>
-        </div>
-    </div>
-    <div class="tools-grid" id="tools-grid"></div>
-</div>
-
-<!-- ══ CART PAGE ══════════════════════════════════════════════════════════ -->
-<div class="page" id="page-cart">
-    <div style="padding:40px 40px 0;max-width:1200px;margin:0 auto">
-        <div class="section-label">Checkout</div>
-        <div class="section-title" style="margin-bottom:0">Your Cart</div>
-    </div>
-    <div class="cart-layout" id="cart-content"></div>
-</div>
-
-<!-- ══ ORDERS PAGE ════════════════════════════════════════════════════════ -->
-<div class="page" id="page-orders">
-    <div class="orders-layout">
-        <div class="section-label">Deliveries</div>
-        <div class="section-title" style="margin-bottom:20px">My Orders</div>
-        <!-- Active -->
-        <div class="active-order" id="active-order-section">
-            <div class="order-status-row">
+    <!-- BROWSE -->
+    <div class="page" id="page-browse">
+        <div class="section">
+            <div class="row" style="margin-bottom:12px">
                 <div>
-                    <div class="order-badge"><span class="order-badge-dot"></span><span class="order-badge-text">IN FLIGHT</span></div>
-                    <div class="order-name">Drill Kit</div>
-                    <div class="order-id">#D-2041 · Ordered 2:14 PM · Room 412</div>
+                    <div style="font-size:20px;font-weight:900;letter-spacing:-.4px">Browse tools</div>
+                    <div class="muted tiny">Tap a tool to add it to your cart.</div>
                 </div>
-                <div class="drone-anim">
-                    <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#1a6ef0" stroke-width="1.6" stroke-linecap="round">
-                        <circle cx="12" cy="12" r="2.5"/>
-                        <path d="M4.5 4.5l3.5 3.5M19.5 4.5l-3.5 3.5M4.5 19.5l3.5-3.5M19.5 19.5l-3.5-3.5"/>
-                        <circle cx="3.5" cy="3.5" r="1.5" fill="#1a6ef0" stroke="none"/>
-                        <circle cx="20.5" cy="3.5" r="1.5" fill="#1a6ef0" stroke="none"/>
-                        <circle cx="3.5" cy="20.5" r="1.5" fill="#1a6ef0" stroke="none"/>
-                        <circle cx="20.5" cy="20.5" r="1.5" fill="#1a6ef0" stroke="none"/>
-                    </svg>
-                    <div style="font-size:13px;font-weight:700;color:#1a6ef0;margin-top:4px">~3 min</div>
-                </div>
+                <button class="btn-secondary" onclick="showPage('cart')">Go to cart</button>
             </div>
-            <div class="progress-labels"><span>Dispatched</span><span>En route</span><span>Arriving</span></div>
-            <div class="progress-bar"><div class="progress-fill" style="width:70%"></div></div>
+            <div class="grid tools-grid" id="tools-grid"></div>
         </div>
-        <div style="font-size:11px;font-weight:600;color:var(--dim);letter-spacing:0.06em;margin-bottom:12px">PAST ORDERS</div>
-        <div class="past-orders" id="past-orders-list"></div>
     </div>
-</div>
 
-<!-- ══ ACCOUNT PAGE ═══════════════════════════════════════════════════════ -->
-<div class="page" id="page-account">
-    <div class="account-layout">
-        <!-- Sidebar -->
-        <div class="account-sidebar">
-            <div class="account-profile">
-                <div class="avatar-ring">
-                    <div class="avatar-ring-border"></div>
-                    <div class="avatar-inner">J</div>
-                </div>
-                <div id="prof-name" class="profile-name">Loading...</div>
-                <div id="prof-email" class="profile-email"></div>
-                <div class="verified-pill">
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#93c5fd" stroke-width="2" stroke-linecap="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
-                    Verified Student
+    <!-- CART -->
+    <div class="page" id="page-cart">
+        <div class="section">
+            <div class="row" style="margin-bottom:12px">
+                <div>
+                    <div style="font-size:20px;font-weight:900;letter-spacing:-.4px">Your cart</div>
+                    <div class="muted tiny">Pick hours, then request delivery.</div>
                 </div>
             </div>
-            <div class="sidebar-nav">
-                <div class="sidebar-nav-item active" onclick="showPanel('address')">
-                    <div class="sidebar-nav-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
-                    Delivery Address
+
+            <div class="two-col">
+                <div class="card">
+                    <div id="cart-items"></div>
+                    <div id="cart-empty" class="muted tiny" style="text-align:center;padding:18px;display:none">
+                        Cart is empty. Add a tool from Browse.
+                    </div>
                 </div>
-                <div class="sidebar-nav-item" onclick="showPanel('payment')">
-                    <div class="sidebar-nav-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div>
-                    Payment Methods
+
+                <div class="card">
+                    <div style="font-size:14px;font-weight:900;margin-bottom:10px">Order summary</div>
+                    <div class="row tiny muted"><span>Rental total</span><span id="sum-total">$0.00</span></div>
+                    <div class="row tiny muted" style="margin-top:8px"><span>Delivery</span><span style="color:#93c5fd;font-weight:900">Free</span></div>
+                    <div style="height:1px;background:var(--border);margin:12px 0"></div>
+                    <div class="row" style="font-weight:900"><span>Total</span><span id="sum-total2">$0.00</span></div>
+                    <button class="btn-primary auth-submit" style="margin-top:12px" onclick="checkout()">Request Delivery</button>
+                    <div class="muted tiny" style="text-align:center;margin-top:10px">Estimated arrival 6–12 min · Free return pickup</div>
                 </div>
-                <div class="sidebar-nav-item" onclick="showPanel('notifications')">
-                    <div class="sidebar-nav-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg></div>
-                    Notifications
-                </div>
-                <div class="sidebar-nav-item" onclick="showPanel('refer')">
-                    <div class="sidebar-nav-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div>
-                    Refer a Friend
-                </div>
-                <div class="sidebar-nav-item" onclick="showPanel('support')">
-                    <div class="sidebar-nav-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
-                    Help & Support
-                </div>
-                <button class="signout-btn" onclick="doSignOut()">Sign Out</button>
             </div>
         </div>
+    </div>
 
-        <!-- Panels -->
-        <div>
-            <!-- Stats always visible -->
-            <div class="stats-grid" style="margin-bottom:16px">
-                <div class="stat-card"><div class="stat-val" id="stat-rentals">—</div><div class="stat-label">Rentals</div></div>
-                <div class="stat-card"><div class="stat-val" id="stat-saved">—</div><div class="stat-label">Saved</div></div>
-                <div class="stat-card"><div class="stat-val" id="stat-hours">—</div><div class="stat-label">Rented</div></div>
+    <!-- ORDERS -->
+    <div class="page" id="page-orders">
+        <div class="section">
+            <div class="row" style="margin-bottom:12px">
+                <div>
+                    <div style="font-size:20px;font-weight:900;letter-spacing:-.4px">Orders</div>
+                    <div class="muted tiny">Your past deliveries show up here.</div>
+                </div>
+                <button class="btn-secondary" onclick="loadOrders()">Refresh</button>
             </div>
 
-            <!-- Address panel -->
-            <div class="account-panel" id="panel-address">
-                <div class="panel-title">Delivery Address</div>
-                <div class="panel-sub">Where drones will drop your tools</div>
-                <div class="form-row">
-                    <div class="form-group"><label class="form-label">BUILDING / HALL</label><input id="addr-building" class="form-input" type="text" placeholder="e.g. Buchanan Hall"/></div>
-                    <div class="form-group"><label class="form-label">ROOM NUMBER</label><input id="addr-room" class="form-input" type="text" placeholder="e.g. 412"/></div>
+            <div class="card">
+                <div style="font-size:12px;font-weight:900;color:var(--dim);letter-spacing:.08em;margin-bottom:12px">PAST ORDERS</div>
+                <div id="past-orders-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ACCOUNT -->
+    <div class="page" id="page-account">
+        <div class="section">
+            <div class="row" style="margin-bottom:12px">
+                <div>
+                    <div style="font-size:20px;font-weight:900;letter-spacing:-.4px">Account</div>
+                    <div class="muted tiny" id="acct-sub">Sign in to manage your delivery info.</div>
                 </div>
-                <div class="form-row">
-                    <div class="form-group full"><label class="form-label">DROP-OFF NOTES</label><input id="addr-notes" class="form-input" type="text" placeholder="e.g. Leave at front door"/></div>
-                </div>
-                <button class="form-save" onclick="saveAddress()">Save Address</button>
+                <button class="btn-secondary" id="signout-btn" onclick="doSignOut()" style="display:none">Sign out</button>
             </div>
 
-            <!-- Payment panel -->
-            <div class="account-panel hidden" id="panel-payment">
-                <div class="panel-title">Payment Methods</div>
-                <div class="panel-sub">Manage your saved cards</div>
-                <div class="payment-card selected" onclick="selectPayment(this)">
-                    <div class="payment-logo"><svg width="28" height="18" viewBox="0 0 32 20" fill="none"><rect width="32" height="20" rx="3" fill="#1a3fa3"/><circle cx="13" cy="10" r="6" fill="#e31837" opacity="0.9"/><circle cx="19" cy="10" r="6" fill="#f5a623" opacity="0.9"/></svg></div>
-                    <div style="flex:1"><div style="font-size:14px;font-weight:500">Visa ···· 4242</div><div style="font-size:12px;color:var(--muted)">Expires 08/27</div></div>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1a6ef0" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
-                </div>
-                <div class="payment-card" onclick="selectPayment(this)">
-                    <div class="payment-logo"><svg width="17" height="17" viewBox="0 0 24 24" fill="white"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg></div>
-                    <div style="flex:1"><div style="font-size:14px;font-weight:500">Apple Pay</div></div>
-                </div>
-                <button class="add-payment">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-                    Add payment method
-                </button>
-            </div>
+            <div class="two-col">
+                <div class="card">
+                    <div style="font-size:16px;font-weight:900;margin-bottom:10px">Profile</div>
 
-            <!-- Notifications panel -->
-            <div class="account-panel hidden" id="panel-notifications">
-                <div class="panel-title">Notifications</div>
-                <div class="panel-sub">Choose what alerts you receive</div>
-                <div class="toggle-row"><div class="toggle-info"><h4>Drone dispatched</h4><p>When your drone is in the air</p></div><label class="toggle"><input id="notif-delivery" type="checkbox" checked onchange="saveNotifications()"/><span class="slider"></span></label></div>
-                <div class="toggle-row"><div class="toggle-info"><h4>ETA updates</h4><p>Live arrival time notifications</p></div><label class="toggle"><input id="notif-eta" type="checkbox" checked onchange="saveNotifications()"/><span class="slider"></span></label></div>
-                <div class="toggle-row"><div class="toggle-info"><h4>Return reminders</h4><p>Alert when rental is about to expire</p></div><label class="toggle"><input id="notif-return" type="checkbox" checked onchange="saveNotifications()"/><span class="slider"></span></label></div>
-                <div class="toggle-row"><div class="toggle-info"><h4>Deals & promotions</h4><p>New tools and discount alerts</p></div><label class="toggle"><input id="notif-promo" type="checkbox" onchange="saveNotifications()"/><span class="slider"></span></label></div>
-            </div>
+                    <div class="form-group">
+                        <label class="form-label">NAME</label>
+                        <input id="profile-name" class="form-input" placeholder="Your name"/>
+                    </div>
 
-            <!-- Refer panel -->
-            <div class="account-panel hidden" id="panel-refer">
-                <div class="panel-title">Refer a Friend</div>
-                <div class="panel-sub">Give $5, get $5 when they complete their first rental</div>
-                <div style="background:linear-gradient(135deg,var(--blue-dim),rgba(26,110,240,0.04));border:1px solid var(--blue-mid);border-radius:14px;padding:24px;text-align:center;margin-bottom:22px">
-                    <div style="font-size:32px;margin-bottom:10px">🎁</div>
-                    <div style="font-size:18px;font-weight:700;margin-bottom:6px">Give $5, Get $5</div>
-                    <div style="font-size:14px;color:var(--muted);line-height:1.7;font-weight:300">Share your link. When a friend completes their first rental, you both get $5 credit automatically.</div>
-                </div>
-                <div style="font-size:11px;font-weight:600;color:var(--dim);letter-spacing:0.05em;margin-bottom:10px">YOUR REFERRAL LINK</div>
-                <div class="refer-link-row">
-                    <input class="refer-link-input" value="droveia.com/r/jamie2024" readonly/>
-                    <button class="copy-btn" id="copy-btn" onclick="copyRef()">Copy link</button>
-                </div>
-                <div style="font-size:11px;font-weight:600;color:var(--dim);letter-spacing:0.05em;margin-bottom:10px">YOUR BALANCE</div>
-                <div class="refer-credit"><span style="font-size:14px">Available credit</span><span style="font-size:18px;font-weight:800;color:var(--green)">$10.00</span></div>
-            </div>
+                    <div class="form-group">
+                        <label class="form-label">DELIVERY ADDRESS</label>
+                        <input id="profile-address" class="form-input" placeholder="Building, room, notes"/>
+                    </div>
 
-            <!-- Support panel -->
-            <div class="account-panel hidden" id="panel-support">
-                <div class="panel-title">Help & Support</div>
-                <div class="panel-sub">We typically reply within a few hours</div>
-                <div class="support-grid">
-                    <button class="support-quick" onclick="showToast('Opening order tracker...')"><div class="support-quick-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1a6ef0" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg></div><div class="support-quick-label">Track order</div></button>
-                    <button class="support-quick" onclick="showToast('Opening return request...')"><div class="support-quick-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1a6ef0" stroke-width="1.8" stroke-linecap="round"><path d="M3 12a9 9 0 1010-9"/><path d="M3 3v9h9"/></svg></div><div class="support-quick-label">Request return</div></button>
-                    <button class="support-quick" onclick="showToast('Opening issue report...')"><div class="support-quick-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1a6ef0" stroke-width="1.8" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg></div><div class="support-quick-label">Report issue</div></button>
-                    <button class="support-quick" onclick="showToast('Opening FAQs...')"><div class="support-quick-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1a6ef0" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/></svg></div><div class="support-quick-label">FAQs</div></button>
+                    <button class="btn-primary" onclick="saveProfile()">Save profile</button>
+                    <div class="muted tiny" style="margin-top:10px;line-height:1.6">
+                        Saved to <code>users/{uid}</code> in Firestore.
+                    </div>
                 </div>
-                <div style="font-size:11px;font-weight:600;color:var(--dim);letter-spacing:0.05em;margin-bottom:10px">SEND A MESSAGE</div>
-                <div id="support-form">
-                    <textarea class="support-textarea" placeholder="Describe your issue or question..." id="support-msg"></textarea>
-                    <button class="form-save" style="margin-top:12px;width:100%;padding:13px" onclick="sendSupport()">Send Message</button>
-                </div>
-                <div id="support-sent" class="hidden" style="background:var(--green-dim);border:1px solid rgba(34,197,94,0.2);border-radius:12px;padding:20px;text-align:center">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round" style="margin-bottom:8px"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                    <div style="font-weight:700;margin-bottom:4px">Message sent!</div>
-                    <div style="font-size:13px;color:var(--muted)">We'll reply within 24 hours.</div>
+
+                <div class="card">
+                    <div style="font-size:16px;font-weight:900;margin-bottom:10px">Support</div>
+
+                    <div class="form-group">
+                        <label class="form-label">MESSAGE</label>
+                        <textarea id="support-msg" class="form-input" style="min-height:120px;resize:none" placeholder="What do you need help with?"></textarea>
+                    </div>
+
+                    <button class="btn-secondary" onclick="sendSupport()">Send</button>
+
+                    <div id="support-sent" class="hidden" style="background:var(--green-dim);border:1px solid rgba(34,197,94,0.2);border-radius:12px;padding:16px;text-align:center;margin-top:12px">
+                        <div style="font-weight:900;margin-bottom:4px">Message sent!</div>
+                        <div class="muted tiny">We’ll reply within 24 hours.</div>
+                    </div>
+
+                    <div class="muted tiny" style="margin-top:10px;line-height:1.6">
+                        Writes to <code>supportTickets</code> with your uid/email.
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Tool modal -->
-<div class="modal-overlay hidden" id="tool-modal" onclick="closeModal(event)">
-    <div class="modal-box" id="modal-box">
-        <button class="modal-close" onclick="closeModalDirect()">✕</button>
-        <div id="modal-content"></div>
+<!-- AUTH OVERLAY -->
+<div class="auth-overlay hidden" id="auth-overlay">
+    <div class="auth-box">
+        <div class="auth-title" id="auth-title">Sign in</div>
+        <div class="auth-sub" id="auth-sub">Use email/password or Google.</div>
+
+        <div class="auth-tabs">
+            <button class="auth-tab active" id="tab-login" type="button">Login</button>
+            <button class="auth-tab" id="tab-signup" type="button">Sign up</button>
+        </div>
+
+        <!-- Login -->
+        <div id="auth-login">
+            <div class="form-group">
+                <label class="form-label">EMAIL</label>
+                <input id="si-email" class="form-input" type="email" placeholder="you@school.edu"/>
+            </div>
+            <div class="form-group">
+                <label class="form-label">PASSWORD</label>
+                <input id="si-pass" class="form-input" type="password" placeholder="••••••••"/>
+            </div>
+            <button class="btn-primary auth-submit" onclick="doSignIn()">Sign In</button>
+
+            <div class="row" style="margin-top:10px">
+                <button class="nav-btn-ghost" style="padding:8px 12px" onclick="doForgotPassword()">Forgot password?</button>
+                <button class="nav-btn-ghost" style="padding:8px 12px" onclick="closeAuth()">Close</button>
+            </div>
+
+            <div class="auth-divider">or</div>
+            <button class="apple-btn" onclick="doGoogleSignIn()">
+                <svg width="18" height="18" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                Continue with Google
+            </button>
+
+            <div class="auth-footer">No account? <a onclick="switchAuth('signup')">Sign up free →</a></div>
+        </div>
+
+        <!-- Signup -->
+        <div id="auth-signup" class="hidden">
+            <div class="form-group">
+                <label class="form-label">NAME</label>
+                <input id="su-name" class="form-input" type="text" placeholder="Jamie Chen"/>
+            </div>
+            <div class="form-group">
+                <label class="form-label">EMAIL</label>
+                <input id="su-email" class="form-input" type="email" placeholder="you@school.edu"/>
+            </div>
+            <div class="form-group">
+                <label class="form-label">PASSWORD</label>
+                <input id="su-pass" class="form-input" type="password" placeholder="8+ characters"/>
+            </div>
+            <button class="btn-primary auth-submit" onclick="doSignUp()">Create account</button>
+
+            <div class="row" style="margin-top:10px">
+                <button class="nav-btn-ghost" style="padding:8px 12px" onclick="switchAuth('login')">Back to login</button>
+                <button class="nav-btn-ghost" style="padding:8px 12px" onclick="closeAuth()">Close</button>
+            </div>
+
+            <div class="auth-divider">or</div>
+            <button class="apple-btn" onclick="doGoogleSignIn()">
+                <svg width="18" height="18" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                Continue with Google
+            </button>
+
+            <div class="auth-footer">Already have an account? <a onclick="switchAuth('login')">Sign in →</a></div>
+        </div>
     </div>
 </div>
 
-
-<!-- ═══════════════════════════════════════════════════════════
-  FIREBASE SETUP — 5 steps, ~10 minutes
-  ═══════════════════════════════════════════════════════════
-
-  1. Go to https://console.firebase.google.com
-     → Create project → name it "droveia"
-
-  2. In Firebase Console:
-     → Authentication → Get Started
-     → Enable "Email/Password" AND "Google"
-
-  3. Firestore Database → Create database
-     → Start in production mode → pick your region
-
-  4. Project Settings (gear icon) → Your apps → </> Web
-     → Register app → copy the firebaseConfig object below
-     → Replace EVERY "YOUR_..." value with your real values
-
-  5. Firestore → Rules → paste this and publish:
-
-     rules_version = '2';
-     service cloud.firestore {
-       match /databases/{database}/documents {
-         match /users/{uid}/{document=**} {
-           allow read, write: if request.auth.uid == uid;
-         }
-       }
-     }
-
-  That's it — sign up, place orders, everything saves live.
-  ═══════════════════════════════════════════════════════════ -->
+<div class="toast" id="toast">Toast</div>
 
 <script type="module">
-    import { initializeApp }
-      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import {
-      getAuth, onAuthStateChanged,
-      createUserWithEmailAndPassword, signInWithEmailAndPassword,
-      signOut, updateProfile, sendPasswordResetEmail,
-      GoogleAuthProvider, signInWithPopup
-    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import {
-      getFirestore, doc, getDoc, setDoc, updateDoc,
-      collection, addDoc, query, orderBy, onSnapshot,
-      serverTimestamp, increment
-    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-    // ─── 🔧 PASTE YOUR FIREBASE CONFIG HERE ──────────────────────────────────────
-    const firebaseConfig = {
-      apiKey:            "YOUR_API_KEY",
-      authDomain:        "YOUR_PROJECT_ID.firebaseapp.com",
-      projectId:         "YOUR_PROJECT_ID",
-      storageBucket:     "YOUR_PROJECT_ID.appspot.com",
-      messagingSenderId: "YOUR_SENDER_ID",
-      appId:             "YOUR_APP_ID"
-    };
-    // ─────────────────────────────────────────────────────────────────────────────
-
-    const app  = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db   = getFirestore(app);
-
-    // ─── Firestore paths ──────────────────────────────────────────────────────────
-    const profileRef = uid => doc(db, "users", uid, "data", "profile");
-    const cartRef    = uid => doc(db, "users", uid, "data", "cart");
-    const ordersCol  = uid => collection(db, "users", uid, "orders");
-
-    // ─── Tool catalog (static, no DB needed) ─────────────────────────────────────
-    const TOOLS = [
-      {id:1,  name:"Heat Gun",       cat:"Workshop",    pph:4.50, retail:45,  rating:4.8, desc:"1500W dual-temp · shrink wrap, paint stripping & crafts",     eta:"8 min"},
-      {id:2,  name:"Drill Kit",      cat:"Workshop",    pph:6.00, retail:80,  rating:4.9, desc:"20V cordless · 18-piece bit set · charged and ready to go",   eta:"6 min"},
-      {id:3,  name:"Sewing Machine", cat:"Crafts",      pph:5.00, retail:90,  rating:4.7, desc:"Compact 12-stitch portable · great for clothing repairs",      eta:"10 min"},
-      {id:4,  name:"Label Maker",    cat:"Office",      pph:2.00, retail:30,  rating:4.6, desc:"Thermal printer · USB & Bluetooth · 3 tape rolls included",    eta:"5 min"},
-      {id:5,  name:"Soldering Iron", cat:"Electronics", pph:3.50, retail:40,  rating:4.8, desc:"60W adjustable station · multiple tips and flux included",      eta:"7 min"},
-      {id:6,  name:"Jigsaw",         cat:"Workshop",    pph:7.00, retail:95,  rating:4.9, desc:"Compact variable-speed · 5 blades for wood and metal",         eta:"9 min"},
-      {id:7,  name:"Embroidery Set", cat:"Crafts",      pph:1.50, retail:18,  rating:4.5, desc:"6-piece bamboo hoops · needles · starter thread assortment",   eta:"4 min"},
-      {id:8,  name:"Laminator",      cat:"Office",      pph:2.50, retail:35,  rating:4.7, desc:"9-inch · 20 pouches · 3-min warmup time",                     eta:"6 min"},
-      {id:9,  name:"Oscilloscope",   cat:"Electronics", pph:8.00, retail:120, rating:4.9, desc:"2-channel 50MHz digital · USB connectivity",                  eta:"12 min"},
-      {id:10, name:"Hot Glue Gun",   cat:"Crafts",      pph:1.00, retail:15,  rating:4.6, desc:"High-temp · 20 glue sticks · fast heat-up",                   eta:"5 min"},
-      {id:11, name:"Multimeter",     cat:"Electronics", pph:2.00, retail:28,  rating:4.8, desc:"Auto-ranging digital · leads and case included",               eta:"6 min"},
-      {id:12, name:"Staple Gun",     cat:"Workshop",    pph:2.50, retail:32,  rating:4.5, desc:"Heavy-duty · 1000 staples · upholstery ready",                eta:"5 min"},
-    ];
-    const DURATIONS = [1,2,4,8,24,48];
-
-    // ─── App state ────────────────────────────────────────────────────────────────
-    let currentUser  = null;
-    let userProfile  = null;
-    let cart         = [];
-    let liveOrders   = [];
-    let ordersUnsub  = null;
-    let currentCat   = "All";
-    let currentTool  = null;
-    let currentHours = 4;
-    let cartSaveTimer = null;
-
-    // ─── Auth state listener ─────────────────────────────────────────────────────
-    onAuthStateChanged(auth, async user => {
-      if (user) {
-        currentUser = user;
-        updateNavForUser(user);
-        await loadProfile();
-        await loadCart();
-        subscribeOrders();
-      } else {
-        if (ordersUnsub) { ordersUnsub(); ordersUnsub = null; }
-        currentUser = null; userProfile = null; cart = []; liveOrders = [];
-        updateNavForGuest();
-        updateCartBadge();
-      }
-    });
-
-    function updateNavForUser(user) {
-      const btn = document.getElementById("nav-auth-btn");
-      const first = (user.displayName || user.email).split(/[\s@]/)[0];
-      btn.textContent = first;
-      btn.onclick = () => showPage("account");
-    }
-    function updateNavForGuest() {
-      const btn = document.getElementById("nav-auth-btn");
-      btn.textContent = "Sign In";
-      btn.onclick = () => showAuth();
-    }
-
-    // ─── Firestore: profile ───────────────────────────────────────────────────────
-    async function loadProfile() {
-      try {
-        const snap = await getDoc(profileRef(currentUser.uid));
-        if (snap.exists()) {
-          userProfile = snap.data();
-        } else {
-          const name = currentUser.displayName || "";
-          const [first, ...rest] = name.split(" ");
-          userProfile = {
-            firstName: first || "", lastName: rest.join(" ") || "",
-            email: currentUser.email || "",
-            building: "", room: "", dropNotes: "",
-            totalRentals: 0, totalSaved: 0, totalHours: 0,
-            notifications: { delivery:true, eta:true, returns:true, promo:false },
-            createdAt: serverTimestamp()
-          };
-          await setDoc(profileRef(currentUser.uid), userProfile);
-        }
-        refreshAccountUI();
-      } catch(e) { console.error("loadProfile:", e); }
-    }
-
-    async function saveProfileFields(fields) {
-      if (!currentUser) return;
-      try {
-        await updateDoc(profileRef(currentUser.uid), { ...fields, updatedAt: serverTimestamp() });
-        userProfile = { ...userProfile, ...fields };
-        refreshAccountUI();
-        showToast("✓ Saved");
-      } catch(e) { showToast("Save failed — check connection"); }
-    }
-
-    // ─── Firestore: cart (persisted) ─────────────────────────────────────────────
-    async function loadCart() {
-      try {
-        const snap = await getDoc(cartRef(currentUser.uid));
-        if (snap.exists() && snap.data().items) {
-          cart = snap.data().items;
-          updateCartBadge();
-          if (document.getElementById("page-cart").classList.contains("active")) renderCart();
-        }
-      } catch(e) { console.error("loadCart:", e); }
-    }
-
-    function saveCartToFirestore() {
-      if (!currentUser) return;
-      clearTimeout(cartSaveTimer);
-      cartSaveTimer = setTimeout(async () => {
-        try {
-          await setDoc(cartRef(currentUser.uid), {
-            items: cart.map(i => ({id:i.id, name:i.name, cat:i.cat, pph:i.pph, retail:i.retail, rating:i.rating, desc:i.desc, eta:i.eta, hours:i.hours})),
-            updatedAt: serverTimestamp()
-          });
-        } catch(e) { console.error("saveCart:", e); }
-      }, 700);
-    }
-
-    // ─── Firestore: orders (real-time) ───────────────────────────────────────────
-    function subscribeOrders() {
-      if (!currentUser) return;
-      if (ordersUnsub) ordersUnsub();
-      const q = query(ordersCol(currentUser.uid), orderBy("createdAt","desc"));
-      ordersUnsub = onSnapshot(q, snap => {
-        liveOrders = snap.docs.map(d => ({ _id: d.id, ...d.data() }));
-        if (document.getElementById("page-orders").classList.contains("active")) renderOrders();
-        // show live indicator if any order in flight
-        const hasLive = liveOrders.some(o => o.status === "in_flight");
-        const badge = document.getElementById("orders-live-dot");
-        if (badge) badge.style.display = hasLive ? "block" : "none";
-      }, e => console.error("ordersListener:", e));
-    }
-
-    async function placeOrder(items) {
-      if (!currentUser) { showAuth(); return; }
-      const total = +items.reduce((s,i) => s + i.pph*i.hours, 0).toFixed(2);
-      const saved = +items.reduce((s,i) => s + (i.retail - i.pph*i.hours), 0).toFixed(2);
-      const totalHrs = items.reduce((s,i) => s + i.hours, 0);
-      try {
-        await addDoc(ordersCol(currentUser.uid), {
-          status: "in_flight",
-          items:  items.map(i => ({ id:i.id, name:i.name, cat:i.cat, pph:i.pph, hours:i.hours, retail:i.retail })),
-          total, saved,
-          address: { building: userProfile?.building||"—", room: userProfile?.room||"—" },
-          createdAt: serverTimestamp(),
-          deliveredAt: null
-        });
-        // Increment lifetime stats
-        await updateDoc(profileRef(currentUser.uid), {
-          totalRentals: increment(items.length),
-          totalSaved:   increment(saved),
-          totalHours:   increment(totalHrs)
-        });
-        userProfile = {
-          ...userProfile,
-          totalRentals: (userProfile?.totalRentals||0) + items.length,
-          totalSaved:   +((userProfile?.totalSaved||0) + saved).toFixed(2),
-          totalHours:   (userProfile?.totalHours||0) + totalHrs
-        };
-        // Clear cart in Firestore
-        cart = [];
-        await setDoc(cartRef(currentUser.uid), { items:[], updatedAt: serverTimestamp() });
-        updateCartBadge();
-        refreshAccountUI();
-        showToast("✓ Order placed! Drone dispatched 🚁");
-        setTimeout(() => showPage("orders"), 800);
-      } catch(e) {
-        console.error("placeOrder:", e);
-        showToast("Order failed — please try again");
-      }
-    }
-
-    // ─── Auth functions (called from HTML) ───────────────────────────────────────
-    window.showAuth = function() {
-      document.getElementById("auth-overlay").classList.remove("hidden");
-    };
-    window.switchAuth = function(tab) {
-      document.querySelectorAll(".auth-tab").forEach((t,i) => t.classList.toggle("active", i===(tab==="login"?0:1)));
-      document.getElementById("auth-login").classList.toggle("hidden",  tab!=="login");
-      document.getElementById("auth-signup").classList.toggle("hidden", tab!=="signup");
-    };
-
-    window.doSignIn = async function() {
-      const email = document.getElementById("si-email")?.value?.trim();
-      const pass  = document.getElementById("si-pass")?.value;
-      if (!email||!pass) { showToast("Please fill in all fields"); return; }
-      setAuthBusy(true);
-      try {
-        await signInWithEmailAndPassword(auth, email, pass);
-        document.getElementById("auth-overlay").classList.add("hidden");
-        showToast("✓ Welcome back!");
-      } catch(e) { showToast(fbErr(e.code)); }
-      finally { setAuthBusy(false); }
-    };
-
-    window.doSignUp = async function() {
-      const first    = document.getElementById("su-first")?.value?.trim();
-      const last     = document.getElementById("su-last")?.value?.trim()||"";
-      const email    = document.getElementById("su-email")?.value?.trim();
-      const building = document.getElementById("su-building")?.value?.trim()||"";
-      const room     = document.getElementById("su-room")?.value?.trim()||"";
-      const pass     = document.getElementById("su-pass")?.value;
-      if (!first||!email||!pass) { showToast("Please fill in required fields"); return; }
-      if (!email.endsWith(".edu")) { showToast("Must use a .edu email address"); return; }
-      if (pass.length<8) { showToast("Password must be at least 8 characters"); return; }
-      setAuthBusy(true);
-      try {
-        const cred = await createUserWithEmailAndPassword(auth, email, pass);
-        await updateProfile(cred.user, { displayName: `${first} ${last}`.trim() });
-        await setDoc(profileRef(cred.user.uid), {
-          firstName:first, lastName:last, email,
-          building, room, dropNotes:"",
-          totalRentals:0, totalSaved:0, totalHours:0,
-          notifications:{delivery:true,eta:true,returns:true,promo:false},
-          createdAt:serverTimestamp()
-        });
-        document.getElementById("auth-overlay").classList.add("hidden");
-        showToast(`✓ Welcome to Droveia, ${first}!`);
-      } catch(e) { showToast(fbErr(e.code)); }
-      finally { setAuthBusy(false); }
-    };
-
-    window.doGoogleSignIn = async function() {
-      try {
-        const provider = new GoogleAuthProvider();
-        await signInWithPopup(auth, provider);
-        document.getElementById("auth-overlay").classList.add("hidden");
-        showToast("✓ Signed in with Google!");
-      } catch(e) {
-        if (e.code !== "auth/popup-closed-by-user") showToast(fbErr(e.code));
-      }
-    };
-
-    window.doForgotPassword = async function() {
-      const email = document.getElementById("si-email")?.value?.trim();
-      if (!email) { showToast("Enter your email first"); return; }
-      try {
-        await sendPasswordResetEmail(auth, email);
-        showToast("✓ Reset email sent!");
-      } catch(e) { showToast(fbErr(e.code)); }
-    };
-
-    window.doSignOut = async function() {
-      if (ordersUnsub) ordersUnsub();
-      await signOut(auth);
-      showPage("home");
-      showToast("Signed out");
-    };
-
-    function setAuthBusy(busy) {
-      document.querySelectorAll(".auth-submit,.apple-btn").forEach(b => {
-        b.disabled = busy; b.style.opacity = busy ? "0.55" : "1";
-      });
-    }
-
-    function fbErr(code) {
-      return ({
-        "auth/user-not-found":       "No account found with that email",
-        "auth/wrong-password":       "Incorrect password",
-        "auth/invalid-credential":   "Invalid email or password",
-        "auth/email-already-in-use": "An account already exists with that email",
-        "auth/invalid-email":        "Invalid email address",
-        "auth/weak-password":        "Password must be at least 6 characters",
-        "auth/too-many-requests":    "Too many attempts — try again later",
-        "auth/network-request-failed":"Network error — check your connection",
-      })[code] || `Sign-in error (${code})`;
-    }
-
-    // ─── Navigation ───────────────────────────────────────────────────────────────
-    window.showPage = function(id) {
-      if (["cart","orders","account"].includes(id) && !currentUser) { showAuth(); return; }
-      document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
-      document.getElementById("page-"+id).classList.add("active");
-      document.querySelectorAll(".nav-link").forEach(l => l.classList.remove("active"));
-      const nl = document.getElementById("nav-"+id);
-      if (nl) nl.classList.add("active");
-      window.scrollTo(0,0);
-      if (id==="browse")  renderTools();
-      if (id==="cart")    renderCart();
-      if (id==="orders")  renderOrders();
-      if (id==="account") refreshAccountUI();
-    };
-
-    // ─── Account UI ───────────────────────────────────────────────────────────────
-    function refreshAccountUI() {
-      if (!userProfile) return;
-      const full = `${userProfile.firstName||""} ${userProfile.lastName||""}`.trim() || "Student";
-      const init = ((userProfile.firstName||"")[0]||(full[0]||"?")).toUpperCase();
-      setText("prof-name",    full);
-      setText("prof-email",   userProfile.email||currentUser?.email||"");
-      setText("prof-initial", init);
-      setText("stat-rentals", userProfile.totalRentals||0);
-      setText("stat-saved",   "$"+(+(userProfile.totalSaved||0)).toFixed(0));
-      setText("stat-hours",   (userProfile.totalHours||0)+"h");
-      setVal("addr-building", userProfile.building||"");
-      setVal("addr-room",     userProfile.room||"");
-      setVal("addr-notes",    userProfile.dropNotes||"");
-      const n = userProfile.notifications||{};
-      setChk("notif-delivery", n.delivery!==false);
-      setChk("notif-eta",      n.eta!==false);
-      setChk("notif-return",   n.returns!==false);
-      setChk("notif-promo",    !!n.promo);
-    }
-    function setText(id,v){ const e=document.getElementById(id); if(e) e.textContent=v; }
-    function setVal(id,v) { const e=document.getElementById(id); if(e) e.value=v; }
-    function setChk(id,v) { const e=document.getElementById(id); if(e) e.checked=!!v; }
-
-    window.showPanel = function(id) {
-      document.querySelectorAll(".account-panel").forEach(p => p.classList.add("hidden"));
-      document.getElementById("panel-"+id).classList.remove("hidden");
-      document.querySelectorAll(".sidebar-nav-item").forEach(i => i.classList.remove("active"));
-      event.currentTarget.classList.add("active");
-    };
-    window.saveAddress = function() {
-      saveProfileFields({
-        building:  document.getElementById("addr-building").value.trim(),
-        room:      document.getElementById("addr-room").value.trim(),
-        dropNotes: document.getElementById("addr-notes").value.trim()
-      });
-    };
-    window.saveNotifications = function() {
-      saveProfileFields({ notifications: {
-        delivery: document.getElementById("notif-delivery").checked,
-        eta:      document.getElementById("notif-eta").checked,
-        returns:  document.getElementById("notif-return").checked,
-        promo:    document.getElementById("notif-promo").checked
-      }});
-    };
-    window.selectPayment = function(el) {
-      document.querySelectorAll(".payment-card").forEach(c => c.classList.remove("selected"));
-      el.classList.add("selected");
-    };
-    window.copyRef = function() {
-      const uid = currentUser?.uid?.slice(0,8)||"friend";
-      navigator.clipboard?.writeText(`droveia.com/r/${uid}`).catch(()=>{});
-      const btn = document.getElementById("copy-btn");
-      btn.textContent="Copied!"; btn.classList.add("copied");
-      setTimeout(()=>{ btn.textContent="Copy link"; btn.classList.remove("copied"); }, 2000);
-      showToast("✓ Link copied!");
-    };
-    window.sendSupport = function() {
-      document.getElementById("support-form").classList.add("hidden");
-      document.getElementById("support-sent").classList.remove("hidden");
-      showToast("✓ Message sent!");
-    };
-
-    // ─── Toast ────────────────────────────────────────────────────────────────────
-    window.showToast = function(msg) {
-      const t = document.getElementById("toast");
-      t.textContent = msg; t.classList.add("show");
-      setTimeout(() => t.classList.remove("show"), 2800);
-    };
-
-    // ─── SVG helpers ─────────────────────────────────────────────────────────────
-    function catIconSvg(cat, color="#1a6ef0") {
-      const a = `width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"`;
-      if(cat==="Workshop")    return `<svg ${a}><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>`;
-      if(cat==="Crafts")      return `<svg ${a}><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>`;
-      if(cat==="Office")      return `<svg ${a}><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>`;
-      if(cat==="Electronics") return `<svg ${a}><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>`;
-      return `<svg ${a}><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>`;
-    }
-    function starsHtml(r) {
-      let s=""; for(let i=1;i<=5;i++) s+=`<span class="star${i>Math.floor(r)?" empty":""}">★</span>`;
-      return `<div class="stars">${s}</div><span class="rating-text">${r}</span>`;
-    }
-
-    // ─── Tool rendering ───────────────────────────────────────────────────────────
-    function renderToolCard(tool) {
-      const pct = Math.round((1-(tool.pph*4)/tool.retail)*100);
-      return `
-      <div class="tool-card fade-up" onclick="openModal(${tool.id})">
-        <div class="tool-card-top">
-          <div class="tool-icon">${catIconSvg(tool.cat)}</div>
-          <div class="save-badge">Save ${pct}%</div>
-        </div>
-        <div class="tool-name">${tool.name}</div>
-        <div class="tool-desc">${tool.desc}</div>
-        <div class="tool-stars">${starsHtml(tool.rating)}</div>
-        <div class="tool-pricing">
-          <div>
-            <div class="price-from">from</div>
-            <div><span class="price-val">$${tool.pph.toFixed(2)}</span><span class="price-unit">/hr</span></div>
-            <div class="retail-cross">$${tool.retail} retail</div>
-          </div>
-          <button class="add-btn" onclick="event.stopPropagation();quickAdd(${tool.id})">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-          </button>
-        </div>
-        <div class="tool-eta">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="2.5"/><path d="M4.5 4.5l3.5 3.5"/></svg>
-          ETA ~${tool.eta}
-        </div>
-      </div>`;
-    }
-
-    window.renderTools = function() {
-      const q = document.getElementById("search-input")?.value?.toLowerCase()||"";
-      const filtered = TOOLS.filter(t=>(currentCat==="All"||t.cat===currentCat)&&t.name.toLowerCase().includes(q));
-      const g = document.getElementById("tools-grid");
-      if(g) g.innerHTML = filtered.length
-        ? filtered.map(t=>renderToolCard(t)).join("")
-        : `<div style="grid-column:1/-1;text-align:center;padding:60px 0;color:var(--muted)"><div style="font-size:36px;margin-bottom:12px;opacity:0.3">🔍</div><div style="font-weight:600">No tools found</div></div>`;
-    };
-
-    function renderFeatured() {
-      const g = document.getElementById("featured-tools");
-      if(g) g.innerHTML = [TOOLS[1],TOOLS[0],TOOLS[4],TOOLS[2],TOOLS[7],TOOLS[3]].map(t=>renderToolCard(t)).join("");
-    }
-
-    window.filterTools = function() { renderTools(); };
-    window.setCat = function(el, cat) {
-      currentCat = cat;
-      document.querySelectorAll(".cat-pill").forEach(p=>p.classList.remove("active"));
-      el.classList.add("active");
-      renderTools();
-    };
-
-    // ─── Tool modal ───────────────────────────────────────────────────────────────
-    window.openModal = function(id) {
-      currentTool = TOOLS.find(t=>t.id===id);
-      currentHours = 4;
-      renderModal();
-      document.getElementById("tool-modal").classList.remove("hidden");
-      document.body.style.overflow = "hidden";
-    };
-    function renderModal() {
-      const t = currentTool;
-      const cost = (t.pph*currentHours).toFixed(2);
-      const pct  = Math.round((1-t.pph*currentHours/t.retail)*100);
-      document.getElementById("modal-content").innerHTML = `
-        <div class="modal-icon">${catIconSvg(t.cat,"#1a6ef0")}</div>
-        <div class="modal-title">${t.name}</div>
-        <div class="modal-meta">
-          ${starsHtml(t.rating)}
-          <span style="color:var(--dim)">·</span>
-          <span style="color:var(--green);font-size:12px;font-weight:600;background:var(--green-dim);padding:2px 8px;border-radius:6px">Save ${pct}%</span>
-        </div>
-        <div class="modal-desc">${t.desc}</div>
-        <div class="dur-label">RENTAL DURATION</div>
-        <div class="dur-presets">
-          ${DURATIONS.map(h=>`<button class="dur-preset${currentHours===h?" active":""}" onclick="setHours(${h})">${h<24?h+"h":h/24+"d"}</button>`).join("")}
-        </div>
-        <div class="dur-stepper">
-          <button class="step-btn step-minus" onclick="adjHours(-1)">−</button>
-          <div class="step-display"><div class="step-val">${currentHours}</div><div class="step-unit">hours</div></div>
-          <button class="step-btn step-plus" onclick="adjHours(1)">+</button>
-        </div>
-        <div class="modal-summary">
-          <div>
-            <div class="modal-total-label">Rental total</div>
-            <div class="modal-total-val">$${cost}</div>
-            <div class="modal-total-cross">vs $${t.retail} to buy</div>
-          </div>
-          <div class="modal-right">
-            <div>ETA ~${t.eta}</div><div>Free return</div>
-            <div style="color:var(--green)">Save $${(t.retail-t.pph*currentHours).toFixed(2)}</div>
-          </div>
-        </div>
-        <button class="modal-add-btn" onclick="addToCart(${t.id})">Add to Cart — $${cost}</button>`;
-    }
-    window.setHours = function(h) { currentHours=h; renderModal(); };
-    window.adjHours = function(d) { currentHours=Math.min(48,Math.max(1,currentHours+d)); renderModal(); };
-    window.closeModal = function(e) { if(e.target.id==="tool-modal") closeModalDirect(); };
-    window.closeModalDirect = function() {
-      document.getElementById("tool-modal").classList.add("hidden");
-      document.body.style.overflow = "";
-    };
-
-    // ─── Cart ─────────────────────────────────────────────────────────────────────
-    window.addToCart = function(id) {
-      if (!currentUser) { closeModalDirect(); showAuth(); return; }
-      const tool = TOOLS.find(t=>t.id===id);
-      const ex   = cart.find(c=>c.id===id);
-      if (ex) ex.hours = currentHours; else cart.push({...tool, hours:currentHours});
-      updateCartBadge(); saveCartToFirestore(); closeModalDirect();
-      showToast(`✓ ${tool.name} added to cart`);
-    };
-    window.quickAdd = function(id) {
-      if (!currentUser) { showAuth(); return; }
-      const tool = TOOLS.find(t=>t.id===id);
-      if (!cart.find(c=>c.id===id)) cart.push({...tool, hours:4});
-      updateCartBadge(); saveCartToFirestore();
-      showToast(`✓ ${tool.name} added — 4h rental`);
-    };
-    window.removeItem = function(id) {
-      cart = cart.filter(c=>c.id!==id);
-      updateCartBadge(); saveCartToFirestore(); renderCart();
-    };
-    function updateCartBadge() {
-      const b = document.getElementById("cart-badge");
-      if (!b) return;
-      b.style.display = cart.length>0 ? "flex" : "none";
-      b.textContent = cart.length;
-    }
-    function renderCart() {
-      const total = cart.reduce((s,c)=>s+c.pph*c.hours,0);
-      const saved = cart.reduce((s,c)=>s+(c.retail-c.pph*c.hours),0);
-      const el = document.getElementById("cart-content");
-      if (!el) return;
-      const addr = userProfile ? `${userProfile.building||"—"}, Room ${userProfile.room||"—"}` : "Sign in to set address";
-      if (!cart.length) {
-        el.innerHTML = `<div style="padding:20px;grid-column:1/-1"><div class="cart-empty">
-          <div class="cart-empty-icon">${catIconSvg("All","#1a6ef0")}</div>
-          <h3>Your cart is empty</h3>
-          <p>Browse our catalog and add tools you need.<br/>Drone-delivered straight to your dorm.</p>
-          <button class="btn-primary" onclick="showPage('browse')">Browse Tools</button>
-        </div></div>`; return;
-      }
-      el.innerHTML = `
-        <div>
-          <div class="address-pill">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-            Delivering to ${addr}
-          </div>
-          <div class="cart-items">
-            ${cart.map(i=>`
-            <div class="cart-item">
-              <div class="cart-item-icon">${catIconSvg(i.cat)}</div>
-              <div class="cart-item-info">
-                <div class="cart-item-name">${i.name}</div>
-                <div class="cart-item-sub">${i.hours}h rental · $${i.pph}/hr</div>
-              </div>
-              <div style="text-align:right">
-                <div class="cart-item-price">$${(i.pph*i.hours).toFixed(2)}</div>
-                <button class="cart-item-remove" onclick="removeItem(${i.id})">Remove</button>
-              </div>
-            </div>`).join("")}
-          </div>
-        </div>
-        <div>
-          <div class="order-summary">
-            <div class="summary-title">Order Summary</div>
-            <div class="summary-row"><span>Rental total</span><span>$${total.toFixed(2)}</span></div>
-            <div class="summary-row"><span>Delivery</span><span class="summary-green">Free</span></div>
-            <div class="summary-row"><span>Saved vs retail</span><span class="summary-green">$${saved.toFixed(2)}</span></div>
-            <div class="summary-divider"></div>
-            <div class="summary-total"><span>Total</span><span>$${total.toFixed(2)}</span></div>
-            <button class="checkout-btn" onclick="checkout()">Request Delivery</button>
-            <div class="checkout-note">Estimated arrival 6–12 min · Free return pickup</div>
-          </div>
-        </div>`;
-    }
-    window.checkout = function() {
-      if (!currentUser) { showAuth(); return; }
-      if (!cart.length) return;
-      placeOrder([...cart]);
-    };
-
-    // ─── Orders rendering ─────────────────────────────────────────────────────────
-    function renderOrders() {
-      const el = document.getElementById("past-orders-list");
-      if (!el) return;
-
-      // Active order card
-      const active = liveOrders.find(o => o.status==="in_flight");
-      const activeSection = document.getElementById("active-order-section");
-      if (activeSection) {
-        if (active) {
-          activeSection.style.display = "block";
-          const names = active.items.map(i=>i.name).join(", ");
-          const nameEl = activeSection.querySelector(".order-name");
-          const idEl   = activeSection.querySelector(".order-id");
-          if (nameEl) nameEl.textContent = names;
-          if (idEl)   idEl.textContent = `#${active._id.slice(0,8).toUpperCase()} · $${active.total?.toFixed(2)||"—"}`;
-        } else {
-          activeSection.style.display = "none";
-        }
-      }
-
-      // Past orders
-      const past = liveOrders.filter(o => o.status!=="in_flight");
-      if (!past.length) {
-        el.innerHTML = `<div style="text-align:center;padding:40px 0;color:var(--muted);font-size:14px">No past orders yet — place your first rental!</div>`;
-        return;
-      }
-      // Group by date
-      const groups = {};
-      past.forEach(o => {
-        const d = o.createdAt?.toDate ? o.createdAt.toDate() : new Date();
-        const label = fmtDate(d);
-        if (!groups[label]) groups[label] = [];
-        groups[label].push({...o, _d:d});
-      });
-      el.innerHTML = Object.entries(groups).map(([label, list]) => `
-        <div style="font-size:11px;font-weight:600;color:var(--dim);letter-spacing:.05em;margin:14px 0 8px">${label.toUpperCase()}</div>
-        ${list.map(o => {
-          const cat  = TOOLS.find(t=>t.name===o.items[0]?.name)?.cat||"All";
-          const name = o.items[0]?.name||"Order";
-          const more = o.items.length>1 ? ` +${o.items.length-1} more`:"";
-          const time = o._d.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"});
-          return `<div class="past-order">
-            <div style="width:44px;height:44px;border-radius:11px;background:linear-gradient(135deg,rgba(26,110,240,.18),rgba(26,110,240,.05));display:flex;align-items:center;justify-content:center;flex-shrink:0">${catIconSvg(cat)}</div>
-            <div style="flex:1">
-              <div style="font-weight:600;font-size:15px">${name}${more}</div>
-              <div style="font-size:12px;color:var(--muted)">#${o._id.slice(0,8).toUpperCase()} · ${time} · $${o.total?.toFixed(2)||"—"}</div>
-            </div>
-            <div class="delivered-badge">Delivered</div>
-          </div>`;
-        }).join("")}
-      `).join("");
-    }
-    function fmtDate(d) {
-      const today = new Date(); today.setHours(0,0,0,0);
-      const od    = new Date(d); od.setHours(0,0,0,0);
-      const diff  = Math.round((today-od)/86400000);
-      if (diff===0) return "Today";
-      if (diff===1) return "Yesterday";
-      return d.toLocaleDateString([],{weekday:"short",month:"short",day:"numeric"});
-    }
-
-    // ─── Init ─────────────────────────────────────────────────────────────────────
-    renderFeatured();
-    renderTools();
-</script>
-
-<script type="module">
-    // =========================
-    // Firebase CDN imports
-    // =========================
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
     import {
       getAuth,
       GoogleAuthProvider,
@@ -1756,8 +479,7 @@
       onAuthStateChanged,
       signOut,
       updateProfile
-    } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
     import {
       getFirestore,
       doc,
@@ -1769,11 +491,9 @@
       query,
       orderBy,
       getDocs
-    } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-    // =========================
-    // Your Firebase config
-    // =========================
+    // ==== YOUR CONFIG (already yours) ====
     const firebaseConfig = {
       apiKey: "AIzaSyCn1FpHSFRiocpx00AGyw9r0JsM4xpvOgY",
       authDomain: "droveia.firebaseapp.com",
@@ -1785,338 +505,450 @@
     };
 
     const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
     const db = getFirestore(app);
-    const provider = new GoogleAuthProvider();
+    const auth = getAuth(app);
+    const googleProvider = new GoogleAuthProvider();
 
-    // =========================
-    // Tiny helpers (uses your toast box)
-    // =========================
-    function toast(msg) {
-      const t = document.getElementById("toast");
-      if (!t) { alert(msg); return; }
-      t.innerHTML = msg;
-      t.classList.add("show");
-      clearTimeout(window.__toastTimer);
-      window.__toastTimer = setTimeout(() => t.classList.remove("show"), 2400);
-    }
+    // ==== Catalog ====
+    const TOOLS = [
+      { id: 1, name: "Soldering Iron", desc: "60W, fine tip, perfect for quick fixes.", pph: 3.50 },
+      { id: 2, name: "Heat Gun", desc: "Shrink wrap, adhesives, plastic work.", pph: 4.00 },
+      { id: 3, name: "Multimeter", desc: "Voltage/current/resistance + continuity.", pph: 2.25 },
+      { id: 4, name: "Hot Glue Gun", desc: "Fast bonds, clean nozzle, extra sticks.", pph: 2.00 },
+      { id: 5, name: "Precision Screwdriver Set", desc: "Bits for electronics + robotics.", pph: 1.50 },
+      { id: 6, name: "Wire Stripper + Crimper", desc: "For quick harness work.", pph: 2.50 },
+    ];
 
-    function showAuth() {
-      document.getElementById("auth-overlay")?.classList.remove("hidden");
-    }
-    window.showAuth = window.showAuth || showAuth;
-
-    function hideAuth() {
-      document.getElementById("auth-overlay")?.classList.add("hidden");
-    }
-
-    function escapeHtml(s) {
-      return String(s ?? "")
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-    }
-
-    // =========================
-    // Basic app state + local cart
-    // =========================
+    // ==== State ====
     let currentUser = null;
     let currentProfile = null;
+    let pendingPage = null;
 
-    const CART_KEY = "droveia_cart";
-    function loadCart() {
-      try { return JSON.parse(localStorage.getItem(CART_KEY) || "[]"); }
-      catch { return []; }
-    }
-    function saveCart(cart) {
-      localStorage.setItem(CART_KEY, JSON.stringify(cart));
+    // Cart stored locally (simple + reliable)
+    const CART_KEY = "droveia_cart_v1";
+    function loadCart(){ try { return JSON.parse(localStorage.getItem(CART_KEY) || "[]"); } catch { return []; } }
+    function saveCart(c){ localStorage.setItem(CART_KEY, JSON.stringify(c)); }
+
+    // ==== DOM helpers ====
+    const $ = (id) => document.getElementById(id);
+
+    function showToast(msg){
+      const t = $("toast");
+      t.textContent = msg;
+      t.classList.add("show");
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(()=>t.classList.remove("show"), 2400);
     }
 
-    function setCartBadge() {
-      const cart = loadCart();
-      const badge = document.getElementById("cart-badge");
-      if (!badge) return;
-      if (cart.length === 0) {
-        badge.style.display = "none";
-        badge.textContent = "0";
-      } else {
-        badge.style.display = "flex";
-        badge.textContent = String(cart.length);
+    // ==== Navigation (single source of truth) ====
+    function showPage(id){
+      // gated pages
+      if(["cart","orders","account"].includes(id) && !currentUser){
+        pendingPage = id;
+        openAuth("login");
+        showToast("Sign in to continue.");
+        return;
       }
-    }
 
-    // =========================
-    // Firestore profile
-    // users/{uid} = { name, email, building, room, createdAt, updatedAt }
-    // =========================
-    async function getProfile(uid) {
+      document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+      $("page-"+id).classList.add("active");
+
+      document.querySelectorAll(".nav-link").forEach(l=>l.classList.remove("active"));
+      const nl = $("nav-"+id);
+      if(nl) nl.classList.add("active");
+
+      window.scrollTo(0,0);
+
+      if(id==="browse") renderTools();
+      if(id==="cart") renderCart();
+      if(id==="orders") loadOrders();
+      if(id==="account") hydrateAccountUI();
+    }
+    window.showPage = showPage;
+
+    // ==== Auth overlay UI ====
+    function openAuth(tab="login"){
+      $("auth-overlay").classList.remove("hidden");
+      switchAuth(tab);
+    }
+    function closeAuth(){
+      $("auth-overlay").classList.add("hidden");
+    }
+    window.closeAuth = closeAuth;
+
+    function switchAuth(tab){
+      const isLogin = tab==="login";
+      $("tab-login").classList.toggle("active", isLogin);
+      $("tab-signup").classList.toggle("active", !isLogin);
+      $("auth-login").classList.toggle("hidden", !isLogin);
+      $("auth-signup").classList.toggle("hidden", isLogin);
+      $("auth-title").textContent = isLogin ? "Sign in" : "Create account";
+      $("auth-sub").textContent = isLogin ? "Use email/password or Google." : "Make an account in 10 seconds.";
+    }
+    window.switchAuth = switchAuth;
+
+    $("tab-login").addEventListener("click", ()=>switchAuth("login"));
+    $("tab-signup").addEventListener("click", ()=>switchAuth("signup"));
+
+    // nav auth btn behavior is driven by auth state
+    $("nav-auth-btn").addEventListener("click", ()=>{
+      if(currentUser) showPage("account");
+      else openAuth("login");
+    });
+
+    // ==== Firestore model ====
+    // users/{uid}: { name, email, address, createdAt, updatedAt }
+    // users/{uid}/orders/{orderId}: { items, total, status, createdAt }
+    async function upsertUserProfile(uid, data){
+      const ref = doc(db, "users", uid);
+      const snap = await getDoc(ref);
+      const base = snap.exists() ? snap.data() : {};
+      const merged = {
+        ...base,
+        ...data,
+        updatedAt: serverTimestamp(),
+        ...(snap.exists() ? {} : { createdAt: serverTimestamp() })
+      };
+      await setDoc(ref, merged, { merge:true });
+      return merged;
+    }
+    async function loadUserProfile(uid){
       const ref = doc(db, "users", uid);
       const snap = await getDoc(ref);
       return snap.exists() ? snap.data() : null;
     }
 
-    async function upsertProfile(uid, data) {
-      await setDoc(doc(db, "users", uid), {
-        ...data,
-        updatedAt: serverTimestamp()
-      }, { merge: true });
-    }
+    // ==== Auth actions ====
+    window.doSignUp = async function(){
+      try{
+        const name = $("su-name").value.trim();
+        const email = $("su-email").value.trim();
+        const pass = $("su-pass").value;
 
-    function requireAuth() {
-      if (currentUser) return true;
-      toast("Sign in first.");
-      showAuth();
-      return false;
-    }
-
-    // =========================
-    // AUTH: match your existing button handlers
-    // (your HTML calls these names)
-    // =========================
-    window.switchAuth = function (mode) {
-      // You already have tabs + panels (#auth-login, #auth-signup).
-      // This just toggles them.
-      const loginTab = document.querySelectorAll(".auth-tab")[0];
-      const signupTab = document.querySelectorAll(".auth-tab")[1];
-      const loginPanel = document.getElementById("auth-login");
-      const signupPanel = document.getElementById("auth-signup");
-
-      const isLogin = (mode === "login");
-      loginTab?.classList.toggle("active", isLogin);
-      signupTab?.classList.toggle("active", !isLogin);
-      loginPanel?.classList.toggle("hidden", !isLogin);
-      signupPanel?.classList.toggle("hidden", isLogin);
-    };
-
-    window.doSignUp = async function () {
-      try {
-        const first = document.getElementById("su-first")?.value?.trim() || "";
-        const last = document.getElementById("su-last")?.value?.trim() || "";
-        const email = document.getElementById("su-email")?.value?.trim() || "";
-        const building = document.getElementById("su-building")?.value?.trim() || "";
-        const room = document.getElementById("su-room")?.value?.trim() || "";
-        const pass = document.getElementById("su-pass")?.value || "";
-
-        if (!email) return toast("Enter an email.");
-        if (!pass || pass.length < 8) return toast("Password must be 8+ chars.");
-        // If you want .edu-only, uncomment:
-        // if (!email.endsWith(".edu")) return toast("Must be a .edu email.");
+        if(!name) return showToast("Add your name.");
+        if(!email) return showToast("Add your email.");
+        if(pass.length < 8) return showToast("Password must be 8+ chars.");
 
         const cred = await createUserWithEmailAndPassword(auth, email, pass);
-        const name = (first + " " + last).trim() || "User";
-
         await updateProfile(cred.user, { displayName: name });
+        await upsertUserProfile(cred.user.uid, { name, email: cred.user.email, address: "" });
 
-        await setDoc(doc(db, "users", cred.user.uid), {
-          name,
-          email,
-          building,
-          room,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp()
-        }, { merge: true });
+        showToast("✓ Account created");
+        closeAuth();
 
-        toast("Account created.");
-        hideAuth();
-      } catch (e) {
+        // go where they intended
+        if(pendingPage){ const go=pendingPage; pendingPage=null; showPage(go); }
+        else showPage("browse");
+      }catch(e){
         console.error(e);
-        toast((e?.message || "Sign up failed").replace("Firebase: ", ""));
+        showToast(e.message.replace("Firebase: ",""));
       }
     };
 
-    window.doSignIn = async function () {
-      try {
-        const email = document.getElementById("si-email")?.value?.trim() || "";
-        const pass = document.getElementById("si-pass")?.value || "";
-        if (!email || !pass) return toast("Enter email + password.");
+    window.doSignIn = async function(){
+      try{
+        const email = $("si-email").value.trim();
+        const pass = $("si-pass").value;
+        if(!email||!pass) return showToast("Fill in email + password.");
 
         await signInWithEmailAndPassword(auth, email, pass);
-        toast("Signed in.");
-        hideAuth();
-      } catch (e) {
+        showToast("✓ Welcome back");
+        closeAuth();
+
+        if(pendingPage){ const go=pendingPage; pendingPage=null; showPage(go); }
+      }catch(e){
         console.error(e);
-        toast((e?.message || "Sign in failed").replace("Firebase: ", ""));
+        showToast(e.message.replace("Firebase: ",""));
       }
     };
 
-    window.doGoogleSignIn = async function () {
-      try {
-        const res = await signInWithPopup(auth, provider);
+    window.doGoogleSignIn = async function(){
+      try{
+        const res = await signInWithPopup(auth, googleProvider);
         const u = res.user;
 
-        await setDoc(doc(db, "users", u.uid), {
+        await upsertUserProfile(u.uid, {
           name: u.displayName || "User",
           email: u.email || "",
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp()
-        }, { merge: true });
+        });
 
-        toast("Signed in with Google.");
-        hideAuth();
-      } catch (e) {
+        showToast("✓ Signed in with Google");
+        closeAuth();
+
+        if(pendingPage){ const go=pendingPage; pendingPage=null; showPage(go); }
+      }catch(e){
         console.error(e);
-        toast((e?.message || "Google sign in failed").replace("Firebase: ", ""));
+        if(e.code !== "auth/popup-closed-by-user") showToast(e.message.replace("Firebase: ",""));
       }
     };
 
-    window.doForgotPassword = async function () {
-      try {
-        const email = document.getElementById("si-email")?.value?.trim() || "";
-        if (!email) return toast("Type your email first.");
+    window.doForgotPassword = async function(){
+      try{
+        const email = $("si-email").value.trim();
+        if(!email) return showToast("Enter your email first.");
         await sendPasswordResetEmail(auth, email);
-        toast("Password reset email sent.");
-      } catch (e) {
+        showToast("✓ Reset email sent");
+      }catch(e){
         console.error(e);
-        toast((e?.message || "Reset failed").replace("Firebase: ", ""));
+        showToast(e.message.replace("Firebase: ",""));
       }
     };
 
-    // Optional: logout handler if you add a sign out button in Account
-    window.doSignOut = async function () {
+    window.doSignOut = async function(){
       await signOut(auth);
-      toast("Signed out.");
+      showToast("Signed out");
+      showPage("home");
     };
 
-    // =========================
-    // Orders in Firestore:
-    // users/{uid}/orders/{orderId}
-    // =========================
-    async function createOrderFromCart() {
-      const cart = loadCart();
-      if (cart.length === 0) return toast("Cart is empty.");
+    onAuthStateChanged(auth, async (user)=>{
+      currentUser = user || null;
+      currentProfile = null;
 
-      // Your cart items likely store tool ids + hours.
-      // If your existing code stores a different shape, tell me and I’ll match it.
-      // We'll store whatever is in cart + a computed total if present.
-      const order = {
-        items: cart,
-        status: "in_flight",
-        createdAt: serverTimestamp(),
-        // helpful profile info
-        building: currentProfile?.building || "",
-        room: currentProfile?.room || ""
-      };
-
-      await addDoc(collection(db, "users", currentUser.uid, "orders"), order);
-      saveCart([]);
-      setCartBadge();
-      toast("Order placed. Drone dispatched.");
-    }
-
-    async function loadOrdersIntoUI() {
-      // You already have #past-orders-list and an "active order" demo section.
-      const list = document.getElementById("past-orders-list");
-      if (!list) return;
-
-      if (!currentUser) {
-        list.innerHTML = `<div class="past-order"><div style="flex:1;color:var(--muted)">Sign in to view orders.</div></div>`;
+      if(!user){
+        $("nav-auth-btn").textContent = "Sign In";
+        $("signout-btn").style.display = "none";
+        $("acct-sub").textContent = "Sign in to manage your delivery info.";
+        updateCartBadge();
         return;
       }
 
+      $("nav-auth-btn").textContent = (user.displayName || "Account").split(" ")[0];
+      $("signout-btn").style.display = "inline-flex";
+      $("acct-sub").textContent = "Update your delivery info and contact support.";
+
+      currentProfile = await loadUserProfile(user.uid);
+      if(!currentProfile){
+        currentProfile = await upsertUserProfile(user.uid, {
+          name: user.displayName || "User",
+          email: user.email || "",
+          address: ""
+        });
+      }
+
+      // hydrate account fields if on account page
+      hydrateAccountUI();
+      updateCartBadge();
+    });
+
+    // ==== Browse / cart ====
+    function renderTools(){
+      const grid = $("tools-grid");
+      grid.innerHTML = TOOLS.map(t=>`
+        <div class="card tool-card" onclick="addToCart(${t.id})">
+          <div class="row" style="margin-bottom:8px">
+            <div class="tool-name">${t.name}</div>
+            <div class="pill">$${t.pph.toFixed(2)}/hr</div>
+          </div>
+          <div class="tool-desc">${t.desc}</div>
+          <div class="row">
+            <button class="btn-primary" onclick="event.stopPropagation();addToCart(${t.id})">Add</button>
+            <button class="btn-secondary" onclick="event.stopPropagation();showPage('cart')">Cart</button>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function addToCart(toolId){
+      const cart = loadCart();
+      const existing = cart.find(x=>x.toolId===toolId);
+      if(existing) existing.hours = Math.min(24, (existing.hours||1) + 1);
+      else cart.push({ toolId, hours: 2 });
+      saveCart(cart);
+      updateCartBadge();
+      showToast("Added to cart");
+    }
+    window.addToCart = addToCart;
+
+    function updateCartBadge(){
+      const cart = loadCart();
+      const badge = $("cart-badge");
+      if(cart.length){
+        badge.style.display = "flex";
+        badge.textContent = String(cart.length);
+      }else{
+        badge.style.display = "none";
+        badge.textContent = "0";
+      }
+    }
+
+    function renderCart(){
+      const cart = loadCart();
+      const itemsEl = $("cart-items");
+      const emptyEl = $("cart-empty");
+
+      if(!cart.length){
+        emptyEl.style.display = "block";
+        itemsEl.innerHTML = "";
+        $("sum-total").textContent = "$0.00";
+        $("sum-total2").textContent = "$0.00";
+        updateCartBadge();
+        return;
+      }
+      emptyEl.style.display = "none";
+
+      let total = 0;
+      itemsEl.innerHTML = cart.map((c, idx)=>{
+        const t = TOOLS.find(x=>x.id===c.toolId);
+        const hours = Math.max(1, Number(c.hours||1));
+        const line = (t.pph * hours);
+        total += line;
+
+        return `
+          <div class="past-order" style="margin-bottom:10px">
+            <div style="flex:1">
+              <div style="font-weight:900">${t.name}</div>
+              <div class="muted tiny">$${t.pph.toFixed(2)}/hr</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <input class="form-input" style="width:86px;padding:10px 10px" type="number" min="1" max="24" value="${hours}"
+                     onchange="setHours(${idx}, this.value)"/>
+              <div style="width:86px;text-align:right;font-weight:900">$${line.toFixed(2)}</div>
+            </div>
+            <button class="nav-btn-ghost" style="padding:8px 12px" onclick="removeCart(${idx})">Remove</button>
+          </div>
+        `;
+      }).join("");
+
+      $("sum-total").textContent = "$" + total.toFixed(2);
+      $("sum-total2").textContent = "$" + total.toFixed(2);
+      updateCartBadge();
+    }
+    window.setHours = function(idx, val){
+      const cart = loadCart();
+      if(!cart[idx]) return;
+      cart[idx].hours = Math.max(1, Math.min(24, Number(val||1)));
+      saveCart(cart);
+      renderCart();
+    };
+    window.removeCart = function(idx){
+      const cart = loadCart();
+      cart.splice(idx, 1);
+      saveCart(cart);
+      renderCart();
+      updateCartBadge();
+    };
+
+    // ==== Checkout + orders ====
+    window.checkout = async function(){
+      if(!currentUser){
+        pendingPage = "cart";
+        openAuth("login");
+        showToast("Sign in to request delivery.");
+        return;
+      }
+      const cart = loadCart();
+      if(!cart.length) return showToast("Cart is empty.");
+
+      const items = cart.map(c=>{
+        const t = TOOLS.find(x=>x.id===c.toolId);
+        return { toolId: t.id, name: t.name, pph: t.pph, hours: Number(c.hours||1) };
+      });
+      const total = items.reduce((s,i)=>s + i.pph*i.hours, 0);
+
+      await addDoc(collection(db, "users", currentUser.uid, "orders"), {
+        items,
+        total,
+        status: "delivered",
+        createdAt: serverTimestamp()
+      });
+
+      saveCart([]);
+      updateCartBadge();
+      showToast("✓ Order placed! Drone dispatched");
+      showPage("orders");
+      loadOrders();
+    };
+
+    window.loadOrders = async function(){
+      if(!currentUser){
+        $("past-orders-list").innerHTML = `<div class="muted tiny" style="padding:14px">Sign in to view orders.</div>`;
+        return;
+      }
       const qy = query(
         collection(db, "users", currentUser.uid, "orders"),
         orderBy("createdAt", "desc")
       );
-
       const snap = await getDocs(qy);
 
-      if (snap.empty) {
-        list.innerHTML = `<div class="past-order"><div style="flex:1;color:var(--muted)">No orders yet.</div></div>`;
+      if(snap.empty){
+        $("past-orders-list").innerHTML = `<div class="muted tiny" style="padding:14px;text-align:center">No past orders yet — place your first rental!</div>`;
         return;
       }
 
-      list.innerHTML = snap.docs.map(d => {
+      $("past-orders-list").innerHTML = snap.docs.map(d=>{
         const o = d.data();
-        const status = String(o.status || "processing").toUpperCase();
-        const total = (o.total != null) ? Number(o.total).toFixed(2) : null;
+        const name = (o.items?.[0]?.name || "Order");
+        const more = (o.items?.length>1) ? ` +${o.items.length-1} more` : "";
+        const total = (o.total!=null) ? `$${Number(o.total).toFixed(2)}` : "—";
         return `
-          <div class="past-order">
-            <div style="flex:1;min-width:220px">
-              <div style="font-weight:700">Order #${escapeHtml(d.id.slice(0,6))}…</div>
-              <div style="font-size:12px;color:var(--muted);margin-top:3px">
-                ${escapeHtml(status)}${(o.building||o.room) ? ` · ${escapeHtml((o.building||"") + (o.room?(" "+o.room):""))}` : ``}
-              </div>
+          <div class="past-order" style="margin-bottom:10px">
+            <div style="flex:1">
+              <div style="font-weight:900">${name}${more}</div>
+              <div class="muted tiny">#${d.id.slice(0,8).toUpperCase()} · ${total}</div>
             </div>
-            ${total ? `<div style="font-weight:700">$${total}</div>` : `<div class="delivered-badge">${escapeHtml(status)}</div>`}
+            <div class="delivered-badge">Delivered</div>
           </div>
         `;
       }).join("");
-    }
-
-    // =========================
-    // Hook into YOUR existing flow
-    // =========================
-    // If your existing "Checkout" button calls a function, we expose one:
-    window.checkout = async function () {
-      if (!requireAuth()) return;
-      try {
-        await createOrderFromCart();
-        // after order, go to orders page if you want:
-        window.showPage?.("orders");
-        await loadOrdersIntoUI();
-      } catch (e) {
-        console.error(e);
-        toast((e?.message || "Checkout failed").replace("Firebase: ", ""));
-      }
     };
 
-    // If your code calls showPage('orders'), we can refresh orders when that page is shown.
-    // If you already have showPage implemented, this wraps it without breaking UI.
-    const originalShowPage = window.showPage;
-    if (typeof originalShowPage === "function") {
-      window.showPage = function (page) {
-        originalShowPage(page);
-        if (page === "orders") loadOrdersIntoUI();
-        if (page === "cart") setCartBadge();
-      };
+    // ==== Account ====
+    function hydrateAccountUI(){
+      if(!currentUser) return;
+      if(!currentProfile) return;
+
+      const name = currentProfile.name || currentUser.displayName || "";
+      const address = currentProfile.address || "";
+
+      $("profile-name").value = name;
+      $("profile-address").value = address;
     }
 
-    // =========================
-    // Auth state sync -> update your navbar/account UI
-    // =========================
-    onAuthStateChanged(auth, async (user) => {
-      currentUser = user || null;
-      currentProfile = null;
-
-      const authBtn = document.getElementById("nav-auth-btn");
-      if (!user) {
-        if (authBtn) authBtn.textContent = "Sign In";
-        setCartBadge();
+    window.saveProfile = async function(){
+      if(!currentUser){
+        pendingPage = "account";
+        openAuth("login");
+        showToast("Sign in to save profile.");
         return;
       }
+      const name = $("profile-name").value.trim() || (currentUser.displayName || "User");
+      const address = $("profile-address").value.trim();
 
-      currentProfile = await getProfile(user.uid);
+      currentProfile = await upsertUserProfile(currentUser.uid, {
+        name,
+        email: currentUser.email || "",
+        address
+      });
 
-      // If profile doc missing (Google sign-in edge case), create it
-      if (!currentProfile) {
-        currentProfile = {
-          name: user.displayName || "User",
-          email: user.email || ""
-        };
-        await upsertProfile(user.uid, currentProfile);
+      showToast("✓ Profile saved");
+    };
+
+    window.sendSupport = async function(){
+      if(!currentUser){
+        pendingPage = "account";
+        openAuth("login");
+        showToast("Sign in to contact support.");
+        return;
       }
+      const msg = $("support-msg").value.trim();
+      if(!msg) return showToast("Write a message first.");
 
-      // Update nav button label
-      const firstName = (currentProfile.name || user.displayName || "Account").split(" ")[0];
-      if (authBtn) authBtn.textContent = firstName;
+      await addDoc(collection(db, "supportTickets"), {
+        uid: currentUser.uid,
+        email: currentUser.email || "",
+        message: msg,
+        createdAt: serverTimestamp()
+      });
 
-      // Update account page header text if present
-      const pn = document.getElementById("prof-name");
-      const pe = document.getElementById("prof-email");
-      if (pn) pn.textContent = currentProfile.name || "Account";
-      if (pe) pe.textContent = currentProfile.email || user.email || "";
+      $("support-msg").value = "";
+      $("support-sent").classList.remove("hidden");
+      setTimeout(()=>$("support-sent").classList.add("hidden"), 2400);
+      showToast("✓ Sent");
+    };
 
-      // Avatar initial
-      const avatar = document.querySelector(".avatar-inner");
-      if (avatar) avatar.textContent = (firstName[0] || "U").toUpperCase();
-
-      setCartBadge();
-    });
-
-    // Boot
-    setCartBadge();
+    // ==== boot ====
+    renderTools();
+    updateCartBadge();
 </script>
 
 </body>

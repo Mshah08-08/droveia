@@ -1275,11 +1275,20 @@
           deliveredAt: null
         });
         // Increment lifetime stats
-        await updateDoc(profileRef(currentUser.uid), {
-          totalRentals: increment(items.length),
-          totalSaved:   increment(saved),
-          totalHours:   increment(totalHrs)
-        });
+// Increment lifetime stats (create profile doc if missing)
+        await setDoc(
+          profileRef(currentUser.uid),
+          {
+            totalRentals: increment(items.length),
+            totalSaved:   increment(saved),
+            totalHours:   increment(totalHrs),
+            // make sure these exist too (helps new users + keeps address consistent)
+            building: userProfile?.building || "—",
+            room:     userProfile?.room || "—",
+            updatedAt: serverTimestamp()
+          },
+          { merge: true }
+        );
         userProfile = {
           ...userProfile,
           totalRentals: (userProfile?.totalRentals||0) + items.length,

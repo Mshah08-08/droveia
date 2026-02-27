@@ -1,10 +1,846 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-  <title>Droveia</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DropKit — Web</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+            rel="stylesheet"
+    />
+    <style>
+        :root{
+          --bg:#0b0b10;
+          --panel:#11111a;
+          --panel2:#0f0f16;
+          --card:#141421;
+          --stroke:rgba(255,255,255,.08);
+          --text:#f4f4fb;
+          --muted:rgba(244,244,251,.72);
+          --muted2:rgba(244,244,251,.55);
+          --brand1:#6d5efc;
+          --brand2:#32d3ff;
+          --good:#46f2a3;
+          --warn:#ffcc66;
+        }
+
+        *{ box-sizing:border-box; }
+        html,body{ height:100%; }
+        body{
+          margin:0;
+          font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+          background:
+            radial-gradient(900px 450px at 20% -10%, rgba(109,94,252,.25), transparent 60%),
+            radial-gradient(900px 450px at 90% 0%, rgba(50,211,255,.18), transparent 55%),
+            var(--bg);
+          color:var(--text);
+        }
+
+        a{ color:inherit; text-decoration:none; }
+        button,input{ font-family:inherit; }
+        .wrap{ min-height:100vh; }
+
+        /* Auth */
+        .auth{ min-height:100vh; display:grid; place-items:center; padding:24px; }
+        .authCard{
+          width:min(980px, 100%);
+          display:grid;
+          grid-template-columns: 1.1fr .9fr;
+          background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+          border:1px solid var(--stroke);
+          border-radius:22px;
+          overflow:hidden;
+          box-shadow:0 30px 90px rgba(0,0,0,.55);
+        }
+        @media (max-width:900px){ .authCard{ grid-template-columns:1fr; } }
+        .authLeft{ padding:34px; background:rgba(10,10,16,.65); }
+        .authRight{ padding:34px; background:rgba(17,17,26,.9); }
+
+        .brand{ display:flex; align-items:center; gap:10px; font-weight:900; letter-spacing:-.4px; }
+        .brandDot{
+          width:11px; height:11px; border-radius:50%;
+          background:linear-gradient(135deg,var(--brand1),var(--brand2));
+          box-shadow:0 0 0 4px rgba(109,94,252,.15);
+        }
+        .authTitle{ margin-top:18px; font-size:30px; line-height:1.1; letter-spacing:-.7px; }
+        .authSub{ margin-top:10px; color:var(--muted); font-size:14px; line-height:1.5; max-width:56ch; }
+        .featureRow{ margin-top:18px; display:flex; flex-wrap:wrap; gap:10px; }
+        .chip{
+          display:inline-flex; align-items:center; gap:8px;
+          padding:8px 10px; border:1px solid var(--stroke);
+          border-radius:999px; color:var(--muted); font-size:12px;
+          background:rgba(0,0,0,.20);
+        }
+
+        .panelTitle{ font-weight:900; letter-spacing:-.4px; }
+        .muted{ color:var(--muted); font-size:12px; }
+        .field{ display:flex; flex-direction:column; gap:8px; margin-top:14px; }
+        .label{ font-size:12px; color:var(--muted2); }
+        .input{
+          height:44px; border-radius:12px; border:1px solid var(--stroke);
+          background:rgba(0,0,0,.18); color:var(--text); padding:0 12px;
+          outline:none;
+        }
+        .input:focus{ border-color:rgba(109,94,252,.55); box-shadow:0 0 0 4px rgba(109,94,252,.18); }
+        .row{ display:flex; gap:10px; align-items:center; justify-content:space-between; }
+        .btn{
+          height:44px; border-radius:12px; border:0; cursor:pointer;
+          padding:0 14px; font-weight:900; letter-spacing:-.2px;
+          background:linear-gradient(135deg,var(--brand1),var(--brand2));
+          color:#0b0b10;
+        }
+        .btn.secondary{
+          background:rgba(255,255,255,.06);
+          border:1px solid var(--stroke);
+          color:var(--text);
+          font-weight:800;
+        }
+        .btn:active{ transform:translateY(1px); }
+        .linkBtn{ border:0; background:none; color:var(--brand2); cursor:pointer; padding:0; font-weight:900; }
+
+        /* App */
+        .app{ min-height:100vh; display:flex; flex-direction:column; }
+        .topbar{
+          position:sticky; top:0; z-index:50;
+          display:flex; align-items:center; gap:14px;
+          padding:14px 18px;
+          background:rgba(8,8,12,.65);
+          border-bottom:1px solid var(--stroke);
+          backdrop-filter: blur(10px);
+        }
+        .grow{ flex:1; }
+        .search{
+          display:flex; align-items:center; gap:10px;
+          background:rgba(255,255,255,.06);
+          border:1px solid var(--stroke);
+          height:42px; padding:0 12px;
+          border-radius:14px;
+          width:min(560px, 100%);
+        }
+        .search input{ border:0; outline:none; background:transparent; color:var(--text); width:100%; }
+
+        .pillTabs{ display:flex; gap:8px; align-items:center; }
+        .pillBtn{
+          height:34px; padding:0 12px; border-radius:999px; border:1px solid var(--stroke);
+          background:rgba(255,255,255,.05); color:var(--muted);
+          cursor:pointer; font-weight:900; font-size:12px;
+        }
+        .pillBtn.active{
+          color:#0b0b10;
+          border-color:transparent;
+          background:linear-gradient(135deg,var(--brand1),var(--brand2));
+        }
+
+        .iconBtn{
+          height:42px; width:42px; border-radius:14px; border:1px solid var(--stroke);
+          background:rgba(255,255,255,.05); color:var(--text);
+          display:grid; place-items:center; cursor:pointer;
+        }
+        .iconBtn:active{ transform:translateY(1px); }
+
+        .badge{
+          position:absolute; transform: translate(14px,-14px);
+          min-width:18px; height:18px; padding:0 6px;
+          border-radius:999px; background:linear-gradient(135deg,var(--brand1),var(--brand2));
+          color:#0b0b10; font-weight:900; font-size:11px;
+          display:grid; place-items:center;
+        }
+
+        .grid{
+          flex:1;
+          width:min(1280px, 100%);
+          margin:0 auto;
+          padding:18px;
+          display:grid;
+          grid-template-columns: 260px 1fr 340px;
+          gap:14px;
+          align-items:start;
+        }
+        @media (max-width:1100px){
+          .grid{ grid-template-columns: 260px 1fr; }
+          .rightCol{ display:none; }
+          .mobileCartBtn{ display:grid; }
+        }
+        @media (min-width:1101px){ .mobileCartBtn{ display:none; } }
+        @media (max-width:860px){ .grid{ grid-template-columns:1fr; } }
+
+        .panel{
+          background:rgba(255,255,255,.05);
+          border:1px solid var(--stroke);
+          border-radius:18px;
+          overflow:hidden;
+        }
+        .panelHd{
+          padding:14px 14px 10px;
+          border-bottom:1px solid rgba(255,255,255,.06);
+          display:flex; align-items:center; justify-content:space-between;
+          gap:10px;
+        }
+
+        .catList{ padding:12px; display:flex; flex-direction:column; gap:8px; }
+        .catItem{
+          height:40px; border-radius:14px; border:1px solid rgba(255,255,255,.06);
+          background:rgba(0,0,0,.16); color:var(--muted);
+          display:flex; align-items:center; justify-content:space-between;
+          padding:0 12px; cursor:pointer; font-weight:900; font-size:13px;
+        }
+        .catItem.active{
+          color:#0b0b10;
+          background:linear-gradient(135deg,var(--brand1),var(--brand2));
+          border-color:transparent;
+        }
+        .catLeft{ display:flex; align-items:center; gap:10px; }
+
+        .cards{ padding:12px; display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap:10px; }
+        @media (max-width:1200px){ .cards{ grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media (max-width:860px){ .cards{ grid-template-columns: 1fr; } }
+
+        .tool{
+          background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+          border:1px solid rgba(255,255,255,.08);
+          border-radius:16px;
+          padding:14px;
+          cursor:pointer;
+          transition: transform .12s ease, border-color .12s ease;
+        }
+        .tool:hover{ transform: translateY(-1px); border-color:rgba(109,94,252,.35); }
+        .toolTop{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+        .toolName{ font-weight:900; letter-spacing:-.35px; }
+        .toolMeta{ margin-top:6px; color:var(--muted); font-size:12px; line-height:1.4; min-height:34px; }
+        .toolRow{ margin-top:10px; display:flex; align-items:center; justify-content:space-between; gap:10px; }
+        .price{ font-weight:900; letter-spacing:-.2px; }
+        .price small{ color:var(--muted); font-weight:800; }
+        .add{
+          height:36px; padding:0 12px; border-radius:12px; border:0;
+          background:rgba(255,255,255,.08);
+          border:1px solid rgba(255,255,255,.10);
+          color:var(--text); cursor:pointer; font-weight:900; font-size:12px;
+        }
+        .add:hover{ border-color:rgba(50,211,255,.35); }
+        .add:active{ transform: translateY(1px); }
+
+        .stars{ display:inline-flex; align-items:center; gap:2px; color:var(--warn); }
+        .starsText{ color:var(--muted); font-size:12px; margin-left:6px; font-weight:800; }
+
+        .cartBody{ padding:12px; display:flex; flex-direction:column; gap:10px; }
+        .cartItem{
+          display:flex; gap:10px; align-items:flex-start;
+          padding:10px; border-radius:14px;
+          background:rgba(0,0,0,.18); border:1px solid rgba(255,255,255,.06);
+        }
+        .cartName{ font-weight:900; letter-spacing:-.25px; font-size:13px; }
+        .cartSub{ margin-top:4px; color:var(--muted); font-size:12px; }
+        .qtyRow{ margin-top:10px; display:flex; align-items:center; justify-content:space-between; gap:10px; }
+        .qty{
+          display:flex; align-items:center; gap:8px;
+          border:1px solid rgba(255,255,255,.10);
+          background:rgba(255,255,255,.05);
+          border-radius:12px;
+          padding:6px 8px;
+          color:var(--muted);
+          font-weight:900;
+        }
+        .qty input{
+          width:58px; border:0; outline:none; background:transparent; color:var(--text);
+        }
+        .del{ border:0; background:none; color:rgba(255,255,255,.75); cursor:pointer; font-weight:900; }
+        .totals{
+          margin-top:6px; padding:12px;
+          border-top:1px solid rgba(255,255,255,.06);
+          display:flex; flex-direction:column; gap:8px;
+        }
+        .totalLine{ display:flex; align-items:center; justify-content:space-between; color:var(--muted); font-weight:900; }
+        .totalLine strong{ color:var(--text); }
+        .checkout{
+          margin-top:8px;
+          height:44px; border-radius:14px; border:0;
+          background:linear-gradient(135deg,var(--brand1),var(--brand2));
+          color:#0b0b10; cursor:pointer; font-weight:950;
+        }
+        .checkout:disabled{ opacity:.5; cursor:not-allowed; }
+
+        /* Orders */
+        .orders{ padding:12px; display:flex; flex-direction:column; gap:10px; }
+        .order{
+          padding:12px;
+          border-radius:16px;
+          background:rgba(0,0,0,.18);
+          border:1px solid rgba(255,255,255,.06);
+          display:flex; flex-direction:column; gap:10px;
+        }
+        .orderTop{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+        .orderId{ font-weight:950; letter-spacing:-.25px; }
+        .orderMeta{ color:var(--muted); font-size:12px; }
+        .bar{
+          height:8px; border-radius:999px;
+          background:rgba(255,255,255,.08);
+          overflow:hidden;
+          border:1px solid rgba(255,255,255,.08);
+        }
+        .bar > div{
+          height:100%;
+          background:linear-gradient(135deg,var(--brand1),var(--brand2));
+          width:0%;
+        }
+
+        /* Toast */
+        .toast{
+          position:fixed; left:50%; bottom:18px; transform:translateX(-50%);
+          padding:10px 12px;
+          background:rgba(0,0,0,.75);
+          border:1px solid rgba(255,255,255,.12);
+          border-radius:999px;
+          color:var(--text);
+          font-weight:900;
+          z-index:200;
+          backdrop-filter: blur(10px);
+        }
+
+        /* Mobile cart drawer */
+        .drawerBg{ position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:120; }
+        .drawer{
+          position:fixed; left:0; right:0; bottom:0;
+          background:rgba(17,17,26,.98);
+          border-top:1px solid rgba(255,255,255,.12);
+          border-radius:18px 18px 0 0;
+          z-index:130;
+          max-height:82vh;
+          overflow:auto;
+          padding-bottom:18px;
+        }
+    </style>
 </head>
-<body style="font-family:sans-serif;text-align:center;margin-top:100px;">
-  <h1>Droveia</h1>
-  <p>testingsetup LLAMA</p>
+
+<body>
+<div id="root" class="wrap"></div>
+
+<script>
+    // ─────────────────────────────────────────────
+    // Data (mirrors your JSX)
+    // ─────────────────────────────────────────────
+    const TOOLS = [
+      { id:1,  name:"Heat Gun",       category:"Workshop",    pricePerHr:4.50, retail:45,  rating:4.8, reviews:124, desc:"1500W dual-temp · shrink wrap & crafts",   eta:"8 min" },
+      { id:2,  name:"Drill Kit",      category:"Workshop",    pricePerHr:6.00, retail:80,  rating:4.9, reviews:310, desc:"20V cordless · 18-piece bit set included",  eta:"6 min" },
+      { id:3,  name:"Sewing Machine", category:"Crafts",      pricePerHr:5.00, retail:90,  rating:4.7, reviews:87,  desc:"Compact 12-stitch · clothing repairs",      eta:"10 min"},
+      { id:4,  name:"Label Maker",    category:"Office",      pricePerHr:2.00, retail:30,  rating:4.6, reviews:203, desc:"Thermal printer · USB & Bluetooth",         eta:"5 min" },
+      { id:5,  name:"Soldering Iron", category:"Electronics", pricePerHr:3.50, retail:40,  rating:4.8, reviews:156, desc:"60W adjustable station · tips & flux",       eta:"7 min" },
+      { id:6,  name:"Jigsaw",         category:"Workshop",    pricePerHr:7.00, retail:95,  rating:4.9, reviews:98,  desc:"Compact · 5 blades included",                eta:"9 min" },
+      { id:7,  name:"Embroidery Set", category:"Crafts",      pricePerHr:1.50, retail:18,  rating:4.5, reviews:64,  desc:"6-piece bamboo hoops · starter thread",      eta:"4 min" },
+      { id:8,  name:"Laminator",      category:"Office",      pricePerHr:2.50, retail:35,  rating:4.7, reviews:179, desc:"9-inch · 20 pouches · 3-min warmup",         eta:"6 min" },
+      { id:9,  name:"Oscilloscope",   category:"Electronics", pricePerHr:8.00, retail:120, rating:4.9, reviews:41,  desc:"2-channel 50MHz digital",                   eta:"12 min"},
+      { id:10, name:"Hot Glue Gun",   category:"Crafts",      pricePerHr:1.00, retail:15,  rating:4.6, reviews:220, desc:"High-temp · 20 glue sticks",                eta:"5 min" },
+      { id:11, name:"Multimeter",     category:"Electronics", pricePerHr:2.00, retail:28,  rating:4.8, reviews:190, desc:"Auto-ranging digital",                      eta:"6 min" },
+      { id:12, name:"Staple Gun",     category:"Workshop",    pricePerHr:2.50, retail:32,  rating:4.5, reviews:88,  desc:"Heavy-duty · 1000 staples included",         eta:"5 min" },
+    ];
+    const CATS = ["All","Workshop","Crafts","Office","Electronics"];
+    const ORDERS = [
+      { id:"#D-2041", name:"Drill Kit",      status:"In Flight", eta:"3 min",   time:"2:14 PM",   progress:0.70 },
+      { id:"#D-2038", name:"Label Maker",    status:"Delivered", eta:null,      time:"1:05 PM",   progress:1    },
+      { id:"#D-2031", name:"Soldering Iron", status:"Delivered", eta:null,      time:"Yesterday", progress:1    },
+    ];
+
+    // ─────────────────────────────────────────────
+    // State
+    // ─────────────────────────────────────────────
+    const state = {
+      route: "login", // login | signup | app
+      tab: "browse",  // browse | orders
+      cat: "All",
+      search: "",
+      email: "",
+      pass: "",
+      showPass: false,
+      cart: [],
+      hours: {}, // toolId -> hours
+      toast: null,
+      cartOpenMobile: false,
+    };
+
+    const root = document.getElementById("root");
+
+    // ─────────────────────────────────────────────
+    // Utilities
+    // ─────────────────────────────────────────────
+    const esc = (s) =>
+      String(s)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+
+    function setToast(msg){
+      state.toast = msg;
+      render();
+      clearTimeout(setToast._t);
+      setToast._t = setTimeout(() => {
+        state.toast = null;
+        render();
+      }, 900);
+    }
+
+    function getHours(id){ return state.hours[id] ?? 4; }
+
+    function filteredTools(){
+      const q = state.search.trim().toLowerCase();
+      return TOOLS.filter(t =>
+        (state.cat === "All" || t.category === state.cat) &&
+        t.name.toLowerCase().includes(q)
+      );
+    }
+
+    function cartTotal(){
+      return state.cart.reduce((s,c) => s + c.pricePerHr * c.hours, 0);
+    }
+    function savedTotal(){
+      return state.cart.reduce((s,c) => s + (c.retail - c.pricePerHr * c.hours), 0);
+    }
+
+    function addToCart(tool){
+      const h = getHours(tool.id);
+      const ex = state.cart.find(c => c.id === tool.id);
+      if (ex){
+        state.cart = state.cart.map(c => c.id === tool.id ? { ...c, hours: h } : c);
+      } else {
+        state.cart = [...state.cart, { ...tool, hours: h }];
+      }
+      setToast(`${tool.name} added`);
+      render();
+    }
+
+    function removeFromCart(id){
+      state.cart = state.cart.filter(x => x.id !== id);
+      render();
+    }
+
+    function clearCart(){
+      state.cart = [];
+      render();
+    }
+
+    function checkout(){
+      if (!state.cart.length) return;
+      setToast("Checkout queued (demo)");
+      state.cart = [];
+      state.cartOpenMobile = false;
+      render();
+    }
+
+    // ─────────────────────────────────────────────
+    // SVG Icons (inline)
+    // ─────────────────────────────────────────────
+    function catIcon(cat){
+      // returns svg string
+      if (cat==="Workshop") return `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+          <path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/>
+        </svg>`;
+      if (cat==="Crafts") return `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+          <circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/>
+        </svg>`;
+      if (cat==="Office") return `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+          <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
+        </svg>`;
+      if (cat==="Electronics") return `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+        </svg>`;
+      return `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+          <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+        </svg>`;
+    }
+
+    function stars(rating){
+      const full = Math.floor(rating);
+      let out = `<span class="stars" title="${rating.toFixed(1)}">`;
+      for (let i=1;i<=5;i++){
+        out += `
+          <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+              fill="${i<=full ? "currentColor" : "none"}"
+              stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" />
+          </svg>`;
+      }
+      out += `<span class="starsText">${rating.toFixed(1)}</span></span>`;
+      return out;
+    }
+
+    // ─────────────────────────────────────────────
+    // Views
+    // ─────────────────────────────────────────────
+    function viewAuth(isSignup){
+      return `
+        <div class="auth">
+          <div class="authCard">
+            <div class="authLeft">
+              <div class="brand"><span class="brandDot"></span><span>DropKit</span></div>
+              <div class="authTitle">Tools on-demand. Delivered by drone.</div>
+              <div class="authSub">
+                Rent the stuff you only need sometimes: heat guns, soldering irons, drills, label makers—delivered fast, returned easy.
+              </div>
+              <div class="featureRow">
+                <span class="chip">${catIcon("Workshop")} Fast ETA</span>
+                <span class="chip">${catIcon("Electronics")} Pay hourly</span>
+                <span class="chip">${catIcon("Office")} Easy returns</span>
+              </div>
+            </div>
+
+            <div class="authRight">
+              <div class="panelTitle" style="font-size:18px;">
+                ${isSignup ? "Create your account" : "Welcome back"}
+              </div>
+              <div class="muted" style="margin-top:6px;">
+                ${isSignup ? "Sign up in seconds (demo UI)." : "Log in to browse and order (demo UI)."}
+              </div>
+
+              <div class="field">
+                <div class="label">Email</div>
+                <input class="input" id="email" value="${esc(state.email)}" placeholder="you@school.edu" />
+              </div>
+
+              <div class="field">
+                <div class="row">
+                  <div class="label">Password</div>
+                  <button class="linkBtn" id="togglePass" type="button">${state.showPass ? "Hide" : "Show"}</button>
+                </div>
+                <input class="input" id="pass" ${state.showPass ? `type="text"` : `type="password"`} value="${esc(state.pass)}" placeholder="••••••••" />
+              </div>
+
+              <div class="row" style="margin-top:18px;">
+                <button class="btn" id="goApp" type="button">${isSignup ? "Sign up" : "Log in"}</button>
+                <button class="btn secondary" id="switchAuth" type="button">${isSignup ? "I have an account" : "Create account"}</button>
+              </div>
+
+              <div class="muted" style="margin-top:14px;">
+                (This is UI only right now—wire it to your backend/auth whenever you’re ready.)
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function viewCartPanel(){
+      const items = state.cart.length ? state.cart.map(c => {
+        const h = state.hours[c.id] ?? c.hours ?? 4;
+        const line = (c.pricePerHr * h).toFixed(2);
+        return `
+          <div class="cartItem">
+            <div class="grow">
+              <div class="cartName">${esc(c.name)}</div>
+              <div class="cartSub">$${c.pricePerHr.toFixed(2)}/hr · ETA ${esc(c.eta)}</div>
+
+              <div class="qtyRow">
+                <div class="qty" title="Rental hours">
+                  Hours:
+                  <input type="number" min="1" max="24" data-hours="${c.id}" value="${h}" />
+                </div>
+                <button class="del" data-remove="${c.id}" type="button">Remove</button>
+              </div>
+            </div>
+            <div style="font-weight:950;color:rgba(244,244,251,.92)">$${line}</div>
+          </div>
+        `;
+      }).join("") : `<div class="muted" style="padding:12px;">Add a tool to start a delivery.</div>`;
+
+      return `
+        <div class="cartBody">${items}</div>
+        <div class="totals">
+          <div class="totalLine"><span>Subtotal</span><strong>$${cartTotal().toFixed(2)}</strong></div>
+          <div class="totalLine"><span>Est. saved vs retail</span><strong>$${Math.max(0, savedTotal()).toFixed(2)}</strong></div>
+          <button class="checkout" id="checkout" ${state.cart.length ? "" : "disabled"} type="button">Checkout (demo)</button>
+        </div>
+      `;
+    }
+
+    function viewApp(){
+      const tools = filteredTools();
+      const browseBody = `
+        <div class="cards">
+          ${tools.map(t => `
+            <div class="tool" data-add="${t.id}" title="Click to add to cart">
+              <div class="toolTop">
+                <div>
+                  <div class="toolName">${esc(t.name)}</div>
+                  <div class="muted" style="margin-top:6px;display:flex;align-items:center;gap:8px;">
+                    <span style="display:inline-flex;align-items:center;gap:6px;">
+                      <span style="color:rgba(244,244,251,.72)">${catIcon(t.category)}</span>
+                      ${esc(t.category)}
+                    </span>
+                    <span>•</span>
+                    <span>ETA ${esc(t.eta)}</span>
+                  </div>
+                </div>
+                ${stars(t.rating)}
+              </div>
+
+              <div class="toolMeta">${esc(t.desc)}</div>
+
+              <div class="toolRow">
+                <div class="price">$${t.pricePerHr.toFixed(2)} <small>/ hr</small></div>
+                <button class="add" data-add-btn="${t.id}" type="button">Add</button>
+              </div>
+
+              <div class="muted" style="margin-top:8px;">${t.reviews} reviews · retail ≈ $${t.retail}</div>
+            </div>
+          `).join("")}
+        </div>
+      `;
+
+      const ordersBody = `
+        <div class="orders">
+          ${ORDERS.map(o => `
+            <div class="order">
+              <div class="orderTop">
+                <div>
+                  <div class="orderId">${esc(o.id)} · ${esc(o.name)}</div>
+                  <div class="orderMeta">${esc(o.status)} ${o.eta ? `· ETA ${esc(o.eta)}` : ""} · ${esc(o.time)}</div>
+                </div>
+                <div class="pillBtn" style="cursor:default;">${esc(o.status)}</div>
+              </div>
+              <div class="bar" aria-label="Delivery progress">
+                <div style="width:${Math.round(o.progress*100)}%"></div>
+              </div>
+            </div>
+          `).join("")}
+        </div>
+      `;
+
+      const midBody = state.tab === "browse" ? browseBody : ordersBody;
+
+      const leftCats = CATS.map(c => {
+        const count = (c === "All") ? TOOLS.length : TOOLS.filter(t => t.category === c).length;
+        return `
+          <div class="catItem ${state.cat === c ? "active":""}" data-cat="${esc(c)}">
+            <div class="catLeft">
+              <span style="${state.cat===c ? "color:#0b0b10":"color:rgba(244,244,251,.72)"}">${catIcon(c==="All"?"All":c)}</span>
+              <span>${esc(c)}</span>
+            </div>
+            <span style="opacity:.9;font-size:12px;">${count}</span>
+          </div>
+        `;
+      }).join("");
+
+      const cartBadge = state.cart.length ? `<span class="badge">${state.cart.length}</span>` : "";
+
+      const mobileDrawer = state.cartOpenMobile ? `
+        <div class="drawerBg" data-close-drawer="1"></div>
+        <div class="drawer">
+          <div class="panelHd">
+            <div>
+              <div class="panelTitle">Cart</div>
+              <div class="muted">${state.cart.length ? `${state.cart.length} item${state.cart.length===1?"":"s"}` : "Empty"}</div>
+            </div>
+            <button class="pillBtn" data-close-drawer="1" type="button">Close</button>
+          </div>
+          ${viewCartPanel()}
+        </div>
+      ` : "";
+
+      return `
+        <div class="app">
+          <div class="topbar">
+            <div class="brand" id="brandHome" role="button" tabindex="0">
+              <span class="brandDot"></span><span>DropKit</span>
+            </div>
+
+            <div class="grow" style="display:flex;justify-content:center;">
+              <div class="search" title="Search tools">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(244,244,251,.7)" stroke-width="2" stroke-linecap="round">
+                  <circle cx="11" cy="11" r="7"></circle>
+                  <path d="M20 20l-3.5-3.5"></path>
+                </svg>
+                <input id="search" value="${esc(state.search)}" placeholder="Search tools…" />
+              </div>
+            </div>
+
+            <div class="pillTabs">
+              <button class="pillBtn ${state.tab==="browse"?"active":""}" data-tab="browse" type="button">Browse</button>
+              <button class="pillBtn ${state.tab==="orders"?"active":""}" data-tab="orders" type="button">Orders</button>
+            </div>
+
+            <button class="iconBtn mobileCartBtn" data-open-cart="1" type="button" title="Cart">
+              <div style="position:relative;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                  <path d="M6 6h15l-2 9H7L6 6z"></path>
+                  <path d="M6 6l-2-2"></path>
+                  <circle cx="9" cy="20" r="1"></circle>
+                  <circle cx="18" cy="20" r="1"></circle>
+                </svg>
+                ${cartBadge}
+              </div>
+            </button>
+
+            <button class="iconBtn" id="logout" type="button" title="Log out">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M10 17l5-5-5-5"></path>
+                <path d="M15 12H3"></path>
+                <path d="M21 21V3"></path>
+              </svg>
+            </button>
+          </div>
+
+          <div class="grid">
+            <div class="panel">
+              <div class="panelHd">
+                <div>
+                  <div class="panelTitle">Categories</div>
+                  <div class="muted">Filter tools</div>
+                </div>
+                <button class="pillBtn" data-cat="All" type="button">Reset</button>
+              </div>
+              <div class="catList">${leftCats}</div>
+            </div>
+
+            <div class="panel">
+              <div class="panelHd">
+                <div>
+                  <div class="panelTitle">${state.tab==="browse" ? "Browse tools" : "Your orders"}</div>
+                  <div class="muted">
+                    ${state.tab==="browse"
+                      ? `${tools.length} result${tools.length===1?"":"s"} · typical ETA 4–12 min`
+                      : "Live delivery + history"}
+                  </div>
+                </div>
+                ${state.tab==="browse"
+                  ? `<div class="muted" style="display:flex;align-items:center;gap:8px;">
+                       <span style="display:inline-flex;align-items:center;gap:6px;">
+                         <span style="width:8px;height:8px;border-radius:999px;background:var(--good);"></span>
+                         Available now
+                       </span>
+                     </div>`
+                  : ""}
+              </div>
+              ${midBody}
+            </div>
+
+            <div class="rightCol panel">
+              <div class="panelHd">
+                <div>
+                  <div class="panelTitle">Cart</div>
+                  <div class="muted">${state.cart.length ? `${state.cart.length} item${state.cart.length===1?"":"s"}` : "Empty"}</div>
+                </div>
+                <button class="pillBtn" id="clearCart" ${state.cart.length ? "" : "disabled"} type="button">Clear</button>
+              </div>
+              ${viewCartPanel()}
+            </div>
+          </div>
+
+          ${mobileDrawer}
+          ${state.toast ? `<div class="toast">${esc(state.toast)}</div>` : ""}
+        </div>
+      `;
+    }
+
+    // ─────────────────────────────────────────────
+    // Render + Events
+    // ─────────────────────────────────────────────
+    function render(){
+      if (state.route === "login") root.innerHTML = viewAuth(false);
+      else if (state.route === "signup") root.innerHTML = viewAuth(true);
+      else root.innerHTML = viewApp();
+      bindEvents();
+    }
+
+    function bindEvents(){
+      // Auth bindings
+      const emailEl = document.getElementById("email");
+      const passEl = document.getElementById("pass");
+      if (emailEl) emailEl.addEventListener("input", (e) => { state.email = e.target.value; });
+      if (passEl) passEl.addEventListener("input", (e) => { state.pass = e.target.value; });
+
+      const togglePass = document.getElementById("togglePass");
+      if (togglePass) togglePass.addEventListener("click", () => { state.showPass = !state.showPass; render(); });
+
+      const goApp = document.getElementById("goApp");
+      if (goApp) goApp.addEventListener("click", () => { state.route = "app"; render(); });
+
+      const switchAuth = document.getElementById("switchAuth");
+      if (switchAuth) switchAuth.addEventListener("click", () => {
+        state.route = (state.route === "signup") ? "login" : "signup";
+        render();
+      });
+
+      // App bindings
+      const logout = document.getElementById("logout");
+      if (logout) logout.addEventListener("click", () => { state.route = "login"; render(); });
+
+      const search = document.getElementById("search");
+      if (search) search.addEventListener("input", (e) => { state.search = e.target.value; render(); });
+
+      const clearBtn = document.getElementById("clearCart");
+      if (clearBtn) clearBtn.addEventListener("click", () => { clearCart(); });
+
+      const checkoutBtn = document.getElementById("checkout");
+      if (checkoutBtn) checkoutBtn.addEventListener("click", () => { checkout(); });
+
+      // Delegated clicks
+      root.querySelectorAll("[data-tab]").forEach(btn => {
+        btn.addEventListener("click", () => { state.tab = btn.getAttribute("data-tab"); render(); });
+      });
+
+      root.querySelectorAll("[data-cat]").forEach(el => {
+        el.addEventListener("click", () => {
+          state.cat = el.getAttribute("data-cat");
+          render();
+        });
+      });
+
+      root.querySelectorAll("[data-add]").forEach(card => {
+        card.addEventListener("click", () => {
+          const id = Number(card.getAttribute("data-add"));
+          const tool = TOOLS.find(t => t.id === id);
+          if (tool) addToCart(tool);
+        });
+      });
+
+      root.querySelectorAll("[data-add-btn]").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const id = Number(btn.getAttribute("data-add-btn"));
+          const tool = TOOLS.find(t => t.id === id);
+          if (tool) addToCart(tool);
+        });
+      });
+
+      root.querySelectorAll("[data-remove]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const id = Number(btn.getAttribute("data-remove"));
+          removeFromCart(id);
+        });
+      });
+
+      root.querySelectorAll("[data-hours]").forEach(inp => {
+        inp.addEventListener("input", () => {
+          const id = Number(inp.getAttribute("data-hours"));
+          let v = Number(inp.value || 1);
+          if (!Number.isFinite(v)) v = 1;
+          v = Math.max(1, Math.min(24, v));
+          state.hours[id] = v;
+          // keep cart hours synced too
+          state.cart = state.cart.map(c => c.id === id ? { ...c, hours: v } : c);
+          render();
+        });
+      });
+
+      const openCart = root.querySelector("[data-open-cart]");
+      if (openCart) openCart.addEventListener("click", () => { state.cartOpenMobile = true; render(); });
+
+      root.querySelectorAll("[data-close-drawer]").forEach(el => {
+        el.addEventListener("click", () => { state.cartOpenMobile = false; render(); });
+      });
+
+      const brandHome = document.getElementById("brandHome");
+      if (brandHome) brandHome.addEventListener("click", () => { state.tab = "browse"; render(); });
+    }
+
+    render();
+</script>
 </body>
 </html>

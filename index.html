@@ -1,1121 +1,1337 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>DropKit — Tools Delivered</title>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
-
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Droveia — Tools Delivered by Drone</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
     <style>
+        /* ── Reset & Base ─────────────────────────────────────── */
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
         :root{
-          --bg:#0b0b10;
-          --panel:#11111a;
-          --panel2:#0f0f16;
-          --card:#141421;
-          --stroke:rgba(255,255,255,.10);
-          --text:#f4f4fb;
-          --muted:rgba(244,244,251,.72);
-          --muted2:rgba(244,244,251,.55);
-          --brand1:#6d5efc;
-          --brand2:#32d3ff;
-          --good:#46f2a3;
-          --warn:#ffcc66;
-          --bad:#ff6b6b;
+          --blue:#1a6ef0;
+          --blue-dim:rgba(26,110,240,0.12);
+          --blue-mid:rgba(26,110,240,0.25);
+          --bg:#09080f;
+          --bg2:#0e0d18;
+          --surface:rgba(255,255,255,0.05);
+          --surface2:rgba(255,255,255,0.08);
+          --border:rgba(255,255,255,0.08);
+          --border2:rgba(255,255,255,0.12);
+          --text:#f0f3ff;
+          --muted:#7a7a9a;
+          --dim:#3a3a50;
+          --green:#22c55e;
+          --green-dim:rgba(34,197,94,0.12);
+          --radius:14px;
+          --font:'Sora',sans-serif;
+        }
+        html{scroll-behavior:smooth}
+        body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+        ::-webkit-scrollbar{width:4px}
+        ::-webkit-scrollbar-track{background:transparent}
+        ::-webkit-scrollbar-thumb{background:var(--dim);border-radius:4px}
+        a{text-decoration:none;color:inherit}
+        button{font-family:var(--font);cursor:pointer}
+        input,textarea,select{font-family:var(--font)}
 
-          --shadow: 0 30px 90px rgba(0,0,0,.55);
-          --radius-xl: 22px;
-          --radius-lg: 18px;
-          --radius-md: 14px;
-          --radius-sm: 12px;
-        }
+        /* ── Animations ──────────────────────────────────────── */
+        @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+        @keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.25}}
+        @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+        @keyframes droneFloat{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-8px) rotate(1deg)}}
+        @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+        @keyframes scaleIn{from{opacity:0;transform:scale(0.96)}to{opacity:1;transform:scale(1)}}
 
-        *{ box-sizing:border-box; }
-        html,body{ height:100%; }
-        body{
-          margin:0;
-          font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-          background:
-            radial-gradient(900px 450px at 20% -10%, rgba(109,94,252,.25), transparent 60%),
-            radial-gradient(900px 450px at 90% 0%, rgba(50,211,255,.18), transparent 55%),
-            var(--bg);
-          color:var(--text);
-        }
-        a{ color:inherit; text-decoration:none; }
-        button,input,textarea{ font-family:inherit; }
-        .container{ width:min(1220px, 100%); margin:0 auto; padding:0 16px; }
+        .fade-up{animation:fadeUp 0.5s ease both}
+        .fade-in{animation:fadeIn 0.3s ease both}
 
-        /* Header */
-        .header{
-          position:sticky; top:0; z-index:60;
-          background:rgba(8,8,12,.72);
-          border-bottom:1px solid var(--stroke);
-          backdrop-filter: blur(10px);
-        }
-        .headerTop{
-          display:flex; align-items:center; gap:12px;
-          padding:12px 0;
-        }
+        /* ── Utility ─────────────────────────────────────────── */
+        .hidden{display:none!important}
+        .page{display:none}
+        .page.active{display:block}
 
-        .logo{
-          display:flex; align-items:center; gap:10px;
-          font-weight:900; letter-spacing:-.5px;
-          cursor:pointer;
-          user-select:none;
-        }
-        .logoDot{
-          width:11px; height:11px; border-radius:50%;
-          background:linear-gradient(135deg,var(--brand1),var(--brand2));
-          box-shadow:0 0 0 4px rgba(109,94,252,.16);
+        /* ── Noise overlay ───────────────────────────────────── */
+        body::before{
+          content:'';position:fixed;inset:0;
+          background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+          pointer-events:none;z-index:0;opacity:0.4;
         }
 
-        .searchBar{
-          flex:1;
-          display:flex; align-items:center; gap:10px;
-          background:rgba(255,255,255,.06);
-          border:1px solid var(--stroke);
-          height:44px; padding:0 12px;
-          border-radius:16px;
-          min-width: 220px;
+        /* ── Glow blobs ──────────────────────────────────────── */
+        .glow-blob{position:fixed;border-radius:50%;filter:blur(120px);pointer-events:none;z-index:0}
+        .glow-1{width:500px;height:500px;background:rgba(26,110,240,0.08);top:-100px;right:-100px}
+        .glow-2{width:400px;height:400px;background:rgba(26,110,240,0.05);bottom:100px;left:-100px}
+
+        /* ── Nav ─────────────────────────────────────────────── */
+        nav{
+          position:fixed;top:0;left:0;right:0;z-index:100;
+          display:flex;align-items:center;justify-content:space-between;
+          padding:0 40px;height:64px;
+          background:rgba(9,8,15,0.85);
+          backdrop-filter:blur(20px);
+          border-bottom:1px solid var(--border);
         }
-        .searchBar input{
-          width:100%;
-          border:0; outline:none;
-          background:transparent; color:var(--text);
-          font-size:14px;
+        .nav-logo{display:flex;align-items:center;gap:10px}
+        .nav-logo-mark{
+          width:32px;height:32px;border-radius:9px;
+          background:linear-gradient(135deg,#1558d0,var(--blue));
+          display:flex;align-items:center;justify-content:center;
+          box-shadow:0 4px 16px rgba(26,110,240,0.35);
+        }
+        .nav-wordmark{font-size:17px;font-weight:700;letter-spacing:-0.3px;color:var(--text)}
+        .nav-links{display:flex;align-items:center;gap:4px}
+        .nav-link{
+          padding:7px 14px;border-radius:8px;font-size:14px;font-weight:500;color:var(--muted);
+          background:none;border:none;cursor:pointer;transition:all 0.15s;
+        }
+        .nav-link:hover,.nav-link.active{color:var(--text);background:var(--surface)}
+        .nav-right{display:flex;align-items:center;gap:10px}
+        .nav-live{
+          display:flex;align-items:center;gap:6px;
+          border:1px solid rgba(26,110,240,0.4);border-radius:20px;padding:5px 12px;
+          background:var(--blue-dim);font-size:11px;font-weight:600;color:#93c5fd;letter-spacing:0.05em;
+        }
+        .live-dot{width:6px;height:6px;border-radius:50%;background:var(--blue);animation:pulse 1.8s ease-in-out infinite}
+        .nav-btn-ghost{
+          padding:8px 16px;border-radius:9px;font-size:14px;font-weight:500;
+          background:none;border:1px solid var(--border2);color:var(--muted);transition:all 0.15s;
+        }
+        .nav-btn-ghost:hover{color:var(--text);border-color:rgba(255,255,255,0.2)}
+        .nav-btn-solid{
+          padding:8px 18px;border-radius:9px;font-size:14px;font-weight:600;
+          background:var(--blue);border:none;color:#fff;transition:all 0.15s;
+        }
+        .nav-btn-solid:hover{filter:brightness(1.1);transform:translateY(-1px)}
+        .cart-btn{position:relative}
+        .cart-badge{
+          position:absolute;top:-4px;right:-4px;width:16px;height:16px;border-radius:50%;
+          background:var(--blue);color:#fff;font-size:9px;font-weight:700;
+          display:flex;align-items:center;justify-content:center;display:none;
         }
 
-        .headerActions{ display:flex; gap:10px; align-items:center; }
-        .pill{
-          height:36px;
-          border-radius:999px;
-          border:1px solid var(--stroke);
-          background:rgba(255,255,255,.06);
-          color:var(--text);
-          padding:0 12px;
-          cursor:pointer;
-          font-weight:800;
-          font-size:12px;
-          display:inline-flex; align-items:center; gap:8px;
-          user-select:none;
-        }
-        .pill.primary{
-          border:0;
-          background:linear-gradient(135deg,var(--brand1),var(--brand2));
-          color:#0b0b10;
-        }
-        .iconBtn{
-          height:44px; width:44px;
-          border-radius:16px;
-          border:1px solid var(--stroke);
-          background:rgba(255,255,255,.06);
-          color:var(--text);
-          display:grid; place-items:center;
-          cursor:pointer;
-          position:relative;
-        }
-        .badge{
-          position:absolute;
-          right:-6px; top:-6px;
-          min-width:18px; height:18px; padding:0 6px;
-          border-radius:999px;
-          background:linear-gradient(135deg,var(--brand1),var(--brand2));
-          color:#0b0b10;
-          font-weight:900;
-          font-size:11px;
-          display:grid; place-items:center;
-          border:1px solid rgba(0,0,0,.25);
-        }
-
-        .navRow{
-          display:flex; gap:8px; align-items:center;
-          padding:10px 0 12px;
-          overflow:auto;
-          scrollbar-width: none;
-        }
-        .navRow::-webkit-scrollbar{ display:none; }
-
-        .navLink{
-          height:34px;
-          padding:0 12px;
-          border-radius:999px;
-          border:1px solid var(--stroke);
-          background:rgba(255,255,255,.05);
-          color:var(--muted);
-          cursor:pointer;
-          font-weight:900;
-          font-size:12px;
-          display:inline-flex; align-items:center; gap:8px;
-          white-space:nowrap;
-        }
-        .navLink.active{
-          color:#0b0b10;
-          border-color:transparent;
-          background:linear-gradient(135deg,var(--brand1),var(--brand2));
-        }
-
-        /* Layout */
-        .main{ padding:18px 0 36px; }
-        .grid{
-          display:grid;
-          grid-template-columns: 280px 1fr 360px;
-          gap:14px;
-          align-items:start;
-        }
-        @media (max-width:1100px){
-          .grid{ grid-template-columns: 280px 1fr; }
-          .rightCol{ display:none; }
-          .mobileCartBtn{ display:grid !important; }
-        }
-        @media (min-width:1101px){ .mobileCartBtn{ display:none !important; } }
-        @media (max-width:860px){
-          .grid{ grid-template-columns:1fr; }
-          .leftCol{ order:2; }
-        }
-
-        /* Panels/cards */
-        .panel{
-          background:rgba(255,255,255,.05);
-          border:1px solid var(--stroke);
-          border-radius:var(--radius-lg);
-          overflow:hidden;
-        }
-        .panelHd{
-          padding:14px 14px 10px;
-          border-bottom:1px solid rgba(255,255,255,.06);
-          display:flex; align-items:center; justify-content:space-between;
-          gap:10px;
-        }
-        .panelTitle{ font-weight:950; letter-spacing:-.35px; }
-        .muted{ color:var(--muted); font-size:12px; }
-
-        /* Home sections */
+        /* ── Hero ─────────────────────────────────────────────── */
+        #page-home{padding-top:64px}
         .hero{
-          background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
-          border:1px solid rgba(255,255,255,.10);
-          border-radius:var(--radius-xl);
-          padding:18px;
-          box-shadow: var(--shadow);
+          position:relative;min-height:92vh;
+          display:flex;align-items:center;justify-content:center;
+          text-align:center;overflow:hidden;
+          background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(26,110,240,0.12) 0%,transparent 70%);
+          padding:80px 24px 60px;
         }
-        .heroGrid{
-          display:grid;
-          grid-template-columns: 1.15fr .85fr;
-          gap:14px;
-          align-items:stretch;
+        .hero-content{position:relative;z-index:1;max-width:760px}
+        .hero-badge{
+          display:inline-flex;align-items:center;gap:8px;
+          background:var(--blue-dim);border:1px solid var(--blue-mid);
+          border-radius:20px;padding:6px 14px;font-size:12px;font-weight:600;
+          color:#93c5fd;letter-spacing:0.04em;margin-bottom:28px;
+          animation:fadeUp 0.5s ease both;
         }
-        @media (max-width:860px){ .heroGrid{ grid-template-columns:1fr; } }
+        .hero-badge svg{flex-shrink:0}
+        .hero-h1{
+          font-size:clamp(42px,7vw,76px);font-weight:800;line-height:1.05;
+          letter-spacing:-2px;color:var(--text);margin-bottom:22px;
+          animation:fadeUp 0.5s 0.08s ease both;
+        }
+        .hero-h1 span{
+          background:linear-gradient(135deg,var(--blue),#60a5fa,#93c5fd);
+          -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+        }
+        .hero-sub{
+          font-size:18px;font-weight:300;color:var(--muted);line-height:1.7;
+          max-width:520px;margin:0 auto 36px;
+          animation:fadeUp 0.5s 0.14s ease both;
+        }
+        .hero-ctas{
+          display:flex;gap:12px;justify-content:center;flex-wrap:wrap;
+          animation:fadeUp 0.5s 0.2s ease both;margin-bottom:56px;
+        }
+        .btn-primary{
+          display:inline-flex;align-items:center;gap:8px;
+          padding:14px 28px;border-radius:12px;font-size:15px;font-weight:600;
+          background:var(--blue);border:none;color:#fff;
+          transition:all 0.18s;box-shadow:0 8px 32px rgba(26,110,240,0.3);
+        }
+        .btn-primary:hover{filter:brightness(1.1);transform:translateY(-2px);box-shadow:0 12px 40px rgba(26,110,240,0.4)}
+        .btn-secondary{
+          display:inline-flex;align-items:center;gap:8px;
+          padding:14px 28px;border-radius:12px;font-size:15px;font-weight:500;
+          background:var(--surface2);border:1px solid var(--border2);color:var(--text);
+          transition:all 0.18s;
+        }
+        .btn-secondary:hover{background:rgba(255,255,255,0.1);transform:translateY(-2px)}
+        .hero-stats{
+          display:flex;gap:0;justify-content:center;
+          background:var(--surface);border:1px solid var(--border);border-radius:16px;
+          padding:0;overflow:hidden;max-width:540px;margin:0 auto;
+          animation:fadeUp 0.5s 0.26s ease both;
+        }
+        .hero-stat{flex:1;padding:20px 24px;text-align:center;border-right:1px solid var(--border)}
+        .hero-stat:last-child{border-right:none}
+        .hero-stat-num{font-size:26px;font-weight:800;color:var(--text);letter-spacing:-0.5px}
+        .hero-stat-label{font-size:11px;color:var(--muted);margin-top:3px;font-weight:400}
 
-        .heroTitle{
-          font-size:34px;
-          line-height:1.05;
-          letter-spacing:-1px;
-          font-weight:950;
-          margin:0;
-        }
-        .heroSub{
-          margin-top:10px;
-          color:var(--muted);
-          line-height:1.5;
-          max-width:60ch;
-          font-size:14px;
-        }
-        .heroCtas{ margin-top:14px; display:flex; gap:10px; flex-wrap:wrap; }
-
-        .miniCards{
-          display:grid;
-          grid-template-columns:1fr;
-          gap:10px;
-        }
-        .mini{
-          padding:12px;
-          border-radius:var(--radius-lg);
-          background:rgba(0,0,0,.16);
-          border:1px solid rgba(255,255,255,.08);
-        }
-        .miniTop{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
-        .miniTitle{ font-weight:950; letter-spacing:-.25px; }
-        .miniText{ margin-top:6px; color:var(--muted); font-size:12px; line-height:1.45; }
-
-        /* Categories left */
-        .catList{ padding:12px; display:flex; flex-direction:column; gap:8px; }
-        .catItem{
-          height:42px; border-radius:16px;
-          border:1px solid rgba(255,255,255,.08);
-          background:rgba(0,0,0,.16);
-          color:var(--muted);
-          display:flex; align-items:center; justify-content:space-between;
-          padding:0 12px;
-          cursor:pointer;
-          font-weight:950;
-          font-size:13px;
-        }
-        .catItem.active{
-          color:#0b0b10;
-          background:linear-gradient(135deg,var(--brand1),var(--brand2));
-          border-color:transparent;
-        }
-        .catLeft{ display:flex; align-items:center; gap:10px; }
-
-        /* Tool cards */
-        .cards{ padding:12px; display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap:10px; }
-        @media (max-width:1200px){ .cards{ grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-        @media (max-width:860px){ .cards{ grid-template-columns: 1fr; } }
-
-        .tool{
-          background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
-          border:1px solid rgba(255,255,255,.10);
-          border-radius:16px;
-          padding:14px;
-          cursor:pointer;
-          transition: transform .12s ease, border-color .12s ease;
-        }
-        .tool:hover{ transform: translateY(-1px); border-color:rgba(109,94,252,.38); }
-        .toolTop{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
-        .toolName{ font-weight:950; letter-spacing:-.35px; }
-        .toolMeta{ margin-top:6px; color:var(--muted); font-size:12px; line-height:1.4; min-height:34px; }
-        .toolRow{ margin-top:10px; display:flex; align-items:center; justify-content:space-between; gap:10px; }
-        .price{ font-weight:950; letter-spacing:-.2px; }
-        .price small{ color:var(--muted); font-weight:800; }
-        .add{
-          height:36px; padding:0 12px;
-          border-radius:12px;
-          border:1px solid rgba(255,255,255,.12);
-          background:rgba(255,255,255,.08);
-          color:var(--text);
-          cursor:pointer;
-          font-weight:950;
-          font-size:12px;
-        }
-        .add:hover{ border-color:rgba(50,211,255,.38); }
-
-        .stars{ display:inline-flex; align-items:center; gap:2px; color:var(--warn); }
-        .starsText{ color:var(--muted); font-size:12px; margin-left:6px; font-weight:800; }
-
-        /* Cart */
-        .cartBody{ padding:12px; display:flex; flex-direction:column; gap:10px; }
-        .cartItem{
-          display:flex; gap:10px; align-items:flex-start;
-          padding:10px;
-          border-radius:16px;
-          background:rgba(0,0,0,.18);
-          border:1px solid rgba(255,255,255,.08);
-        }
-        .cartName{ font-weight:950; letter-spacing:-.25px; font-size:13px; }
-        .cartSub{ margin-top:4px; color:var(--muted); font-size:12px; }
-        .qtyRow{ margin-top:10px; display:flex; align-items:center; justify-content:space-between; gap:10px; }
-        .qty{
-          display:flex; align-items:center; gap:8px;
-          border:1px solid rgba(255,255,255,.12);
-          background:rgba(255,255,255,.06);
-          border-radius:12px;
-          padding:6px 8px;
-          color:var(--muted);
-          font-weight:900;
-        }
-        .qty input{
-          width:58px;
-          border:0; outline:none;
-          background:transparent;
-          color:var(--text);
-        }
-        .del{ border:0; background:none; color:rgba(255,255,255,.75); cursor:pointer; font-weight:950; }
-        .totals{
-          margin-top:6px;
-          padding:12px;
-          border-top:1px solid rgba(255,255,255,.06);
-          display:flex; flex-direction:column; gap:8px;
-        }
-        .totalLine{ display:flex; align-items:center; justify-content:space-between; color:var(--muted); font-weight:900; }
-        .totalLine strong{ color:var(--text); }
-        .checkout{
-          margin-top:8px;
-          height:44px;
-          border-radius:16px;
-          border:0;
-          background:linear-gradient(135deg,var(--brand1),var(--brand2));
-          color:#0b0b10;
-          cursor:pointer;
-          font-weight:950;
-        }
-        .checkout:disabled{ opacity:.5; cursor:not-allowed; }
-
-        /* Orders */
-        .orders{ padding:12px; display:flex; flex-direction:column; gap:10px; }
-        .order{
-          padding:12px;
-          border-radius:16px;
-          background:rgba(0,0,0,.18);
-          border:1px solid rgba(255,255,255,.08);
-          display:flex; flex-direction:column; gap:10px;
-        }
-        .orderTop{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
-        .orderId{ font-weight:950; letter-spacing:-.25px; }
-        .orderMeta{ color:var(--muted); font-size:12px; }
-        .bar{
-          height:8px; border-radius:999px;
-          background:rgba(255,255,255,.08);
-          overflow:hidden;
-          border:1px solid rgba(255,255,255,.10);
-        }
-        .bar > div{
-          height:100%;
-          background:linear-gradient(135deg,var(--brand1),var(--brand2));
-          width:0%;
+        /* Drone illustration */
+        .drone-illustration{
+          position:absolute;right:6%;top:50%;transform:translateY(-50%);
+          opacity:0.12;animation:droneFloat 4s ease-in-out infinite;
         }
 
-        /* Help / Contact */
-        .helpWrap{ padding:12px; }
-        .helpGrid{
-          display:grid;
-          grid-template-columns: 1fr 1fr;
-          gap:10px;
-        }
-        @media (max-width:860px){ .helpGrid{ grid-template-columns:1fr; } }
+        /* ── Section wrapper ─────────────────────────────────── */
+        .section{padding:80px 40px;max-width:1200px;margin:0 auto;position:relative;z-index:1}
+        .section-label{font-size:11px;font-weight:600;color:var(--blue);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px}
+        .section-title{font-size:clamp(28px,4vw,42px);font-weight:800;letter-spacing:-1px;color:var(--text);margin-bottom:12px;line-height:1.15}
+        .section-sub{font-size:16px;color:var(--muted);font-weight:300;line-height:1.7;max-width:520px}
 
-        .card{
-          padding:14px;
-          border-radius:18px;
-          background:rgba(0,0,0,.18);
-          border:1px solid rgba(255,255,255,.08);
+        /* ── How it works ────────────────────────────────────── */
+        #page-home .how{
+          background:linear-gradient(180deg,transparent,rgba(26,110,240,0.04) 50%,transparent);
+          border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+          padding:80px 40px;
         }
-        .card h3{ margin:0; font-size:14px; letter-spacing:-.2px; }
-        .card p{ margin:8px 0 0; color:var(--muted); font-size:13px; line-height:1.5; }
+        .steps-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-top:48px}
+        .step-card{
+          background:var(--surface);border:1px solid var(--border);border-radius:16px;
+          padding:24px;position:relative;transition:border-color 0.2s,transform 0.2s;
+        }
+        .step-card:hover{border-color:rgba(26,110,240,0.3);transform:translateY(-3px)}
+        .step-num{
+          font-size:11px;font-weight:700;color:var(--blue);letter-spacing:0.08em;
+          margin-bottom:14px;
+        }
+        .step-icon{
+          width:44px;height:44px;border-radius:12px;
+          background:linear-gradient(135deg,rgba(26,110,240,0.2),rgba(26,110,240,0.06));
+          display:flex;align-items:center;justify-content:center;margin-bottom:14px;
+        }
+        .step-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px}
+        .step-desc{font-size:13px;color:var(--muted);line-height:1.6;font-weight:300}
 
-        .form{ display:flex; flex-direction:column; gap:10px; margin-top:10px; }
-        .field{ display:flex; flex-direction:column; gap:6px; }
-        .label{ font-size:12px; color:var(--muted2); font-weight:800; }
-        .input, textarea{
-          border-radius:14px;
-          border:1px solid rgba(255,255,255,.12);
-          background:rgba(255,255,255,.06);
-          color:var(--text);
-          outline:none;
-          padding:10px 12px;
+        /* ── Tools catalog ───────────────────────────────────── */
+        #page-browse{padding-top:80px}
+        .browse-header{
+          padding:40px 40px 0;max-width:1200px;margin:0 auto;
         }
-        textarea{ min-height:120px; resize:vertical; }
-        .input:focus, textarea:focus{
-          border-color:rgba(109,94,252,.55);
-          box-shadow:0 0 0 4px rgba(109,94,252,.18);
+        .browse-toolbar{
+          display:flex;align-items:center;gap:12px;margin-top:24px;flex-wrap:wrap;
         }
-        .smallNote{ color:var(--muted); font-size:12px; margin-top:8px; }
+        .search-wrap{
+          position:relative;flex:1;min-width:240px;max-width:400px;
+        }
+        .search-wrap input{
+          width:100%;padding:11px 16px 11px 42px;
+          background:var(--surface);border:1px solid var(--border);
+          border-radius:10px;color:var(--text);font-size:14px;outline:none;
+          transition:border-color 0.15s;
+        }
+        .search-wrap input:focus{border-color:rgba(26,110,240,0.5)}
+        .search-wrap input::placeholder{color:var(--dim)}
+        .search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);opacity:0.4;pointer-events:none}
+        .cat-pills{display:flex;gap:7px;flex-wrap:wrap}
+        .cat-pill{
+          padding:8px 16px;border-radius:20px;font-size:13px;font-weight:500;
+          background:var(--surface);border:1px solid var(--border);color:var(--muted);
+          cursor:pointer;transition:all 0.13s;white-space:nowrap;
+        }
+        .cat-pill:hover{color:var(--text);border-color:var(--border2)}
+        .cat-pill.active{background:var(--blue);border-color:var(--blue);color:#fff}
+        .tools-grid{
+          display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+          gap:16px;padding:28px 40px 60px;max-width:1200px;margin:0 auto;
+        }
+        .tool-card{
+          background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+          padding:20px;cursor:pointer;transition:all 0.18s;position:relative;overflow:hidden;
+        }
+        .tool-card::before{
+          content:'';position:absolute;inset:0;
+          background:linear-gradient(135deg,rgba(26,110,240,0.06),transparent);
+          opacity:0;transition:opacity 0.2s;
+        }
+        .tool-card:hover{border-color:rgba(26,110,240,0.3);transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,0.3)}
+        .tool-card:hover::before{opacity:1}
+        .tool-card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
+        .tool-icon{
+          width:44px;height:44px;border-radius:11px;
+          background:linear-gradient(135deg,rgba(26,110,240,0.2),rgba(26,110,240,0.06));
+          display:flex;align-items:center;justify-content:center;
+        }
+        .save-badge{
+          background:var(--green-dim);color:var(--green);
+          font-size:10px;font-weight:700;border-radius:6px;padding:3px 7px;
+        }
+        .tool-name{font-size:15px;font-weight:700;color:var(--text);margin-bottom:3px;line-height:1.3}
+        .tool-desc{font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.5;font-weight:300}
+        .tool-stars{display:flex;align-items:center;gap:6px;margin-bottom:14px}
+        .stars{display:flex;gap:2px}
+        .star{font-size:11px;color:#f5a623}
+        .star.empty{color:var(--dim)}
+        .rating-text{font-size:11px;color:var(--muted)}
+        .tool-pricing{display:flex;align-items:flex-end;justify-content:space-between}
+        .price-from{font-size:11px;color:var(--muted);margin-bottom:1px;font-weight:300}
+        .price-val{font-size:20px;font-weight:800;color:var(--text);letter-spacing:-0.5px;line-height:1}
+        .price-unit{font-size:11px;color:var(--muted);font-weight:300}
+        .retail-cross{font-size:11px;color:var(--dim);text-decoration:line-through;margin-top:2px}
+        .add-btn{
+          width:36px;height:36px;border-radius:10px;background:var(--blue);border:none;
+          display:flex;align-items:center;justify-content:center;
+          transition:all 0.15s;flex-shrink:0;
+        }
+        .add-btn:hover{filter:brightness(1.15);transform:scale(1.08)}
+        .tool-eta{font-size:11px;color:var(--dim);margin-top:10px;display:flex;align-items:center;gap:5px}
 
-        /* Footer */
-        footer{
-          margin-top:22px;
-          border-top:1px solid rgba(255,255,255,.08);
-          padding:20px 0 30px;
-          color:var(--muted);
-          font-size:12px;
+        /* ── Modal ────────────────────────────────────────────── */
+        .modal-overlay{
+          position:fixed;inset:0;z-index:200;
+          background:rgba(0,0,0,0.7);backdrop-filter:blur(12px);
+          display:flex;align-items:center;justify-content:center;padding:24px;
+          animation:fadeIn 0.2s ease;
         }
-        .footerGrid{
-          display:grid;
-          grid-template-columns: 1.2fr 1fr 1fr 1fr;
-          gap:12px;
+        .modal-box{
+          background:#13121e;border:1px solid var(--border2);border-radius:20px;
+          padding:32px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;
+          animation:scaleIn 0.22s ease;position:relative;
         }
-        @media (max-width:860px){ .footerGrid{ grid-template-columns:1fr 1fr; } }
-        .fTitle{ color:var(--text); font-weight:900; margin-bottom:10px; }
-        .fLink{ display:block; padding:6px 0; color:var(--muted); }
-        .fLink:hover{ color:var(--text); }
+        .modal-close{
+          position:absolute;top:16px;right:16px;
+          width:32px;height:32px;border-radius:8px;
+          background:var(--surface);border:1px solid var(--border);
+          color:var(--muted);font-size:18px;display:flex;align-items:center;justify-content:center;
+          cursor:pointer;transition:all 0.13s;
+        }
+        .modal-close:hover{color:var(--text);background:var(--surface2)}
+        .modal-icon{
+          width:60px;height:60px;border-radius:15px;
+          background:linear-gradient(135deg,rgba(26,110,240,0.25),rgba(26,110,240,0.08));
+          display:flex;align-items:center;justify-content:center;margin-bottom:16px;
+        }
+        .modal-title{font-size:24px;font-weight:800;letter-spacing:-0.5px;margin-bottom:4px}
+        .modal-meta{font-size:13px;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:10px}
+        .modal-desc{font-size:14px;color:var(--muted);line-height:1.7;font-weight:300;margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border)}
+        .dur-label{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:0.05em;margin-bottom:10px}
+        .dur-presets{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:14px}
+        .dur-preset{
+          padding:10px 0;border-radius:9px;font-size:13px;font-weight:600;
+          background:var(--surface);border:1px solid var(--border);color:var(--muted);
+          cursor:pointer;transition:all 0.13s;
+        }
+        .dur-preset:hover{color:var(--text);border-color:var(--border2)}
+        .dur-preset.active{background:var(--blue);border-color:var(--blue);color:#fff}
+        .dur-stepper{
+          display:flex;align-items:center;gap:12px;
+          background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 14px;
+          margin-bottom:20px;
+        }
+        .step-btn{
+          width:36px;height:36px;border-radius:9px;border:none;
+          font-size:20px;display:flex;align-items:center;justify-content:center;
+          cursor:pointer;transition:all 0.13s;
+        }
+        .step-minus{background:var(--surface2);color:var(--text)}
+        .step-minus:hover{background:rgba(255,255,255,0.12)}
+        .step-plus{background:var(--blue);color:#fff}
+        .step-plus:hover{filter:brightness(1.1)}
+        .step-display{flex:1;text-align:center}
+        .step-val{font-size:28px;font-weight:800;color:var(--text);line-height:1}
+        .step-unit{font-size:12px;color:var(--muted);margin-top:3px}
+        .modal-summary{
+          display:flex;justify-content:space-between;align-items:center;
+          padding:16px 0;border-top:1px solid var(--border);margin-top:4px;margin-bottom:16px;
+        }
+        .modal-total-label{font-size:12px;color:var(--muted);margin-bottom:4px}
+        .modal-total-val{font-size:32px;font-weight:800;letter-spacing:-1px;color:var(--text)}
+        .modal-total-cross{font-size:12px;color:var(--dim)}
+        .modal-right{text-align:right;font-size:13px;color:var(--muted);line-height:2}
+        .modal-add-btn{
+          width:100%;padding:15px;border-radius:12px;background:var(--blue);border:none;
+          color:#fff;font-size:16px;font-weight:600;cursor:pointer;transition:all 0.15s;
+          font-family:var(--font);
+        }
+        .modal-add-btn:hover{filter:brightness(1.1);transform:translateY(-1px);box-shadow:0 8px 28px rgba(26,110,240,0.35)}
 
-        /* Toast + Drawer */
+        /* ── Cart page ───────────────────────────────────────── */
+        #page-cart{padding-top:80px}
+        .cart-layout{
+          display:grid;grid-template-columns:1fr 360px;gap:24px;
+          padding:40px;max-width:1200px;margin:0 auto;align-items:start;
+        }
+        .cart-items{display:flex;flex-direction:column;gap:12px}
+        .cart-item{
+          display:flex;align-items:center;gap:16px;
+          background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;
+          transition:border-color 0.15s;
+        }
+        .cart-item:hover{border-color:var(--border2)}
+        .cart-item-icon{
+          width:48px;height:48px;border-radius:12px;flex-shrink:0;
+          background:linear-gradient(135deg,rgba(26,110,240,0.2),rgba(26,110,240,0.06));
+          display:flex;align-items:center;justify-content:center;
+        }
+        .cart-item-info{flex:1;min-width:0}
+        .cart-item-name{font-size:15px;font-weight:600;color:var(--text);margin-bottom:3px}
+        .cart-item-sub{font-size:13px;color:var(--muted)}
+        .cart-item-price{font-size:16px;font-weight:700;color:var(--text);white-space:nowrap}
+        .cart-item-remove{font-size:12px;color:var(--dim);background:none;border:none;cursor:pointer;margin-top:3px;display:block;transition:color 0.13s}
+        .cart-item-remove:hover{color:var(--muted)}
+        .cart-empty{
+          padding:80px 24px;text-align:center;
+          background:var(--surface);border:1px solid var(--border);border-radius:16px;
+        }
+        .cart-empty-icon{
+          width:72px;height:72px;border-radius:20px;margin:0 auto 20px;
+          background:linear-gradient(135deg,rgba(26,110,240,0.18),rgba(26,110,240,0.04));
+          display:flex;align-items:center;justify-content:center;
+        }
+        .cart-empty h3{font-size:20px;font-weight:700;margin-bottom:8px}
+        .cart-empty p{font-size:14px;color:var(--muted);line-height:1.7;font-weight:300;margin-bottom:24px}
+        .order-summary{
+          background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;
+          position:sticky;top:84px;
+        }
+        .summary-title{font-size:16px;font-weight:700;margin-bottom:18px}
+        .summary-row{display:flex;justify-content:space-between;font-size:14px;margin-bottom:12px}
+        .summary-row span:first-child{color:var(--muted);font-weight:300}
+        .summary-row span:last-child{font-weight:500}
+        .summary-green{color:var(--green)!important;font-weight:600!important}
+        .summary-divider{height:1px;background:var(--border);margin:14px 0}
+        .summary-total{display:flex;justify-content:space-between;font-size:18px;font-weight:800;margin-bottom:18px}
+        .checkout-btn{
+          width:100%;padding:15px;border-radius:12px;background:var(--blue);border:none;
+          color:#fff;font-size:16px;font-weight:600;cursor:pointer;transition:all 0.15s;
+          font-family:var(--font);
+        }
+        .checkout-btn:hover{filter:brightness(1.1);transform:translateY(-1px);box-shadow:0 8px 28px rgba(26,110,240,0.35)}
+        .checkout-note{font-size:11px;color:var(--dim);text-align:center;margin-top:10px}
+        .address-pill{
+          display:flex;align-items:center;gap:8px;
+          background:var(--blue-dim);border:1px solid rgba(26,110,240,0.2);
+          border-radius:10px;padding:10px 14px;margin-bottom:18px;font-size:13px;color:#93c5fd;
+        }
+
+        /* ── Orders page ─────────────────────────────────────── */
+        #page-orders{padding-top:80px}
+        .orders-layout{padding:40px;max-width:900px;margin:0 auto}
+        .active-order{
+          background:linear-gradient(135deg,rgba(26,110,240,0.14) 0%,rgba(26,110,240,0.04) 100%);
+          border:1px solid rgba(26,110,240,0.3);border-radius:18px;padding:24px;margin-bottom:32px;
+        }
+        .order-status-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px}
+        .order-badge{display:flex;align-items:center;gap:7px;margin-bottom:6px}
+        .order-badge-dot{width:6px;height:6px;border-radius:50%;background:var(--blue);animation:pulse 1.4s infinite}
+        .order-badge-text{font-size:11px;font-weight:700;color:var(--blue);letter-spacing:0.06em}
+        .order-name{font-size:20px;font-weight:700;margin-bottom:4px}
+        .order-id{font-size:13px;color:var(--muted)}
+        .drone-anim{animation:droneFloat 2.5s ease-in-out infinite;text-align:center}
+        .progress-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:8px}
+        .progress-bar{height:5px;background:rgba(255,255,255,0.07);border-radius:10px;overflow:hidden}
+        .progress-fill{height:100%;border-radius:10px;background:linear-gradient(90deg,#1558d0,var(--blue))}
+        .past-orders{display:flex;flex-direction:column;gap:10px}
+        .past-order{
+          display:flex;align-items:center;gap:16px;
+          background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px 20px;
+          transition:border-color 0.15s;
+        }
+        .past-order:hover{border-color:var(--border2)}
+        .delivered-badge{font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;background:var(--green-dim);color:var(--green);white-space:nowrap}
+
+        /* ── Account page ────────────────────────────────────── */
+        #page-account{padding-top:80px}
+        .account-layout{display:grid;grid-template-columns:280px 1fr;gap:24px;padding:40px;max-width:1100px;margin:0 auto;align-items:start}
+        .account-sidebar{position:sticky;top:84px}
+        .account-profile{
+          background:linear-gradient(135deg,rgba(26,110,240,0.14),rgba(26,110,240,0.04));
+          border:1px solid rgba(26,110,240,0.2);border-radius:16px;padding:24px;margin-bottom:12px;
+        }
+        .avatar-ring{position:relative;width:56px;height:56px;margin-bottom:14px}
+        .avatar-ring-border{position:absolute;inset:-2px;border-radius:50%;background:conic-gradient(#1558d0,#60a5fa,#38bdf8,#1558d0);animation:spin 5s linear infinite}
+        .avatar-inner{position:absolute;inset:2px;border-radius:50%;background:#1c1a2e;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#60a5fa}
+        .profile-name{font-size:17px;font-weight:700;margin-bottom:3px}
+        .profile-email{font-size:12px;color:var(--muted);margin-bottom:10px}
+        .verified-pill{display:inline-flex;align-items:center;gap:5px;background:var(--blue-dim);border-radius:8px;padding:4px 10px;font-size:11px;color:#93c5fd;font-weight:500}
+        .sidebar-nav{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+        .sidebar-nav-item{
+          display:flex;align-items:center;gap:12px;padding:13px 16px;
+          cursor:pointer;transition:background 0.13s;border-bottom:1px solid var(--border);
+          font-size:14px;font-weight:500;color:var(--muted);
+        }
+        .sidebar-nav-item:last-child{border-bottom:none}
+        .sidebar-nav-item:hover{background:var(--surface2);color:var(--text)}
+        .sidebar-nav-item.active{background:var(--blue-dim);color:var(--blue)}
+        .sidebar-nav-icon{width:30px;height:30px;border-radius:7px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+        .account-panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px}
+        .panel-title{font-size:18px;font-weight:700;margin-bottom:4px}
+        .panel-sub{font-size:13px;color:var(--muted);font-weight:300;margin-bottom:24px}
+        .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+        .form-group{display:flex;flex-direction:column;gap:6px}
+        .form-group.full{grid-column:1/-1}
+        .form-label{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:0.05em}
+        .form-input{
+          padding:12px 14px;background:rgba(255,255,255,0.05);
+          border:1px solid var(--border);border-radius:10px;
+          color:var(--text);font-size:14px;outline:none;transition:border-color 0.15s;
+        }
+        .form-input:focus{border-color:rgba(26,110,240,0.5)}
+        .form-input::placeholder{color:var(--dim)}
+        .form-save{
+          padding:12px 24px;border-radius:10px;background:var(--blue);border:none;
+          color:#fff;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.15s;
+          font-family:var(--font);
+        }
+        .form-save:hover{filter:brightness(1.1)}
+        .toggle-row{
+          display:flex;align-items:center;justify-content:space-between;
+          padding:14px 0;border-bottom:1px solid var(--border);
+        }
+        .toggle-row:last-child{border-bottom:none}
+        .toggle-info h4{font-size:14px;font-weight:500;margin-bottom:2px}
+        .toggle-info p{font-size:12px;color:var(--muted);font-weight:300}
+        .toggle{position:relative;display:inline-block;width:44px;height:24px;flex-shrink:0}
+        .toggle input{opacity:0;width:0;height:0}
+        .slider{position:absolute;inset:0;background:#2a2a3a;border-radius:24px;transition:background 0.2s;cursor:pointer}
+        .slider:before{content:'';position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:white;border-radius:50%;transition:transform 0.2s}
+        input:checked+.slider{background:var(--blue)}
+        input:checked+.slider:before{transform:translateX(20px)}
+        .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px}
+        .stat-card{
+          background:linear-gradient(135deg,rgba(26,110,240,0.1),rgba(26,110,240,0.03));
+          border:1px solid rgba(26,110,240,0.15);border-radius:12px;padding:16px;text-align:center;
+        }
+        .stat-val{font-size:22px;font-weight:800;color:#93c5fd;letter-spacing:-0.5px}
+        .stat-label{font-size:11px;color:var(--muted);margin-top:3px;font-weight:300}
+        .payment-card{
+          display:flex;align-items:center;gap:14px;
+          padding:14px 16px;background:var(--surface);border:1px solid var(--border);
+          border-radius:12px;margin-bottom:10px;cursor:pointer;transition:all 0.13s;
+        }
+        .payment-card:hover{border-color:var(--border2)}
+        .payment-card.selected{background:var(--blue-dim);border-color:rgba(26,110,240,0.35)}
+        .payment-logo{width:44px;height:28px;border-radius:5px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+        .add-payment{
+          display:flex;align-items:center;gap:8px;padding:12px 16px;
+          background:none;border:1px dashed var(--border);border-radius:12px;
+          color:var(--muted);font-size:13px;font-weight:500;cursor:pointer;
+          width:100%;font-family:var(--font);transition:all 0.13s;margin-top:4px;
+        }
+        .add-payment:hover{border-color:var(--border2);color:var(--text)}
+        .support-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:24px}
+        .support-quick{
+          display:flex;flex-direction:column;gap:10px;
+          padding:16px;background:var(--surface);border:1px solid var(--border);
+          border-radius:12px;cursor:pointer;transition:all 0.15s;
+        }
+        .support-quick:hover{border-color:var(--border2);transform:translateY(-2px)}
+        .support-quick-icon{width:36px;height:36px;border-radius:9px;background:var(--blue-dim);display:flex;align-items:center;justify-content:center}
+        .support-quick-label{font-size:13px;font-weight:600;color:var(--text)}
+        .support-textarea{
+          width:100%;padding:14px;background:rgba(255,255,255,0.04);
+          border:1px solid var(--border);border-radius:12px;
+          color:var(--text);font-size:14px;outline:none;resize:none;
+          min-height:120px;line-height:1.6;transition:border-color 0.15s;
+          font-family:var(--font);
+        }
+        .support-textarea:focus{border-color:rgba(26,110,240,0.5)}
+        .support-textarea::placeholder{color:var(--dim)}
+        .refer-link-row{display:flex;gap:10px;margin-bottom:20px}
+        .refer-link-input{
+          flex:1;padding:12px 14px;background:rgba(255,255,255,0.04);
+          border:1px solid var(--border);border-radius:10px;
+          color:var(--muted);font-size:13px;outline:none;
+        }
+        .copy-btn{
+          padding:12px 20px;border-radius:10px;background:var(--blue);border:none;
+          color:#fff;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;
+          font-family:var(--font);transition:all 0.15s;
+        }
+        .copy-btn:hover{filter:brightness(1.1)}
+        .copy-btn.copied{background:rgba(34,197,94,0.2);border:1px solid rgba(34,197,94,0.3);color:var(--green)}
+        .refer-credit{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:var(--surface);border:1px solid var(--border);border-radius:12px}
+        .signout-btn{
+          width:100%;padding:12px;border-radius:10px;
+          background:rgba(255,50,50,0.06);border:1px solid rgba(255,80,80,0.12);
+          color:#f87171;font-size:14px;font-weight:500;cursor:pointer;font-family:var(--font);
+          transition:all 0.13s;margin-top:12px;
+        }
+        .signout-btn:hover{background:rgba(255,50,50,0.1)}
+
+        /* ── Toast ───────────────────────────────────────────── */
         .toast{
-          position:fixed; left:50%; bottom:18px; transform:translateX(-50%);
-          padding:10px 12px;
-          background:rgba(0,0,0,.75);
-          border:1px solid rgba(255,255,255,.12);
-          border-radius:999px;
-          color:var(--text);
-          font-weight:900;
-          z-index:200;
-          backdrop-filter: blur(10px);
+          position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);
+          background:#13121e;border:1px solid var(--border2);border-radius:12px;
+          padding:12px 20px;font-size:14px;font-weight:500;color:var(--text);
+          z-index:300;transition:transform 0.3s ease,opacity 0.3s ease;
+          opacity:0;white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,0.4);
+          display:flex;align-items:center;gap:8px;
         }
-        .drawerBg{ position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:120; }
-        .drawer{
-          position:fixed; left:0; right:0; bottom:0;
-          background:rgba(17,17,26,.98);
-          border-top:1px solid rgba(255,255,255,.12);
-          border-radius:18px 18px 0 0;
-          z-index:130;
-          max-height:82vh;
-          overflow:auto;
-          padding-bottom:18px;
-        }
+        .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
 
-        /* Tiny helpers */
-        .row{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
-        .sep{ height:1px; background:rgba(255,255,255,.08); margin:10px 0; }
+        /* ── Login overlay ────────────────────────────────────── */
+        .auth-overlay{
+          position:fixed;inset:0;z-index:150;
+          background:rgba(0,0,0,0.75);backdrop-filter:blur(14px);
+          display:flex;align-items:center;justify-content:center;padding:24px;
+        }
+        .auth-box{
+          background:#13121e;border:1px solid var(--border2);border-radius:22px;
+          padding:36px;width:100%;max-width:420px;
+          animation:scaleIn 0.22s ease;
+        }
+        .auth-logo{display:flex;align-items:center;gap:10px;margin-bottom:28px}
+        .auth-title{font-size:26px;font-weight:800;letter-spacing:-0.5px;margin-bottom:6px}
+        .auth-sub{font-size:14px;color:var(--muted);font-weight:300;margin-bottom:26px}
+        .auth-tabs{display:flex;background:var(--surface);border-radius:10px;padding:3px;margin-bottom:24px}
+        .auth-tab{flex:1;padding:9px;border-radius:8px;border:none;font-size:14px;font-weight:500;cursor:pointer;transition:all 0.15s;font-family:var(--font);background:none;color:var(--muted)}
+        .auth-tab.active{background:#1d1c2e;color:var(--text)}
+        .auth-form{display:flex;flex-direction:column;gap:12px}
+        .auth-fields-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+        .apple-btn{
+          display:flex;align-items:center;justify-content:center;gap:10px;
+          width:100%;padding:13px;border-radius:11px;
+          background:var(--surface2);border:1px solid var(--border2);
+          color:var(--text);font-size:14px;font-weight:500;cursor:pointer;font-family:var(--font);
+          transition:all 0.13s;
+        }
+        .apple-btn:hover{background:rgba(255,255,255,0.1)}
+        .auth-divider{display:flex;align-items:center;gap:12px;color:var(--dim);font-size:12px}
+        .auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+        .auth-submit{
+          width:100%;padding:14px;border-radius:11px;background:var(--blue);border:none;
+          color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:var(--font);
+          transition:all 0.15s;
+        }
+        .auth-submit:hover{filter:brightness(1.1);transform:translateY(-1px);box-shadow:0 8px 24px rgba(26,110,240,0.35)}
+        .auth-footer{text-align:center;font-size:13px;color:var(--muted);margin-top:4px}
+        .auth-footer a{color:var(--blue);font-weight:600;cursor:pointer}
+
+        /* ── Responsive ───────────────────────────────────────── */
+        @media(max-width:900px){
+          nav{padding:0 20px}
+          .nav-links{display:none}
+          .steps-grid{grid-template-columns:repeat(2,1fr)}
+          .cart-layout{grid-template-columns:1fr}
+          .account-layout{grid-template-columns:1fr}
+          .account-sidebar{position:static}
+          .tools-grid{padding:20px}
+          .section{padding:60px 20px}
+        }
+        @media(max-width:600px){
+          .hero-stats{flex-direction:column;max-width:100%}
+          .hero-stat{border-right:none;border-bottom:1px solid var(--border)}
+          .hero-stat:last-child{border-bottom:none}
+          .form-row{grid-template-columns:1fr}
+          .stats-grid{grid-template-columns:1fr 1fr}
+        }
     </style>
 </head>
-
 <body>
-<header class="header">
-    <div class="container">
-        <div class="headerTop">
-            <div class="logo" id="goHome">
-                <span class="logoDot"></span>
-                <span>DropKit</span>
-            </div>
 
-            <div class="searchBar">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(244,244,251,.75)" stroke-width="2" stroke-linecap="round">
-                    <circle cx="11" cy="11" r="7"></circle>
-                    <path d="M20 20l-3.5-3.5"></path>
-                </svg>
-                <input id="search" placeholder="Search tools, kits, electronics…" />
-            </div>
+<!-- Atmosphere -->
+<div class="glow-blob glow-1"></div>
+<div class="glow-blob glow-2"></div>
 
-            <div class="headerActions">
-                <button class="pill primary" id="shopNow">Shop</button>
-                <button class="pill" id="helpBtn">Help</button>
+<!-- Toast -->
+<div class="toast" id="toast"></div>
 
-                <button class="iconBtn mobileCartBtn" id="openCartMobile" title="Cart">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                        <path d="M6 6h15l-2 9H7L6 6z"></path>
-                        <path d="M6 6l-2-2"></path>
-                        <circle cx="9" cy="20" r="1"></circle>
-                        <circle cx="18" cy="20" r="1"></circle>
-                    </svg>
-                    <span class="badge" id="cartBadge" style="display:none;">0</span>
+<!-- Auth Modal -->
+<div class="auth-overlay hidden" id="auth-overlay">
+    <div class="auth-box">
+        <div class="auth-logo">
+            <div class="nav-logo-mark"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="2.5"/><path d="M4.5 4.5l3.5 3.5M19.5 4.5l-3.5 3.5M4.5 19.5l3.5-3.5M19.5 19.5l-3.5-3.5"/><circle cx="3.5" cy="3.5" r="1.5" fill="white" stroke="none"/><circle cx="20.5" cy="3.5" r="1.5" fill="white" stroke="none"/><circle cx="3.5" cy="20.5" r="1.5" fill="white" stroke="none"/><circle cx="20.5" cy="20.5" r="1.5" fill="white" stroke="none"/></svg></div>
+            <span class="nav-wordmark">Droveia</span>
+        </div>
+        <div class="auth-tabs">
+            <button class="auth-tab active" onclick="switchAuth('login')">Sign In</button>
+            <button class="auth-tab" onclick="switchAuth('signup')">Create Account</button>
+        </div>
+        <!-- Login form -->
+        <div id="auth-login">
+            <div class="auth-form">
+                <div class="form-group"><label class="form-label">EMAIL</label><input class="form-input" type="email" placeholder="you@university.edu"/></div>
+                <div class="form-group"><label class="form-label">PASSWORD</label><input class="form-input" type="password" placeholder="••••••••"/></div>
+                <div style="text-align:right;margin-top:-4px"><button style="background:none;border:none;font-size:13px;color:var(--blue);cursor:pointer;font-family:var(--font)">Forgot password?</button></div>
+                <button class="auth-submit" onclick="completeAuth()">Sign In</button>
+                <div class="auth-divider">or</div>
+                <button class="apple-btn" onclick="completeAuth()">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="white"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+                    Continue with Apple
                 </button>
             </div>
         </div>
-
-        <div class="navRow" id="navRow">
-            <button class="navLink active" data-route="home">Home</button>
-            <button class="navLink" data-route="shop">Shop</button>
-            <button class="navLink" data-route="orders">Orders</button>
-            <button class="navLink" data-route="help">Contact Us</button>
-            <button class="navLink" data-route="about">About</button>
-        </div>
-    </div>
-</header>
-
-<main class="main">
-    <div class="container" id="app"></div>
-</main>
-
-<footer>
-    <div class="container">
-        <div class="footerGrid">
-            <div>
-                <div class="fTitle">DropKit</div>
-                <div class="muted">Tools delivered when you need them. Pay hourly. Return easy.</div>
-                <div class="smallNote">© <span id="year"></span> DropKit</div>
-            </div>
-            <div>
-                <div class="fTitle">Shop</div>
-                <a class="fLink" href="#shop" data-route="shop">Browse tools</a>
-                <a class="fLink" href="#orders" data-route="orders">Track orders</a>
-            </div>
-            <div>
-                <div class="fTitle">Support</div>
-                <a class="fLink" href="#help" data-route="help">Contact Us</a>
-                <a class="fLink" href="#help" data-route="help">FAQ</a>
-            </div>
-            <div>
-                <div class="fTitle">Company</div>
-                <a class="fLink" href="#about" data-route="about">About</a>
-                <a class="fLink" href="#about" data-route="about">Safety</a>
+        <!-- Signup form -->
+        <div id="auth-signup" class="hidden">
+            <div class="auth-form">
+                <div class="auth-fields-row">
+                    <div class="form-group"><label class="form-label">FIRST</label><input class="form-input" type="text" placeholder="Jamie"/></div>
+                    <div class="form-group"><label class="form-label">LAST</label><input class="form-input" type="text" placeholder="Chen"/></div>
+                </div>
+                <div class="form-group"><label class="form-label">UNIVERSITY EMAIL</label><input class="form-input" type="email" placeholder="you@university.edu"/></div>
+                <div class="auth-fields-row">
+                    <div class="form-group"><label class="form-label">BUILDING</label><input class="form-input" type="text" placeholder="Buchanan Hall"/></div>
+                    <div class="form-group"><label class="form-label">ROOM</label><input class="form-input" type="text" placeholder="412"/></div>
+                </div>
+                <div class="form-group"><label class="form-label">PASSWORD</label><input class="form-input" type="password" placeholder="Min. 8 characters"/></div>
+                <div style="background:var(--blue-dim);border:1px solid var(--blue-mid);border-radius:9px;padding:10px 13px;font-size:12px;color:#93c5fd;line-height:1.6">Must be a valid .edu address — verified automatically.</div>
+                <button class="auth-submit" onclick="completeAuth()">Create Account</button>
             </div>
         </div>
     </div>
-</footer>
+</div>
 
-<div id="toast" class="toast" style="display:none;"></div>
+<!-- Nav -->
+<nav>
+    <div class="nav-logo" style="cursor:pointer" onclick="showPage('home')">
+        <div class="nav-logo-mark">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round">
+                <circle cx="12" cy="12" r="2.5"/>
+                <path d="M4.5 4.5l3.5 3.5M19.5 4.5l-3.5 3.5M4.5 19.5l3.5-3.5M19.5 19.5l-3.5-3.5"/>
+                <circle cx="3.5" cy="3.5" r="1.5" fill="white" stroke="none"/>
+                <circle cx="20.5" cy="3.5" r="1.5" fill="white" stroke="none"/>
+                <circle cx="3.5" cy="20.5" r="1.5" fill="white" stroke="none"/>
+                <circle cx="20.5" cy="20.5" r="1.5" fill="white" stroke="none"/>
+            </svg>
+        </div>
+        <span class="nav-wordmark">Droveia</span>
+    </div>
+    <div class="nav-links">
+        <button class="nav-link active" id="nav-home" onclick="showPage('home')">Home</button>
+        <button class="nav-link" id="nav-browse" onclick="showPage('browse')">Browse Tools</button>
+        <button class="nav-link" id="nav-orders" onclick="showPage('orders')">Orders</button>
+        <button class="nav-link" id="nav-account" onclick="showPage('account')">Account</button>
+    </div>
+    <div class="nav-right">
+        <div class="nav-live"><span class="live-dot"></span>CAMPUS LIVE</div>
+        <button class="nav-btn-ghost cart-btn" id="cart-nav-btn" onclick="showPage('cart')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+            Cart <span class="cart-badge" id="cart-badge">0</span>
+        </button>
+        <button class="nav-btn-solid" id="nav-auth-btn" onclick="showAuth()">Sign In</button>
+    </div>
+</nav>
 
-<div id="drawerWrap" style="display:none;">
-    <div class="drawerBg" id="closeDrawer"></div>
-    <div class="drawer" id="drawer"></div>
+<!-- ══ HOME PAGE ══════════════════════════════════════════════════════════ -->
+<div class="page active" id="page-home">
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-badge">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="2.5"/><path d="M4.5 4.5l3.5 3.5M19.5 4.5l-3.5 3.5"/></svg>
+                Drone delivery · Campus only · Avg 7 min
+            </div>
+            <h1 class="hero-h1">The tool you need,<br/><span>dropped in minutes.</span></h1>
+            <p class="hero-sub">Rent any tool for as long as you need it — delivered by drone straight to your dorm. No ownership. No clutter. Just use it and return.</p>
+            <div class="hero-ctas">
+                <button class="btn-primary" onclick="showPage('browse')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                    Browse Tools
+                </button>
+                <button class="btn-secondary" onclick="showAuth()">
+                    Create Free Account
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+            </div>
+            <div class="hero-stats">
+                <div class="hero-stat"><div class="hero-stat-num">200+</div><div class="hero-stat-label">Tools available</div></div>
+                <div class="hero-stat"><div class="hero-stat-num">~7 min</div><div class="hero-stat-label">Avg delivery</div></div>
+                <div class="hero-stat"><div class="hero-stat-num">95%</div><div class="hero-stat-label">Savings vs buying</div></div>
+                <div class="hero-stat"><div class="hero-stat-num">Free</div><div class="hero-stat-label">Returns</div></div>
+            </div>
+        </div>
+
+        <!-- Drone SVG illustration -->
+        <div class="drone-illustration">
+            <svg width="260" height="260" viewBox="0 0 100 100" fill="none" stroke="white" stroke-width="1.2" stroke-linecap="round">
+                <circle cx="50" cy="50" r="10"/>
+                <path d="M20 20l14 14M80 20L66 34M20 80l14-14M80 80L66 66"/>
+                <circle cx="18" cy="18" r="6"/><circle cx="82" cy="18" r="6"/>
+                <circle cx="18" cy="82" r="6"/><circle cx="82" cy="82" r="6"/>
+                <line x1="18" y1="18" x2="18" y2="10"/><line x1="14" y1="18" x2="22" y2="18"/>
+                <line x1="82" y1="18" x2="82" y2="10"/><line x1="78" y1="18" x2="86" y2="18"/>
+                <line x1="18" y1="82" x2="18" y2="90"/><line x1="14" y1="82" x2="22" y2="82"/>
+                <line x1="82" y1="82" x2="82" y2="90"/><line x1="78" y1="82" x2="86" y2="82"/>
+                <rect x="44" y="58" width="12" height="16" rx="2" fill="rgba(26,110,240,0.3)" stroke="rgba(26,110,240,0.6)"/>
+            </svg>
+        </div>
+    </section>
+
+    <!-- How it works -->
+    <div class="how" style="position:relative;z-index:1">
+        <div style="max-width:1200px;margin:0 auto;padding:0 40px">
+            <div class="section-label">How it works</div>
+            <div class="section-title">Four steps to any tool</div>
+            <div class="steps-grid">
+                <div class="step-card fade-up" style="animation-delay:0s">
+                    <div class="step-num">01</div>
+                    <div class="step-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a6ef0" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></div>
+                    <div class="step-title">Browse & pick</div>
+                    <div class="step-desc">Search our catalog of 200+ tools. Filter by category, see pricing by the hour.</div>
+                </div>
+                <div class="step-card fade-up" style="animation-delay:0.08s">
+                    <div class="step-num">02</div>
+                    <div class="step-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a6ef0" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="2.5"/><path d="M4.5 4.5l3.5 3.5M19.5 4.5l-3.5 3.5M4.5 19.5l3.5-3.5M19.5 19.5l-3.5-3.5"/></svg></div>
+                    <div class="step-title">Drone dispatched</div>
+                    <div class="step-desc">Confirm your order. A drone launches from our campus hub in under 60 seconds.</div>
+                </div>
+                <div class="step-card fade-up" style="animation-delay:0.14s">
+                    <div class="step-num">03</div>
+                    <div class="step-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a6ef0" stroke-width="1.8" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+                    <div class="step-title">Dropped to your door</div>
+                    <div class="step-desc">Average delivery is 7 minutes. You'll get a live ETA on your order page.</div>
+                </div>
+                <div class="step-card fade-up" style="animation-delay:0.2s">
+                    <div class="step-num">04</div>
+                    <div class="step-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a6ef0" stroke-width="1.8" stroke-linecap="round"><path d="M3 12a9 9 0 1010-9"/><path d="M3 3v9h9"/></svg></div>
+                    <div class="step-title">Free return pickup</div>
+                    <div class="step-desc">When you're done, just request pickup. Drone comes back to collect at no charge.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Featured tools preview -->
+    <div class="section">
+        <div class="section-label">Popular right now</div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:28px;flex-wrap:gap">
+            <div class="section-title" style="margin-bottom:0">Most rented this week</div>
+            <button class="btn-secondary" onclick="showPage('browse')" style="padding:10px 20px;font-size:13px">View all tools</button>
+        </div>
+        <div class="tools-grid" style="padding:0" id="featured-tools"></div>
+    </div>
+
+</div>
+
+<!-- ══ BROWSE PAGE ════════════════════════════════════════════════════════ -->
+<div class="page" id="page-browse">
+    <div class="browse-header">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px">
+            <div>
+                <div class="section-label">Catalog</div>
+                <div class="section-title" style="margin-bottom:4px">Browse Tools</div>
+                <div style="font-size:14px;color:var(--muted);font-weight:300">Drone-delivered to Buchanan Hall · Avg 7 min</div>
+            </div>
+            <div class="nav-live" style="align-self:flex-end"><span class="live-dot"></span>12 drones available</div>
+        </div>
+        <div class="browse-toolbar">
+            <div class="search-wrap">
+                <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+                <input type="text" id="search-input" placeholder="Search tools..." oninput="filterTools()"/>
+            </div>
+            <div class="cat-pills" id="cat-pills">
+                <button class="cat-pill active" onclick="setCat(this,'All')">All</button>
+                <button class="cat-pill" onclick="setCat(this,'Workshop')">Workshop</button>
+                <button class="cat-pill" onclick="setCat(this,'Crafts')">Crafts</button>
+                <button class="cat-pill" onclick="setCat(this,'Office')">Office</button>
+                <button class="cat-pill" onclick="setCat(this,'Electronics')">Electronics</button>
+            </div>
+        </div>
+    </div>
+    <div class="tools-grid" id="tools-grid"></div>
+</div>
+
+<!-- ══ CART PAGE ══════════════════════════════════════════════════════════ -->
+<div class="page" id="page-cart">
+    <div style="padding:40px 40px 0;max-width:1200px;margin:0 auto">
+        <div class="section-label">Checkout</div>
+        <div class="section-title" style="margin-bottom:0">Your Cart</div>
+    </div>
+    <div class="cart-layout" id="cart-content"></div>
+</div>
+
+<!-- ══ ORDERS PAGE ════════════════════════════════════════════════════════ -->
+<div class="page" id="page-orders">
+    <div class="orders-layout">
+        <div class="section-label">Deliveries</div>
+        <div class="section-title" style="margin-bottom:20px">My Orders</div>
+        <!-- Active -->
+        <div class="active-order">
+            <div class="order-status-row">
+                <div>
+                    <div class="order-badge"><span class="order-badge-dot"></span><span class="order-badge-text">IN FLIGHT</span></div>
+                    <div class="order-name">Drill Kit</div>
+                    <div class="order-id">#D-2041 · Ordered 2:14 PM · Room 412</div>
+                </div>
+                <div class="drone-anim">
+                    <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#1a6ef0" stroke-width="1.6" stroke-linecap="round">
+                        <circle cx="12" cy="12" r="2.5"/>
+                        <path d="M4.5 4.5l3.5 3.5M19.5 4.5l-3.5 3.5M4.5 19.5l3.5-3.5M19.5 19.5l-3.5-3.5"/>
+                        <circle cx="3.5" cy="3.5" r="1.5" fill="#1a6ef0" stroke="none"/>
+                        <circle cx="20.5" cy="3.5" r="1.5" fill="#1a6ef0" stroke="none"/>
+                        <circle cx="3.5" cy="20.5" r="1.5" fill="#1a6ef0" stroke="none"/>
+                        <circle cx="20.5" cy="20.5" r="1.5" fill="#1a6ef0" stroke="none"/>
+                    </svg>
+                    <div style="font-size:13px;font-weight:700;color:#1a6ef0;margin-top:4px">~3 min</div>
+                </div>
+            </div>
+            <div class="progress-labels"><span>Dispatched</span><span>En route</span><span>Arriving</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width:70%"></div></div>
+        </div>
+        <div style="font-size:11px;font-weight:600;color:var(--dim);letter-spacing:0.06em;margin-bottom:12px">PAST ORDERS</div>
+        <div class="past-orders" id="past-orders-list"></div>
+    </div>
+</div>
+
+<!-- ══ ACCOUNT PAGE ═══════════════════════════════════════════════════════ -->
+<div class="page" id="page-account">
+    <div class="account-layout">
+        <!-- Sidebar -->
+        <div class="account-sidebar">
+            <div class="account-profile">
+                <div class="avatar-ring">
+                    <div class="avatar-ring-border"></div>
+                    <div class="avatar-inner">J</div>
+                </div>
+                <div class="profile-name">Jamie Chen</div>
+                <div class="profile-email">jamie@university.edu</div>
+                <div class="verified-pill">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#93c5fd" stroke-width="2" stroke-linecap="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+                    Verified Student
+                </div>
+            </div>
+            <div class="sidebar-nav">
+                <div class="sidebar-nav-item active" onclick="showPanel('address')">
+                    <div class="sidebar-nav-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+                    Delivery Address
+                </div>
+                <div class="sidebar-nav-item" onclick="showPanel('payment')">
+                    <div class="sidebar-nav-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div>
+                    Payment Methods
+                </div>
+                <div class="sidebar-nav-item" onclick="showPanel('notifications')">
+                    <div class="sidebar-nav-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg></div>
+                    Notifications
+                </div>
+                <div class="sidebar-nav-item" onclick="showPanel('refer')">
+                    <div class="sidebar-nav-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div>
+                    Refer a Friend
+                </div>
+                <div class="sidebar-nav-item" onclick="showPanel('support')">
+                    <div class="sidebar-nav-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+                    Help & Support
+                </div>
+                <button class="signout-btn" onclick="showPage('home');showToast('Signed out')">Sign Out</button>
+            </div>
+        </div>
+
+        <!-- Panels -->
+        <div>
+            <!-- Stats always visible -->
+            <div class="stats-grid" style="margin-bottom:16px">
+                <div class="stat-card"><div class="stat-val">14</div><div class="stat-label">Rentals</div></div>
+                <div class="stat-card"><div class="stat-val">$284</div><div class="stat-label">Saved</div></div>
+                <div class="stat-card"><div class="stat-val">31h</div><div class="stat-label">Rented</div></div>
+            </div>
+
+            <!-- Address panel -->
+            <div class="account-panel" id="panel-address">
+                <div class="panel-title">Delivery Address</div>
+                <div class="panel-sub">Where drones will drop your tools</div>
+                <div class="form-row">
+                    <div class="form-group"><label class="form-label">BUILDING / HALL</label><input class="form-input" type="text" value="Buchanan Hall"/></div>
+                    <div class="form-group"><label class="form-label">ROOM NUMBER</label><input class="form-input" type="text" value="412"/></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group full"><label class="form-label">DROP-OFF NOTES</label><input class="form-input" type="text" placeholder="e.g. Leave at front door" value="Leave at front door"/></div>
+                </div>
+                <button class="form-save" onclick="showToast('✓ Address saved')">Save Address</button>
+            </div>
+
+            <!-- Payment panel -->
+            <div class="account-panel hidden" id="panel-payment">
+                <div class="panel-title">Payment Methods</div>
+                <div class="panel-sub">Manage your saved cards</div>
+                <div class="payment-card selected" onclick="selectPayment(this)">
+                    <div class="payment-logo"><svg width="28" height="18" viewBox="0 0 32 20" fill="none"><rect width="32" height="20" rx="3" fill="#1a3fa3"/><circle cx="13" cy="10" r="6" fill="#e31837" opacity="0.9"/><circle cx="19" cy="10" r="6" fill="#f5a623" opacity="0.9"/></svg></div>
+                    <div style="flex:1"><div style="font-size:14px;font-weight:500">Visa ···· 4242</div><div style="font-size:12px;color:var(--muted)">Expires 08/27</div></div>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1a6ef0" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
+                </div>
+                <div class="payment-card" onclick="selectPayment(this)">
+                    <div class="payment-logo"><svg width="17" height="17" viewBox="0 0 24 24" fill="white"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg></div>
+                    <div style="flex:1"><div style="font-size:14px;font-weight:500">Apple Pay</div></div>
+                </div>
+                <button class="add-payment">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                    Add payment method
+                </button>
+            </div>
+
+            <!-- Notifications panel -->
+            <div class="account-panel hidden" id="panel-notifications">
+                <div class="panel-title">Notifications</div>
+                <div class="panel-sub">Choose what alerts you receive</div>
+                <div class="toggle-row"><div class="toggle-info"><h4>Drone dispatched</h4><p>When your drone is in the air</p></div><label class="toggle"><input type="checkbox" checked/><span class="slider"></span></label></div>
+                <div class="toggle-row"><div class="toggle-info"><h4>ETA updates</h4><p>Live arrival time notifications</p></div><label class="toggle"><input type="checkbox" checked/><span class="slider"></span></label></div>
+                <div class="toggle-row"><div class="toggle-info"><h4>Return reminders</h4><p>Alert when rental is about to expire</p></div><label class="toggle"><input type="checkbox" checked/><span class="slider"></span></label></div>
+                <div class="toggle-row"><div class="toggle-info"><h4>Deals & promotions</h4><p>New tools and discount alerts</p></div><label class="toggle"><input type="checkbox"/><span class="slider"></span></label></div>
+            </div>
+
+            <!-- Refer panel -->
+            <div class="account-panel hidden" id="panel-refer">
+                <div class="panel-title">Refer a Friend</div>
+                <div class="panel-sub">Give $5, get $5 when they complete their first rental</div>
+                <div style="background:linear-gradient(135deg,var(--blue-dim),rgba(26,110,240,0.04));border:1px solid var(--blue-mid);border-radius:14px;padding:24px;text-align:center;margin-bottom:22px">
+                    <div style="font-size:32px;margin-bottom:10px">🎁</div>
+                    <div style="font-size:18px;font-weight:700;margin-bottom:6px">Give $5, Get $5</div>
+                    <div style="font-size:14px;color:var(--muted);line-height:1.7;font-weight:300">Share your link. When a friend completes their first rental, you both get $5 credit automatically.</div>
+                </div>
+                <div style="font-size:11px;font-weight:600;color:var(--dim);letter-spacing:0.05em;margin-bottom:10px">YOUR REFERRAL LINK</div>
+                <div class="refer-link-row">
+                    <input class="refer-link-input" value="droveia.com/r/jamie2024" readonly/>
+                    <button class="copy-btn" id="copy-btn" onclick="copyRef()">Copy link</button>
+                </div>
+                <div style="font-size:11px;font-weight:600;color:var(--dim);letter-spacing:0.05em;margin-bottom:10px">YOUR BALANCE</div>
+                <div class="refer-credit"><span style="font-size:14px">Available credit</span><span style="font-size:18px;font-weight:800;color:var(--green)">$10.00</span></div>
+            </div>
+
+            <!-- Support panel -->
+            <div class="account-panel hidden" id="panel-support">
+                <div class="panel-title">Help & Support</div>
+                <div class="panel-sub">We typically reply within a few hours</div>
+                <div class="support-grid">
+                    <button class="support-quick" onclick="showToast('Opening order tracker...')"><div class="support-quick-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1a6ef0" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg></div><div class="support-quick-label">Track order</div></button>
+                    <button class="support-quick" onclick="showToast('Opening return request...')"><div class="support-quick-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1a6ef0" stroke-width="1.8" stroke-linecap="round"><path d="M3 12a9 9 0 1010-9"/><path d="M3 3v9h9"/></svg></div><div class="support-quick-label">Request return</div></button>
+                    <button class="support-quick" onclick="showToast('Opening issue report...')"><div class="support-quick-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1a6ef0" stroke-width="1.8" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg></div><div class="support-quick-label">Report issue</div></button>
+                    <button class="support-quick" onclick="showToast('Opening FAQs...')"><div class="support-quick-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1a6ef0" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/></svg></div><div class="support-quick-label">FAQs</div></button>
+                </div>
+                <div style="font-size:11px;font-weight:600;color:var(--dim);letter-spacing:0.05em;margin-bottom:10px">SEND A MESSAGE</div>
+                <div id="support-form">
+                    <textarea class="support-textarea" placeholder="Describe your issue or question..." id="support-msg"></textarea>
+                    <button class="form-save" style="margin-top:12px;width:100%;padding:13px" onclick="sendSupport()">Send Message</button>
+                </div>
+                <div id="support-sent" class="hidden" style="background:var(--green-dim);border:1px solid rgba(34,197,94,0.2);border-radius:12px;padding:20px;text-align:center">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round" style="margin-bottom:8px"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    <div style="font-weight:700;margin-bottom:4px">Message sent!</div>
+                    <div style="font-size:13px;color:var(--muted)">We'll reply within 24 hours.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tool modal -->
+<div class="modal-overlay hidden" id="tool-modal" onclick="closeModal(event)">
+    <div class="modal-box" id="modal-box">
+        <button class="modal-close" onclick="closeModalDirect()">✕</button>
+        <div id="modal-content"></div>
+    </div>
 </div>
 
 <script>
-    // ─────────────────────────────────────────────
-    // Data
-    // ─────────────────────────────────────────────
+    // ─── Data ────────────────────────────────────────────────
     const TOOLS = [
-      { id: 1, name: "Heat Gun", category: "Workshop", pricePerHr: 4.5, retail: 45, rating: 4.8, reviews: 124, desc: "1500W dual-temp · shrink wrap & crafts", eta: "8 min" },
-      { id: 2, name: "Drill Kit", category: "Workshop", pricePerHr: 6.0, retail: 80, rating: 4.9, reviews: 310, desc: "20V cordless · 18-piece bit set included", eta: "6 min" },
-      { id: 3, name: "Sewing Machine", category: "Crafts", pricePerHr: 5.0, retail: 90, rating: 4.7, reviews: 87, desc: "Compact 12-stitch · clothing repairs", eta: "10 min" },
-      { id: 4, name: "Label Maker", category: "Office", pricePerHr: 2.0, retail: 30, rating: 4.6, reviews: 203, desc: "Thermal printer · USB & Bluetooth", eta: "5 min" },
-      { id: 5, name: "Soldering Iron", category: "Electronics", pricePerHr: 3.5, retail: 40, rating: 4.8, reviews: 156, desc: "60W adjustable station · tips & flux", eta: "7 min" },
-      { id: 6, name: "Jigsaw", category: "Workshop", pricePerHr: 7.0, retail: 95, rating: 4.9, reviews: 98, desc: "Compact · 5 blades included", eta: "9 min" },
-      { id: 7, name: "Embroidery Set", category: "Crafts", pricePerHr: 1.5, retail: 18, rating: 4.5, reviews: 64, desc: "6-piece bamboo hoops · starter thread", eta: "4 min" },
-      { id: 8, name: "Laminator", category: "Office", pricePerHr: 2.5, retail: 35, rating: 4.7, reviews: 179, desc: "9-inch · 20 pouches · 3-min warmup", eta: "6 min" },
-      { id: 9, name: "Oscilloscope", category: "Electronics", pricePerHr: 8.0, retail: 120, rating: 4.9, reviews: 41, desc: "2-channel 50MHz digital", eta: "12 min" },
-      { id: 10, name: "Hot Glue Gun", category: "Crafts", pricePerHr: 1.0, retail: 15, rating: 4.6, reviews: 220, desc: "High-temp · 20 glue sticks", eta: "5 min" },
-      { id: 11, name: "Multimeter", category: "Electronics", pricePerHr: 2.0, retail: 28, rating: 4.8, reviews: 190, desc: "Auto-ranging digital", eta: "6 min" },
-      { id: 12, name: "Staple Gun", category: "Workshop", pricePerHr: 2.5, retail: 32, rating: 4.5, reviews: 88, desc: "Heavy-duty · 1000 staples included", eta: "5 min" },
+      {id:1, name:"Heat Gun",       cat:"Workshop",    pph:4.50, retail:45,  rating:4.8, reviews:124, desc:"1500W dual-temp · perfect for shrink wrap, paint stripping & crafts", eta:"8 min"},
+      {id:2, name:"Drill Kit",      cat:"Workshop",    pph:6.00, retail:80,  rating:4.9, reviews:310, desc:"20V cordless drill · 18-piece bit set · charged and ready to go",     eta:"6 min"},
+      {id:3, name:"Sewing Machine", cat:"Crafts",      pph:5.00, retail:90,  rating:4.7, reviews:87,  desc:"Compact 12-stitch portable machine · great for clothing repairs",      eta:"10 min"},
+      {id:4, name:"Label Maker",    cat:"Office",      pph:2.00, retail:30,  rating:4.6, reviews:203, desc:"Thermal label printer · USB & Bluetooth · 3 tape rolls included",     eta:"5 min"},
+      {id:5, name:"Soldering Iron", cat:"Electronics", pph:3.50, retail:40,  rating:4.8, reviews:156, desc:"60W adjustable station · multiple tips and flux included",             eta:"7 min"},
+      {id:6, name:"Jigsaw",         cat:"Workshop",    pph:7.00, retail:95,  rating:4.9, reviews:98,  desc:"Compact variable-speed · 5 blades for wood and metal",               eta:"9 min"},
+      {id:7, name:"Embroidery Set", cat:"Crafts",      pph:1.50, retail:18,  rating:4.5, reviews:64,  desc:"6-piece bamboo hoop set · needles · starter thread assortment",       eta:"4 min"},
+      {id:8, name:"Laminator",      cat:"Office",      pph:2.50, retail:35,  rating:4.7, reviews:179, desc:"9-inch · 20 pouches · 3-min warmup time",                           eta:"6 min"},
+      {id:9, name:"Oscilloscope",   cat:"Electronics", pph:8.00, retail:120, rating:4.9, reviews:41,  desc:"2-channel 50MHz digital oscilloscope · USB connectivity",           eta:"12 min"},
+      {id:10,name:"Hot Glue Gun",   cat:"Crafts",      pph:1.00, retail:15,  rating:4.6, reviews:220, desc:"High-temp glue gun · 20 glue sticks · fast heat-up",               eta:"5 min"},
+      {id:11,name:"Multimeter",     cat:"Electronics", pph:2.00, retail:28,  rating:4.8, reviews:190, desc:"Auto-ranging digital multimeter · leads and case included",         eta:"6 min"},
+      {id:12,name:"Staple Gun",     cat:"Workshop",    pph:2.50, retail:32,  rating:4.5, reviews:88,  desc:"Heavy-duty · 1000 staples · upholstery ready",                     eta:"5 min"},
     ];
-    const CATS = ["All", "Workshop", "Crafts", "Office", "Electronics"];
-    const ORDERS = [
-      { id: "#D-2041", name: "Drill Kit", status: "In Flight", eta: "3 min", time: "2:14 PM", progress: 0.7 },
-      { id: "#D-2038", name: "Label Maker", status: "Delivered", eta: null, time: "1:05 PM", progress: 1 },
-      { id: "#D-2031", name: "Soldering Iron", status: "Delivered", eta: null, time: "Yesterday", progress: 1 },
+    const PAST_ORDERS = [
+      {id:"#D-2038", name:"Label Maker",    time:"1:05 PM",   date:"Today"},
+      {id:"#D-2031", name:"Soldering Iron", time:"4:20 PM",   date:"Yesterday"},
+      {id:"#D-2027", name:"Laminator",      time:"11:10 AM",  date:"Mon, Feb 24"},
+      {id:"#D-2019", name:"Drill Kit",      time:"2:45 PM",   date:"Fri, Feb 21"},
     ];
+    const DURATIONS = [1,2,4,8,24,48];
+    let cart = [];
+    let currentCat = "All";
+    let currentTool = null;
+    let currentHours = 4;
+    let isLoggedIn = false;
 
-    // ─────────────────────────────────────────────
-    // State
-    // ─────────────────────────────────────────────
-    const state = {
-      route: "home", // home | shop | orders | help | about
-      cat: "All",
-      search: "",
-      cart: [],
-      hours: {},
-    };
-
-    const app = document.getElementById("app");
-    const toastEl = document.getElementById("toast");
-    const cartBadge = document.getElementById("cartBadge");
-    document.getElementById("year").textContent = new Date().getFullYear();
-
-    function esc(s){
-      return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
+    // ─── Cat icons ───────────────────────────────────────────
+    function catIconSvg(cat, color="#1a6ef0") {
+      const s = `width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"`;
+      if(cat==="Workshop")    return `<svg ${s}><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>`;
+      if(cat==="Crafts")      return `<svg ${s}><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>`;
+      if(cat==="Office")      return `<svg ${s}><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>`;
+      if(cat==="Electronics") return `<svg ${s}><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>`;
+      return `<svg ${s}><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>`;
+    }
+    function starsHtml(rating) {
+      let s = '';
+      for(let i=1;i<=5;i++) s += `<span class="star${i>Math.floor(rating)?' empty':''}">★</span>`;
+      return `<div class="stars">${s}</div><span class="rating-text">${rating} (${(Math.random()*300+40)|0})</span>`;
     }
 
-    function toast(msg){
-      toastEl.textContent = msg;
-      toastEl.style.display = "block";
-      clearTimeout(toast._t);
-      toast._t = setTimeout(()=> toastEl.style.display = "none", 1000);
+    // ─── Page navigation ──────────────────────────────────────
+    function showPage(id) {
+      document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+      document.getElementById('page-'+id).classList.add('active');
+      document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));
+      const nl = document.getElementById('nav-'+id);
+      if(nl) nl.classList.add('active');
+      window.scrollTo(0,0);
+      if(id==='browse') renderTools();
+      if(id==='cart') renderCart();
+      if(id==='orders') renderOrders();
     }
 
-    function setRoute(r){
-      state.route = r;
-      // highlight nav
-      document.querySelectorAll(".navLink").forEach(b => {
-        b.classList.toggle("active", b.dataset.route === r);
-      });
-      render();
-      // optional: scroll top
-      window.scrollTo({ top: 0, behavior: "smooth" });
+    // ─── Auth ─────────────────────────────────────────────────
+    function showAuth() {
+      document.getElementById('auth-overlay').classList.remove('hidden');
+    }
+    function switchAuth(tab) {
+      document.querySelectorAll('.auth-tab').forEach((t,i)=>t.classList.toggle('active',i===(tab==='login'?0:1)));
+      document.getElementById('auth-login').classList.toggle('hidden', tab!=='login');
+      document.getElementById('auth-signup').classList.toggle('hidden', tab!=='signup');
+    }
+    function completeAuth() {
+      isLoggedIn = true;
+      document.getElementById('auth-overlay').classList.add('hidden');
+      document.getElementById('nav-auth-btn').textContent = 'Jamie';
+      document.getElementById('nav-auth-btn').onclick = ()=>showPage('account');
+      showToast('✓ Welcome to Droveia!');
     }
 
-    function filteredTools(){
-      const q = state.search.trim().toLowerCase();
-      return TOOLS.filter(t =>
-        (state.cat === "All" || t.category === state.cat) &&
-        t.name.toLowerCase().includes(q)
-      );
+    // ─── Toast ────────────────────────────────────────────────
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(()=>t.classList.remove('show'), 2800);
     }
 
-    function getHours(id){ return state.hours[id] ?? 4; }
-
-    function addToCart(tool){
-      const h = getHours(tool.id);
-      const ex = state.cart.find(c => c.id === tool.id);
-      if (ex){
-        state.cart = state.cart.map(c => c.id === tool.id ? { ...c, hours: h } : c);
-      } else {
-        state.cart = [...state.cart, { ...tool, hours: h }];
-      }
-      toast(`${tool.name} added`);
-      syncCartBadge();
-      render();
-    }
-
-    function removeFromCart(id){
-      state.cart = state.cart.filter(x => x.id !== id);
-      syncCartBadge();
-      render();
-    }
-
-    function cartTotal(){
-      return state.cart.reduce((s,c) => s + c.pricePerHr * c.hours, 0);
-    }
-
-    function savedTotal(){
-      return state.cart.reduce((s,c) => s + (c.retail - c.pricePerHr * c.hours), 0);
-    }
-
-    function syncCartBadge(){
-      if (state.cart.length > 0){
-        cartBadge.style.display = "grid";
-        cartBadge.textContent = String(state.cart.length);
-      } else {
-        cartBadge.style.display = "none";
-      }
-    }
-
-    function stars(rating){
-      const full = Math.floor(rating);
-      let out = `<span class="stars" title="${rating.toFixed(1)}">`;
-      for (let i=1;i<=5;i++){
-        out += `
-          <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
-              fill="${i<=full ? "currentColor" : "none"}"
-              stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" />
-          </svg>`;
-      }
-      out += `<span class="starsText">${rating.toFixed(1)}</span></span>`;
-      return out;
-    }
-
-    // ─────────────────────────────────────────────
-    // Views
-    // ─────────────────────────────────────────────
-    function viewHome(){
-      const featured = TOOLS.slice(0, 6);
+    // ─── Tool rendering ───────────────────────────────────────
+    function renderToolCard(tool, featured=false) {
+      const pct = Math.round((1-(tool.pph*4)/tool.retail)*100);
       return `
-        <div class="hero">
-          <div class="heroGrid">
-            <div>
-              <h1 class="heroTitle">Rent tools like you buy on Amazon.</h1>
-              <div class="heroSub">
-                Need a heat gun for 30 minutes? A drill for a weekend? DropKit delivers fast, you pay hourly, and returns are simple.
-              </div>
-              <div class="heroCtas">
-                <button class="pill primary" id="ctaShop">Browse tools</button>
-                <button class="pill" id="ctaHelp">How it works</button>
-                <span class="pill" style="cursor:default;">
-                  <span style="width:8px;height:8px;border-radius:999px;background:var(--good);display:inline-block;"></span>
-                  Available now
-                </span>
-              </div>
-
-              <div class="sep"></div>
-
-              <div class="muted" style="font-weight:900; margin-bottom:10px;">Popular right now</div>
-              <div class="cards" style="padding:0;">
-                ${featured.map(t => `
-                  <div class="tool" data-add="${t.id}" title="Click to add to cart">
-                    <div class="toolTop">
-                      <div>
-                        <div class="toolName">${esc(t.name)}</div>
-                        <div class="muted" style="margin-top:6px;">${esc(t.category)} • ETA ${esc(t.eta)}</div>
-                      </div>
-                      ${stars(t.rating)}
-                    </div>
-                    <div class="toolMeta">${esc(t.desc)}</div>
-                    <div class="toolRow">
-                      <div class="price">$${t.pricePerHr.toFixed(2)} <small>/ hr</small></div>
-                      <button class="add" data-add-btn="${t.id}" type="button">Add</button>
-                    </div>
-                  </div>
-                `).join("")}
-              </div>
-            </div>
-
-            <div class="miniCards">
-              <div class="mini">
-                <div class="miniTop">
-                  <div class="miniTitle">Fast ETA</div>
-                  <div class="pill" style="cursor:default;">4–12 min</div>
-                </div>
-                <div class="miniText">Nearby inventory + quick dispatch. Track deliveries from the Orders page.</div>
-              </div>
-
-              <div class="mini">
-                <div class="miniTop">
-                  <div class="miniTitle">Pay hourly</div>
-                  <div class="pill" style="cursor:default;">No ownership</div>
-                </div>
-                <div class="miniText">You don’t need to buy a soldering station for one project. Rent it, return it.</div>
-              </div>
-
-              <div class="mini">
-                <div class="miniTop">
-                  <div class="miniTitle">Easy returns</div>
-                  <div class="pill" style="cursor:default;">Pickup</div>
-                </div>
-                <div class="miniText">Schedule a pickup window. We’ll handle retrieval (demo UI for now).</div>
-              </div>
-
-              <div class="mini">
-                <div class="miniTop">
-                  <div class="miniTitle">Need help?</div>
-                  <button class="pill primary" id="miniContact">Contact us</button>
-                </div>
-                <div class="miniText">Questions about eligibility, safety, or delivery areas? Hit Contact Us.</div>
-              </div>
-            </div>
-          </div>
+      <div class="tool-card fade-up" onclick="openModal(${tool.id})">
+        <div class="tool-card-top">
+          <div class="tool-icon">${catIconSvg(tool.cat)}</div>
+          <div class="save-badge">Save ${pct}%</div>
         </div>
-      `;
-    }
-
-    function viewShop(){
-      const tools = filteredTools();
-      return `
-        <div class="grid">
-          <div class="leftCol panel">
-            <div class="panelHd">
-              <div>
-                <div class="panelTitle">Categories</div>
-                <div class="muted">Filter tools</div>
-              </div>
-              <button class="pill" data-cat="All">Reset</button>
-            </div>
-            <div class="catList">
-              ${CATS.map(c => {
-                const count = (c==="All") ? TOOLS.length : TOOLS.filter(t=>t.category===c).length;
-                return `
-                  <div class="catItem ${state.cat===c ? "active":""}" data-cat="${esc(c)}">
-                    <div class="catLeft"><span>${esc(c)}</span></div>
-                    <span style="opacity:.9;font-size:12px;">${count}</span>
-                  </div>
-                `;
-              }).join("")}
-            </div>
-          </div>
-
-          <div class="panel">
-            <div class="panelHd">
-              <div>
-                <div class="panelTitle">Shop</div>
-                <div class="muted">${tools.length} result${tools.length===1?"":"s"} • typical ETA 4–12 min</div>
-              </div>
-              <div class="muted" style="font-weight:900;">
-                <span style="width:8px;height:8px;border-radius:999px;background:var(--good);display:inline-block;vertical-align:middle;margin-right:6px;"></span>
-                Available now
-              </div>
-            </div>
-
-            <div class="cards">
-              ${tools.map(t => `
-                <div class="tool" data-add="${t.id}">
-                  <div class="toolTop">
-                    <div>
-                      <div class="toolName">${esc(t.name)}</div>
-                      <div class="muted" style="margin-top:6px;">${esc(t.category)} • ETA ${esc(t.eta)}</div>
-                    </div>
-                    ${stars(t.rating)}
-                  </div>
-                  <div class="toolMeta">${esc(t.desc)}</div>
-                  <div class="toolRow">
-                    <div class="price">$${t.pricePerHr.toFixed(2)} <small>/ hr</small></div>
-                    <button class="add" data-add-btn="${t.id}" type="button">Add</button>
-                  </div>
-                  <div class="muted" style="margin-top:8px;">${t.reviews} reviews · retail ≈ $${t.retail}</div>
-                </div>
-              `).join("")}
-            </div>
-          </div>
-
-          <div class="rightCol panel">
-            <div class="panelHd">
-              <div>
-                <div class="panelTitle">Cart</div>
-                <div class="muted">${state.cart.length ? `${state.cart.length} item${state.cart.length===1?"":"s"}` : "Empty"}</div>
-              </div>
-              <button class="pill" id="clearCart" ${state.cart.length ? "" : "disabled"}>Clear</button>
-            </div>
-            ${viewCartPanel()}
-          </div>
-        </div>
-      `;
-    }
-
-    function viewCartPanel(){
-      const items = state.cart.length ? state.cart.map(c => {
-        const h = state.hours[c.id] ?? c.hours ?? 4;
-        const line = (c.pricePerHr * h).toFixed(2);
-        return `
-          <div class="cartItem">
-            <div style="flex:1;">
-              <div class="cartName">${esc(c.name)}</div>
-              <div class="cartSub">$${c.pricePerHr.toFixed(2)}/hr · ETA ${esc(c.eta)}</div>
-
-              <div class="qtyRow">
-                <div class="qty">
-                  Hours:
-                  <input type="number" min="1" max="24" data-hours="${c.id}" value="${h}" />
-                </div>
-                <button class="del" data-remove="${c.id}" type="button">Remove</button>
-              </div>
-            </div>
-            <div style="font-weight:950;color:rgba(244,244,251,.92)">$${line}</div>
-          </div>
-        `;
-      }).join("") : `<div class="muted" style="padding:12px;">Add a tool to start a delivery.</div>`;
-
-      return `
-        <div class="cartBody">${items}</div>
-        <div class="totals">
-          <div class="totalLine"><span>Subtotal</span><strong>$${cartTotal().toFixed(2)}</strong></div>
-          <div class="totalLine"><span>Est. saved vs retail</span><strong>$${Math.max(0, savedTotal()).toFixed(2)}</strong></div>
-          <button class="checkout" id="checkout" ${state.cart.length ? "" : "disabled"}>Checkout (demo)</button>
-        </div>
-      `;
-    }
-
-    function viewOrders(){
-      return `
-        <div class="panel">
-          <div class="panelHd">
-            <div>
-              <div class="panelTitle">Your orders</div>
-              <div class="muted">Track deliveries + history</div>
-            </div>
-            <button class="pill" style="cursor:default;">Live</button>
-          </div>
-          <div class="orders">
-            ${ORDERS.map(o => `
-              <div class="order">
-                <div class="orderTop">
-                  <div>
-                    <div class="orderId">${esc(o.id)} · ${esc(o.name)}</div>
-                    <div class="orderMeta">${esc(o.status)} ${o.eta ? `· ETA ${esc(o.eta)}` : ""} · ${esc(o.time)}</div>
-                  </div>
-                  <div class="pill" style="cursor:default;">${esc(o.status)}</div>
-                </div>
-                <div class="bar"><div style="width:${Math.round(o.progress*100)}%"></div></div>
-              </div>
-            `).join("")}
-          </div>
-        </div>
-      `;
-    }
-
-    function viewHelp(){
-      return `
-        <div class="panel">
-          <div class="panelHd">
-            <div>
-              <div class="panelTitle">Help & Contact Us</div>
-              <div class="muted">Support, safety, and delivery questions</div>
-            </div>
-            <button class="pill" id="fakeChat">Live chat (demo)</button>
-          </div>
-
-          <div class="helpWrap">
-            <div class="helpGrid">
-              <div class="card">
-                <h3>FAQ</h3>
-                <p><b>How does pricing work?</b> You pay hourly. The site shows an estimate vs retail.</p>
-                <p><b>Where do you deliver?</b> Start with a small radius around a staging area. Expand later.</p>
-                <p><b>Returns?</b> Pickup windows. You can schedule it after checkout (backend needed).</p>
-              </div>
-
-              <div class="card">
-                <h3>Contact form</h3>
-                <p>Send a message. In a static site this is “UI only” unless you wire it to a form service or a backend.</p>
-
-                <div class="form">
-                  <div class="field">
-                    <div class="label">Name</div>
-                    <input class="input" id="cName" placeholder="Your name" />
-                  </div>
-                  <div class="field">
-                    <div class="label">Email</div>
-                    <input class="input" id="cEmail" placeholder="you@email.com" />
-                  </div>
-                  <div class="field">
-                    <div class="label">Message</div>
-                    <textarea id="cMsg" placeholder="What do you need help with?"></textarea>
-                  </div>
-                  <button class="pill primary" id="sendMsg">Send message</button>
-                  <div class="smallNote">Tip: easiest “real” contact on GitHub Pages is Formspree / Netlify Forms.</div>
-                </div>
-              </div>
-            </div>
-
-            <div class="sep"></div>
-
-            <div class="card">
-              <h3>Business / sponsors</h3>
-              <p>Email: <span style="color:var(--text);font-weight:900;">support@dropkit.example</span> (placeholder)</p>
-              <p>Hours: 9am–6pm</p>
-            </div>
-          </div>
-        </div>
-      `;
-    }
-
-    function viewAbout(){
-      return `
-        <div class="panel">
-          <div class="panelHd">
-            <div>
-              <div class="panelTitle">About DropKit</div>
-              <div class="muted">A tool rental service designed for speed</div>
-            </div>
-            <button class="pill" id="goHelpFromAbout">Contact</button>
-          </div>
-
-          <div class="helpWrap">
-            <div class="card">
-              <h3>What it is</h3>
-              <p>DropKit is a tool delivery service for things you don’t need every day: heat guns, soldering irons, drills, etc.</p>
-              <p>Start simple: small inventory, small delivery radius, predictable pricing.</p>
-            </div>
-
-            <div class="sep"></div>
-
-            <div class="helpGrid">
-              <div class="card">
-                <h3>Safety</h3>
-                <p>Tools require ID verification + waiver + basic safe-use checklist (backend feature).</p>
-                <p>Drone delivery should follow local regulations and approved drop zones.</p>
-              </div>
-              <div class="card">
-                <h3>Next steps</h3>
-                <p>Once you need accounts, payments, and order tracking, that’s when Node.js makes sense.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      `;
-    }
-
-    function render(){
-      if (state.route === "home") app.innerHTML = viewHome();
-      if (state.route === "shop") app.innerHTML = viewShop();
-      if (state.route === "orders") app.innerHTML = viewOrders();
-      if (state.route === "help") app.innerHTML = viewHelp();
-      if (state.route === "about") app.innerHTML = viewAbout();
-
-      bindViewEvents();
-    }
-
-    // ─────────────────────────────────────────────
-    // Drawer (mobile cart)
-    // ─────────────────────────────────────────────
-    const drawerWrap = document.getElementById("drawerWrap");
-    const drawer = document.getElementById("drawer");
-    document.getElementById("closeDrawer").addEventListener("click", closeDrawer);
-
-    function openDrawerCart(){
-      drawer.innerHTML = `
-        <div class="panelHd">
+        <div class="tool-name">${tool.name}</div>
+        <div class="tool-desc">${tool.desc}</div>
+        <div class="tool-stars">${starsHtml(tool.rating)}</div>
+        <div class="tool-pricing">
           <div>
-            <div class="panelTitle">Cart</div>
-            <div class="muted">${state.cart.length ? `${state.cart.length} item${state.cart.length===1?"":"s"}` : "Empty"}</div>
+            <div class="price-from">from</div>
+            <div><span class="price-val">$${tool.pph.toFixed(2)}</span><span class="price-unit">/hr</span></div>
+            <div class="retail-cross">$${tool.retail} retail</div>
           </div>
-          <button class="pill" id="closeCartBtn">Close</button>
+          <button class="add-btn" onclick="event.stopPropagation();quickAdd(${tool.id})">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
         </div>
-        ${viewCartPanel()}
+        <div class="tool-eta">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="2.5"/><path d="M4.5 4.5l3.5 3.5"/></svg>
+          ETA ~${tool.eta}
+        </div>
+      </div>`;
+    }
+
+    function renderTools() {
+      const q = document.getElementById('search-input')?.value?.toLowerCase()||'';
+      const filtered = TOOLS.filter(t=>(currentCat==='All'||t.cat===currentCat)&&t.name.toLowerCase().includes(q));
+      const g = document.getElementById('tools-grid');
+      if(g) g.innerHTML = filtered.length ? filtered.map(t=>renderToolCard(t)).join('') : `<div style="grid-column:1/-1;text-align:center;padding:60px 0;color:var(--muted)"><div style="font-size:40px;margin-bottom:12px;opacity:0.3">🔍</div><div style="font-weight:600;font-size:16px">No tools found</div></div>`;
+    }
+
+    function renderFeatured() {
+      const featured = [TOOLS[1],TOOLS[0],TOOLS[4],TOOLS[2],TOOLS[7],TOOLS[3]];
+      const g = document.getElementById('featured-tools');
+      if(g) g.innerHTML = featured.map(t=>renderToolCard(t,true)).join('');
+    }
+
+    function filterTools() { renderTools(); }
+
+    function setCat(el, cat) {
+      currentCat = cat;
+      document.querySelectorAll('.cat-pill').forEach(p=>p.classList.remove('active'));
+      el.classList.add('active');
+      renderTools();
+    }
+
+    // ─── Modal ────────────────────────────────────────────────
+    function openModal(id) {
+      currentTool = TOOLS.find(t=>t.id===id);
+      currentHours = 4;
+      renderModal();
+      document.getElementById('tool-modal').classList.remove('hidden');
+      document.body.style.overflow='hidden';
+    }
+    function renderModal() {
+      const t = currentTool;
+      const cost = (t.pph*currentHours).toFixed(2);
+      const pct = Math.round((1-(t.pph*currentHours)/t.retail)*100);
+      const presetsHtml = DURATIONS.map(h=>`
+        <button class="dur-preset${currentHours===h?' active':''}" onclick="setHours(${h})">
+          ${h<24?h+'h':h/24+'d'}
+        </button>`).join('');
+      document.getElementById('modal-content').innerHTML = `
+        <div class="modal-icon">${catIconSvg(t.cat,'#1a6ef0')}</div>
+        <div class="modal-title">${t.name}</div>
+        <div class="modal-meta">
+          <div class="tool-stars" style="margin:0">${starsHtml(t.rating)}</div>
+          <span style="color:var(--dim)">·</span>
+          <span style="color:var(--green);font-size:12px;font-weight:600;background:var(--green-dim);padding:2px 8px;border-radius:6px">Save ${pct}%</span>
+        </div>
+        <div class="modal-desc">${t.desc}</div>
+
+        <div class="dur-label">RENTAL DURATION</div>
+        <div class="dur-presets">${presetsHtml}</div>
+        <div class="dur-stepper">
+          <button class="step-btn step-minus" onclick="adjHours(-1)">−</button>
+          <div class="step-display">
+            <div class="step-val">${currentHours}</div>
+            <div class="step-unit">hours</div>
+          </div>
+          <button class="step-btn step-plus" onclick="adjHours(1)">+</button>
+        </div>
+
+        <div class="modal-summary">
+          <div>
+            <div class="modal-total-label">Rental total</div>
+            <div class="modal-total-val">$${cost}</div>
+            <div class="modal-total-cross">vs $${t.retail} to buy</div>
+          </div>
+          <div class="modal-right">
+            <div>ETA ~${t.eta}</div>
+            <div>Free return</div>
+            <div style="color:var(--green)">Save $${(t.retail-(t.pph*currentHours)).toFixed(2)}</div>
+          </div>
+        </div>
+        <button class="modal-add-btn" onclick="addToCart(${t.id})">Add to Cart — $${cost}</button>
       `;
-      drawerWrap.style.display = "block";
-      document.getElementById("closeCartBtn").addEventListener("click", closeDrawer);
-      bindCartEvents(drawer);
     }
-    function closeDrawer(){
-      drawerWrap.style.display = "none";
-    }
+    function setHours(h) { currentHours=h; renderModal(); }
+    function adjHours(d) { currentHours=Math.min(48,Math.max(1,currentHours+d)); renderModal(); }
+    function closeModal(e) { if(e.target.id==='tool-modal') closeModalDirect(); }
+    function closeModalDirect() { document.getElementById('tool-modal').classList.add('hidden'); document.body.style.overflow=''; }
 
-    // ─────────────────────────────────────────────
-    // Event wiring
-    // ─────────────────────────────────────────────
-    function bindCartEvents(scope){
-      scope.querySelectorAll("[data-remove]").forEach(btn => {
-        btn.addEventListener("click", () => removeFromCart(Number(btn.dataset.remove)));
-      });
-      scope.querySelectorAll("[data-hours]").forEach(inp => {
-        inp.addEventListener("input", () => {
-          const id = Number(inp.dataset.hours);
-          let v = Number(inp.value || 1);
-          if (!Number.isFinite(v)) v = 1;
-          v = Math.max(1, Math.min(24, v));
-          state.hours[id] = v;
-          state.cart = state.cart.map(c => c.id === id ? { ...c, hours: v } : c);
-          syncCartBadge();
-          render();
-        });
-      });
-      const checkoutBtn = scope.querySelector("#checkout");
-      if (checkoutBtn){
-        checkoutBtn.addEventListener("click", () => {
-          if (!state.cart.length) return;
-          toast("Checkout queued (demo)");
-          state.cart = [];
-          syncCartBadge();
-          closeDrawer();
-          render();
-        });
+    // ─── Cart ─────────────────────────────────────────────────
+    function addToCart(id) {
+      const tool = TOOLS.find(t=>t.id===id);
+      const ex = cart.find(c=>c.id===id);
+      if(ex) ex.hours=currentHours;
+      else cart.push({...tool, hours:currentHours});
+      updateCartBadge();
+      closeModalDirect();
+      showToast(`✓ ${tool.name} added to cart`);
+    }
+    function quickAdd(id) {
+      const tool = TOOLS.find(t=>t.id===id);
+      const ex = cart.find(c=>c.id===id);
+      if(!ex) cart.push({...tool, hours:4});
+      updateCartBadge();
+      showToast(`✓ ${tool.name} added — 4h rental`);
+    }
+    function removeItem(id) {
+      cart = cart.filter(c=>c.id!==id);
+      updateCartBadge();
+      renderCart();
+    }
+    function updateCartBadge() {
+      const badge = document.getElementById('cart-badge');
+      if(cart.length>0) { badge.style.display='flex'; badge.textContent=cart.length; }
+      else badge.style.display='none';
+    }
+    function renderCart() {
+      const total = cart.reduce((s,c)=>s+c.pph*c.hours,0);
+      const saved = cart.reduce((s,c)=>s+(c.retail-c.pph*c.hours),0);
+      const el = document.getElementById('cart-content');
+      if(!el) return;
+      if(cart.length===0) {
+        el.innerHTML=`<div style="grid-column:1/-1;padding:20px"><div class="cart-empty"><div class="cart-empty-icon">${catIconSvg('All','#1a6ef0')}</div><h3>Your cart is empty</h3><p>Browse our catalog and add tools you need.<br/>Drone-delivered straight to your dorm.</p><button class="btn-primary" onclick="showPage('browse')">Browse Tools</button></div></div>`;
+        return;
       }
-      const clearBtn = scope.querySelector("#clearCart");
-      if (clearBtn){
-        clearBtn.addEventListener("click", () => {
-          state.cart = [];
-          syncCartBadge();
-          render();
-        });
-      }
+      const items = cart.map(item=>`
+        <div class="cart-item">
+          <div class="cart-item-icon">${catIconSvg(item.cat)}</div>
+          <div class="cart-item-info">
+            <div class="cart-item-name">${item.name}</div>
+            <div class="cart-item-sub">${item.hours}h rental · $${item.pph}/hr</div>
+          </div>
+          <div style="text-align:right">
+            <div class="cart-item-price">$${(item.pph*item.hours).toFixed(2)}</div>
+            <button class="cart-item-remove" onclick="removeItem(${item.id})">Remove</button>
+          </div>
+        </div>`).join('');
+      el.innerHTML=`
+        <div>
+          <div class="address-pill">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Delivering to Buchanan Hall, Room 412
+          </div>
+          <div class="cart-items">${items}</div>
+        </div>
+        <div>
+          <div class="order-summary">
+            <div class="summary-title">Order Summary</div>
+            <div class="summary-row"><span>Rental total</span><span>$${total.toFixed(2)}</span></div>
+            <div class="summary-row"><span>Delivery</span><span class="summary-green">Free</span></div>
+            <div class="summary-row"><span>Saved vs retail</span><span class="summary-green">$${saved.toFixed(2)}</span></div>
+            <div class="summary-divider"></div>
+            <div class="summary-total"><span>Total</span><span>$${total.toFixed(2)}</span></div>
+            <button class="checkout-btn" onclick="checkout()">Request Delivery</button>
+            <div class="checkout-note">Estimated arrival 6–12 min · Free return pickup</div>
+          </div>
+        </div>`;
+    }
+    function checkout() {
+      cart=[];
+      updateCartBadge();
+      showToast('✓ Order placed! Drone dispatched');
+      setTimeout(()=>showPage('orders'),800);
     }
 
-    function bindViewEvents(){
-      // tool add
-      app.querySelectorAll("[data-add]").forEach(card => {
-        card.addEventListener("click", () => {
-          const id = Number(card.dataset.add);
-          const tool = TOOLS.find(t => t.id === id);
-          if (tool) addToCart(tool);
-        });
-      });
-      app.querySelectorAll("[data-add-btn]").forEach(btn => {
-        btn.addEventListener("click", (e) => {
-          e.stopPropagation();
-          const id = Number(btn.dataset.addBtn);
-          const tool = TOOLS.find(t => t.id === id);
-          if (tool) addToCart(tool);
-        });
-      });
-
-      // categories
-      app.querySelectorAll("[data-cat]").forEach(el => {
-        el.addEventListener("click", () => {
-          state.cat = el.dataset.cat;
-          render();
-        });
-      });
-
-      // cart events in main layout
-      bindCartEvents(app);
-
-      // home CTAs
-      const ctaShop = document.getElementById("ctaShop");
-      if (ctaShop) ctaShop.addEventListener("click", () => setRoute("shop"));
-      const ctaHelp = document.getElementById("ctaHelp");
-      if (ctaHelp) ctaHelp.addEventListener("click", () => setRoute("help"));
-      const miniContact = document.getElementById("miniContact");
-      if (miniContact) miniContact.addEventListener("click", () => setRoute("help"));
-
-      // help buttons
-      const fakeChat = document.getElementById("fakeChat");
-      if (fakeChat) fakeChat.addEventListener("click", () => toast("Live chat is demo UI right now."));
-      const sendMsg = document.getElementById("sendMsg");
-      if (sendMsg) sendMsg.addEventListener("click", () => toast("Message sent (demo). Add backend/form service to make real."));
-
-      // about -> contact
-      const goHelpFromAbout = document.getElementById("goHelpFromAbout");
-      if (goHelpFromAbout) goHelpFromAbout.addEventListener("click", () => setRoute("help"));
+    // ─── Orders ───────────────────────────────────────────────
+    function renderOrders() {
+      const el = document.getElementById('past-orders-list');
+      if(!el) return;
+      const grouped = {};
+      PAST_ORDERS.forEach(o=>{ if(!grouped[o.date]) grouped[o.date]=[]; grouped[o.date].push(o); });
+      el.innerHTML = Object.entries(grouped).map(([date,orders])=>`
+        <div style="font-size:11px;font-weight:600;color:var(--dim);letter-spacing:0.05em;margin:14px 0 8px">${date.toUpperCase()}</div>
+        ${orders.map(o=>`
+          <div class="past-order">
+            <div style="width:44px;height:44px;border-radius:11px;background:linear-gradient(135deg,rgba(26,110,240,0.18),rgba(26,110,240,0.05));display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              ${catIconSvg(TOOLS.find(t=>t.name===o.name)?.cat||'All')}
+            </div>
+            <div style="flex:1">
+              <div style="font-weight:600;font-size:15px">${o.name}</div>
+              <div style="font-size:12px;color:var(--muted)">${o.id} · ${o.time}</div>
+            </div>
+            <div class="delivered-badge">Delivered</div>
+          </div>`).join('')}
+      `).join('');
     }
 
-    // header/nav events
-    document.getElementById("goHome").addEventListener("click", () => setRoute("home"));
-    document.getElementById("shopNow").addEventListener("click", () => setRoute("shop"));
-    document.getElementById("helpBtn").addEventListener("click", () => setRoute("help"));
+    // ─── Account panels ───────────────────────────────────────
+    function showPanel(id) {
+      document.querySelectorAll('.account-panel').forEach(p=>p.classList.add('hidden'));
+      document.getElementById('panel-'+id).classList.remove('hidden');
+      document.querySelectorAll('.sidebar-nav-item').forEach(i=>i.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+    }
+    function selectPayment(el) {
+      document.querySelectorAll('.payment-card').forEach(c=>c.classList.remove('selected'));
+      el.classList.add('selected');
+    }
+    function copyRef() {
+      const btn = document.getElementById('copy-btn');
+      btn.textContent='Copied!'; btn.classList.add('copied');
+      setTimeout(()=>{ btn.textContent='Copy link'; btn.classList.remove('copied'); }, 2000);
+      showToast('✓ Link copied to clipboard');
+    }
+    function sendSupport() {
+      document.getElementById('support-form').classList.add('hidden');
+      document.getElementById('support-sent').classList.remove('hidden');
+      showToast('✓ Message sent!');
+    }
 
-    document.getElementById("openCartMobile").addEventListener("click", () => openDrawerCart());
-
-    document.querySelectorAll(".navLink").forEach(btn => {
-      btn.addEventListener("click", () => setRoute(btn.dataset.route));
-    });
-
-    // footer route links
-    document.querySelectorAll("[data-route]").forEach(el => {
-      el.addEventListener("click", (e) => {
-        e.preventDefault();
-        setRoute(el.getAttribute("data-route"));
-      });
-    });
-
-    // global search
-    const search = document.getElementById("search");
-    search.addEventListener("input", (e) => {
-      state.search = e.target.value;
-      // if they're searching, feel like amazon: jump them to shop
-      if (state.route !== "shop") setRoute("shop");
-      else render();
-    });
-
-    // init
-    syncCartBadge();
-    render();
+    // ─── Init ─────────────────────────────────────────────────
+    renderFeatured();
+    renderTools();
+    renderOrders();
 </script>
 </body>
 </html>

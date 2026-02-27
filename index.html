@@ -36,12 +36,18 @@
           --radius-sm:9px;
           --font:'Sora',sans-serif;
           --nav-h:64px;
+          --toast-bg:#1a1a2e;
+          --toast-border:rgba(255,255,255,.12);
+          --toast-text:#f0f3ff;
           --search-h:54px;
         }
 
         /* ── Dark theme override ─────────────────────────────────────────────────── */
         [data-theme="dark"] {
           --bg:#09080f;
+          --toast-bg:#ffffff;
+          --toast-border:rgba(0,0,0,.12);
+          --toast-text:#0d0f1a;
           --bg2:#0e0d18;
           --bg3:#13121f;
           --surface:rgba(255,255,255,0.04);
@@ -80,9 +86,7 @@
           color:#93c5fd !important;
         }
         [data-theme="dark"] .tool-card { background:var(--bg2) !important; }
-        [data-theme="dark"] .tool-card-img {
-          background:linear-gradient(135deg,rgba(26,110,240,.12),rgba(26,110,240,.04)) !important;
-        }
+        [data-theme="dark"] .tool-card-img {background:linear-gradient(135deg,rgba(26,110,240,.08),rgba(9,8,15,.9)) !important}
         [data-theme="dark"] .tool-card:hover {
           box-shadow:0 12px 36px rgba(0,0,0,.5) !important;
           border-color:rgba(26,110,240,.3) !important;
@@ -189,8 +193,8 @@
         .noise-overlay{position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.025;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
 
         /* ── Toast ─────────────────────────────────── */
-        .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:rgba(22,22,34,.96);backdrop-filter:blur(20px);border:1px solid var(--border2);border-radius:40px;padding:11px 20px;font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;z-index:10000;pointer-events:none;opacity:0;transition:opacity .2s}
-        .toast.show{opacity:1;animation:toastIn .25s ease}
+        .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(8px);background:var(--toast-bg);backdrop-filter:blur(20px);border:1px solid var(--toast-border);border-radius:40px;padding:11px 20px;font-size:13px;font-weight:500;color:var(--toast-text);white-space:nowrap;z-index:10000;pointer-events:none;opacity:0;transition:opacity .25s,transform .25s}
+        .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
         /* ── Auth Modal ─────────────────────────────── */
         .auth-overlay{position:fixed;inset:0;background:rgba(15,20,60,.5);backdrop-filter:blur(8px);z-index:5000;display:flex;align-items:center;justify-content:center;animation:fadeIn .2s ease}
@@ -259,7 +263,7 @@
         .nav-auth-btn:hover{background:var(--blue-hover)}
 
         /* ── Pages ──────────────────────────────────── */
-        .page{display:none;min-height:calc(100vh - var(--nav-h));position:relative;z-index:2}
+        .page{display:none;min-height:calc(100vh - var(--nav-h));position:relative;z-index:2}#page-browse{height:calc(100vh - var(--nav-h));overflow:hidden;display:flex;flex-direction:column}
         .page.active{display:block}
         .container{max-width:1280px;margin:0 auto;padding:0 24px}
 
@@ -317,12 +321,12 @@
         .see-all-btn:hover{color:#60a5fa}
 
         /* ── Tool Cards (improved) ──────────────────── */
-        .tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px}
+        .tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;width:100%}
         .tool-card{background:#ffffff;border:1px solid var(--border);border-radius:var(--radius);padding:20px;cursor:pointer;transition:.22s;position:relative;overflow:hidden;display:flex;flex-direction:column;gap:10px}
         .tool-card::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent,rgba(26,110,240,.03));opacity:0;transition:.2s;pointer-events:none}
         .tool-card:hover{border-color:rgba(26,110,240,.35);transform:translateY(-3px);box-shadow:0 12px 36px rgba(26,110,240,.12)}
         .tool-card:hover::after{opacity:1}
-        .tool-card-price-row{display:flex;align-items:baseline;gap:2px;margin-bottom:10px}.tool-card-pph{font-size:20px;font-weight:800;color:var(--text);line-height:1}.tool-card-unit{font-size:12px;color:var(--muted);font-weight:500}.tool-card-retail{font-size:12px;color:var(--muted);text-decoration:line-through;margin-left:6px}.tool-card-eta-pill{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px}.tool-card-footer{display:flex;align-items:center;justify-content:space-between;gap:8px}.tool-card-add{padding:7px 14px;background:var(--blue);border:none;border-radius:8px;color:#fff;font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s}.tool-card-add:hover{background:#1560d8}
+        .tool-card-img{width:100%;aspect-ratio:1.6;display:flex;align-items:center;justify-content:center;position:relative;border-radius:var(--radius) var(--radius) 0 0;overflow:hidden;background:linear-gradient(135deg,#dbeafe,#eff6ff)}.tool-card-price-row{display:flex;align-items:baseline;gap:2px;margin-bottom:10px}.tool-card-pph{font-size:20px;font-weight:800;color:var(--text);line-height:1}.tool-card-unit{font-size:12px;color:var(--muted);font-weight:500}.tool-card-retail{font-size:12px;color:var(--muted);text-decoration:line-through;margin-left:6px}.tool-card-eta-pill{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px}.tool-card-footer{display:flex;align-items:center;justify-content:space-between;gap:8px}.tool-card-add{padding:7px 14px;background:var(--blue);border:none;border-radius:8px;color:#fff;font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s}.tool-card-add:hover{background:#1560d8}
         .tool-card-top{display:flex;align-items:flex-start;justify-content:space-between}
         .tool-icon{width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,rgba(26,110,240,.18),rgba(26,110,240,.06));display:flex;align-items:center;justify-content:center;flex-shrink:0}
         .save-badge{background:var(--green-dim);border:1px solid var(--green-mid);color:var(--green);font-size:11px;font-weight:700;border-radius:20px;padding:3px 9px;white-space:nowrap}
@@ -350,8 +354,8 @@
         .hiw-desc{font-size:13px;color:var(--muted);line-height:1.6;font-weight:300}
 
         /* ── Browse Page ────────────────────────────── */
-        .browse-layout{display:grid;grid-template-columns:220px 1fr;gap:28px;max-width:1280px;margin:0 auto;padding:32px 24px;align-items:start}
-        .browse-sidebar{position:sticky;top:72px;max-height:calc(100vh - 80px);overflow-y:auto;align-self:start}
+        .browse-layout{display:grid;grid-template-columns:220px 1fr;gap:0;flex:1;overflow:hidden}
+        .browse-sidebar{height:100%;overflow-y:auto;padding:24px 20px;border-right:1px solid var(--border);flex-shrink:0}
         .sidebar-section{margin-bottom:24px}
         .sidebar-section-title{font-size:11px;font-weight:700;letter-spacing:.07em;color:var(--muted);margin-bottom:10px;text-transform:uppercase}
         .sidebar-filter-item{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:8px;cursor:pointer;transition:.15s;font-size:13px;color:var(--text2);margin-bottom:2px}
@@ -361,7 +365,7 @@
         .browse-main{}
         .browse-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
         .result-count{font-size:14px;color:var(--muted)}
-        .sort-select{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;color:var(--text);outline:none;cursor:pointer;font-family:var(--font)}
+        .sort-select{background:var(--bg2);border:1.5px solid var(--border2);border-radius:8px;padding:8px 32px 8px 12px;font-size:13px;color:var(--text);outline:none;cursor:pointer;font-family:var(--font);appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2.5' stroke-linecap='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;transition:border-color .15s,box-shadow .15s}
         .search-bar{display:flex;align-items:center;background:var(--surface);border:1px solid var(--border2);border-radius:11px;overflow:hidden;margin-bottom:20px;transition:.2s}
         .search-bar:focus-within{border-color:var(--blue)}
         .search-bar svg{margin-left:14px;flex-shrink:0;color:var(--dim)}
@@ -427,7 +431,9 @@
         /* ── Orders Page ────────────────────────────── */
         .orders-layout{max-width:900px;margin:0 auto;padding:32px 24px}
         .orders-hero{background:linear-gradient(135deg,rgba(26,110,240,.08),rgba(26,110,240,.02));border:1px solid rgba(26,110,240,.2);border-radius:var(--radius);padding:28px;margin-bottom:28px;position:relative;overflow:hidden}
+        .orders-hero-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px}
         .orders-hero-title{font-size:18px;font-weight:800;margin-bottom:4px}
+        .orders-eta-badge{display:flex;align-items:center;gap:5px;background:var(--blue);color:#fff;font-size:12px;font-weight:700;padding:6px 12px;border-radius:20px;white-space:nowrap}
         .orders-hero-sub{font-size:13px;color:var(--muted);margin-bottom:20px}
         .order-progress{height:6px;background:rgba(0,0,0,.08);border-radius:6px;overflow:hidden;margin-bottom:10px}
         .order-progress-bar{height:100%;background:linear-gradient(90deg,var(--blue),#60a5fa);border-radius:6px;animation:progressFill 2s ease both}
@@ -482,6 +488,9 @@
         .payment-card{display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:14px 16px;cursor:pointer;transition:.18s;margin-bottom:10px}
         .payment-card:hover{border-color:var(--blue)}
         .payment-card.selected{border-color:var(--blue);background:var(--blue-dim)}
+        select:hover{border-color:var(--blue)}
+        select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
+        [data-theme="dark"] select{background:var(--bg2);color:var(--text);border-color:var(--border2);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237a7a9a' stroke-width='2.5' stroke-linecap='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
         .payment-logo{width:40px;height:26px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
         .add-payment{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px dashed var(--dim);border-radius:12px;padding:14px 16px;cursor:pointer;width:100%;font-size:13px;color:var(--muted);transition:.18s;font-family:var(--font)}
         .add-payment:hover{border-color:var(--blue);color:var(--blue)}
@@ -550,8 +559,10 @@
           .account-sidebar{position:static}
         }
         @media(max-width:960px){
+          #page-browse{height:auto;overflow:visible}
           .browse-layout{grid-template-columns:1fr}
-          .browse-sidebar{position:static;max-height:none;display:flex;gap:10px;flex-wrap:wrap}
+          .browse-sidebar{height:auto;overflow-y:visible;position:static;max-height:none;display:flex;gap:10px;flex-wrap:wrap;border-right:none;border-bottom:1px solid var(--border)}
+          .browse-main{height:auto;overflow-y:visible}
           .cart-layout{grid-template-columns:1fr}
           .hiw-grid{grid-template-columns:1fr 1fr}
           .cat-grid{grid-template-columns:1fr 1fr}
@@ -560,19 +571,65 @@
           .hero-stats-grid{grid-template-columns:1fr 1fr}
         }
         @media(max-width:640px){
-          nav{padding:0 16px;gap:10px}
+          nav{padding:0 14px;gap:8px}
           .nav-search{display:none}
           .nav-links{display:none}
-          .hero{padding:36px 0 32px}
+          .nav-wordmark{font-size:16px}
+          .nav-logo-mark{width:28px;height:28px}
+          .nav-auth-btn{padding:7px 12px;font-size:13px}
+          .nav-secondary{display:none}
+          .hero{padding:28px 0 24px}
+          .hero-inner{padding:0 16px;gap:28px}
+          .hero-sub{font-size:15px}
+          .hero-stats-grid{grid-template-columns:1fr 1fr}
+          .btn-primary,.btn-secondary{padding:12px 18px;font-size:14px}
           .hiw-grid{grid-template-columns:1fr}
+          .cat-grid{grid-template-columns:1fr 1fr}
+          .trust-strip{grid-template-columns:1fr 1fr}
+          .auth-box{padding:22px 18px;border-radius:16px;margin:12px}
           .auth-fields-row{grid-template-columns:1fr}
           .form-row{grid-template-columns:1fr}
+          #page-browse{height:auto;overflow:visible}
+          .browse-layout{grid-template-columns:1fr;padding:0}
+          .browse-sidebar{height:auto;overflow-y:visible;border-right:none;border-bottom:1px solid var(--border);padding:16px}
+          .browse-main{height:auto;overflow-y:visible;padding:16px}
+          .browse-sidebar{padding:14px}
+          .browse-toolbar{flex-wrap:wrap;gap:8px}
+          .tools-grid{grid-template-columns:repeat(2,1fr)!important}
+          .modal-box{padding:20px 16px;margin:8px;max-height:92vh;overflow-y:auto}
+          .dur-presets{flex-wrap:wrap}
+          .cart-layout{grid-template-columns:1fr}
+          .cart-item{padding:14px}
+          .orders-layout{padding:20px 16px}
+          #order-map{height:180px!important}
+          .account-layout{grid-template-columns:1fr;padding:16px}
+          .account-sidebar{position:static}
           .stats-grid{grid-template-columns:1fr 1fr}
           .support-grid{grid-template-columns:1fr}
-          .modal-box{padding:22px}
-          .hero-stats-grid{grid-template-columns:1fr 1fr}
+          .past-order{padding:12px}
+          .page{padding-bottom:20px}
+        }
+
+        @media(max-width:400px){
+          .tools-grid{grid-template-columns:1fr!important}
+          .cat-grid{grid-template-columns:1fr}
+          .trust-strip{grid-template-columns:1fr}
+          .auth-box{margin:8px;padding:18px 14px}
+        }
+
+        /* Mobile bottom nav */
+        .mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--bg2);border-top:1px solid var(--border);z-index:900;padding:8px 0 max(8px,env(safe-area-inset-bottom));gap:0}
+        .mobile-nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 4px;background:none;border:none;color:var(--muted);font-family:var(--font);font-size:10px;font-weight:600;letter-spacing:.04em;cursor:pointer;transition:.15s}
+        .mobile-nav-item.active{color:var(--blue)}
+        .mobile-nav-item svg{transition:.15s}
+        .mobile-nav-item.active svg{stroke:var(--blue)}
+        @media(max-width:640px){
+          .mobile-nav{display:flex}
+          body{padding-bottom:calc(60px + env(safe-area-inset-bottom))}
+          .toast{bottom:calc(70px + env(safe-area-inset-bottom))}
         }
     </style>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 </head>
 <body>
 
@@ -633,7 +690,10 @@
                     <div class="form-group"><label class="form-label">BUILDING / HALL</label><input id="su-building" class="form-input" type="text" placeholder="Buchanan Hall"/></div>
                     <div class="form-group"><label class="form-label">ROOM #</label><input id="su-room" class="form-input" type="text" placeholder="412"/></div>
                 </div>
-                <div class="form-group"><label class="form-label">PASSWORD</label><input id="su-pass" class="form-input" type="password" placeholder="Min. 8 characters"/></div>
+                <div class="auth-fields-row">
+                    <div class="form-group"><label class="form-label">PASSWORD</label><input id="su-pass" class="form-input" type="password" placeholder="Min. 8 characters"/></div>
+                    <div class="form-group"><label class="form-label">PHONE (ETA UPDATES)</label><input id="su-phone" class="form-input" type="tel" placeholder="(919) 555-0123"/></div>
+                </div>
                 <div style="background:var(--blue-dim);border:1px solid var(--blue-mid);border-radius:9px;padding:10px 13px;font-size:12px;color:#93c5fd;display:flex;align-items:flex-start;gap:8px">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#93c5fd" stroke-width="2" stroke-linecap="round" style="margin-top:1px;flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                     Must be a valid .edu address. Verified automatically.
@@ -853,14 +913,14 @@
         </div>
 
         <!-- Main content -->
-        <div class="browse-main">
+        <div style="overflow-y:auto;height:100%;padding:24px;" class="browse-main">
             <div class="search-bar">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
                 <input id="browse-search" type="text" placeholder="Search tools by name..." oninput="renderTools()"/>
             </div>
             <div class="browse-header">
                 <div class="result-count" id="result-count">12 tools</div>
-                <select class="sort-select" onchange="renderTools()">
+                <select class="sort-select" id="sort-select" onchange="sortTools(this.value)">
                     <option value="popular">Most popular</option>
                     <option value="price-asc">Price: Low to high</option>
                     <option value="price-desc">Price: High to low</option>
@@ -889,20 +949,26 @@
         <h2 style="font-size:22px;font-weight:800;margin-bottom:20px;letter-spacing:-.02em">My Orders</h2>
         <div id="active-order-section" style="display:none">
             <div class="orders-hero">
-                <div class="orders-hero-title" id="order-name-display">Drill Kit</div>
-                <div class="orders-hero-sub">Order <span id="order-id-display">#—</span> · Estimated arrival ~7 min</div>
+                <div class="orders-hero-header">
+                    <div>
+                        <div class="orders-hero-title" id="order-name-display">Drill Kit</div>
+                        <div class="orders-hero-sub">Order <span id="order-id-display">#—</span></div>
+                    </div>
+                    <div class="orders-eta-badge">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        ETA ~<span id="order-eta-display">7</span> min
+                    </div>
+                </div>
+
+                <!-- Leaflet map -->
+                <div id="order-map" style="width:100%;height:220px;border-radius:10px;margin:14px 0;overflow:hidden;z-index:1"></div>
+
                 <div class="order-progress"><div class="order-progress-bar"></div></div>
                 <div class="order-steps">
                     <span class="done">✓ Order placed</span>
                     <span class="done">✓ Drone en route</span>
                     <span>Arriving soon</span>
                     <span>Delivered</span>
-                </div>
-                <div class="drone-icon-animated">
-                    <svg width="44" height="44" viewBox="0 0 100 100" fill="none" stroke="rgba(26,110,240,.7)" stroke-width="2" stroke-linecap="round">
-                        <circle cx="50" cy="50" r="10"/><path d="M20 20l14 14M80 20L66 34M20 80l14-14M80 80L66 66"/>
-                        <circle cx="18" cy="18" r="6"/><circle cx="82" cy="18" r="6"/><circle cx="18" cy="82" r="6"/><circle cx="82" cy="82" r="6"/>
-                    </svg>
                 </div>
             </div>
         </div>
@@ -1113,7 +1179,25 @@
       {id:9,  name:"Oscilloscope",   cat:"Electronics", pph:8.00, retail:120, rating:4.9, desc:"2-channel 50MHz digital · USB connectivity",                eta:"12 min"},
       {id:10, name:"Hot Glue Gun",   cat:"Crafts",      pph:1.00, retail:15,  rating:4.6, desc:"High-temp · 20 glue sticks · fast heat-up",                 eta:"5 min"},
       {id:11, name:"Multimeter",     cat:"Electronics", pph:2.00, retail:28,  rating:4.8, desc:"Auto-ranging digital · leads and case included",            eta:"6 min"},
-      {id:12, name:"Staple Gun",     cat:"Workshop",    pph:2.50, retail:32,  rating:4.5, desc:"Heavy-duty · 1000 staples · upholstery ready",             eta:"5 min"}
+      {id:12, name:"Staple Gun",     cat:"Workshop",    pph:2.50, retail:32,  rating:4.5, desc:"Heavy-duty · 1000 staples · upholstery ready",             eta:"5 min"},
+      {id:13, name:"Circular Saw",   cat:"Workshop",    pph:8.00, retail:110, rating:4.9, desc:"7-1/4 inch · laser guide · blade guard · ear protection included", eta:"8 min"},
+      {id:14, name:"Tile Cutter",    cat:"Workshop",    pph:6.50, retail:85,  rating:4.7, desc:"Wet saw · diamond blade · 12-inch capacity",                    eta:"10 min"},
+      {id:15, name:"Clamp Set",      cat:"Workshop",    pph:1.50, retail:22,  rating:4.6, desc:"6-piece bar clamps · 12-inch reach · quick release",            eta:"4 min"},
+      {id:16, name:"3D Pen",         cat:"Crafts",      pph:2.00, retail:35,  rating:4.6, desc:"1.75mm PLA/ABS · adjustable speed · 3 filament rolls included", eta:"6 min"},
+      {id:17, name:"Vinyl Cutter",   cat:"Crafts",      pph:4.00, retail:65,  rating:4.8, desc:"12-inch · USB · compatible with Cricut design files",           eta:"9 min"},
+      {id:18, name:"Airbrush Kit",   cat:"Crafts",      pph:3.00, retail:55,  rating:4.7, desc:"Dual-action · mini compressor · 6 paint colors",               eta:"7 min"},
+      {id:19, name:"Loom",           cat:"Crafts",      pph:2.50, retail:40,  rating:4.5, desc:"12-inch rigid heddle · beginner-friendly · yarn included",      eta:"8 min"},
+      {id:20, name:"Projector",      cat:"Office",      pph:5.00, retail:180, rating:4.8, desc:"1080p · HDMI & USB-C · 150-inch throw · remote included",       eta:"8 min"},
+      {id:21, name:"Paper Shredder", cat:"Office",      pph:1.50, retail:45,  rating:4.5, desc:"Cross-cut · 8-sheet capacity · auto-feed mode",                 eta:"5 min"},
+      {id:22, name:"Binding Machine",cat:"Office",      pph:2.00, retail:38,  rating:4.6, desc:"Comb binding · up to 300 sheets · 100 combs included",          eta:"6 min"},
+      {id:23, name:"Poster Printer", cat:"Office",      pph:3.50, retail:90,  rating:4.7, desc:"A3 inkjet · borderless · 50 glossy sheets included",            eta:"7 min"},
+      {id:24, name:"Raspberry Pi Kit",cat:"Electronics",pph:3.00, retail:75,  rating:4.8, desc:"Pi 4 · 4GB RAM · SD card · power supply · breadboard",          eta:"6 min"},
+      {id:25, name:"Logic Analyzer", cat:"Electronics", pph:4.00, retail:60,  rating:4.7, desc:"8-channel · 24MHz · USB · works with Pulseview",               eta:"7 min"},
+      {id:26, name:"Reflow Station", cat:"Electronics", pph:5.00, retail:80,  rating:4.8, desc:"SMD rework · hot air + iron · digital display",                 eta:"9 min"},
+      {id:27, name:"Bench PSU",      cat:"Electronics", pph:4.50, retail:70,  rating:4.9, desc:"30V 5A · dual-channel · adjustable voltage & current",          eta:"8 min"},
+      {id:28, name:"Laser Level",    cat:"Workshop",    pph:3.00, retail:50,  rating:4.7, desc:"Self-leveling · 3-line · 50ft range · tripod included",         eta:"6 min"},
+      {id:29, name:"Impact Driver",  cat:"Workshop",    pph:5.00, retail:70,  rating:4.9, desc:"18V brushless · 2000 in-lb torque · 3 bits included",           eta:"5 min"},
+      {id:30, name:"Wire Stripper",  cat:"Electronics", pph:1.00, retail:18,  rating:4.6, desc:"Auto-adjusting · 10-24 AWG · ergonomic grip",                  eta:"4 min"}
     ];
     var DURATIONS = [1,2,4,8,24,48];
 
@@ -1163,6 +1247,13 @@
       t.textContent=msg; t.classList.add("show");
       setTimeout(function(){ t.classList.remove("show"); }, 2800);
     }
+
+    window.updateMobileNav = function(page) {
+      ["home","browse","cart","orders","account"].forEach(function(p){
+        var btn = document.getElementById("mnav-"+p);
+        if (btn) btn.classList.toggle("active", p===page);
+      });
+    };
     window.showToast = showToast;
 
     // ── Navigation ────────────────────────────────────────────────────────────────
@@ -1173,9 +1264,10 @@
       qsa(".nav-link").forEach(function(l){ l.classList.remove("active"); });
       var nl = el("nav-"+id); if(nl) nl.classList.add("active");
       window.scrollTo(0,0);
+      updateMobileNav(id);
       if (id==="browse")  renderTools();
       if (id==="cart")    renderCart();
-      if (id==="orders")  renderOrders();
+      if (id==="orders")  { renderOrders(); setTimeout(initOrderMap, 100); }
       if (id==="account") renderAccount();
     }
     window.showPage = showPage;
@@ -1194,7 +1286,7 @@
 
     // ── Tools rendering ───────────────────────────────────────────────────────────
     function toolCard(t) {
-      var pct  = Math.round((1-(t.pph*4)/t.retail)*100);
+      var pct  = Math.max(0, Math.round((1-(Math.min(t.pph*4,t.retail))/t.retail)*100));
       var emoj = t.cat;
       return '<div class="tool-card fade-up" onclick="openModal('+t.id+')">'+
         '<div class="tool-card-img">'+
@@ -1282,7 +1374,10 @@
       renderTools();
     };
 
-    window.sortTools = function(val) { currentSort=val; renderTools(); };
+    window.sortTools = function(val) {
+      currentSort = val||"popular";
+      renderTools();
+    };
 
     // active filter state
     var currentPriceFilter = "all";
@@ -1349,8 +1444,9 @@
 
     function renderModal() {
       var t    = currentTool;
-      var cost = (t.pph * currentHours).toFixed(2);
-      var pct  = Math.round((1 - (t.pph*currentHours)/t.retail)*100);
+      var rawCost = t.pph * currentHours;
+      var cost = Math.min(rawCost, t.retail).toFixed(2);
+      var pct  = Math.max(0, Math.round((1 - parseFloat(cost)/t.retail)*100));
       var pre  = DURATIONS.map(function(h){
         return '<button class="dur-preset'+(currentHours===h?" active":"")+'" onclick="setHours('+h+')">'+(h<24?h+"h":(h/24)+"d")+'</button>';
       }).join("");
@@ -1383,8 +1479,18 @@
         '<button class="modal-add-btn" onclick="addToCart('+t.id+')">Add to Cart · $'+cost+'</button>';
     }
 
-    window.setHours = function(h)  { currentHours=h; renderModal(); };
-    window.adjHours = function(d)  { currentHours=Math.min(48,Math.max(1,currentHours+d)); renderModal(); };
+    window.setHours = function(h) {
+      var t = currentTool;
+      var maxH = t ? Math.floor(t.retail / t.pph) : 48;
+      currentHours = Math.min(h, maxH);
+      renderModal();
+    };
+    window.adjHours = function(d) {
+      var t = currentTool;
+      var maxH = t ? Math.floor(t.retail / t.pph) : 48;
+      currentHours = Math.min(maxH, Math.max(1, currentHours+d));
+      renderModal();
+    };
     window.closeModal = function(e){ if(e.target.id==="tool-modal") closeModalDirect(); };
     window.closeModalDirect = function() {
       el("tool-modal").classList.add("hidden");
@@ -1394,9 +1500,12 @@
     // ── Cart ──────────────────────────────────────────────────────────────────────
     function addToCart(id) {
       if (!currentUser) { closeModalDirect(); showAuth(); return; }
+      // Cap hours so cost never exceeds retail price
       var t = getTool(id), found = false;
-      for (var i=0;i<cart.length;i++) if (cart[i].id===id) { cart[i].hours=currentHours; found=true; break; }
-      if (!found) { var item={}; for(var k in t) item[k]=t[k]; item.hours=currentHours; cart.push(item); }
+      var maxHours = Math.floor(t.retail / t.pph);
+      var safeHours = Math.min(currentHours, maxHours);
+      for (var i=0;i<cart.length;i++) if (cart[i].id===id) { cart[i].hours=safeHours; found=true; break; }
+      if (!found) { var item={}; for(var k in t) item[k]=t[k]; item.hours=safeHours; cart.push(item); }
       updateBadge(); saveCart(); closeModalDirect();
       showToast("✓ "+t.name+" added to cart");
     }
@@ -1479,6 +1588,72 @@
     };
 
     // ── Orders ────────────────────────────────────────────────────────────────────
+
+    // ── Order map ─────────────────────────────────────────────────────────────────
+    var _map = null;
+    var _droneMarker = null;
+    var _destMarker = null;
+
+    function initOrderMap() {
+      if (!window.L) return;
+      var mapEl = document.getElementById("order-map");
+      if (!mapEl) return;
+
+      // NC State campus center as default destination
+      var dest = [35.7847, -78.6821];
+      // Drone starts ~0.5mi away
+      var droneStart = [35.7880, -78.6750];
+
+      if (!_map) {
+        _map = L.map("order-map", { zoomControl:false, attributionControl:false })
+                 .setView(dest, 15);
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          maxZoom:19
+        }).addTo(_map);
+
+        // Destination pin
+        var destIcon = L.divIcon({
+          html: '<div style="width:16px;height:16px;background:#1a6ef0;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,.3)"></div>',
+          iconSize:[16,16], iconAnchor:[8,8], className:''
+        });
+        _destMarker = L.marker(dest, {icon:destIcon}).addTo(_map)
+                       .bindPopup("Your delivery location").openPopup();
+
+        // Drone marker
+        var droneIcon = L.divIcon({
+          html: '<div style="width:36px;height:36px;background:var(--blue);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(26,110,240,.5);animation:pulse 1.5s ease-in-out infinite">' +
+                '<svg width="18" height="18" viewBox="0 0 100 100" fill="none" stroke="white" stroke-width="6" stroke-linecap="round">' +
+                '<circle cx="50" cy="50" r="10"/><path d="M20 20l14 14M80 20L66 34M20 80l14-14M80 80L66 66"/>' +
+                '<circle cx="18" cy="18" r="6" fill="white" stroke="none"/><circle cx="82" cy="18" r="6" fill="white" stroke="none"/>' +
+                '<circle cx="18" cy="82" r="6" fill="white" stroke="none"/><circle cx="82" cy="82" r="6" fill="white" stroke="none"/>' +
+                '</svg></div>',
+          iconSize:[36,36], iconAnchor:[18,18], className:''
+        });
+        _droneMarker = L.marker(droneStart, {icon:droneIcon}).addTo(_map);
+
+        // Draw route line
+        L.polyline([droneStart, dest], {
+          color:'#1a6ef0', weight:2.5, dashArray:'6 6', opacity:0.7
+        }).addTo(_map);
+
+        // Animate drone toward destination
+        animateDrone(droneStart, dest);
+      } else {
+        _map.invalidateSize();
+      }
+    }
+
+    function animateDrone(from, to) {
+      var steps = 120, step = 0;
+      var latDiff = (to[0]-from[0])/steps;
+      var lngDiff = (to[1]-from[1])/steps;
+      var interval = setInterval(function(){
+        step++;
+        if (!_droneMarker || step > steps) { clearInterval(interval); return; }
+        _droneMarker.setLatLng([from[0]+latDiff*step, from[1]+lngDiff*step]);
+      }, 350);
+    }
+
     function renderOrders() {
       var listEl = el("past-orders-list");
       var activeEl = el("active-order-section");
@@ -1744,6 +1919,7 @@
         var bldg  = (el("su-building")||{value:""}).value.trim()||"";
         var room  = (el("su-room")||{value:""}).value.trim()||"";
         var pass  = (el("su-pass")||{value:""}).value;
+        var phone = (el("su-phone")||{value:""}).value.trim()||"";
         if (!first||!email||!pass){ showToast("Please fill in required fields"); return; }
         if (!email.endsWith(".edu")){ showToast("Must use a .edu email address"); return; }
         if (pass.length<8){ showToast("Password must be at least 8 characters"); return; }
@@ -1752,7 +1928,7 @@
           var cred = await fb.createUserWithEmailAndPassword(fb.auth, email, pass);
           await fb.updateProfile(cred.user, {displayName:(first+" "+last).trim()});
           await fb.setDoc(pRef(cred.user.uid),{
-            firstName:first,lastName:last,email:email,
+            firstName:first,lastName:last,email:email,phone:phone,
             building:bldg,room:room,dropNotes:"",
             totalRentals:0,totalSaved:0,totalHours:0,
             notifications:{delivery:true,eta:true,returns:true,promo:false},
@@ -1867,3 +2043,30 @@
       document.addEventListener("fbready", startApp, {once:true});
     }
 </script>
+
+<!-- Mobile bottom nav -->
+<div class="mobile-nav" id="mobile-nav">
+    <button class="mobile-nav-item active" id="mnav-home" onclick="showPage('home');updateMobileNav('home')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Home
+    </button>
+    <button class="mobile-nav-item" id="mnav-browse" onclick="showPage('browse');updateMobileNav('browse')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        Browse
+    </button>
+    <button class="mobile-nav-item" id="mnav-cart" onclick="showPage('cart');updateMobileNav('cart')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+        Cart
+    </button>
+    <button class="mobile-nav-item" id="mnav-orders" onclick="showPage('orders');updateMobileNav('orders')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Orders
+    </button>
+    <button class="mobile-nav-item" id="mnav-account" onclick="showPage('account');updateMobileNav('account')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Account
+    </button>
+</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</body>
+</html>

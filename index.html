@@ -263,8 +263,9 @@
         .nav-auth-btn:hover{background:var(--blue-hover)}
 
         /* ── Pages ──────────────────────────────────── */
-        .page{display:none;min-height:calc(100vh - var(--nav-h));position:relative;z-index:2}#page-browse{height:calc(100vh - var(--nav-h));overflow:hidden;display:flex;flex-direction:column}
+        .page{display:none;min-height:calc(100vh - var(--nav-h))}
         .page.active{display:block}
+        #page-browse{min-height:calc(100vh - var(--nav-h))}
         .container{max-width:1280px;margin:0 auto;padding:0 24px}
 
         /* ── Promo Banner ───────────────────────────── */
@@ -559,7 +560,7 @@
           .account-sidebar{position:static}
         }
         @media(max-width:960px){
-          #page-browse{height:auto;overflow:visible}
+
           .browse-layout{grid-template-columns:1fr}
           .browse-sidebar{height:auto;overflow-y:visible;position:static;max-height:none;display:flex;gap:10px;flex-wrap:wrap;border-right:none;border-bottom:1px solid var(--border)}
           .browse-main{height:auto;overflow-y:visible}
@@ -589,7 +590,7 @@
           .auth-box{padding:22px 18px;border-radius:16px;margin:12px}
           .auth-fields-row{grid-template-columns:1fr}
           .form-row{grid-template-columns:1fr}
-          #page-browse{height:auto;overflow:visible}
+
           .browse-layout{grid-template-columns:1fr;padding:0}
           .browse-sidebar{height:auto;overflow-y:visible;border-right:none;border-bottom:1px solid var(--border);padding:16px}
           .browse-main{height:auto;overflow-y:visible;padding:16px}

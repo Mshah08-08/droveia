@@ -1494,15 +1494,11 @@
     }
 
     window.setHours = function(h) {
-      var t = currentTool;
-      var maxH = t ? Math.floor(t.retail / t.pph) : 48;
-      currentHours = Math.min(h, maxH);
+      currentHours = Math.min(48, Math.max(1, h));
       renderModal();
     };
     window.adjHours = function(d) {
-      var t = currentTool;
-      var maxH = t ? Math.floor(t.retail / t.pph) : 48;
-      currentHours = Math.min(maxH, Math.max(1, currentHours+d));
+      currentHours = Math.min(48, Math.max(1, currentHours+d));
       renderModal();
     };
     window.closeModal = function(e){ if(e.target.id==="tool-modal") closeModalDirect(); };
@@ -1514,22 +1510,14 @@
     // ── Cart ──────────────────────────────────────────────────────────────────────
     function addToCart(id) {
       if (!currentUser) { closeModalDirect(); showAuth(); return; }
-      // Cap hours so cost never exceeds retail price
       var t = getTool(id), found = false;
-      var maxHours = Math.floor(t.retail / t.pph);
-      var safeHours = Math.min(currentHours, maxHours);
-      for (var i=0;i<cart.length;i++) if (cart[i].id===id) { cart[i].hours=safeHours; found=true; break; }
-      if (!found) { var item={}; for(var k in t) item[k]=t[k]; item.hours=safeHours; cart.push(item); }
+      for (var i=0;i<cart.length;i++) if (cart[i].id===id) { cart[i].hours=currentHours; found=true; break; }
+      if (!found) { var item={}; for(var k in t) item[k]=t[k]; item.hours=currentHours; cart.push(item); }
       updateBadge(); saveCart(); closeModalDirect();
       showToast("✓ "+t.name+" added to cart");
     }
     function quickAdd(id) {
-      if (!currentUser) { showAuth(); return; }
-      var t = getTool(id), has=false;
-      for (var i=0;i<cart.length;i++) if (cart[i].id===id) { has=true; break; }
-      if (!has) { var item={}; for(var k in t) item[k]=t[k]; item.hours=4; cart.push(item); }
-      updateBadge(); saveCart();
-      showToast("✓ "+t.name+" added, 4h rental");
+      openModal(id);
     }
     function removeItem(id) {
       cart = cart.filter(function(c){ return c.id!==id; });

@@ -644,7 +644,7 @@
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
             <div class="auth-logo">
                 <div class="nav-logo-mark" style="width:28px;height:28px">
-                    <img src="1.png" style="width:28px;height:28px;object-fit:contain;display:block;border-radius:5px"/>
+                    <img src="1.png" style="width:36px;height:36px;object-fit:contain;display:block;border-radius:5px"/>
                 </div>
                 <span style="font-size:16px;font-weight:800;letter-spacing:-.03em">Droveia</span>
             </div>
@@ -1258,7 +1258,6 @@
 
     // ── Navigation ────────────────────────────────────────────────────────────────
     function showPage(id) {
-      if ((id==="cart"||id==="orders"||id==="account") && !currentUser) { showAuth(); return; }
       qsa(".page").forEach(function(p){ p.classList.remove("active"); });
       var pg = el("page-"+id); if(pg) pg.classList.add("active");
       qsa(".nav-link").forEach(function(l){ l.classList.remove("active"); });
@@ -1534,6 +1533,11 @@
       var items = el("cart-items-container");
       var sumEl = el("cart-summary-container");
       if (!items) return;
+      if (!currentUser) {
+        items.innerHTML = '<div class="cart-empty"><div class="cart-empty-icon"></div><h3>Sign in to view your cart</h3><p>Create a free account to start renting tools.</p><button class="btn-primary" onclick="showAuth()">Sign In</button></div>';
+        if (sumEl) sumEl.innerHTML = "";
+        return;
+      }
       if (!cart.length) {
         items.innerHTML =
           '<div class="cart-empty">'+
@@ -1658,6 +1662,11 @@
       var listEl = el("past-orders-list");
       var activeEl = el("active-order-section");
       if (!listEl) return;
+      if (!currentUser) {
+        if (activeEl) activeEl.style.display = "none";
+        listEl.innerHTML = '<div style="text-align:center;padding:48px 0;color:var(--muted);font-size:14px"><div style="font-size:32px;margin-bottom:12px;opacity:.3"></div><div style="font-weight:600;margin-bottom:8px">Sign in to see your orders</div><button class="btn-primary" style="margin-top:8px" onclick="showAuth()">Sign In</button></div>';
+        return;
+      }
       var active = null;
       for (var i=0;i<liveOrders.length;i++) if (liveOrders[i].status==="in_flight") { active=liveOrders[i]; break; }
       if (activeEl) {
@@ -1714,6 +1723,7 @@
 
     // ── Account ───────────────────────────────────────────────────────────────────
     function renderAccount() {
+      if (!currentUser) { showAuth(); return; }
       if (!userProfile) return;
       var full = ((userProfile.firstName||"")+" "+(userProfile.lastName||"")).trim()||"Student";
       setText("prof-name",    full);

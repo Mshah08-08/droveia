@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Droveia</title>
+    <title>Droveia — Tools Delivered by Drone</title>
     <link rel="preconnect" href="https://fonts.googleapis.com"/>
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
     <style>
@@ -644,7 +644,7 @@
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
             <div class="auth-logo">
                 <div class="nav-logo-mark" style="width:28px;height:28px">
-                    <img src="1.png" style="width:36px;height:36px;object-fit:contain;display:block;border-radius:5px"/>
+                    <img src="1.png" style="width:28px;height:28px;object-fit:contain;display:block;border-radius:5px"/>
                 </div>
                 <span style="font-size:16px;font-weight:800;letter-spacing:-.03em">Droveia</span>
             </div>
@@ -2021,7 +2021,7 @@
 
 
     // ── Theme toggle ─────────────────────────────────────────────────────────────
-    var _theme = localStorage.getItem("droveiaTheme") || "light";
+    var _theme = (function(){ try { return localStorage.getItem("droveiaTheme") || "light"; } catch(e){ return "light"; } })();
     function applyTheme(t, animate) {
       var html = document.documentElement;
       if (animate) {
@@ -2034,7 +2034,7 @@
       if (moon) moon.style.display = t === "dark" ? "none"  : "block";
       if (sun)  sun.style.display  = t === "dark" ? "block" : "none";
       _theme = t;
-      localStorage.setItem("droveiaTheme", t);
+      try { localStorage.setItem("droveiaTheme", t); } catch(e){}
     }
     window.toggleTheme = function() {
       applyTheme(_theme === "dark" ? "light" : "dark", true);

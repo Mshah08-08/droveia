@@ -985,6 +985,11 @@
                 </div>
             </div>
             <div class="sidebar-section">
+                <div class="sidebar-section-title">Availability</div>
+                <div class="sidebar-filter-item active" id="avail-all" onclick="setAvailFilter(this,'all')">Show all</div>
+                <div class="sidebar-filter-item" id="avail-available" onclick="setAvailFilter(this,'available')">Available only</div>
+            </div>
+            <div class="sidebar-section">
                 <div class="sidebar-section-title">Price Range</div>
                 <div class="sidebar-filter-item active" onclick="setFilter(this,'price','all')">Any price</div>
                 <div class="sidebar-filter-item" onclick="setFilter(this,'price','0-2')">Under $2/hr</div>
@@ -1380,6 +1385,7 @@
       var list = TOOLS.filter(function(t){
         if (currentCat!=="All" && t.cat!==currentCat) return false;
         if (t.name.toLowerCase().indexOf(q)<0) return false;
+        if (currentAvailFilter==="available" && t.available===false) return false;
         // price filter
         if (currentPriceFilter!=="all") {
           var parts = currentPriceFilter.split("-");
@@ -1459,6 +1465,14 @@
     // active filter state
     var currentPriceFilter = "all";
     var currentEtaFilter   = "all";
+    var currentAvailFilter = "all";
+
+    window.setAvailFilter = function(elem, val) {
+      document.querySelectorAll("#avail-all, #avail-available").forEach(function(i){ i.classList.remove("active"); });
+      elem.classList.add("active");
+      currentAvailFilter = val;
+      renderTools();
+    };
 
     window.setFilter = function(elem, type, val) {
       // update active state within same section

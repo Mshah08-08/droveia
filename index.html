@@ -2362,10 +2362,10 @@ window.adminOrderAction = function(btn) {
         await fb.updateDoc(fb.doc(fb.db, "allOrders", orderId), update);
 
         // Update user's own order subcollection so their app updates in real-time
-        if (orderData.userId) {
+        if (orderData.userId && orderData.userOrderId) {
           try {
             await fb.updateDoc(
-              fb.doc(fb.db, "users", orderData.userId, "orders", orderId),
+              fb.doc(fb.db, "users", orderData.userId, "orders", orderData.userOrderId),
               update
             );
           } catch(e) { console.error("Could not update user order:", e.message); showToast("Warning: " + e.message); }
@@ -2501,7 +2501,7 @@ function startApp() {
     var saved = parseFloat(items.reduce(function(s,i){return s+(i.retail-calcCost(i,i.hours));},0).toFixed(2));
     var hrs   = items.reduce(function(s,i){return s+i.hours;},0);
     try {
-      await fb.addDoc(oCol(currentUser.uid), {
+      var orderRef = await fb.addDoc(oCol(currentUser.uid), {
         status: "in_flight",
         items:  items.map(function(i){
           return {id:i.id,name:i.name,cat:i.cat,pph:i.pph,hours:i.hours,retail:i.retail};
@@ -2536,7 +2536,7 @@ function startApp() {
         userEmail: currentUser.email,
         createdAt: fb.serverTimestamp()
       };
-      fb.addDoc(fb.collection(fb.db, "allOrders"), orderData).catch(function(){});
+      fb.addDoc(fb.collection(fb.db, "allOrders"), Object.assign({}, orderData, { userOrderId: orderRef.id })).catch(function(){});
       showToast("✓ Order placed! Drone dispatched");
       setTimeout(function(){ showPage("orders"); }, 800);
     } catch(e){ console.error("placeOrder",e); showToast("Order failed, try again"); }

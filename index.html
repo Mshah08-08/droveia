@@ -1432,8 +1432,8 @@ window.showToast = showToast;
 function showPage(id) {
   qsa(".page").forEach(function(p){ p.classList.remove("active"); });
   var pg = el("page-"+id); if(pg) pg.classList.add("active");
-  // Clear hash so refresh doesn't re-trigger admin
   if (window.location.hash) history.replaceState(null, "", window.location.pathname);
+  sessionStorage.setItem("currentPage", id);
   qsa(".nav-link").forEach(function(l){ l.classList.remove("active"); });
   var nl = el("nav-"+id); if(nl) nl.classList.add("active");
   if (id === "admin") { renderAdmin(); }
@@ -3085,6 +3085,11 @@ if (window._fbReady) subscribeInventory(window._fb);
 if (sessionStorage.getItem("openAdmin") === "1") {
   sessionStorage.removeItem("openAdmin");
   window._openAdminOnAuth = true;
+}
+// Restore last visited page on refresh
+var _savedPage = sessionStorage.getItem("currentPage");
+if (_savedPage && _savedPage !== "admin") {
+  showPage(_savedPage);
 }
 </script>
 

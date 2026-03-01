@@ -915,9 +915,13 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
             Browse Tools
           </button>
-          <button class="btn-secondary" id="hero-admin-btn" onclick="showPage('admin')">
+          <button class="btn-secondary" id="hero-admin-btn" onclick="showPage('admin')" style="display:none">
             Admin
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          </button>
+          <button class="btn-secondary" id="hero-signup-btn" onclick="switchAuth('signup');showAuth()">
+            Create Free Account
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           </button>
         </div>
         <div class="trust-row">
@@ -2231,21 +2235,17 @@ async function adminLoadOrders() {
   if (!wrap) return;
   var fb = window._fb;
   try {
-    var usersSnap = await fb.getDocs(fb.collection(fb.db, "users"));
-    var orders = [];
-    for (var i = 0; i < usersSnap.docs.length; i++) {
-      var uDoc = usersSnap.docs[i];
-      var oSnap = await fb.getDocs(
-        fb.query(fb.collection(fb.db, "users", uDoc.id, "orders"), fb.orderBy("createdAt","desc"), fb.limit(5))
-      );
-      oSnap.docs.forEach(function(d){ orders.push(Object.assign({_id:d.id, _uid:uDoc.id}, d.data())); });
-    }
-    orders.sort(function(a,b){ return (b.createdAt?.seconds||0) - (a.createdAt?.seconds||0); });
+    // Use top-level allOrders collection instead of per-user subcollections
+    var snap = await fb.getDocs(
+      fb.query(fb.collection(fb.db, "allOrders"), fb.orderBy("createdAt","desc"), fb.limit(50))
+    );
+    var orders = snap.docs.map(function(d){ return Object.assign({_id:d.id}, d.data()); });
+
     if (!orders.length) {
-      wrap.innerHTML = '<div style="color:var(--muted);font-size:14px;padding:20px">No orders found.</div>';
+      wrap.innerHTML = '<div style="color:var(--muted);font-size:14px;padding:20px">No orders yet.</div>';
       return;
     }
-    wrap.innerHTML = orders.slice(0, 30).map(function(o) {
+    wrap.innerHTML = orders.map(function(o) {
       var items = (o.items||[]).map(function(i){ return '<span class="admin-order-item">' + i.name + ' · ' + i.hours + 'h</span>'; }).join("");
       var addr = o.address ? o.address.building + ", Room " + o.address.room : "—";
       var date = o.createdAt && o.createdAt.toDate ? o.createdAt.toDate().toLocaleString() : "";
@@ -2369,6 +2369,18 @@ function startApp() {
       updateBadge(); renderAccount();
       // Mark rented tools unavailable in real-time
       items.forEach(function(i){ markToolUnavailable(fb, i.id); });
+      // Also write to top-level allOrders for admin dashboard
+      var orderData = {
+        status: "in_flight", items: items.map(function(i){
+          return {id:i.id,name:i.name,cat:i.cat,pph:i.pph,hours:i.hours,retail:i.retail};
+        }),
+        total:total, saved:saved,
+        address:{building:userProfile&&userProfile.building||"—",room:userProfile&&userProfile.room||"—"},
+        userId: currentUser.uid,
+        userEmail: currentUser.email,
+        createdAt: fb.serverTimestamp()
+      };
+      fb.addDoc(fb.collection(fb.db, "allOrders"), orderData).catch(function(){});
       showToast("✓ Order placed! Drone dispatched");
       setTimeout(function(){ showPage("orders"); }, 800);
     } catch(e){ console.error("placeOrder",e); showToast("Order failed, try again"); }
@@ -2470,6 +2482,10 @@ function startApp() {
       if (btn) { btn.textContent=first; btn.onclick=function(){showPage("account");}; }
       var heroBtn = el("hero-signup-btn");
       if (heroBtn) heroBtn.style.display = "none";
+      // Show admin button only for admin users
+      await loadAdminEmails();
+      var adminBtn = el("hero-admin-btn");
+      if (adminBtn) adminBtn.style.display = checkAdmin() ? "" : "none";
       await loadProfile();
       await loadCart();
       subscribeOrders();
@@ -2484,6 +2500,8 @@ function startApp() {
       if(btn){ btn.textContent="Sign In"; btn.onclick=showAuth; }
       var heroBtn = el("hero-signup-btn");
       if (heroBtn) heroBtn.style.display = "";
+      var adminBtn = el("hero-admin-btn");
+      if (adminBtn) adminBtn.style.display = "none";
     }
   });
 }

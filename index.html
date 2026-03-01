@@ -408,7 +408,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:var(--nav-h);backgro
 .filter-chip-x{color:rgba(147,197,253,.5);font-size:14px}
 
 /* ── Cart Page ──────────────────────────────── */
-.cart-layout{max-width:1280px;margin:0 auto;padding:32px 24px;min-height:calc(100vh - var(--nav-h))}.cart-layout.empty{display:flex;align-items:center;justify-content:center}
+.cart-layout{max-width:1280px;margin:0 auto;padding:0 24px 32px;min-height:calc(70vh - var(--nav-h))}.cart-layout.empty{display:flex;align-items:center;justify-content:center}
 .cart-layout.has-items{display:grid;grid-template-columns:1fr 360px;gap:28px;align-items:start}
 .cart-items{display:flex;flex-direction:column;gap:12px}
 .cart-item{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:18px;display:flex;align-items:center;gap:16px;transition:.2s}
@@ -1133,9 +1133,11 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
 
 <!-- ══ CART PAGE ════════════════════════════════════════════════ -->
 <div class="page" id="page-cart">
+  <div style="max-width:1280px;margin:0 auto;padding:32px 24px 0">
+    <h2 style="font-size:22px;font-weight:800;margin-bottom:20px;letter-spacing:-.02em">Your Cart</h2>
+  </div>
   <div class="cart-layout">
     <div>
-      <h2 style="font-size:22px;font-weight:800;margin-bottom:20px;letter-spacing:-.02em">Your Cart</h2>
       <div id="cart-items-container"></div>
     </div>
     <div id="cart-summary-container"></div>
@@ -2289,24 +2291,26 @@ window.adminDeleteTool = function(id) {
 };
 
 async function adminSyncToRTDB() {
-  // qty and rentedQty are NEVER changed here — only via the edit form or mark functions
-  var url = "https://droveia-default-rtdb.firebaseio.com/tools.json?auth=" + "NKLKSY1Cshm1pba0vuKK6RQOmjV2uOfeje7hzxkI";
+  var url = "https://droveia-default-rtdb.firebaseio.com/tools.json?auth=NKLKSY1Cshm1pba0vuKK6RQOmjV2uOfeje7hzxkI";
+  // Fetch live RTDB to get current qty/rentedQty, then merge with TOOLS metadata
   try {
-    // Fetch live RTDB first so qty/rentedQty are never clobbered
     var cur = await fetch(url).then(function(r){ return r.json(); });
-    var curArr = Array.isArray(cur) ? cur : Object.values(cur);
+    var curArr = Array.isArray(cur) ? cur : Object.values(cur || {});
     var merged = TOOLS.map(function(t) {
       var live = curArr.find(function(c){ return c && parseInt(c.id) === parseInt(t.id); });
+      // Start with all tool fields from memory (name, cat, retail, etc.)
       var result = Object.assign({}, t);
-      // Always take qty and rentedQty from live RTDB — never from in-memory TOOLS
-      result.qty       = live !== undefined ? (parseInt(live.qty)       || 0) : (parseInt(t.qty) || 1);
-      result.rentedQty = live !== undefined ? (parseInt(live.rentedQty) || 0) : 0;
-      result.available = result.qty > result.rentedQty;
+      // Only overwrite qty/rentedQty from live if the live entry exists and has them
+      if (live) {
+        if (live.qty       !== undefined) result.qty       = parseInt(live.qty)       || 0;
+        if (live.rentedQty !== undefined) result.rentedQty = parseInt(live.rentedQty) || 0;
+      }
+      result.available = (result.qty || 0) > (result.rentedQty || 0);
       return result;
     });
     await fetch(url, {
       method: "PUT",
-      headers: {"Content-Type":"application/json"},
+      headers: {"Content-Type": "application/json"},
       body: JSON.stringify(merged)
     });
     TOOLS = merged;

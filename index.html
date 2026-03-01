@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
+  <link rel="icon" type="image/png" href="1.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Droveia</title>
-<link rel="icon" type="image/png" href="1.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
 <style>
@@ -230,7 +230,7 @@ img{max-width:100%}
 /* ── Navigation ─────────────────────────────── */
 nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:var(--nav-h);background:rgba(255,255,255,.92);backdrop-filter:blur(20px) saturate(160%);border-bottom:1px solid var(--border);box-shadow:0 1px 20px rgba(0,0,0,.06);display:flex;align-items:center;padding:0 24px;gap:16px}
 .nav-logo{display:flex;align-items:center;gap:9px;cursor:pointer;flex-shrink:0}
-.nav-logo-mark{width:48px;height:48px;background:transparent;border:none;box-shadow:none;display:flex;align-items:center;justify-content:center;}
+.nav-logo-mark{height:40px;width:auto;background:transparent;border:none;box-shadow:none;display:flex;align-items:center;justify-content:center;}
 .nav-wordmark{font-size:17px;font-weight:800;letter-spacing:-.03em}
 
 /* ── Search bar (Amazon-style, center nav) ─────────────────── */
@@ -608,7 +608,7 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
   .nav-search{display:none}
   .nav-links{display:none}
   .nav-wordmark{font-size:16px}
-  .nav-logo-mark{width:48px;height:48px;background:transparent;border:none;box-shadow:none;display:flex;align-items:center;justify-content:center;}
+  .nav-logo-mark{height:40px;width:auto;background:transparent;border:none;box-shadow:none;display:flex;align-items:center;justify-content:center;}
   .nav-auth-btn{padding:7px 12px;font-size:13px}
   .nav-secondary{display:none}
   .hero{padding:28px 0 24px}
@@ -819,8 +819,8 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
   <div class="auth-box">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
       <div class="auth-logo">
-        <div class="nav-logo-mark" style="width:40px;height:40px">
-          <img src="1.png" style="width:40px;height:40px;object-fit:contain;display:block;border-radius:0"/>
+        <div class="nav-logo-mark" style="height:36px;width:auto">
+          <img src="1.png" style="height:36px;width:auto;display:block;border-radius:0"/>
         </div>
         <span style="font-size:16px;font-weight:800;letter-spacing:-.03em">Droveia</span>
       </div>
@@ -896,7 +896,7 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
 <nav>
   <div class="nav-logo" onclick="showPage('home')">
     <div class="nav-logo-mark">
-      <img src="1.png" style="width:48px;height:48px;object-fit:contain;display:block;border-radius:0"/>
+      <img src="1.png" style="height:40px;width:auto;display:block;border-radius:0"/>
     </div>
     <span class="nav-wordmark">Droveia</span>
   </div>

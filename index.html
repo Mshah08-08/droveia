@@ -2261,14 +2261,16 @@ window.adminSaveEdit = async function(id) {
 window.adminSetAvail = async function(id, available) {
   var tool = TOOLS.find(function(t){ return t.id === id; });
   if (!tool) return;
+  var idx = TOOLS.findIndex(function(t){ return t.id === id; });
   tool.available = available;
-  await adminSyncToRTDB();
-  // Also update Firestore inventory
-  var fb = window._fb;
-  await fb.setDoc(fb.doc(fb.db, "inventory", String(id)), {
-    toolId: id, available: available,
-    updatedAt: fb.serverTimestamp(), updatedBy: currentUser.email
-  });
+  // Just PATCH available in RTDB — never touch qty or rentedQty here
+  try {
+    await fetch("https://droveia-default-rtdb.firebaseio.com/tools/" + idx + ".json?auth=NKLKSY1Cshm1pba0vuKK6RQOmjV2uOfeje7hzxkI", {
+      method: "PATCH",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({ available: available })
+    });
+  } catch(e) { console.error("adminSetAvail RTDB error", e); }
   showToast(tool.name + " marked " + (available ? "available" : "rented"));
   renderAdmin();
 };

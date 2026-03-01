@@ -943,7 +943,7 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
             Browse Tools
           </button>
-          <button class="btn-secondary" id="hero-admin-btn" onclick="window.open(location.pathname + '#admin', '_blank')" style="display:none">
+          <button class="btn-secondary" id="hero-admin-btn" onclick="window.open(location.href.split('#')[0] + '#admin', '_blank')" style="display:none">
             Admin
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
           </button>
@@ -2654,8 +2654,8 @@ function startApp() {
       await loadCart();
       subscribeOrders();
       subscribeHomeReviews(fb);
-      subscribeInventory(fb);
       if (el('page-admin') && el('page-admin').classList.contains('active')) renderAdmin();
+      if (window._openAdminOnAuth) { window._openAdminOnAuth = false; showPage('admin'); }
     } else {
       if (ordersUnsub){ ordersUnsub(); ordersUnsub=null; }
       currentUser=null; userProfile=null; cart=[]; liveOrders=[];
@@ -2787,9 +2787,9 @@ async function markToolUnavailable(fb, toolId) {
     var invData = invSnap.exists() ? invSnap.data() : {};
     var newRented = (invData.rentedQty || 0) + 1;
     var nowAvailable = newRented < totalQty;
-    console.log("[inventory] tool=" + toolId + " qty=" + (tool ? tool.qty : "NOT FOUND") + " totalQty=" + totalQty + " newRented=" + newRented + " available=" + nowAvailable);
-    await fb.setDoc(fb.doc(fb.db, "inventory", String(toolId)), {
-      toolId:    toolId,
+    var tidNum = parseInt(toolId);
+    await fb.setDoc(fb.doc(fb.db, "inventory", String(tidNum)), {
+      toolId:    tidNum,
       rentedQty: newRented,
       available: nowAvailable,
       updatedAt: fb.serverTimestamp()
@@ -2996,11 +2996,14 @@ if (window._fbReady) {
 }
 
 // Hash routing — open admin page if #admin in URL
+// Start inventory subscription at boot — public data, no auth needed
+document.addEventListener("fbready", function() {
+  subscribeInventory(window._fb);
+});
+if (window._fbReady) subscribeInventory(window._fb);
+
 if (window.location.hash === "#admin") {
-  document.addEventListener("fbready", function() {
-    setTimeout(function() { showPage("admin"); }, 100);
-  }, {once: true});
-  if (window._fbReady) setTimeout(function() { showPage("admin"); }, 100);
+  window._openAdminOnAuth = true;
 }
 </script>
 

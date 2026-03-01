@@ -1754,9 +1754,11 @@
         btn.setAttribute('data-tool-id', item.id);
         btn.setAttribute('data-tool-name', item.name);
         btn.setAttribute('data-order-id', o._id);
-        // We return HTML string, so encode onclick safely
+        var tid = item.id || item.toolId || item.tool_id || 0;
+        var tname = item.name || item.toolName || item.tool_name || 'Tool';
+        console.log('Review item:', JSON.stringify(item), 'tid:', tid, 'tname:', tname);
         return '<button class="review-btn" onclick="openReviewModal(' +
-          item.id + ',decodeURIComponent(\'' + encodeURIComponent(item.name) + '\'),\'' + o._id + '\')">Review</button>';
+          tid + ',decodeURIComponent(\'' + encodeURIComponent(tname) + '\'),\'' + o._id + '\')">Review</button>';
       }).join('');
     }
 
@@ -2261,7 +2263,7 @@
       if (typeof toolName === "string" && toolName.indexOf("%") >= 0) { try { toolName = decodeURIComponent(toolName); } catch(e){} }
       if (!currentUser) { showAuth(); return; }
       _reviewStar    = 0;
-      _reviewToolId  = toolId;
+      _reviewToolId  = toolId !== undefined ? toolId : null;
       _reviewToolName = toolName;
       _reviewOrderId  = orderId;
       el("review-modal-title").textContent = "Review: " + toolName;
@@ -2291,15 +2293,15 @@
       try {
         var first = (userProfile && userProfile.firstName) ||
                     (currentUser.displayName || currentUser.email).split(/[\s@]/)[0];
-        // Save review to Firestore
+        // Save review to Firestore — coerce all to safe types
         await fb.addDoc(fb.collection(fb.db, "reviews"), {
-          toolId:    _reviewToolId,
-          toolName:  _reviewToolName,
-          orderId:   _reviewOrderId,
-          userId:    currentUser.uid,
-          userName:  first,
-          rating:    _reviewStar,
-          text:      text,
+          toolId:    Number(_reviewToolId) || String(_reviewToolId || "unknown"),
+          toolName:  String(_reviewToolName || "Tool"),
+          orderId:   String(_reviewOrderId || ""),
+          userId:    String(currentUser.uid),
+          userName:  String(first || "Student"),
+          rating:    Number(_reviewStar),
+          text:      String(text),
           createdAt: fb.serverTimestamp()
         });
         // Update tool rating average in RTDB

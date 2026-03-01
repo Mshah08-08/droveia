@@ -1571,7 +1571,7 @@
           '</div>'+
           '<div class="modal-right">'+
             '<div>ETA ~'+t.eta+'</div><div>Free return</div>'+
-            '<div style="color:var(--green)">Save $'+(t.retail - t.pph*currentHours).toFixed(2)+'</div>'+
+            '<div style="color:var(--green)">Save $'+Math.max(0, t.retail - calcCost(t, currentHours)).toFixed(2)+'</div>'+
           '</div>'+
         '</div>'+
         '<button class="modal-add-btn" onclick="addToCart('+t.id+')">Add to Cart · $'+cost+'</button>';

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Droveia</title>
+    <title>Droveia — Tools Delivered by Drone</title>
     <link rel="preconnect" href="https://fonts.googleapis.com"/>
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
     <style>
@@ -674,7 +674,7 @@
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
             <div class="auth-logo">
                 <div class="nav-logo-mark" style="width:28px;height:28px">
-                    <img src="1.png" style="width:36px;height:36px;object-fit:contain;display:block;border-radius:5px"/>
+                    <img src="1.png" style="width:28px;height:28px;object-fit:contain;display:block;border-radius:5px"/>
                 </div>
                 <span style="font-size:16px;font-weight:800;letter-spacing:-.03em">Droveia</span>
             </div>
@@ -1199,36 +1199,36 @@
 
     // ── Data ──────────────────────────────────────────────────────────────────────
     var TOOLS = [
-      {id:1,  name:"Heat Gun",       cat:"Workshop",    pph:4.50, retail:45,  rating:4.8, desc:"1500W dual-temp · shrink wrap, paint stripping & crafts",   eta:"8 min"},
-      {id:2,  name:"Drill Kit",      cat:"Workshop",    pph:6.00, retail:80,  rating:4.9, desc:"20V cordless · 18-piece bit set · charged and ready to go", eta:"6 min"},
-      {id:3,  name:"Sewing Machine", cat:"Crafts",      pph:5.00, retail:90,  rating:4.7, desc:"Compact 12-stitch portable · great for clothing repairs",    eta:"10 min"},
-      {id:4,  name:"Label Maker",    cat:"Office",      pph:2.00, retail:30,  rating:4.6, desc:"Thermal printer · USB & Bluetooth · 3 tape rolls included",  eta:"5 min"},
-      {id:5,  name:"Soldering Iron", cat:"Electronics", pph:3.50, retail:40,  rating:4.8, desc:"60W adjustable station · multiple tips and flux included",   eta:"7 min"},
-      {id:6,  name:"Jigsaw",         cat:"Workshop",    pph:7.00, retail:95,  rating:4.9, desc:"Compact variable-speed · 5 blades for wood and metal",      eta:"9 min"},
-      {id:7,  name:"Embroidery Set", cat:"Crafts",      pph:1.50, retail:18,  rating:4.5, desc:"6-piece bamboo hoops · needles · starter thread assortment",eta:"4 min"},
-      {id:8,  name:"Laminator",      cat:"Office",      pph:2.50, retail:35,  rating:4.7, desc:"9-inch · 20 pouches · 3-min warmup time",                   eta:"6 min"},
-      {id:9,  name:"Oscilloscope",   cat:"Electronics", pph:8.00, retail:120, rating:4.9, desc:"2-channel 50MHz digital · USB connectivity",                eta:"12 min"},
-      {id:10, name:"Hot Glue Gun",   cat:"Crafts",      pph:1.00, retail:15,  rating:4.6, desc:"High-temp · 20 glue sticks · fast heat-up",                 eta:"5 min"},
-      {id:11, name:"Multimeter",     cat:"Electronics", pph:2.00, retail:28,  rating:4.8, desc:"Auto-ranging digital · leads and case included",            eta:"6 min"},
-      {id:12, name:"Staple Gun",     cat:"Workshop",    pph:2.50, retail:32,  rating:4.5, desc:"Heavy-duty · 1000 staples · upholstery ready",             eta:"5 min"},
-      {id:13, name:"Circular Saw",   cat:"Workshop",    pph:8.00, retail:110, rating:4.9, desc:"7-1/4 inch · laser guide · blade guard · ear protection included", eta:"8 min"},
-      {id:14, name:"Tile Cutter",    cat:"Workshop",    pph:6.50, retail:85,  rating:4.7, desc:"Wet saw · diamond blade · 12-inch capacity",                    eta:"10 min"},
-      {id:15, name:"Clamp Set",      cat:"Workshop",    pph:1.50, retail:22,  rating:4.6, desc:"6-piece bar clamps · 12-inch reach · quick release",            eta:"4 min"},
-      {id:16, name:"3D Pen",         cat:"Crafts",      pph:2.00, retail:35,  rating:4.6, desc:"1.75mm PLA/ABS · adjustable speed · 3 filament rolls included", eta:"6 min"},
-      {id:17, name:"Vinyl Cutter",   cat:"Crafts",      pph:4.00, retail:65,  rating:4.8, desc:"12-inch · USB · compatible with Cricut design files",           eta:"9 min"},
-      {id:18, name:"Airbrush Kit",   cat:"Crafts",      pph:3.00, retail:55,  rating:4.7, desc:"Dual-action · mini compressor · 6 paint colors",               eta:"7 min"},
-      {id:19, name:"Loom",           cat:"Crafts",      pph:2.50, retail:40,  rating:4.5, desc:"12-inch rigid heddle · beginner-friendly · yarn included",      eta:"8 min"},
-      {id:20, name:"Projector",      cat:"Office",      pph:5.00, retail:180, rating:4.8, desc:"1080p · HDMI & USB-C · 150-inch throw · remote included",       eta:"8 min"},
-      {id:21, name:"Paper Shredder", cat:"Office",      pph:1.50, retail:45,  rating:4.5, desc:"Cross-cut · 8-sheet capacity · auto-feed mode",                 eta:"5 min"},
-      {id:22, name:"Binding Machine",cat:"Office",      pph:2.00, retail:38,  rating:4.6, desc:"Comb binding · up to 300 sheets · 100 combs included",          eta:"6 min"},
-      {id:23, name:"Poster Printer", cat:"Office",      pph:3.50, retail:90,  rating:4.7, desc:"A3 inkjet · borderless · 50 glossy sheets included",            eta:"7 min"},
-      {id:24, name:"Raspberry Pi Kit",cat:"Electronics",pph:3.00, retail:75,  rating:4.8, desc:"Pi 4 · 4GB RAM · SD card · power supply · breadboard",          eta:"6 min"},
-      {id:25, name:"Logic Analyzer", cat:"Electronics", pph:4.00, retail:60,  rating:4.7, desc:"8-channel · 24MHz · USB · works with Pulseview",               eta:"7 min"},
-      {id:26, name:"Reflow Station", cat:"Electronics", pph:5.00, retail:80,  rating:4.8, desc:"SMD rework · hot air + iron · digital display",                 eta:"9 min"},
-      {id:27, name:"Bench PSU",      cat:"Electronics", pph:4.50, retail:70,  rating:4.9, desc:"30V 5A · dual-channel · adjustable voltage & current",          eta:"8 min"},
-      {id:28, name:"Laser Level",    cat:"Workshop",    pph:3.00, retail:50,  rating:4.7, desc:"Self-leveling · 3-line · 50ft range · tripod included",         eta:"6 min"},
-      {id:29, name:"Impact Driver",  cat:"Workshop",    pph:5.00, retail:70,  rating:4.9, desc:"18V brushless · 2000 in-lb torque · 3 bits included",           eta:"5 min"},
-      {id:30, name:"Wire Stripper",  cat:"Electronics", pph:1.00, retail:18,  rating:4.6, desc:"Auto-adjusting · 10-24 AWG · ergonomic grip",                  eta:"4 min"}
+      {id:1,  name:"Heat Gun",       cat:"Workshop",    pph:4.50, retail:45,  rating:4.8, desc:"1500W dual-temp · shrink wrap, paint stripping & crafts",   eta:"8 min", img:"https://picsum.photos/seed/tool1/400/260"},
+      {id:2,  name:"Drill Kit",      cat:"Workshop",    pph:6.00, retail:80,  rating:4.9, desc:"20V cordless · 18-piece bit set · charged and ready to go", eta:"6 min", img:"https://picsum.photos/seed/tool2/400/260"},
+      {id:3,  name:"Sewing Machine", cat:"Crafts",      pph:5.00, retail:90,  rating:4.7, desc:"Compact 12-stitch portable · great for clothing repairs",    eta:"10 min", img:"https://picsum.photos/seed/tool3/400/260"},
+      {id:4,  name:"Label Maker",    cat:"Office",      pph:2.00, retail:30,  rating:4.6, desc:"Thermal printer · USB & Bluetooth · 3 tape rolls included",  eta:"5 min", img:"https://picsum.photos/seed/tool4/400/260"},
+      {id:5,  name:"Soldering Iron", cat:"Electronics", pph:3.50, retail:40,  rating:4.8, desc:"60W adjustable station · multiple tips and flux included",   eta:"7 min", img:"https://picsum.photos/seed/tool5/400/260"},
+      {id:6,  name:"Jigsaw",         cat:"Workshop",    pph:7.00, retail:95,  rating:4.9, desc:"Compact variable-speed · 5 blades for wood and metal",      eta:"9 min", img:"https://picsum.photos/seed/tool6/400/260"},
+      {id:7,  name:"Embroidery Set", cat:"Crafts",      pph:1.50, retail:18,  rating:4.5, desc:"6-piece bamboo hoops · needles · starter thread assortment",eta:"4 min", img:"https://picsum.photos/seed/tool7/400/260"},
+      {id:8,  name:"Laminator",      cat:"Office",      pph:2.50, retail:35,  rating:4.7, desc:"9-inch · 20 pouches · 3-min warmup time",                   eta:"6 min", img:"https://picsum.photos/seed/tool8/400/260"},
+      {id:9,  name:"Oscilloscope",   cat:"Electronics", pph:8.00, retail:120, rating:4.9, desc:"2-channel 50MHz digital · USB connectivity",                eta:"12 min", img:"https://picsum.photos/seed/tool9/400/260"},
+      {id:10, name:"Hot Glue Gun",   cat:"Crafts",      pph:1.00, retail:15,  rating:4.6, desc:"High-temp · 20 glue sticks · fast heat-up",                 eta:"5 min", img:"https://picsum.photos/seed/tool10/400/260"},
+      {id:11, name:"Multimeter",     cat:"Electronics", pph:2.00, retail:28,  rating:4.8, desc:"Auto-ranging digital · leads and case included",            eta:"6 min", img:"https://picsum.photos/seed/tool11/400/260"},
+      {id:12, name:"Staple Gun",     cat:"Workshop",    pph:2.50, retail:32,  rating:4.5, desc:"Heavy-duty · 1000 staples · upholstery ready",             eta:"5 min", img:"https://picsum.photos/seed/tool12/400/260"},
+      {id:13, name:"Circular Saw",   cat:"Workshop",    pph:8.00, retail:110, rating:4.9, desc:"7-1/4 inch · laser guide · blade guard · ear protection included", eta:"8 min", img:"https://picsum.photos/seed/tool13/400/260"},
+      {id:14, name:"Tile Cutter",    cat:"Workshop",    pph:6.50, retail:85,  rating:4.7, desc:"Wet saw · diamond blade · 12-inch capacity",                    eta:"10 min", img:"https://picsum.photos/seed/tool14/400/260"},
+      {id:15, name:"Clamp Set",      cat:"Workshop",    pph:1.50, retail:22,  rating:4.6, desc:"6-piece bar clamps · 12-inch reach · quick release",            eta:"4 min", img:"https://picsum.photos/seed/tool15/400/260"},
+      {id:16, name:"3D Pen",         cat:"Crafts",      pph:2.00, retail:35,  rating:4.6, desc:"1.75mm PLA/ABS · adjustable speed · 3 filament rolls included", eta:"6 min", img:"https://picsum.photos/seed/tool16/400/260"},
+      {id:17, name:"Vinyl Cutter",   cat:"Crafts",      pph:4.00, retail:65,  rating:4.8, desc:"12-inch · USB · compatible with Cricut design files",           eta:"9 min", img:"https://picsum.photos/seed/tool17/400/260"},
+      {id:18, name:"Airbrush Kit",   cat:"Crafts",      pph:3.00, retail:55,  rating:4.7, desc:"Dual-action · mini compressor · 6 paint colors",               eta:"7 min", img:"https://picsum.photos/seed/tool18/400/260"},
+      {id:19, name:"Loom",           cat:"Crafts",      pph:2.50, retail:40,  rating:4.5, desc:"12-inch rigid heddle · beginner-friendly · yarn included",      eta:"8 min", img:"https://picsum.photos/seed/tool19/400/260"},
+      {id:20, name:"Projector",      cat:"Office",      pph:5.00, retail:180, rating:4.8, desc:"1080p · HDMI & USB-C · 150-inch throw · remote included",       eta:"8 min", img:"https://picsum.photos/seed/tool20/400/260"},
+      {id:21, name:"Paper Shredder", cat:"Office",      pph:1.50, retail:45,  rating:4.5, desc:"Cross-cut · 8-sheet capacity · auto-feed mode",                 eta:"5 min", img:"https://picsum.photos/seed/tool21/400/260"},
+      {id:22, name:"Binding Machine",cat:"Office",      pph:2.00, retail:38,  rating:4.6, desc:"Comb binding · up to 300 sheets · 100 combs included",          eta:"6 min", img:"https://picsum.photos/seed/tool22/400/260"},
+      {id:23, name:"Poster Printer", cat:"Office",      pph:3.50, retail:90,  rating:4.7, desc:"A3 inkjet · borderless · 50 glossy sheets included",            eta:"7 min", img:"https://picsum.photos/seed/tool23/400/260"},
+      {id:24, name:"Raspberry Pi Kit",cat:"Electronics",pph:3.00, retail:75,  rating:4.8, desc:"Pi 4 · 4GB RAM · SD card · power supply · breadboard",          eta:"6 min", img:"https://picsum.photos/seed/tool24/400/260"},
+      {id:25, name:"Logic Analyzer", cat:"Electronics", pph:4.00, retail:60,  rating:4.7, desc:"8-channel · 24MHz · USB · works with Pulseview",               eta:"7 min", img:"https://picsum.photos/seed/tool25/400/260"},
+      {id:26, name:"Reflow Station", cat:"Electronics", pph:5.00, retail:80,  rating:4.8, desc:"SMD rework · hot air + iron · digital display",                 eta:"9 min", img:"https://picsum.photos/seed/tool26/400/260"},
+      {id:27, name:"Bench PSU",      cat:"Electronics", pph:4.50, retail:70,  rating:4.9, desc:"30V 5A · dual-channel · adjustable voltage & current",          eta:"8 min", img:"https://picsum.photos/seed/tool27/400/260"},
+      {id:28, name:"Laser Level",    cat:"Workshop",    pph:3.00, retail:50,  rating:4.7, desc:"Self-leveling · 3-line · 50ft range · tripod included",         eta:"6 min", img:"https://picsum.photos/seed/tool28/400/260"},
+      {id:29, name:"Impact Driver",  cat:"Workshop",    pph:5.00, retail:70,  rating:4.9, desc:"18V brushless · 2000 in-lb torque · 3 bits included",           eta:"5 min", img:"https://picsum.photos/seed/tool29/400/260"},
+      {id:30, name:"Wire Stripper",  cat:"Electronics", pph:1.00, retail:18,  rating:4.6, desc:"Auto-adjusting · 10-24 AWG · ergonomic grip",                  eta:"4 min", img:"https://picsum.photos/seed/tool30/400/260"}
     ];
     var DURATIONS = [1,2,4,8,24,48];
 
@@ -1323,8 +1323,8 @@
       var emoj = t.cat;
       return '<div class="tool-card fade-up" onclick="openModal('+t.id+')">'+
         '<div class="tool-card-img">'+
-          '<div style="position:absolute;top:10px;right:10px;background:var(--green);color:#000;font-size:10px;font-weight:800;padding:3px 8px;border-radius:6px">Save '+pct+'%</div>'+
-          catIcon(t.cat,"#1a6ef0")+
+          '<img src="'+t.img+'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" onerror="this.style.display=\'none\'"/>'+
+          '<div style="position:absolute;top:10px;right:10px;background:var(--green);color:#000;font-size:10px;font-weight:800;padding:3px 8px;border-radius:6px;z-index:1">Save '+pct+'%</div>'+
         '</div>'+
         '<div class="tool-card-body">'+
           '<div class="tool-card-cat-tag">'+t.cat+'</div>'+
@@ -1496,7 +1496,9 @@
         return '<button class="dur-preset'+(currentHours===h?' active':'')+'" onclick="setHours('+h+')">'+lbl+'<span class="dur-preset-price">$'+c2+'</span></button>';
       }).join("");
       el("modal-content").innerHTML =
-        '<div class="modal-icon">'+catIcon(t.cat,"#1a6ef0")+'</div>'+
+        '<div style="width:100%;height:160px;border-radius:12px;overflow:hidden;margin-bottom:16px;background:var(--blue-dim);position:relative">'+
+        '<img src="'+t.img+'" style="width:100%;height:100%;object-fit:cover;display:block"/>'+
+      '</div>'+
         '<div class="modal-title">'+t.name+'</div>'+
         '<div class="modal-meta">'+stars(t.rating)+
           '<span style="color:var(--dim)">·</span>'+

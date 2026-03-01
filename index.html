@@ -2232,7 +2232,7 @@ window.adminSaveAdd = async function() {
   var vals = adminGetFormVals();
   if (!vals.name || !vals.retail || !vals.eta) { showToast("Fill in required fields"); return; }
   var nextId = TOOLS.length ? Math.max.apply(null, TOOLS.map(function(t){ return t.id || 0; })) + 1 : 1;
-  var tool = Object.assign({ id: nextId, available: true }, vals);
+  var tool = Object.assign({ id: nextId, available: true, rentedQty: 0 }, vals);
   if (!tool.img) tool.img = "x";
   TOOLS.push(tool);
   await adminSyncToRTDB();

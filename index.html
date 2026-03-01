@@ -1478,6 +1478,7 @@
 
     // ── Pricing tiers ─────────────────────────────────────────────────────────────
     function calcCost(t, hours) {
+      if (!t || !t.pph) return 0;
       var rate = t.pph;
       if      (hours >= 48) rate = t.pph * 0.50;
       else if (hours >= 24) rate = t.pph * 0.60;
@@ -2092,9 +2093,9 @@
         .then(function(data) {
           if (!data || !Array.isArray(data)) return;
           // Merge with any missing fields from local TOOLS as fallback
-          TOOLS = data.filter(Boolean).map(function(t, i) {
+          TOOLS = data.filter(function(t){ return t && t.name && t.pph; }).map(function(t, i) {
             return {
-              id:     t.id     || (i+1),
+              id:     parseInt(t.id)     || (i+1),
               name:   t.name   || "Tool",
               cat:    t.cat    || "Workshop",
               pph:    parseFloat(t.pph)    || 2,
@@ -2123,6 +2124,8 @@
 
     // Load live inventory from Firebase Realtime DB
     loadToolsFromRTDB();
+    // Auto-refresh inventory every 60 seconds
+    setInterval(loadToolsFromRTDB, 60000);
 
     if (window._fbReady) {
       startApp();

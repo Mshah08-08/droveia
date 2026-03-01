@@ -2295,7 +2295,7 @@ async function adminSyncToRTDB() {
   // Fetch live RTDB to get current qty/rentedQty, then merge with TOOLS metadata
   try {
     var cur = await fetch(url).then(function(r){ return r.json(); });
-    var curArr = Array.isArray(cur) ? cur : Object.values(cur || {});
+    var curArr = !cur ? [] : Array.isArray(cur) ? cur : Object.values(cur);
     var merged = TOOLS.map(function(t) {
       var live = curArr.find(function(c){ return c && parseInt(c.id) === parseInt(t.id); });
       // Start with all tool fields from memory (name, cat, retail, etc.)

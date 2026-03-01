@@ -1198,38 +1198,7 @@
     // =============================================================================
 
     // ── Data ──────────────────────────────────────────────────────────────────────
-    var TOOLS = [
-      {id:1,  name:"Heat Gun",       cat:"Workshop",    pph:4.50, retail:45,  rating:4.8, desc:"1500W dual-temp · shrink wrap, paint stripping & crafts",   eta:"8 min", img:"https://images.unsplash.com/photo-1504148455047-e2670ee03968?w=400&h=260&fit=crop&q=80"},
-      {id:2,  name:"Drill Kit",      cat:"Workshop",    pph:6.00, retail:80,  rating:4.9, desc:"20V cordless · 18-piece bit set · charged and ready to go", eta:"6 min", img:"https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?w=400&h=260&fit=crop&q=80"},
-      {id:3,  name:"Sewing Machine", cat:"Crafts",      pph:5.00, retail:90,  rating:4.7, desc:"Compact 12-stitch portable · great for clothing repairs",    eta:"10 min", img:"https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=260&fit=crop&q=80"},
-      {id:4,  name:"Label Maker",    cat:"Office",      pph:2.00, retail:30,  rating:4.6, desc:"Thermal printer · USB & Bluetooth · 3 tape rolls included",  eta:"5 min", img:"https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=400&h=260&fit=crop&q=80"},
-      {id:5,  name:"Soldering Iron", cat:"Electronics", pph:3.50, retail:40,  rating:4.8, desc:"60W adjustable station · multiple tips and flux included",   eta:"7 min", img:"https://images.unsplash.com/photo-1581092918056-0c4c3aebb0e7?w=400&h=260&fit=crop&q=80"},
-      {id:6,  name:"Jigsaw",         cat:"Workshop",    pph:7.00, retail:95,  rating:4.9, desc:"Compact variable-speed · 5 blades for wood and metal",      eta:"9 min", img:"https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=400&h=260&fit=crop&q=80"},
-      {id:7,  name:"Embroidery Set", cat:"Crafts",      pph:1.50, retail:18,  rating:4.5, desc:"6-piece bamboo hoops · needles · starter thread assortment",eta:"4 min", img:"https://images.unsplash.com/photo-1530143584435-82ce3cd78bac?w=400&h=260&fit=crop&q=80"},
-      {id:8,  name:"Laminator",      cat:"Office",      pph:2.50, retail:35,  rating:4.7, desc:"9-inch · 20 pouches · 3-min warmup time",                   eta:"6 min", img:"https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&h=260&fit=crop&q=80"},
-      {id:9,  name:"Oscilloscope",   cat:"Electronics", pph:8.00, retail:120, rating:4.9, desc:"2-channel 50MHz digital · USB connectivity",                eta:"12 min", img:"https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&h=260&fit=crop&q=80"},
-      {id:10, name:"Hot Glue Gun",   cat:"Crafts",      pph:1.00, retail:15,  rating:4.6, desc:"High-temp · 20 glue sticks · fast heat-up",                 eta:"5 min", img:"https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=260&fit=crop&q=80"},
-      {id:11, name:"Multimeter",     cat:"Electronics", pph:2.00, retail:28,  rating:4.8, desc:"Auto-ranging digital · leads and case included",            eta:"6 min", img:"https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=400&h=260&fit=crop&q=80"},
-      {id:12, name:"Staple Gun",     cat:"Workshop",    pph:2.50, retail:32,  rating:4.5, desc:"Heavy-duty · 1000 staples · upholstery ready",             eta:"5 min", img:"https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=400&h=260&fit=crop&q=80"},
-      {id:13, name:"Circular Saw",   cat:"Workshop",    pph:8.00, retail:110, rating:4.9, desc:"7-1/4 inch · laser guide · blade guard · ear protection included", eta:"8 min", img:"https://images.unsplash.com/photo-1572981779307-38b8cabb2407?w=400&h=260&fit=crop&q=80"},
-      {id:14, name:"Tile Cutter",    cat:"Workshop",    pph:6.50, retail:85,  rating:4.7, desc:"Wet saw · diamond blade · 12-inch capacity",                    eta:"10 min", img:"https://images.unsplash.com/photo-1504148455047-e2670ee03968?w=400&h=260&fit=crop&q=80"},
-      {id:15, name:"Clamp Set",      cat:"Workshop",    pph:1.50, retail:22,  rating:4.6, desc:"6-piece bar clamps · 12-inch reach · quick release",            eta:"4 min", img:"https://images.unsplash.com/photo-1541888703399-dc68827f1b17?w=400&h=260&fit=crop&q=80"},
-      {id:16, name:"3D Pen",         cat:"Crafts",      pph:2.00, retail:35,  rating:4.6, desc:"1.75mm PLA/ABS · adjustable speed · 3 filament rolls included", eta:"6 min", img:"https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&h=260&fit=crop&q=80"},
-      {id:17, name:"Vinyl Cutter",   cat:"Crafts",      pph:4.00, retail:65,  rating:4.8, desc:"12-inch · USB · compatible with Cricut design files",           eta:"9 min", img:"https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=260&fit=crop&q=80"},
-      {id:18, name:"Airbrush Kit",   cat:"Crafts",      pph:3.00, retail:55,  rating:4.7, desc:"Dual-action · mini compressor · 6 paint colors",               eta:"7 min", img:"https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=400&h=260&fit=crop&q=80"},
-      {id:19, name:"Loom",           cat:"Crafts",      pph:2.50, retail:40,  rating:4.5, desc:"12-inch rigid heddle · beginner-friendly · yarn included",      eta:"8 min", img:"https://images.unsplash.com/photo-1530143584435-82ce3cd78bac?w=400&h=260&fit=crop&q=80"},
-      {id:20, name:"Projector",      cat:"Office",      pph:5.00, retail:180, rating:4.8, desc:"1080p · HDMI & USB-C · 150-inch throw · remote included",       eta:"8 min", img:"https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=400&h=260&fit=crop&q=80"},
-      {id:21, name:"Paper Shredder", cat:"Office",      pph:1.50, retail:45,  rating:4.5, desc:"Cross-cut · 8-sheet capacity · auto-feed mode",                 eta:"5 min", img:"https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&h=260&fit=crop&q=80"},
-      {id:22, name:"Binding Machine",cat:"Office",      pph:2.00, retail:38,  rating:4.6, desc:"Comb binding · up to 300 sheets · 100 combs included",          eta:"6 min", img:"https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&h=260&fit=crop&q=80"},
-      {id:23, name:"Poster Printer", cat:"Office",      pph:3.50, retail:90,  rating:4.7, desc:"A3 inkjet · borderless · 50 glossy sheets included",            eta:"7 min", img:"https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=400&h=260&fit=crop&q=80"},
-      {id:24, name:"Raspberry Pi Kit",cat:"Electronics",pph:3.00, retail:75,  rating:4.8, desc:"Pi 4 · 4GB RAM · SD card · power supply · breadboard",          eta:"6 min", img:"https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&h=260&fit=crop&q=80"},
-      {id:25, name:"Logic Analyzer", cat:"Electronics", pph:4.00, retail:60,  rating:4.7, desc:"8-channel · 24MHz · USB · works with Pulseview",               eta:"7 min", img:"https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=400&h=260&fit=crop&q=80"},
-      {id:26, name:"Reflow Station", cat:"Electronics", pph:5.00, retail:80,  rating:4.8, desc:"SMD rework · hot air + iron · digital display",                 eta:"9 min", img:"https://images.unsplash.com/photo-1581092918056-0c4c3aebb0e7?w=400&h=260&fit=crop&q=80"},
-      {id:27, name:"Bench PSU",      cat:"Electronics", pph:4.50, retail:70,  rating:4.9, desc:"30V 5A · dual-channel · adjustable voltage & current",          eta:"8 min", img:"https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&h=260&fit=crop&q=80"},
-      {id:28, name:"Laser Level",    cat:"Workshop",    pph:3.00, retail:50,  rating:4.7, desc:"Self-leveling · 3-line · 50ft range · tripod included",         eta:"6 min", img:"https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=400&h=260&fit=crop&q=80"},
-      {id:29, name:"Impact Driver",  cat:"Workshop",    pph:5.00, retail:70,  rating:4.9, desc:"18V brushless · 2000 in-lb torque · 3 bits included",           eta:"5 min", img:"https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?w=400&h=260&fit=crop&q=80"},
-      {id:30, name:"Wire Stripper",  cat:"Electronics", pph:1.00, retail:18,  rating:4.6, desc:"Auto-adjusting · 10-24 AWG · ergonomic grip",                  eta:"4 min", img:"https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=400&h=260&fit=crop&q=80"}
-    ];
+    var TOOLS = [];
     var DURATIONS = [1,2,4,8,24,48];
 
     // ── State ─────────────────────────────────────────────────────────────────────
@@ -1369,8 +1338,14 @@
       if (currentSort==="eta")        list.sort(function(a,b){return parseFloat(a.eta)-parseFloat(b.eta);});
       var g = el("tools-grid"), cnt = el("result-count")||el("browse-count");
       if (cnt) cnt.textContent = "Showing "+list.length+" tool"+(list.length!==1?"s":"");
-      if (g)   g.innerHTML = list.length ? list.map(toolCard).join("") :
-        '<div style="grid-column:1/-1;text-align:center;padding:60px 0;color:var(--muted)"><div style="font-size:36px;margin-bottom:12px"></div><div style="font-weight:600">No tools found</div></div>';
+      if (g) {
+        if (!TOOLS.length) {
+          g.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px 0;color:var(--muted)"><div style="font-size:14px;margin-bottom:8px">Loading inventory from Firebase...</div></div>';
+        } else {
+          g.innerHTML = list.length ? list.map(toolCard).join("") :
+            '<div style="grid-column:1/-1;text-align:center;padding:60px 0;color:var(--muted)"><div style="font-weight:600">No tools found</div></div>';
+        }
+      }
     }
     window.renderTools = renderTools;
 
@@ -1382,7 +1357,13 @@
     }
     function renderFeatured() {
       var g = el("featured-tools");
-      if (g) g.innerHTML = [TOOLS[1],TOOLS[0],TOOLS[4],TOOLS[2],TOOLS[7],TOOLS[3]].map(toolCard).join("");
+      if (!g) return;
+      if (!TOOLS.length) {
+        g.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted);font-size:14px">Loading inventory...</div>';
+        return;
+      }
+      var featured = TOOLS.slice(0, 6);
+      g.innerHTML = featured.map(toolCard).join("");
     }
 
     window.filterTools = renderTools;
@@ -2110,7 +2091,7 @@
           renderCatIcons();
           renderFeatured();
           renderTools();
-          console.log("Loaded " + TOOLS.length + " tools from Firebase");
+          console.log("Loaded " + TOOLS.length + " tools from Firebase: " + TOOLS.map(function(t){return t.name;}).join(", "));
         })
         .catch(function(e){
           console.warn("RTDB load failed, using local tools:", e);
@@ -2119,10 +2100,8 @@
 
     // ── Boot ──────────────────────────────────────────────────────────────────────
     renderCatIcons();
-    renderFeatured();
-    renderTools();
 
-    // Load live inventory from Firebase Realtime DB
+    // Load live inventory from Firebase Realtime DB — renders tools once loaded
     loadToolsFromRTDB();
     // Auto-refresh inventory every 60 seconds
     setInterval(loadToolsFromRTDB, 60000);

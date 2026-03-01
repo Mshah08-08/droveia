@@ -2378,26 +2378,11 @@ window.adminOrderAction = function(btn) {
           } catch(e) { console.error("Could not update user order:", e.message); showToast("Warning: " + e.message); }
         }
 
-        // Only restore stock when returned or cancelled — NOT on delivery
+        // Restore stock in RTDB when returned or cancelled
         if (newStatus === "returned" || newStatus === "cancelled") {
           var items = orderData.items || [];
           for (var i = 0; i < items.length; i++) {
-            var tid = items[i].id;
-            if (!tid) continue;
-            // Increment stock back
-            try {
-              var invSnap = await fb.getDoc(fb.doc(fb.db, "inventory", String(tid)));
-              var invData = invSnap.exists() ? invSnap.data() : {};
-              var newQty = Math.max(0, (invData.rentedQty || 0) - 1);
-              var toolQty = (TOOLS.find(function(t){ return String(t.id) === String(tid); }) || {}).qty || 1;
-              console.log("Restoring stock: tid=" + tid + " newRented=" + newQty + " totalQty=" + toolQty + " available=" + (newQty < toolQty));
-              await fb.setDoc(fb.doc(fb.db, "inventory", String(tid)), {
-                toolId: tid,
-                rentedQty: newQty,
-                available: newQty < toolQty,
-                updatedAt: fb.serverTimestamp()
-              });
-            } catch(e) { console.warn("inventory update:", e.message); }
+            if (items[i].id) await markToolAvailable(fb, items[i].id);
           }
         }
         showToast("Order updated");
@@ -2780,32 +2765,44 @@ function subscribeInventory(fb) {
 
 // When a tool is rented, mark unavailable in Firestore
 async function markToolUnavailable(fb, toolId) {
+  var tid = parseInt(toolId);
+  // Find tool index in TOOLS array (RTDB is array-based)
+  var idx = TOOLS.findIndex(function(t){ return t.id === tid; });
+  if (idx < 0) { console.warn("markToolUnavailable: tool not found", tid); return; }
+  var newQty = Math.max(0, (parseInt(TOOLS[idx].qty) || 1) - 1);
+  TOOLS[idx].qty = newQty;
+  TOOLS[idx].available = newQty > 0;
+  // Patch just this tool's qty and available in RTDB
+  var url = "https://droveia-default-rtdb.firebaseio.com/tools/" + idx + ".json?auth=NKLKSY1Cshm1pba0vuKK6RQOmjV2uOfeje7hzxkI";
   try {
-    var tool = TOOLS.find(function(t){ return String(t.id) === String(toolId); });
-    var totalQty = tool ? (parseInt(tool.qty) || 1) : 1;
-    var invSnap = await fb.getDoc(fb.doc(fb.db, "inventory", String(toolId)));
-    var invData = invSnap.exists() ? invSnap.data() : {};
-    var newRented = (invData.rentedQty || 0) + 1;
-    var nowAvailable = newRented < totalQty;
-    var tidNum = parseInt(toolId);
-    await fb.setDoc(fb.doc(fb.db, "inventory", String(tidNum)), {
-      toolId:    tidNum,
-      rentedQty: newRented,
-      available: nowAvailable,
-      updatedAt: fb.serverTimestamp()
+    await fetch(url, {
+      method: "PATCH",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ qty: newQty, available: newQty > 0 })
     });
-  } catch(e) { console.error("inventory update", e); }
+    renderTools();
+    renderFeatured();
+  } catch(e) { console.error("markToolUnavailable RTDB error", e); }
 }
 
 // When order delivered, mark tool available again
 async function markToolAvailable(fb, toolId) {
+  var tid = parseInt(toolId);
+  var idx = TOOLS.findIndex(function(t){ return t.id === tid; });
+  if (idx < 0) { console.warn("markToolAvailable: tool not found", tid); return; }
+  var newQty = (parseInt(TOOLS[idx].qty) || 0) + 1;
+  TOOLS[idx].qty = newQty;
+  TOOLS[idx].available = true;
+  var url = "https://droveia-default-rtdb.firebaseio.com/tools/" + idx + ".json?auth=NKLKSY1Cshm1pba0vuKK6RQOmjV2uOfeje7hzxkI";
   try {
-    await fb.setDoc(fb.doc(fb.db, "inventory", String(toolId)), {
-      toolId: toolId,
-      available: true,
-      returnedAt: fb.serverTimestamp()
+    await fetch(url, {
+      method: "PATCH",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ qty: newQty, available: true })
     });
-  } catch(e) { console.error("inventory update", e); }
+    renderTools();
+    renderFeatured();
+  } catch(e) { console.error("markToolAvailable RTDB error", e); }
 }
 
 

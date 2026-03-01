@@ -1928,7 +1928,9 @@ function renderOrders() {
             '<div style="font-size:12px;color:var(--muted)">#'+o._id.slice(0,8).toUpperCase()+' · '+time+' · $'+(o.total||0).toFixed(2)+'</div>'+
           '</div>'+
           '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">'+
-          '<div class="delivered-badge">Delivered</div>'+
+          (o.status === "cancelled"
+            ? '<div class="delivered-badge" style="background:rgba(239,68,68,.1);color:#ef4444;border-color:rgba(239,68,68,.2)">Cancelled</div>'
+            : '<div class="delivered-badge">Delivered</div>')+
           buildReviewBtns(o)+
           '</div>'+
         '</div>';
@@ -2113,12 +2115,14 @@ function adminInventoryTable() {
   var rows = TOOLS.map(function(t) {
     var avail = t.available !== false;
     var rate = (t.pph && t.pph > 0) ? t.pph : ((t.retail * 0.70) / 48);
+    var qty = t.qty || 1;
     return '<tr>' +
       '<td><strong>#' + t.id + '</strong></td>' +
       '<td>' + t.name + '</td>' +
       '<td><span style="font-size:11px;background:var(--surface2);padding:2px 8px;border-radius:6px">' + t.cat + '</span></td>' +
       '<td>$' + t.retail + '</td>' +
       '<td>$' + rate.toFixed(2) + '/hr</td>' +
+      '<td><span style="font-size:13px;font-weight:700">' + qty + '</span><span style="color:var(--muted);font-size:11px"> units</span></td>' +
       '<td><span class="admin-avail-badge ' + (avail ? 'yes' : 'no') + '">' + (avail ? 'Available' : 'Rented') + '</span></td>' +
       '<td>' +
         '<button class="admin-action-btn" onclick="adminEditTool(' + t.id + ')">Edit</button>' +
@@ -2131,7 +2135,7 @@ function adminInventoryTable() {
   }).join("");
 
   return '<div class="admin-table-wrap"><table class="admin-table">' +
-    '<thead><tr><th>#</th><th>Name</th><th>Category</th><th>Retail</th><th>Rate</th><th>Status</th><th>Actions</th></tr></thead>' +
+    '<thead><tr><th>#</th><th>Name</th><th>Category</th><th>Retail</th><th>Rate</th><th>Stock</th><th>Status</th><th>Actions</th></tr></thead>' +
     '<tbody>' + rows + '</tbody>' +
     '</table></div>';
 }
@@ -2147,6 +2151,7 @@ function adminToolForm(tool, isEdit) {
       adminField("PPH (0 = auto)", "number", "af-pph", t.pph || 0, false) +
       adminField("Rating", "number", "af-rating", t.rating || 4.5, false) +
       adminField("ETA (e.g. 8 min)", "text", "af-eta", t.eta, true) +
+      adminField("Qty in Stock", "number", "af-qty", t.qty || 1, false) +
       adminField("Image URL", "text", "af-img", t.img !== "x" ? (t.img || "") : "", false) +
     '</div>' +
     '<div style="margin-top:12px">' + adminField("Description", "textarea", "af-desc", t.desc, true) + '</div>' +
@@ -2180,6 +2185,7 @@ function adminGetFormVals() {
     rating: parseFloat((el("af-rating") || {}).value) || 4.5,
     eta:    (el("af-eta")    || {}).value || "",
     img:    (el("af-img")    || {}).value || "x",
+    qty:    parseInt((el("af-qty") || {}).value) || 1,
     desc:   (el("af-desc")   || {}).value || "",
   };
 }
@@ -2344,24 +2350,46 @@ window.adminOrderAction = function(btn) {
     onOk: async function() {
       var fb = window._fb;
       try {
-        await fb.updateDoc(fb.doc(fb.db, "allOrders", orderId), {
-          status: newStatus,
-          updatedAt: fb.serverTimestamp()
-        });
-        // If delivered or cancelled, mark tools available in Firestore
+        // Get order first so we have userId + items
+        var orderSnap = await fb.getDoc(fb.doc(fb.db, "allOrders", orderId));
+        var orderData = orderSnap.data();
+        if (!orderData) { showToast("Order not found"); return; }
+
+        var update = { status: newStatus, updatedAt: fb.serverTimestamp() };
+        if (newStatus === "delivered") update.deliveredAt = fb.serverTimestamp();
+
+        // Update allOrders (admin view)
+        await fb.updateDoc(fb.doc(fb.db, "allOrders", orderId), update);
+
+        // Update user's own order subcollection so their app updates in real-time
+        if (orderData.userId) {
+          try {
+            await fb.updateDoc(
+              fb.doc(fb.db, "users", orderData.userId, "orders", orderId),
+              update
+            );
+          } catch(e) { console.warn("Could not update user order:", e.message); }
+        }
+
+        // If delivered or cancelled, decrement tool stock / mark available
         if (newStatus === "delivered" || newStatus === "cancelled") {
-          var snap = await fb.getDoc(fb.doc(fb.db, "allOrders", orderId));
-          var data = snap.data();
-          if (data && data.items) {
-            for (var i = 0; i < data.items.length; i++) {
-              var tid = data.items[i].id;
-              if (tid) {
-                await fb.setDoc(fb.doc(fb.db, "inventory", String(tid)), {
-                  toolId: tid, available: true,
-                  updatedAt: fb.serverTimestamp()
-                });
-              }
-            }
+          var items = orderData.items || [];
+          for (var i = 0; i < items.length; i++) {
+            var tid = items[i].id;
+            if (!tid) continue;
+            // Increment stock back
+            try {
+              var invSnap = await fb.getDoc(fb.doc(fb.db, "inventory", String(tid)));
+              var invData = invSnap.exists() ? invSnap.data() : {};
+              var newQty = Math.max(0, (invData.rentedQty || 1) - 1);
+              var toolQty = (TOOLS.find(function(t){ return t.id === tid; }) || {}).qty || 1;
+              await fb.setDoc(fb.doc(fb.db, "inventory", String(tid)), {
+                toolId: tid,
+                rentedQty: newQty,
+                available: newQty < toolQty,
+                updatedAt: fb.serverTimestamp()
+              });
+            } catch(e) { console.warn("inventory update:", e.message); }
           }
         }
         showToast("Order updated");
@@ -2716,6 +2744,7 @@ function subscribeInventory(fb) {
       for (var i = 0; i < TOOLS.length; i++) {
         if (TOOLS[i].id == data.toolId) {
           TOOLS[i].available = data.available;
+          TOOLS[i].rentedQty = data.rentedQty || 0;
           break;
         }
       }
@@ -2728,9 +2757,15 @@ function subscribeInventory(fb) {
 // When a tool is rented, mark unavailable in Firestore
 async function markToolUnavailable(fb, toolId) {
   try {
+    var tool = TOOLS.find(function(t){ return t.id === toolId; });
+    var totalQty = tool ? (tool.qty || 1) : 1;
+    var invSnap = await fb.getDoc(fb.doc(fb.db, "inventory", String(toolId)));
+    var invData = invSnap.exists() ? invSnap.data() : {};
+    var newRented = (invData.rentedQty || 0) + 1;
     await fb.setDoc(fb.doc(fb.db, "inventory", String(toolId)), {
       toolId: toolId,
-      available: false,
+      rentedQty: newRented,
+      available: newRented < totalQty,
       rentedAt: fb.serverTimestamp()
     });
   } catch(e) { console.error("inventory update", e); }

@@ -2154,7 +2154,6 @@ function adminToolForm(tool, isEdit) {
       adminField("Rating", "number", "af-rating", t.rating || 4.5, false) +
       adminField("ETA (e.g. 8 min)", "text", "af-eta", t.eta, true) +
       adminField("Qty in Stock", "number", "af-qty", t.qty || 1, false) +
-      adminField("Qty in Stock", "number", "af-qty", t.qty || 1, false) +
       adminField("Image URL", "text", "af-img", t.img !== "x" ? (t.img || "") : "", false) +
     '</div>' +
     '<div style="margin-top:12px">' + adminField("Description", "textarea", "af-desc", t.desc, true) + '</div>' +
@@ -2187,9 +2186,8 @@ function adminGetFormVals() {
     pph:    parseFloat((el("af-pph")    || {}).value) || 0,
     rating: parseFloat((el("af-rating") || {}).value) || 4.5,
     eta:    (el("af-eta")    || {}).value || "",
-    qty:    parseInt((el("af-qty")   || {}).value) || 1,
-    img:    (el("af-img")    || {}).value || "x",
     qty:    parseInt((el("af-qty") || {}).value) || 1,
+    img:    (el("af-img")    || {}).value || "x",
     desc:   (el("af-desc")   || {}).value || "",
   };
 }
@@ -2783,7 +2781,7 @@ function subscribeInventory(fb) {
 // When a tool is rented, mark unavailable in Firestore
 async function markToolUnavailable(fb, toolId) {
   try {
-    var tool = TOOLS.find(function(t){ return t.id === toolId; });
+    var tool = TOOLS.find(function(t){ return String(t.id) === String(toolId); });
     var totalQty = tool ? (parseInt(tool.qty) || 1) : 1;
     var invSnap = await fb.getDoc(fb.doc(fb.db, "inventory", String(toolId)));
     var invData = invSnap.exists() ? invSnap.data() : {};

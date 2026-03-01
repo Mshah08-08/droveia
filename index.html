@@ -733,6 +733,7 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
 .admin-avail-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
 .admin-avail-badge.yes{background:var(--green-dim);color:var(--green);border:1px solid var(--green-mid)}
 .admin-avail-badge.no{background:rgba(239,68,68,.1);color:#ef4444;border:1px solid rgba(239,68,68,.2)}
+.admin-avail-badge.warn{background:rgba(245,158,11,.1);color:#f59e0b;border:1px solid rgba(245,158,11,.2)}
 .admin-action-btn{padding:5px 12px;border-radius:8px;border:1px solid var(--border2);background:none;color:var(--text2);font-size:11px;font-weight:600;cursor:pointer;font-family:var(--font);transition:.15s;margin-right:4px}
 .admin-action-btn:hover{background:var(--blue);border-color:var(--blue);color:#fff}
 .admin-action-btn.red:hover{background:#ef4444;border-color:#ef4444;color:#fff}
@@ -2065,9 +2066,6 @@ async function renderAdmin() {
     return;
   }
 
-  var avail = TOOLS.filter(function(t){ return t.available !== false; }).length;
-  var rented = TOOLS.length - avail;
-
   wrap.innerHTML =
     '<div class="admin-header">' +
       '<div><div class="admin-title">Admin Dashboard</div><div class="admin-subtitle">Droveia inventory & order management</div></div>' +
@@ -2079,11 +2077,7 @@ async function renderAdmin() {
       '</div>' +
     '</div>' +
 
-    '<div class="admin-stats">' +
-      '<div class="admin-stat"><div class="admin-stat-val">' + TOOLS.length + '</div><div class="admin-stat-label">Total Tools</div></div>' +
-      '<div class="admin-stat"><div class="admin-stat-val green">' + avail + '</div><div class="admin-stat-label">Available</div></div>' +
-      '<div class="admin-stat"><div class="admin-stat-val red">' + rented + '</div><div class="admin-stat-label">Rented Out</div></div>' +
-    '</div>' +
+
 
     '<div class="admin-tabs" style="margin-bottom:24px">' +
       '<button class="admin-tab active" data-panel="inventory" onclick="adminSwitchTab(this)">Inventory</button>' +
@@ -2113,31 +2107,57 @@ function adminSwitchTab(btn) {
 }
 
 function adminInventoryTable() {
-  var cats = ["Workshop","Crafts","Office","Electronics"];
+  var totalTools  = TOOLS.length;
+  var totalStock  = TOOLS.reduce(function(s,t){ return s + (parseInt(t.qty)||0); }, 0);
+  var totalRented = TOOLS.reduce(function(s,t){ return s + (parseInt(t.rentedQty)||0); }, 0);
+
   var rows = TOOLS.map(function(t) {
-    var avail = t.available !== false;
-    var rate = (t.pph && t.pph > 0) ? t.pph : ((t.retail * 0.70) / 48);
-    var qty = t.qty || 1;
+    var rate      = (t.pph && t.pph > 0) ? t.pph : ((t.retail * 0.70) / 48);
+    var qty       = parseInt(t.qty) || 0;
+    var rentedQty = parseInt(t.rentedQty) || 0;
+    var totalQty  = qty + rentedQty;
+    var pct       = totalQty > 0 ? Math.round((rentedQty / totalQty) * 100) : 0;
+    var statusCls = qty === 0 ? 'no' : qty <= 1 ? 'warn' : 'yes';
+    var statusLbl = qty === 0 ? 'Out of Stock' : qty === 1 ? 'Low Stock' : 'In Stock';
     return '<tr>' +
-      '<td><strong>#' + t.id + '</strong></td>' +
-      '<td>' + t.name + '</td>' +
-      '<td><span style="font-size:11px;background:var(--surface2);padding:2px 8px;border-radius:6px">' + t.cat + '</span></td>' +
+      '<td><span style="font-size:11px;font-weight:700;color:var(--muted)">#' + t.id + '</span></td>' +
+      '<td><div style="font-weight:600;font-size:13px">' + t.name + '</div>' +
+          '<div style="font-size:11px;color:var(--muted);margin-top:1px">$' + rate.toFixed(2) + '/hr · ' + t.cat + '</div></td>' +
       '<td>$' + t.retail + '</td>' +
-      '<td>$' + rate.toFixed(2) + '/hr</td>' +
-      '<td><span style="font-size:13px;font-weight:700">' + qty + '</span><span style="color:var(--muted);font-size:11px"> units</span></td>' +
-      '<td><span class="admin-avail-badge ' + (avail ? 'yes' : 'no') + '">' + (avail ? 'Available' : 'Rented') + '</span></td>' +
       '<td>' +
+        '<div style="display:flex;align-items:center;gap:10px">' +
+          '<div>' +
+            '<div style="font-size:18px;font-weight:800;line-height:1">' + qty + '</div>' +
+            '<div style="font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase">Available</div>' +
+          '</div>' +
+          '<div style="color:var(--dim);font-size:16px">·</div>' +
+          '<div>' +
+            '<div style="font-size:18px;font-weight:800;line-height:1;color:var(--blue)">' + rentedQty + '</div>' +
+            '<div style="font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase">Rented</div>' +
+          '</div>' +
+          '<div style="flex:1;min-width:60px">' +
+            '<div style="height:4px;background:var(--surface3);border-radius:2px;overflow:hidden">' +
+              '<div style="height:100%;width:' + pct + '%;background:var(--blue);border-radius:2px;transition:.3s"></div>' +
+            '</div>' +
+            '<div style="font-size:10px;color:var(--muted);margin-top:2px">' + pct + '% rented</div>' +
+          '</div>' +
+        '</div>' +
+      '</td>' +
+      '<td><span class="admin-avail-badge ' + statusCls + '">' + statusLbl + '</span></td>' +
+      '<td style="white-space:nowrap">' +
         '<button class="admin-action-btn" onclick="adminEditTool(' + t.id + ')">Edit</button>' +
-        (avail
-          ? '<button class="admin-action-btn" onclick="adminSetAvail(' + t.id + ',false)">Mark Rented</button>'
-          : '<button class="admin-action-btn green" onclick="adminSetAvail(' + t.id + ',true)">Mark Available</button>') +
         '<button class="admin-action-btn red" onclick="adminDeleteTool(' + t.id + ')">Delete</button>' +
       '</td>' +
     '</tr>';
-  }).join("");
+  }).join('');
 
-  return '<div class="admin-table-wrap"><table class="admin-table">' +
-    '<thead><tr><th>#</th><th>Name</th><th>Category</th><th>Retail</th><th>Rate</th><th>Stock</th><th>Status</th><th>Actions</th></tr></thead>' +
+  return '<div style="display:flex;gap:12px;margin-bottom:20px">' +
+    '<div class="admin-stat" style="flex:1"><div class="admin-stat-val">' + totalTools + '</div><div class="admin-stat-label">Tools</div></div>' +
+    '<div class="admin-stat" style="flex:1"><div class="admin-stat-val green">' + totalStock + '</div><div class="admin-stat-label">In Stock</div></div>' +
+    '<div class="admin-stat" style="flex:1"><div class="admin-stat-val" style="color:var(--blue)">' + totalRented + '</div><div class="admin-stat-label">Rented Out</div></div>' +
+    '</div>' +
+    '<div class="admin-table-wrap"><table class="admin-table">' +
+    '<thead><tr><th>#</th><th>Tool</th><th>Retail</th><th>Stock</th><th>Status</th><th>Actions</th></tr></thead>' +
     '<tbody>' + rows + '</tbody>' +
     '</table></div>';
 }
@@ -2287,49 +2307,73 @@ async function adminLoadOrders() {
       return;
     }
     wrap.innerHTML = orders.map(function(o) {
-      var items = (o.items||[]).map(function(i){
-        return '<span class="admin-order-item">' + i.name + ' · ' + i.hours + 'h</span>';
-      }).join("");
-      var addr  = o.address ? o.address.building + ", Room " + o.address.room : "—";
-      var date  = o.createdAt && o.createdAt.toDate ? o.createdAt.toDate().toLocaleString() : "";
-      var email = o.userEmail || "—";
-      var statusColors = { delivered: "var(--green)", returned: "var(--muted)", in_flight: "var(--blue)", cancelled: "#ef4444" };
+      var statusColors = { delivered: "var(--green)", returned: "#22c55e", in_flight: "var(--blue)", cancelled: "#ef4444" };
+      var statusIcons  = { delivered: "✈", returned: "✓", in_flight: "⟳", cancelled: "✕" };
       var statusColor  = statusColors[o.status] || "var(--muted)";
       var statusLabel  = (o.status||"").replace(/_/g," ").toUpperCase();
+      var statusIcon   = statusIcons[o.status] || "·";
+      var date   = o.createdAt && o.createdAt.toDate ? o.createdAt.toDate() : null;
+      var dateStr = date ? date.toLocaleDateString([], {month:"short",day:"numeric",year:"numeric"}) : "";
+      var timeStr = date ? date.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"}) : "";
+      var updStr = o.updatedAt && o.updatedAt.toDate ? "Updated " + o.updatedAt.toDate().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}) : "";
+      var items = (o.items||[]).map(function(i){
+        return '<span class="admin-order-item">' + i.name + '<span style="color:var(--muted)"> · ' + i.hours + 'h</span></span>';
+      }).join("");
+      var addr = o.address ? o.address.building + (o.address.room ? ', Rm ' + o.address.room : '') : "—";
+      var dropNotes = o.address && o.address.dropNotes ? o.address.dropNotes : "";
 
-      // Build action buttons based on current status
+      // Action buttons
       var actions = "";
       if (o.status === "in_flight") {
-        actions +=
-          '<button class="order-act-btn green" data-oid="' + o._id + '" data-ns="delivered" onclick="adminOrderAction(this)">Mark Delivered</button>' +
-          '<button class="order-act-btn" data-oid="' + o._id + '" data-ns="cancelled" onclick="adminOrderAction(this)">Cancel Order</button>';
+        actions += '<button class="order-act-btn green" data-oid="' + o._id + '" data-ns="delivered" onclick="adminOrderAction(this)">Mark Delivered</button>';
+        actions += '<button class="order-act-btn" data-oid="' + o._id + '" data-ns="cancelled" onclick="adminOrderAction(this)">Cancel</button>';
       } else if (o.status === "delivered") {
-        actions +=
-          '<button class="order-act-btn green" data-oid="' + o._id + '" data-ns="returned" onclick="adminOrderAction(this)">Mark Returned</button>' +
-          '<button class="order-act-btn" data-oid="' + o._id + '" data-ns="in_flight" onclick="adminOrderAction(this)">Reopen</button>';
+        actions += '<button class="order-act-btn green" data-oid="' + o._id + '" data-ns="returned" onclick="adminOrderAction(this)">Mark Returned</button>';
+        actions += '<button class="order-act-btn" data-oid="' + o._id + '" data-ns="in_flight" onclick="adminOrderAction(this)">Reopen</button>';
       } else if (o.status === "returned") {
-        actions +=
-          '<button class="order-act-btn" data-oid="' + o._id + '" data-ns="delivered" onclick="adminOrderAction(this)">Undo Return</button>';
+        actions += '<button class="order-act-btn" data-oid="' + o._id + '" data-ns="delivered" onclick="adminOrderAction(this)">Undo Return</button>';
       } else if (o.status === "cancelled") {
-        actions +=
-          '<button class="order-act-btn green" data-oid="' + o._id + '" data-ns="in_flight" onclick="adminOrderAction(this)">Restore</button>';
+        actions += '<button class="order-act-btn green" data-oid="' + o._id + '" data-ns="in_flight" onclick="adminOrderAction(this)">Restore</button>';
       }
       actions += '<button class="order-act-btn red" data-oid="' + o._id + '" onclick="adminDeleteOrder(this)">Delete</button>';
 
       return '<div class="admin-order-card">' +
-        '<div class="admin-order-header">' +
-          '<div>' +
-            '<span class="admin-order-id">#' + o._id.slice(0,10).toUpperCase() + '</span>' +
-            '<span style="margin-left:10px;font-size:11px;font-weight:700;color:' + statusColor + '">' + statusLabel + '</span>' +
+        // Header row
+        '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px">' +
+          '<div style="display:flex;align-items:center;gap:10px">' +
+            '<div style="width:36px;height:36px;border-radius:10px;background:' + statusColor.replace('var(--','rgba(').replace(')',',0.12)') + ';display:flex;align-items:center;justify-content:center;font-size:14px;border:1px solid ' + statusColor.replace('var(--','rgba(').replace(')',',0.2)') + '">' + statusIcon + '</div>' +
+            '<div>' +
+              '<div style="font-family:monospace;font-size:11px;font-weight:700;color:var(--muted)">#' + o._id.slice(0,10).toUpperCase() + '</div>' +
+              '<div style="display:flex;align-items:center;gap:6px;margin-top:2px">' +
+                '<span style="font-size:11px;font-weight:800;color:' + statusColor + '">' + statusLabel + '</span>' +
+                (updStr ? '<span style="font-size:10px;color:var(--dim)">· ' + updStr + '</span>' : '') +
+              '</div>' +
+            '</div>' +
           '</div>' +
-          '<div class="admin-order-total">$' + (o.total||0).toFixed(2) + '</div>' +
+          '<div style="text-align:right">' +
+            '<div style="font-size:20px;font-weight:900;letter-spacing:-.02em">$' + (o.total||0).toFixed(2) + '</div>' +
+            '<div style="font-size:11px;color:var(--green)">' + (o.saved > 0 ? 'saved $' + (o.saved||0).toFixed(2) : '') + '</div>' +
+          '</div>' +
         '</div>' +
-        '<div class="admin-order-items">' + items + '</div>' +
-        '<div class="admin-order-addr" style="display:flex;flex-wrap:wrap;gap:16px">' +
-          '<span>Deliver to: ' + addr + '</span>' +
-          '<span style="color:var(--dim)">' + email + '</span>' +
-          '<span style="color:var(--dim)">' + date + '</span>' +
+        // Items
+        '<div style="margin-bottom:10px">' +
+          '<div style="font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Items</div>' +
+          '<div class="admin-order-items">' + items + '</div>' +
         '</div>' +
+        // Delivery info
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">' +
+          '<div style="background:var(--bg3);border-radius:10px;padding:10px 12px">' +
+            '<div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">Deliver To</div>' +
+            '<div style="font-size:13px;font-weight:600">' + addr + '</div>' +
+            (dropNotes ? '<div style="font-size:11px;color:var(--muted);margin-top:2px">' + dropNotes + '</div>' : '') +
+          '</div>' +
+          '<div style="background:var(--bg3);border-radius:10px;padding:10px 12px">' +
+            '<div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">Customer</div>' +
+            '<div style="font-size:13px;font-weight:600;word-break:break-all">' + (o.userEmail||"—") + '</div>' +
+            '<div style="font-size:11px;color:var(--muted);margin-top:2px">' + dateStr + (timeStr ? ' at ' + timeStr : '') + '</div>' +
+          '</div>' +
+        '</div>' +
+        // Actions
         '<div class="order-actions">' + actions + '</div>' +
       '</div>';
     }).join("");
@@ -2709,12 +2753,11 @@ function loadToolsFromRTDB() {
           desc:   t.desc   || "",
           eta:    t.eta    || "5 min",
           img:    t.img    || "",
-          qty:    parseInt(t.qty) || 1,
-          available: true  // will be overridden by Firestore inventory snapshot
+          qty:       parseInt(t.qty) || 1,
+          rentedQty: parseInt(t.rentedQty) || 0,
+          available: (parseInt(t.qty) || 1) > 0
         };
       });
-      // After loading RTDB tools, apply current Firestore inventory state
-      applyFirestoreInventory();
       renderCatIcons();
       renderFeatured();
       renderTools();
@@ -2766,44 +2809,46 @@ function subscribeInventory(fb) {
 // When a tool is rented, mark unavailable in Firestore
 async function markToolUnavailable(fb, toolId) {
   var tid = parseInt(toolId);
-  // Find tool index in TOOLS array (RTDB is array-based)
   var idx = TOOLS.findIndex(function(t){ return t.id === tid; });
   if (idx < 0) { console.warn("markToolUnavailable: tool not found", tid); return; }
-  var newQty = Math.max(0, (parseInt(TOOLS[idx].qty) || 1) - 1);
-  TOOLS[idx].qty = newQty;
+  var totalQty   = parseInt(TOOLS[idx].qty) || 1;
+  var rentedQty  = parseInt(TOOLS[idx].rentedQty) || 0;
+  var newRented  = rentedQty + 1;
+  var newQty     = Math.max(0, totalQty - 1);
+  TOOLS[idx].qty       = newQty;
+  TOOLS[idx].rentedQty = newRented;
   TOOLS[idx].available = newQty > 0;
-  // Patch just this tool's qty and available in RTDB
   var url = "https://droveia-default-rtdb.firebaseio.com/tools/" + idx + ".json?auth=NKLKSY1Cshm1pba0vuKK6RQOmjV2uOfeje7hzxkI";
   try {
     await fetch(url, {
       method: "PATCH",
       headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({ qty: newQty, available: newQty > 0 })
+      body: JSON.stringify({ qty: newQty, rentedQty: newRented, available: newQty > 0 })
     });
-    renderTools();
-    renderFeatured();
+    renderTools(); renderFeatured();
   } catch(e) { console.error("markToolUnavailable RTDB error", e); }
 }
 
-// When order delivered, mark tool available again
 async function markToolAvailable(fb, toolId) {
   var tid = parseInt(toolId);
   var idx = TOOLS.findIndex(function(t){ return t.id === tid; });
   if (idx < 0) { console.warn("markToolAvailable: tool not found", tid); return; }
-  var newQty = (parseInt(TOOLS[idx].qty) || 0) + 1;
-  TOOLS[idx].qty = newQty;
+  var rentedQty = Math.max(0, (parseInt(TOOLS[idx].rentedQty) || 1) - 1);
+  var newQty    = (parseInt(TOOLS[idx].qty) || 0) + 1;
+  TOOLS[idx].qty       = newQty;
+  TOOLS[idx].rentedQty = rentedQty;
   TOOLS[idx].available = true;
   var url = "https://droveia-default-rtdb.firebaseio.com/tools/" + idx + ".json?auth=NKLKSY1Cshm1pba0vuKK6RQOmjV2uOfeje7hzxkI";
   try {
     await fetch(url, {
       method: "PATCH",
       headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({ qty: newQty, available: true })
+      body: JSON.stringify({ qty: newQty, rentedQty: rentedQty, available: true })
     });
-    renderTools();
-    renderFeatured();
+    renderTools(); renderFeatured();
   } catch(e) { console.error("markToolAvailable RTDB error", e); }
 }
+
 
 
 // ── Confirm Modal ─────────────────────────────────────────────────────────────

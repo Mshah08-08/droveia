@@ -2368,7 +2368,7 @@ window.adminOrderAction = function(btn) {
               fb.doc(fb.db, "users", orderData.userId, "orders", orderId),
               update
             );
-          } catch(e) { console.warn("Could not update user order:", e.message); }
+          } catch(e) { console.error("Could not update user order:", e.message); showToast("Warning: " + e.message); }
         }
 
         // If delivered or cancelled, decrement tool stock / mark available

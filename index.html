@@ -2074,7 +2074,10 @@
         .then(function(r){ return r.json(); })
         .then(function(data) {
           console.log("Raw Firebase data:", JSON.stringify(data));
-          if (!data || !Array.isArray(data)) { console.log("Data not array:", typeof data); return; }
+          // Firebase returns object {0:{...}, 1:{...}} or array — handle both
+          var arr = Array.isArray(data) ? data : Object.values(data);
+          if (!arr || !arr.length) { console.log("No data"); return; }
+          data = arr;
           // Merge with any missing fields from local TOOLS as fallback
           TOOLS = data.filter(function(t){ return t && t.name && t.pph; }).map(function(t, i) {
             return {

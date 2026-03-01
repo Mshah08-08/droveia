@@ -1346,32 +1346,31 @@
 
     // ── Tools rendering ───────────────────────────────────────────────────────────
     function toolCard(t) {
-      if (!t || !t.name || !t.retail) return '';
+      if (!t || !t.name || !t.retail) return "";
       var pct = Math.max(0, Math.round((1 - calcCost(t,4) / t.retail) * 100));
       var unavail = t.available === false;
       var baseRate = (t.pph && t.pph > 0) ? t.pph : (t.retail * 0.70 / 48);
-      var html = '<div class="tool-card fade-up' + (unavail ? ' tool-unavailable' : '') + '" onclick="openModal(' + t.id + ')">';
-      html += '<div class="tool-card-img" style="position:relative">';
-      if (unavail) html += '<div style="position:absolute;inset:0;background:rgba(0,0,0,.5);z-index:2;display:flex;align-items:center;justify-content:center;border-radius:var(--radius) var(--radius) 0 0"><span style="color:#fff;font-weight:800;font-size:13px;letter-spacing:.05em">UNAVAILABLE</span></div>';
-      html += '<img src="' + t.img + '" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center center;" onerror="this.style.display='none'"/>';
-      html += '<div style="position:absolute;top:10px;right:10px;background:var(--green);color:#000;font-size:10px;font-weight:800;padding:3px 8px;border-radius:6px;z-index:1">Save ' + pct + '%</div>';
-      html += '</div>';
-      html += '<div class="tool-card-body">';
-      html += '<div class="tool-card-cat-tag">' + t.cat + '</div>';
-      html += '<div class="tool-name">' + t.name + '</div>';
-      html += '<div class="tool-desc">' + t.desc + '</div>';
-      html += '<div class="tool-stars" style="margin-bottom:10px">' + stars(t.rating) + '</div>';
-      html += '<div class="tool-card-price-row">';
-      html += '<div class="tool-card-pph">$' + baseRate.toFixed(2) + '<span class="tool-card-unit">/hr</span></div>';
-      html += '<div class="tool-card-retail">$' + t.retail + '</div>';
-      html += '</div>';
-      html += '<div class="tool-card-footer">';
-      html += '<div class="tool-card-eta-pill">~' + t.eta + '</div>';
-      html += '<button class="tool-card-add" onclick="event.stopPropagation();quickAdd(' + t.id + ')">+ Add</button>';
-      html += '</div>';
-      html += '</div>';
-      html += '</div>';
-      return html;
+      var h = "";
+      h += '<div class="tool-card fade-up' + (unavail ? ' tool-unavailable' : '') + '" onclick="openModal(' + t.id + ')">';
+      h += '<div class="tool-card-img" style="position:relative">';
+      if (unavail) h += '<div style="position:absolute;inset:0;background:rgba(0,0,0,.5);z-index:2;display:flex;align-items:center;justify-content:center"><span style="color:#fff;font-weight:800;font-size:13px">UNAVAILABLE</span></div>';
+      h += '<img src="' + t.img + '" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" onerror="this.style.display=\'none\'">' ;
+      h += '<div style="position:absolute;top:10px;right:10px;background:var(--green);color:#000;font-size:10px;font-weight:800;padding:3px 8px;border-radius:6px;z-index:1">Save ' + pct + '%</div>';
+      h += '</div>';
+      h += '<div class="tool-card-body">';
+      h += '<div class="tool-card-cat-tag">' + t.cat + '</div>';
+      h += '<div class="tool-name">' + t.name + '</div>';
+      h += '<div class="tool-desc">' + t.desc + '</div>';
+      h += '<div class="tool-stars" style="margin-bottom:10px">' + stars(t.rating) + '</div>';
+      h += '<div class="tool-card-price-row">';
+      h += '<div class="tool-card-pph">$' + baseRate.toFixed(2) + '<span class="tool-card-unit">/hr</span></div>';
+      h += '<div class="tool-card-retail">$' + t.retail + '</div>';
+      h += '</div>';
+      h += '<div class="tool-card-footer">';
+      h += '<div class="tool-card-eta-pill">~' + t.eta + '</div>';
+      h += '<button class="tool-card-add" onclick="event.stopPropagation();quickAdd(' + t.id + ')">+ Add</button>';
+      h += '</div></div></div>';
+      return h;
     }
 
     function renderTools() {

@@ -2168,7 +2168,7 @@
             return clean;
           });
           // Merge with any missing fields from local TOOLS as fallback
-          TOOLS = data.filter(function(t){ return t && t.name && t.pph; }).map(function(t, i) {
+          TOOLS = data.filter(function(t){ return t && t.name && t.retail; }).map(function(t, i) {
             return {
               id:     parseInt(t.id)     || (i+1),
               name:   t.name   || "Tool",

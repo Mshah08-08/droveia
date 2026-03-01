@@ -4,7 +4,6 @@
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Droveia</title>
-    <link rel="icon" type="image/png" href="1.png">
     <link rel="preconnect" href="https://fonts.googleapis.com"/>
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
     <style>
@@ -2083,10 +2082,47 @@
     // Apply saved theme immediately
     applyTheme(_theme);
 
+
+    // ── Firebase Realtime DB — tool inventory ────────────────────────────────────
+    var RTDB_URL = "https://droveia-default-rtdb.firebaseio.com/tools.json";
+
+    function loadToolsFromRTDB() {
+      fetch(RTDB_URL)
+        .then(function(r){ return r.json(); })
+        .then(function(data) {
+          if (!data || !Array.isArray(data)) return;
+          // Merge with any missing fields from local TOOLS as fallback
+          TOOLS = data.filter(Boolean).map(function(t, i) {
+            return {
+              id:     t.id     || (i+1),
+              name:   t.name   || "Tool",
+              cat:    t.cat    || "Workshop",
+              pph:    parseFloat(t.pph)    || 2,
+              retail: parseFloat(t.retail) || 20,
+              rating: parseFloat(t.rating) || 4.5,
+              desc:   t.desc   || "",
+              eta:    t.eta    || "5 min",
+              img:    t.img    || "",
+              available: t.available !== false
+            };
+          }).filter(function(t){ return t.available !== false; });
+          renderCatIcons();
+          renderFeatured();
+          renderTools();
+          console.log("Loaded " + TOOLS.length + " tools from Firebase");
+        })
+        .catch(function(e){
+          console.warn("RTDB load failed, using local tools:", e);
+        });
+    }
+
     // ── Boot ──────────────────────────────────────────────────────────────────────
     renderCatIcons();
     renderFeatured();
     renderTools();
+
+    // Load live inventory from Firebase Realtime DB
+    loadToolsFromRTDB();
 
     if (window._fbReady) {
       startApp();

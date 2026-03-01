@@ -1362,7 +1362,7 @@
           '<div class="tool-desc">'+t.desc+'</div>'+
           '<div class="tool-stars" style="margin-bottom:10px">'+stars(t.rating)+'</div>'+
           '<div class="tool-card-price-row">'+
-            '<div class="tool-card-pph">$'+t.pph.toFixed(2)+'<span class="tool-card-unit">/hr</span></div>'+
+            '<div class="tool-card-pph">$'+(t.pph && t.pph > 0 ? t.pph : (t.retail*0.70/48)).toFixed(2)+'<span class="tool-card-unit">/hr</span></div>'+''
             '<div class="tool-card-retail">$'+t.retail+'</div>'+
           '</div>'+
           '<div class="tool-card-footer">'+
@@ -1520,14 +1520,20 @@
 
     // ── Pricing tiers ─────────────────────────────────────────────────────────────
     function calcCost(t, hours) {
-      if (!t || !t.pph) return 0;
-      var rate = t.pph;
-      if      (hours >= 48) rate = t.pph * 0.50;
-      else if (hours >= 24) rate = t.pph * 0.60;
-      else if (hours >= 12) rate = t.pph * 0.70;
-      else if (hours >= 8)  rate = t.pph * 0.80;
-      else if (hours >= 4)  rate = t.pph * 0.90;
-      return parseFloat((rate * hours).toFixed(2));
+      if (!t || !t.retail) return 0;
+      // If pph is manually set (non-zero), use it directly with tier discounts
+      // If pph is 0 or missing, auto-derive from retail (48h = 70% of retail)
+      var base = (t.pph && t.pph > 0)
+        ? t.pph
+        : (t.retail * 0.70) / 48;
+      var multiplier;
+      if      (hours >= 48) multiplier = 1.00;
+      else if (hours >= 24) multiplier = 1.20;
+      else if (hours >= 12) multiplier = 1.50;
+      else if (hours >= 8)  multiplier = 1.80;
+      else if (hours >= 4)  multiplier = 2.20;
+      else                  multiplier = 2.80;
+      return parseFloat((base * multiplier * hours).toFixed(2));
     }
     function renderModal() {
       var t    = currentTool;

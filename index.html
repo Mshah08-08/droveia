@@ -1743,23 +1743,12 @@
 
 
     function buildReviewBtns(o) {
-      return o.items.map(function(item) {
-        var reviewed = hasReviewed(o._id, item.id);
-        if (reviewed) {
-          return '<button class="review-btn done" disabled>Reviewed</button>';
-        }
-        var btn = document.createElement('button');
-        btn.className = 'review-btn';
-        btn.textContent = 'Review';
-        btn.setAttribute('data-tool-id', item.id);
-        btn.setAttribute('data-tool-name', item.name);
-        btn.setAttribute('data-order-id', o._id);
-        var tid = item.id || item.toolId || item.tool_id || 0;
-        var tname = item.name || item.toolName || item.tool_name || 'Tool';
-        console.log('Review item:', JSON.stringify(item), 'tid:', tid, 'tname:', tname);
-        return '<button class="review-btn" onclick="openReviewModal(' +
-          tid + ',decodeURIComponent(\'' + encodeURIComponent(tname) + '\'),\'' + o._id + '\')">Review</button>';
-      }).join('');
+      var reviewed = hasReviewed(o._id, 'order');
+      if (reviewed) return '<button class="review-btn done" disabled>✓ Reviewed</button>';
+      var firstItem = (o.items && o.items[0]) || {};
+      var tname = firstItem.name || firstItem.toolName || 'Order';
+      var label = o.items && o.items.length > 1 ? tname + ' +' + (o.items.length - 1) + ' more' : tname;
+      return '<button class="review-btn" onclick="openReviewModal(0,decodeURIComponent(\'' + encodeURIComponent(label) + '\'),\'' + o._id + '\')">Review</button>';
     }
 
     function renderOrders() {
@@ -2309,7 +2298,7 @@
         closeReviewModal();
         showToast("✓ Review submitted!");
         // Mark this order item as reviewed
-        markOrderItemReviewed(_reviewOrderId, _reviewToolId);
+        markOrderItemReviewed(_reviewOrderId, 'order');
       } catch(e) {
         console.error("review", e);
         showToast("Failed to submit review");

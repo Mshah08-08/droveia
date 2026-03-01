@@ -1930,6 +1930,8 @@ function renderOrders() {
           '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">'+
           (o.status === "cancelled"
             ? '<div class="delivered-badge" style="background:rgba(239,68,68,.1);color:#ef4444;border-color:rgba(239,68,68,.2)">Cancelled</div>'
+            : o.status === "returned"
+            ? '<div class="delivered-badge" style="background:var(--surface2);color:var(--muted);border-color:var(--border)">Returned</div>'
             : '<div class="delivered-badge">Delivered</div>')+
           buildReviewBtns(o)+
           '</div>'+
@@ -2152,6 +2154,7 @@ function adminToolForm(tool, isEdit) {
       adminField("Rating", "number", "af-rating", t.rating || 4.5, false) +
       adminField("ETA (e.g. 8 min)", "text", "af-eta", t.eta, true) +
       adminField("Qty in Stock", "number", "af-qty", t.qty || 1, false) +
+      adminField("Qty in Stock", "number", "af-qty", t.qty || 1, false) +
       adminField("Image URL", "text", "af-img", t.img !== "x" ? (t.img || "") : "", false) +
     '</div>' +
     '<div style="margin-top:12px">' + adminField("Description", "textarea", "af-desc", t.desc, true) + '</div>' +
@@ -2184,6 +2187,7 @@ function adminGetFormVals() {
     pph:    parseFloat((el("af-pph")    || {}).value) || 0,
     rating: parseFloat((el("af-rating") || {}).value) || 4.5,
     eta:    (el("af-eta")    || {}).value || "",
+    qty:    parseInt((el("af-qty")   || {}).value) || 1,
     img:    (el("af-img")    || {}).value || "x",
     qty:    parseInt((el("af-qty") || {}).value) || 1,
     desc:   (el("af-desc")   || {}).value || "",
@@ -2291,7 +2295,7 @@ async function adminLoadOrders() {
       var addr  = o.address ? o.address.building + ", Room " + o.address.room : "—";
       var date  = o.createdAt && o.createdAt.toDate ? o.createdAt.toDate().toLocaleString() : "";
       var email = o.userEmail || "—";
-      var statusColors = { delivered: "var(--green)", in_flight: "var(--blue)", cancelled: "#ef4444" };
+      var statusColors = { delivered: "var(--green)", returned: "var(--muted)", in_flight: "var(--blue)", cancelled: "#ef4444" };
       var statusColor  = statusColors[o.status] || "var(--muted)";
       var statusLabel  = (o.status||"").replace(/_/g," ").toUpperCase();
 
@@ -2303,7 +2307,11 @@ async function adminLoadOrders() {
           '<button class="order-act-btn" data-oid="' + o._id + '" data-ns="cancelled" onclick="adminOrderAction(this)">Cancel Order</button>';
       } else if (o.status === "delivered") {
         actions +=
+          '<button class="order-act-btn green" data-oid="' + o._id + '" data-ns="returned" onclick="adminOrderAction(this)">Mark Returned</button>' +
           '<button class="order-act-btn" data-oid="' + o._id + '" data-ns="in_flight" onclick="adminOrderAction(this)">Reopen</button>';
+      } else if (o.status === "returned") {
+        actions +=
+          '<button class="order-act-btn" data-oid="' + o._id + '" data-ns="delivered" onclick="adminOrderAction(this)">Undo Return</button>';
       } else if (o.status === "cancelled") {
         actions +=
           '<button class="order-act-btn green" data-oid="' + o._id + '" data-ns="in_flight" onclick="adminOrderAction(this)">Restore</button>';
@@ -2335,12 +2343,13 @@ async function adminLoadOrders() {
 window.adminOrderAction = function(btn) {
   var orderId = btn.getAttribute("data-oid");
   var newStatus = btn.getAttribute("data-ns");
-  var labels = { delivered: "Mark as Delivered", cancelled: "Cancel Order", in_flight: "Reopen Order" };
-  var colors = { delivered: "green", cancelled: "red", in_flight: "amber" };
+  var labels = { delivered: "Mark as Delivered", cancelled: "Cancel Order", in_flight: "Reopen Order", returned: "Mark as Returned", };
+  var colors = { delivered: "green", cancelled: "red", in_flight: "amber", returned: "green" };
   var msgs = {
-    delivered: "Mark this order as delivered? This will free up the rented tools.",
+    delivered: "Mark this order as delivered. Stock stays rented until items are physically returned.",
     cancelled:  "Cancel this order? The tools will be marked available again.",
-    in_flight:  "Reopen this order and mark it as in-flight?"
+    in_flight:  "Reopen this order and mark it as in-flight?",
+    returned:   "Mark items as returned? This will add them back to stock."
   };
   showConfirm({
     title:   labels[newStatus] || "Update Order",
@@ -2371,8 +2380,8 @@ window.adminOrderAction = function(btn) {
           } catch(e) { console.error("Could not update user order:", e.message); showToast("Warning: " + e.message); }
         }
 
-        // If delivered or cancelled, decrement tool stock / mark available
-        if (newStatus === "delivered" || newStatus === "cancelled") {
+        // Only restore stock when returned or cancelled — NOT on delivery
+        if (newStatus === "returned" || newStatus === "cancelled") {
           var items = orderData.items || [];
           for (var i = 0; i < items.length; i++) {
             var tid = items[i].id;
@@ -2716,6 +2725,7 @@ function loadToolsFromRTDB() {
           desc:   t.desc   || "",
           eta:    t.eta    || "5 min",
           img:    t.img    || "",
+          qty:    parseInt(t.qty) || 1,
           available: true  // will be overridden by Firestore inventory snapshot
         };
       });
@@ -2743,8 +2753,10 @@ function applyFirestoreInventory() {
     var inv = _inventoryCache[tid];
     for (var i = 0; i < TOOLS.length; i++) {
       if (String(TOOLS[i].id) === String(tid)) {
-        TOOLS[i].available = inv.available;
-        TOOLS[i].rentedQty = inv.rentedQty || 0;
+        var totalQty = parseInt(TOOLS[i].qty) || 1;
+        var rentedQty = inv.rentedQty || 0;
+        TOOLS[i].rentedQty = rentedQty;
+        TOOLS[i].available = rentedQty < totalQty;  // available if stock remains
         break;
       }
     }

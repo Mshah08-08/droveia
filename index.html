@@ -2716,9 +2716,11 @@ function loadToolsFromRTDB() {
           desc:   t.desc   || "",
           eta:    t.eta    || "5 min",
           img:    t.img    || "",
-          available: t.available !== false
+          available: true  // will be overridden by Firestore inventory snapshot
         };
-      }).filter(function(t){ return t.available !== false; });
+      });
+      // After loading RTDB tools, apply current Firestore inventory state
+      applyFirestoreInventory();
       renderCatIcons();
       renderFeatured();
       renderTools();
@@ -2734,21 +2736,32 @@ function loadToolsFromRTDB() {
 // ── Real-time inventory via Firestore ────────────────────────────────────────
 var _inventoryUnsub = null;
 
+var _inventoryCache = {};  // toolId -> {available, rentedQty}
+
+function applyFirestoreInventory() {
+  Object.keys(_inventoryCache).forEach(function(tid) {
+    var inv = _inventoryCache[tid];
+    for (var i = 0; i < TOOLS.length; i++) {
+      if (String(TOOLS[i].id) === String(tid)) {
+        TOOLS[i].available = inv.available;
+        TOOLS[i].rentedQty = inv.rentedQty || 0;
+        break;
+      }
+    }
+  });
+}
+
 function subscribeInventory(fb) {
   if (_inventoryUnsub) _inventoryUnsub();
   var invCol = fb.collection(fb.db, "inventory");
   _inventoryUnsub = fb.onSnapshot(invCol, function(snap) {
-    // Update TOOLS availability from Firestore in real-time
+    // Cache inventory state
     snap.docs.forEach(function(d) {
       var data = d.data();
-      for (var i = 0; i < TOOLS.length; i++) {
-        if (TOOLS[i].id == data.toolId) {
-          TOOLS[i].available = data.available;
-          TOOLS[i].rentedQty = data.rentedQty || 0;
-          break;
-        }
-      }
+      _inventoryCache[String(data.toolId)] = { available: data.available, rentedQty: data.rentedQty || 0 };
     });
+    // Apply to TOOLS
+    applyFirestoreInventory();
     renderTools();
     renderFeatured();
   });
@@ -2758,15 +2771,16 @@ function subscribeInventory(fb) {
 async function markToolUnavailable(fb, toolId) {
   try {
     var tool = TOOLS.find(function(t){ return t.id === toolId; });
-    var totalQty = tool ? (tool.qty || 1) : 1;
+    var totalQty = tool ? (parseInt(tool.qty) || 1) : 1;
     var invSnap = await fb.getDoc(fb.doc(fb.db, "inventory", String(toolId)));
     var invData = invSnap.exists() ? invSnap.data() : {};
     var newRented = (invData.rentedQty || 0) + 1;
+    var nowAvailable = newRented < totalQty;  // still available if stock remains
     await fb.setDoc(fb.doc(fb.db, "inventory", String(toolId)), {
-      toolId: toolId,
+      toolId:    toolId,
       rentedQty: newRented,
-      available: newRented < totalQty,
-      rentedAt: fb.serverTimestamp()
+      available: nowAvailable,
+      updatedAt: fb.serverTimestamp()
     });
   } catch(e) { console.error("inventory update", e); }
 }

@@ -2115,10 +2115,11 @@ function adminInventoryTable() {
     var rate      = (t.pph && t.pph > 0) ? t.pph : ((t.retail * 0.70) / 48);
     var qty       = parseInt(t.qty) || 0;
     var rentedQty = parseInt(t.rentedQty) || 0;
-    var totalQty  = qty + rentedQty;
-    var pct       = totalQty > 0 ? Math.round((rentedQty / totalQty) * 100) : 0;
-    var statusCls = qty === 0 ? 'no' : qty <= 1 ? 'warn' : 'yes';
-    var statusLbl = qty === 0 ? 'Out of Stock' : qty === 1 ? 'Low Stock' : 'In Stock';
+    var avail     = Math.max(0, qty - rentedQty);
+    var totalQty  = qty;
+    var pct       = qty > 0 ? Math.round((rentedQty / qty) * 100) : 0;
+    var statusCls = avail === 0 ? 'no' : avail <= 1 ? 'warn' : 'yes';
+    var statusLbl = avail === 0 ? 'Out of Stock' : avail <= 1 ? 'Low Stock' : 'In Stock';
     return '<tr>' +
       '<td><span style="font-size:11px;font-weight:700;color:var(--muted)">#' + t.id + '</span></td>' +
       '<td><div style="font-weight:600;font-size:13px">' + t.name + '</div>' +
@@ -2754,9 +2755,19 @@ function loadToolsFromRTDB() {
           eta:    t.eta    || "5 min",
           img:    t.img    || "",
           qty:       parseInt(t.qty) || 1,
-          rentedQty: parseInt(t.rentedQty) || 0,
-          available: (parseInt(t.qty) || 1) > 0
+          rentedQty: parseInt(t.rentedQty) || 0,  // if missing, assume 0 rented
+          available: (parseInt(t.qty) || 1) > (parseInt(t.rentedQty) || 0)
         };
+      });
+      // Patch any tools missing rentedQty field into RTDB
+      TOOLS.forEach(function(t, idx) {
+        if (t.rentedQty === undefined || t.rentedQty === null) {
+          fetch("https://droveia-default-rtdb.firebaseio.com/tools/" + idx + ".json?auth=NKLKSY1Cshm1pba0vuKK6RQOmjV2uOfeje7hzxkI", {
+            method: "PATCH",
+            headers: {"Content-Type":"application/json"},
+            body: JSON.stringify({ rentedQty: 0 })
+          }).catch(function(){});
+        }
       });
       renderCatIcons();
       renderFeatured();
@@ -2811,43 +2822,42 @@ async function markToolUnavailable(fb, toolId) {
   var tid = parseInt(toolId);
   var idx = TOOLS.findIndex(function(t){ return t.id === tid; });
   if (idx < 0) { console.warn("markToolUnavailable: tool not found", tid); return; }
-  var totalQty   = parseInt(TOOLS[idx].qty) || 1;
-  var rentedQty  = parseInt(TOOLS[idx].rentedQty) || 0;
-  var newRented  = rentedQty + 1;
-  var newQty     = Math.max(0, totalQty - 1);
-  TOOLS[idx].qty       = newQty;
-  TOOLS[idx].rentedQty = newRented;
-  TOOLS[idx].available = newQty > 0;
+  var qty       = parseInt(TOOLS[idx].qty) || 1;        // NEVER change this
+  var rentedQty = (parseInt(TOOLS[idx].rentedQty) || 0) + 1;
+  var available = rentedQty < qty;
+  TOOLS[idx].rentedQty = rentedQty;
+  TOOLS[idx].available = available;
   var url = "https://droveia-default-rtdb.firebaseio.com/tools/" + idx + ".json?auth=NKLKSY1Cshm1pba0vuKK6RQOmjV2uOfeje7hzxkI";
   try {
     await fetch(url, {
       method: "PATCH",
       headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({ qty: newQty, rentedQty: newRented, available: newQty > 0 })
+      body: JSON.stringify({ rentedQty: rentedQty, available: available })
     });
     renderTools(); renderFeatured();
-  } catch(e) { console.error("markToolUnavailable RTDB error", e); }
+  } catch(e) { console.error("markToolUnavailable error", e); }
 }
 
 async function markToolAvailable(fb, toolId) {
   var tid = parseInt(toolId);
   var idx = TOOLS.findIndex(function(t){ return t.id === tid; });
   if (idx < 0) { console.warn("markToolAvailable: tool not found", tid); return; }
+  var qty       = parseInt(TOOLS[idx].qty) || 1;        // NEVER change this
   var rentedQty = Math.max(0, (parseInt(TOOLS[idx].rentedQty) || 1) - 1);
-  var newQty    = (parseInt(TOOLS[idx].qty) || 0) + 1;
-  TOOLS[idx].qty       = newQty;
+  var available = rentedQty < qty;
   TOOLS[idx].rentedQty = rentedQty;
-  TOOLS[idx].available = true;
+  TOOLS[idx].available = available;
   var url = "https://droveia-default-rtdb.firebaseio.com/tools/" + idx + ".json?auth=NKLKSY1Cshm1pba0vuKK6RQOmjV2uOfeje7hzxkI";
   try {
     await fetch(url, {
       method: "PATCH",
       headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({ qty: newQty, rentedQty: rentedQty, available: true })
+      body: JSON.stringify({ rentedQty: rentedQty, available: available })
     });
     renderTools(); renderFeatured();
-  } catch(e) { console.error("markToolAvailable RTDB error", e); }
+  } catch(e) { console.error("markToolAvailable error", e); }
 }
+
 
 
 

@@ -2077,7 +2077,13 @@
           // Firebase returns object {0:{...}, 1:{...}} or array — handle both
           var arr = Array.isArray(data) ? data : Object.values(data);
           if (!arr || !arr.length) { console.log("No data"); return; }
-          data = arr;
+          // Trim whitespace from all keys (Google Sheets adds trailing spaces)
+          data = arr.map(function(t) {
+            if (!t) return null;
+            var clean = {};
+            Object.keys(t).forEach(function(k){ clean[k.trim()] = typeof t[k] === 'string' ? t[k].trim() : t[k]; });
+            return clean;
+          });
           // Merge with any missing fields from local TOOLS as fallback
           TOOLS = data.filter(function(t){ return t && t.name && t.pph; }).map(function(t, i) {
             return {

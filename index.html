@@ -2797,6 +2797,12 @@ function loadToolsFromRTDB() {
       renderCatIcons();
       renderFeatured();
       renderTools();
+      // Refresh admin inventory table if admin page is open
+      var adminInv = el("admin-panel-inventory");
+      if (adminInv && adminInv.classList.contains("active")) {
+        var tableWrap = adminInv.querySelector(".admin-table-wrap");
+        if (tableWrap) adminInv.innerHTML = '<div id="admin-add-form-wrap"></div><div id="admin-edit-form-wrap"></div>' + adminInventoryTable();
+      }
       console.log("Loaded " + TOOLS.length + " tools from Firebase: " + TOOLS.map(function(t){return t.name;}).join(", "));
     })
     .catch(function(e){
@@ -2860,6 +2866,11 @@ async function markToolUnavailable(fb, toolId) {
       body: JSON.stringify({ rentedQty: rentedQty, available: available })
     });
     renderTools(); renderFeatured();
+    // Refresh admin panel if open
+    var adminInv = el("admin-panel-inventory");
+    if (adminInv && adminInv.classList.contains("active")) {
+      adminInv.innerHTML = '<div id="admin-add-form-wrap"></div><div id="admin-edit-form-wrap"></div>' + adminInventoryTable();
+    }
   } catch(e) { console.error("markToolUnavailable error", e); }
 }
 
@@ -2880,6 +2891,10 @@ async function markToolAvailable(fb, toolId) {
       body: JSON.stringify({ rentedQty: rentedQty, available: available })
     });
     renderTools(); renderFeatured();
+    var adminInv = el("admin-panel-inventory");
+    if (adminInv && adminInv.classList.contains("active")) {
+      adminInv.innerHTML = '<div id="admin-add-form-wrap"></div><div id="admin-edit-form-wrap"></div>' + adminInventoryTable();
+    }
   } catch(e) { console.error("markToolAvailable error", e); }
 }
 

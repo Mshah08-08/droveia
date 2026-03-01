@@ -1288,6 +1288,7 @@
 
     // ── Tools rendering ───────────────────────────────────────────────────────────
     function toolCard(t) {
+      if (!t || !t.name || !t.pph || !t.retail) return '';
       var pct  = Math.max(0, Math.round((1-calcCost(t,4)/t.retail)*100));
       var emoj = t.cat;
       return '<div class="tool-card fade-up" onclick="openModal('+t.id+')">'+
@@ -1362,7 +1363,7 @@
         g.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted);font-size:14px">Loading inventory...</div>';
         return;
       }
-      var featured = TOOLS.slice(0, 6);
+      var featured = TOOLS.slice(0, 6).filter(function(t){ return t && t.pph && t.retail; });
       g.innerHTML = featured.map(toolCard).join("");
     }
 
@@ -2072,7 +2073,8 @@
       fetch(RTDB_URL)
         .then(function(r){ return r.json(); })
         .then(function(data) {
-          if (!data || !Array.isArray(data)) return;
+          console.log("Raw Firebase data:", JSON.stringify(data));
+          if (!data || !Array.isArray(data)) { console.log("Data not array:", typeof data); return; }
           // Merge with any missing fields from local TOOLS as fallback
           TOOLS = data.filter(function(t){ return t && t.name && t.pph; }).map(function(t, i) {
             return {

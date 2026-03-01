@@ -2059,6 +2059,8 @@ async function renderAdmin() {
   var wrap = el("admin-content");
   if (!wrap) return;
 
+  // Always reload fresh from RTDB so rentedQty/qty are current
+  await loadToolsFromRTDB();
   await loadAdminEmails();
   isAdmin = checkAdmin();
 
@@ -2752,63 +2754,47 @@ applyTheme(_theme);
 // ── Firebase Realtime DB — tool inventory ────────────────────────────────────
 var RTDB_URL = "https://droveia-default-rtdb.firebaseio.com/tools.json";
 
-function loadToolsFromRTDB() {
-  fetch(RTDB_URL)
-    .then(function(r){ return r.json(); })
-    .then(function(data) {
-      console.log("Raw Firebase data:", JSON.stringify(data));
-      // Firebase returns object {0:{...}, 1:{...}} or array — handle both
-      var arr = Array.isArray(data) ? data : Object.values(data);
-      if (!arr || !arr.length) { console.log("No data"); return; }
-      // Trim whitespace from all keys (Google Sheets adds trailing spaces)
-      data = arr.map(function(t) {
-        if (!t) return null;
-        var clean = {};
-        Object.keys(t).forEach(function(k){ clean[k.trim()] = typeof t[k] === 'string' ? t[k].trim() : t[k]; });
-        return clean;
-      });
-      // Merge with any missing fields from local TOOLS as fallback
-      TOOLS = data.filter(function(t){ return t && t.name && t.retail; }).map(function(t, i) {
-        return {
-          id:     parseInt(t.id)     || (i+1),
-          name:   t.name   || "Tool",
-          cat:    t.cat    || "Workshop",
-          pph:    parseFloat(t.pph) || 0,
-          retail: parseFloat(t.retail) || 20,
-          rating: parseFloat(t.rating) || 4.5,
-          desc:   t.desc   || "",
-          eta:    t.eta    || "5 min",
-          img:    t.img    || "",
-          qty:       parseInt(t.qty) || 1,
-          rentedQty: parseInt(t.rentedQty) || 0,  // if missing, assume 0 rented
-          available: (parseInt(t.qty) || 1) > (parseInt(t.rentedQty) || 0)
-        };
-      });
-      // Patch any tools missing rentedQty field into RTDB
-      TOOLS.forEach(function(t, idx) {
-        if (t.rentedQty === undefined || t.rentedQty === null) {
-          fetch("https://droveia-default-rtdb.firebaseio.com/tools/" + idx + ".json?auth=NKLKSY1Cshm1pba0vuKK6RQOmjV2uOfeje7hzxkI", {
-            method: "PATCH",
-            headers: {"Content-Type":"application/json"},
-            body: JSON.stringify({ rentedQty: 0 })
-          }).catch(function(){});
-        }
-      });
-      renderCatIcons();
-      renderFeatured();
-      renderTools();
-      // Refresh admin inventory table if admin page is open
-      var adminInv = el("admin-panel-inventory");
-      if (adminInv && adminInv.classList.contains("active")) {
-        var tableWrap = adminInv.querySelector(".admin-table-wrap");
-        if (tableWrap) adminInv.innerHTML = '<div id="admin-add-form-wrap"></div><div id="admin-edit-form-wrap"></div>' + adminInventoryTable();
-      }
-      console.log("Loaded " + TOOLS.length + " tools from Firebase: " + TOOLS.map(function(t){return t.name;}).join(", "));
-    })
-    .catch(function(e){
-      console.warn("RTDB load failed, using local tools:", e);
+async function loadToolsFromRTDB() {
+  try {
+    var data = await fetch(RTDB_URL).then(function(r){ return r.json(); });
+    var arr = !data ? [] : Array.isArray(data) ? data : Object.values(data);
+    if (!arr.length) { console.log("No RTDB data"); return; }
+    // Trim whitespace from all keys
+    arr = arr.map(function(t) {
+      if (!t) return null;
+      var clean = {};
+      Object.keys(t).forEach(function(k){ clean[k.trim()] = typeof t[k] === 'string' ? t[k].trim() : t[k]; });
+      return clean;
     });
+    TOOLS = arr.filter(function(t){ return t && t.name && t.retail; }).map(function(t, i) {
+      return {
+        id:        parseInt(t.id)        || (i+1),
+        name:      t.name                || "Tool",
+        cat:       t.cat                 || "Workshop",
+        pph:       parseFloat(t.pph)     || 0,
+        retail:    parseFloat(t.retail)  || 20,
+        rating:    parseFloat(t.rating)  || 4.5,
+        desc:      t.desc                || "",
+        eta:       t.eta                 || "5 min",
+        img:       t.img                 || "",
+        qty:       parseInt(t.qty)       || 1,
+        rentedQty: parseInt(t.rentedQty) || 0,
+        available: (parseInt(t.qty) || 1) > (parseInt(t.rentedQty) || 0)
+      };
+    });
+    renderCatIcons();
+    renderFeatured();
+    renderTools();
+    // Refresh admin inventory table if open
+    var adminInv = el("admin-panel-inventory");
+    if (adminInv && adminInv.classList.contains("active")) {
+      adminInv.innerHTML = '<div id="admin-add-form-wrap"></div><div id="admin-edit-form-wrap"></div>' + adminInventoryTable();
+    }
+  } catch(e) {
+    console.warn("RTDB load failed:", e);
+  }
 }
+
 
 
 

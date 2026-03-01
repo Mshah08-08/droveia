@@ -2286,12 +2286,28 @@ window.adminDeleteTool = function(id) {
 };
 
 async function adminSyncToRTDB() {
+  // qty and rentedQty are NEVER changed here — only via the edit form or mark functions
   var url = "https://droveia-default-rtdb.firebaseio.com/tools.json?auth=" + "NKLKSY1Cshm1pba0vuKK6RQOmjV2uOfeje7hzxkI";
-  await fetch(url, {
-    method: "PUT",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify(TOOLS)
-  });
+  try {
+    // Fetch live RTDB first so qty/rentedQty are never clobbered
+    var cur = await fetch(url).then(function(r){ return r.json(); });
+    var curArr = Array.isArray(cur) ? cur : Object.values(cur);
+    var merged = TOOLS.map(function(t) {
+      var live = curArr.find(function(c){ return c && parseInt(c.id) === parseInt(t.id); });
+      var result = Object.assign({}, t);
+      // Always take qty and rentedQty from live RTDB — never from in-memory TOOLS
+      result.qty       = live !== undefined ? (parseInt(live.qty)       || 0) : (parseInt(t.qty) || 1);
+      result.rentedQty = live !== undefined ? (parseInt(live.rentedQty) || 0) : 0;
+      result.available = result.qty > result.rentedQty;
+      return result;
+    });
+    await fetch(url, {
+      method: "PUT",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify(merged)
+    });
+    TOOLS = merged;
+  } catch(e) { console.error("adminSyncToRTDB error", e); }
 }
 
 async function adminLoadOrders() {

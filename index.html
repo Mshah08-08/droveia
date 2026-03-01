@@ -702,11 +702,12 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
 [data-theme="dark"] .review-textarea{background:var(--bg3);border-color:var(--border2);color:var(--text)}
 
 /* ── Admin Page ──────────────────────────────────────────────────────────── */
+#page-admin{background:var(--bg)}
 .admin-wrap{max-width:1280px;margin:0 auto;padding:32px 24px}
 .admin-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;flex-wrap:wrap;gap:16px}
 .admin-title{font-size:26px;font-weight:800;letter-spacing:-.02em}
 .admin-subtitle{font-size:14px;color:var(--muted);margin-top:2px}
-.admin-tabs{display:flex;gap:4px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:4px}
+.admin-tabs{display:inline-flex;gap:4px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:4px}
 .admin-tab{padding:8px 18px;border-radius:9px;border:none;background:none;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);transition:.15s;white-space:nowrap}
 .admin-tab.active{background:var(--blue);color:#fff}
 .admin-tab:hover:not(.active){color:var(--text);background:var(--surface2)}
@@ -773,6 +774,33 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
 [data-theme="dark"] .admin-field input,
 [data-theme="dark"] .admin-field select,
 [data-theme="dark"] .admin-field textarea{background:var(--bg3);color:var(--text)}
+
+/* ── Confirm Modal ───────────────────────────────────────────────────────── */
+.confirm-modal{position:fixed;inset:0;background:rgba(15,20,60,.55);backdrop-filter:blur(8px);z-index:9000;display:flex;align-items:center;justify-content:center;padding:16px}
+.confirm-modal.hidden{display:none}
+.confirm-box{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:32px 28px;width:100%;max-width:380px;box-shadow:0 24px 80px rgba(0,0,0,.2);text-align:center}
+.confirm-box-icon{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:22px}
+.confirm-box-icon.red{background:rgba(239,68,68,.12)}
+.confirm-box-icon.amber{background:rgba(245,158,11,.12)}
+.confirm-box-icon.green{background:rgba(34,197,94,.12)}
+.confirm-box-title{font-size:18px;font-weight:800;margin-bottom:8px}
+.confirm-box-msg{font-size:14px;color:var(--muted);margin-bottom:24px;line-height:1.5}
+.confirm-box-actions{display:flex;gap:10px;justify-content:center}
+.confirm-box-actions button{flex:1;padding:12px;border-radius:10px;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;transition:.15s;border:none}
+.confirm-ok{background:var(--blue);color:#fff}
+.confirm-ok.red{background:#ef4444}
+.confirm-ok.green{background:var(--green);color:#000}
+.confirm-ok.amber{background:#f59e0b;color:#000}
+.confirm-ok:hover{opacity:.88}
+.confirm-cancel-btn{background:var(--surface2);color:var(--text2);border:1px solid var(--border2) !important}
+.confirm-cancel-btn:hover{background:var(--surface3)}
+
+/* ── Order action buttons ────────────────────────────────────────────────── */
+.order-actions{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}
+.order-act-btn{padding:6px 14px;border-radius:8px;border:1px solid var(--border2);background:none;color:var(--text2);font-size:11px;font-weight:700;cursor:pointer;font-family:var(--font);transition:.15s}
+.order-act-btn:hover{border-color:var(--blue);color:var(--blue)}
+.order-act-btn.green:hover{border-color:var(--green);color:var(--green)}
+.order-act-btn.red:hover{border-color:#ef4444;color:#ef4444}
 </style>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 </head>
@@ -2211,14 +2239,21 @@ window.adminSetAvail = async function(id, available) {
   renderAdmin();
 };
 
-window.adminDeleteTool = async function(id) {
+window.adminDeleteTool = function(id) {
   var tool = TOOLS.find(function(t){ return t.id === id; });
   if (!tool) return;
-  if (!confirm("Delete " + tool.name + "? This cannot be undone.")) return;
-  TOOLS = TOOLS.filter(function(t){ return t.id !== id; });
-  await adminSyncToRTDB();
-  showToast("Tool deleted");
-  renderAdmin();
+  showConfirm({
+    title: "Delete " + tool.name + "?",
+    msg: "This will permanently remove the tool from inventory. This cannot be undone.",
+    okLabel: "Delete",
+    color: "red",
+    onOk: async function() {
+      TOOLS = TOOLS.filter(function(t){ return t.id !== id; });
+      await adminSyncToRTDB();
+      showToast("Tool deleted");
+      renderAdmin();
+    }
+  });
 };
 
 async function adminSyncToRTDB() {
@@ -2235,35 +2270,128 @@ async function adminLoadOrders() {
   if (!wrap) return;
   var fb = window._fb;
   try {
-    // Use top-level allOrders collection instead of per-user subcollections
     var snap = await fb.getDocs(
       fb.query(fb.collection(fb.db, "allOrders"), fb.orderBy("createdAt","desc"), fb.limit(50))
     );
     var orders = snap.docs.map(function(d){ return Object.assign({_id:d.id}, d.data()); });
-
     if (!orders.length) {
       wrap.innerHTML = '<div style="color:var(--muted);font-size:14px;padding:20px">No orders yet.</div>';
       return;
     }
     wrap.innerHTML = orders.map(function(o) {
-      var items = (o.items||[]).map(function(i){ return '<span class="admin-order-item">' + i.name + ' · ' + i.hours + 'h</span>'; }).join("");
-      var addr = o.address ? o.address.building + ", Room " + o.address.room : "—";
-      var date = o.createdAt && o.createdAt.toDate ? o.createdAt.toDate().toLocaleString() : "";
-      var statusColor = o.status === "delivered" ? "var(--green)" : o.status === "in_flight" ? "var(--blue)" : "var(--muted)";
+      var items = (o.items||[]).map(function(i){
+        return '<span class="admin-order-item">' + i.name + ' · ' + i.hours + 'h</span>';
+      }).join("");
+      var addr  = o.address ? o.address.building + ", Room " + o.address.room : "—";
+      var date  = o.createdAt && o.createdAt.toDate ? o.createdAt.toDate().toLocaleString() : "";
+      var email = o.userEmail || "—";
+      var statusColors = { delivered: "var(--green)", in_flight: "var(--blue)", cancelled: "#ef4444" };
+      var statusColor  = statusColors[o.status] || "var(--muted)";
+      var statusLabel  = (o.status||"").replace(/_/g," ").toUpperCase();
+
+      // Build action buttons based on current status
+      var actions = "";
+      if (o.status === "in_flight") {
+        actions +=
+          '<button class="order-act-btn green" data-oid="' + o._id + '" data-ns="delivered" onclick="adminOrderAction(this)">Mark Delivered</button>' +
+          '<button class="order-act-btn" data-oid="' + o._id + '" data-ns="cancelled" onclick="adminOrderAction(this)">Cancel Order</button>';
+      } else if (o.status === "delivered") {
+        actions +=
+          '<button class="order-act-btn" data-oid="' + o._id + '" data-ns="in_flight" onclick="adminOrderAction(this)">Reopen</button>';
+      } else if (o.status === "cancelled") {
+        actions +=
+          '<button class="order-act-btn green" data-oid="' + o._id + '" data-ns="in_flight" onclick="adminOrderAction(this)">Restore</button>';
+      }
+      actions += '<button class="order-act-btn red" data-oid="' + o._id + '" onclick="adminDeleteOrder(this)">Delete</button>';
+
       return '<div class="admin-order-card">' +
         '<div class="admin-order-header">' +
-          '<div><span class="admin-order-id">#' + o._id.slice(0,12).toUpperCase() + '</span>' +
-          '<span style="margin-left:10px;font-size:11px;font-weight:700;color:' + statusColor + '">' + (o.status||"").replace("_"," ").toUpperCase() + '</span></div>' +
+          '<div>' +
+            '<span class="admin-order-id">#' + o._id.slice(0,10).toUpperCase() + '</span>' +
+            '<span style="margin-left:10px;font-size:11px;font-weight:700;color:' + statusColor + '">' + statusLabel + '</span>' +
+          '</div>' +
           '<div class="admin-order-total">$' + (o.total||0).toFixed(2) + '</div>' +
         '</div>' +
         '<div class="admin-order-items">' + items + '</div>' +
-        '<div class="admin-order-addr">Deliver to: ' + addr + '  ·  ' + date + '</div>' +
+        '<div class="admin-order-addr" style="display:flex;flex-wrap:wrap;gap:16px">' +
+          '<span>Deliver to: ' + addr + '</span>' +
+          '<span style="color:var(--dim)">' + email + '</span>' +
+          '<span style="color:var(--dim)">' + date + '</span>' +
+        '</div>' +
+        '<div class="order-actions">' + actions + '</div>' +
       '</div>';
     }).join("");
   } catch(e) {
     wrap.innerHTML = '<div style="color:#ef4444;font-size:13px;padding:20px">Failed to load orders: ' + e.message + '</div>';
   }
 }
+
+window.adminOrderAction = function(btn) {
+  var orderId = btn.getAttribute("data-oid");
+  var newStatus = btn.getAttribute("data-ns");
+  var labels = { delivered: "Mark as Delivered", cancelled: "Cancel Order", in_flight: "Reopen Order" };
+  var colors = { delivered: "green", cancelled: "red", in_flight: "amber" };
+  var msgs = {
+    delivered: "Mark this order as delivered? This will free up the rented tools.",
+    cancelled:  "Cancel this order? The tools will be marked available again.",
+    in_flight:  "Reopen this order and mark it as in-flight?"
+  };
+  showConfirm({
+    title:   labels[newStatus] || "Update Order",
+    msg:     msgs[newStatus]   || "Update this order status?",
+    okLabel: labels[newStatus] || "Confirm",
+    color:   colors[newStatus] || "blue",
+    onOk: async function() {
+      var fb = window._fb;
+      try {
+        await fb.updateDoc(fb.doc(fb.db, "allOrders", orderId), {
+          status: newStatus,
+          updatedAt: fb.serverTimestamp()
+        });
+        // If delivered or cancelled, mark tools available in Firestore
+        if (newStatus === "delivered" || newStatus === "cancelled") {
+          var snap = await fb.getDoc(fb.doc(fb.db, "allOrders", orderId));
+          var data = snap.data();
+          if (data && data.items) {
+            for (var i = 0; i < data.items.length; i++) {
+              var tid = data.items[i].id;
+              if (tid) {
+                await fb.setDoc(fb.doc(fb.db, "inventory", String(tid)), {
+                  toolId: tid, available: true,
+                  updatedAt: fb.serverTimestamp()
+                });
+              }
+            }
+          }
+        }
+        showToast("Order updated");
+        adminLoadOrders();
+      } catch(e) {
+        showToast("Failed: " + e.message);
+      }
+    }
+  });
+};
+
+window.adminDeleteOrder = function(btn) {
+  var orderId = btn.getAttribute("data-oid");
+  showConfirm({
+    title:   "Delete Order?",
+    msg:     "This will permanently delete the order record. This cannot be undone.",
+    okLabel: "Delete",
+    color:   "red",
+    onOk: async function() {
+      var fb = window._fb;
+      try {
+        await fb.deleteDoc(fb.doc(fb.db, "allOrders", orderId));
+        showToast("Order deleted");
+        adminLoadOrders();
+      } catch(e) {
+        showToast("Failed: " + e.message);
+      }
+    }
+  });
+};
 
 
 function startApp() {
@@ -2619,6 +2747,42 @@ async function markToolAvailable(fb, toolId) {
   } catch(e) { console.error("inventory update", e); }
 }
 
+
+// ── Confirm Modal ─────────────────────────────────────────────────────────────
+var _confirmCallback = null;
+
+window.showConfirm = function(opts) {
+  // opts: { title, msg, okLabel, color, onOk }
+  var icon    = el("confirm-icon");
+  var title   = el("confirm-title");
+  var msg     = el("confirm-msg");
+  var okBtn   = el("confirm-ok-btn");
+  var color   = opts.color || "blue";
+  var icons   = { red: "✕", amber: "!", green: "✓", blue: "?" };
+  if (icon)  { icon.className = "confirm-box-icon " + color; icon.textContent = icons[color] || "?"; }
+  if (title)   title.textContent = opts.title || "Are you sure?";
+  if (msg)     msg.textContent   = opts.msg   || "";
+  if (okBtn) { okBtn.textContent = opts.okLabel || "Confirm"; okBtn.className = "confirm-ok " + color; }
+  _confirmCallback = opts.onOk || null;
+  el("confirm-modal").classList.remove("hidden");
+};
+
+window.closeConfirm = function() {
+  el("confirm-modal").classList.add("hidden");
+  _confirmCallback = null;
+};
+
+window.confirmOk = function() {
+  el("confirm-modal").classList.add("hidden");
+  if (_confirmCallback) { _confirmCallback(); _confirmCallback = null; }
+};
+
+// Close on backdrop click
+document.addEventListener("click", function(e) {
+  var modal = el("confirm-modal");
+  if (modal && e.target === modal) closeConfirm();
+});
+
 // ── Reviews ──────────────────────────────────────────────────────────────────
 var _reviewStar   = 0;
 var _reviewToolId = null;
@@ -2808,6 +2972,19 @@ if (window._fbReady) {
   </div>
 </div>
 
+
+<!-- Confirm Modal -->
+<div class="confirm-modal hidden" id="confirm-modal">
+  <div class="confirm-box">
+    <div class="confirm-box-icon" id="confirm-icon"></div>
+    <div class="confirm-box-title" id="confirm-title">Are you sure?</div>
+    <div class="confirm-box-msg" id="confirm-msg"></div>
+    <div class="confirm-box-actions">
+      <button class="confirm-cancel-btn" onclick="closeConfirm()">Cancel</button>
+      <button class="confirm-ok" id="confirm-ok-btn" onclick="confirmOk()">Confirm</button>
+    </div>
+  </div>
+</div>
 <!-- Review Modal -->
 <div class="review-modal hidden" id="review-modal">
   <div class="review-box">

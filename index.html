@@ -2390,8 +2390,9 @@ window.adminOrderAction = function(btn) {
             try {
               var invSnap = await fb.getDoc(fb.doc(fb.db, "inventory", String(tid)));
               var invData = invSnap.exists() ? invSnap.data() : {};
-              var newQty = Math.max(0, (invData.rentedQty || 1) - 1);
-              var toolQty = (TOOLS.find(function(t){ return t.id === tid; }) || {}).qty || 1;
+              var newQty = Math.max(0, (invData.rentedQty || 0) - 1);
+              var toolQty = (TOOLS.find(function(t){ return String(t.id) === String(tid); }) || {}).qty || 1;
+              console.log("Restoring stock: tid=" + tid + " newRented=" + newQty + " totalQty=" + toolQty + " available=" + (newQty < toolQty));
               await fb.setDoc(fb.doc(fb.db, "inventory", String(tid)), {
                 toolId: tid,
                 rentedQty: newQty,

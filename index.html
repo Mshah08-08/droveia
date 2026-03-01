@@ -2803,38 +2803,6 @@ async function loadToolsFromRTDB() {
 // ── Real-time inventory via Firestore ────────────────────────────────────────
 var _inventoryUnsub = null;
 
-var _inventoryCache = {};  // toolId -> {available, rentedQty}
-
-function applyFirestoreInventory() {
-  Object.keys(_inventoryCache).forEach(function(tid) {
-    var inv = _inventoryCache[tid];
-    for (var i = 0; i < TOOLS.length; i++) {
-      if (String(TOOLS[i].id) === String(tid)) {
-        var totalQty = parseInt(TOOLS[i].qty) || 1;
-        var rentedQty = inv.rentedQty || 0;
-        TOOLS[i].rentedQty = rentedQty;
-        TOOLS[i].available = rentedQty < totalQty;  // available if stock remains
-        break;
-      }
-    }
-  });
-}
-
-function subscribeInventory(fb) {
-  if (_inventoryUnsub) _inventoryUnsub();
-  var invCol = fb.collection(fb.db, "inventory");
-  _inventoryUnsub = fb.onSnapshot(invCol, function(snap) {
-    // Cache inventory state
-    snap.docs.forEach(function(d) {
-      var data = d.data();
-      _inventoryCache[String(data.toolId)] = { available: data.available, rentedQty: data.rentedQty || 0 };
-    });
-    // Apply to TOOLS
-    applyFirestoreInventory();
-    renderTools();
-    renderFeatured();
-  });
-}
 
 // When a tool is rented, mark unavailable in Firestore
 async function markToolUnavailable(fb, toolId) {
@@ -3076,12 +3044,6 @@ if (window._fbReady) {
 }
 
 // Hash routing — open admin page if #admin in URL
-// Start inventory subscription at boot — public data, no auth needed
-document.addEventListener("fbready", function() {
-  subscribeInventory(window._fb);
-});
-if (window._fbReady) subscribeInventory(window._fb);
-
 if (sessionStorage.getItem("openAdmin") === "1") {
   sessionStorage.removeItem("openAdmin");
   window._openAdminOnAuth = true;

@@ -1994,6 +1994,278 @@ window.saveAddress      = function(){ showToast("Loading..."); };
 window.saveNotifications= function(){ showToast("Loading..."); };
 
 // ── Firebase app init ─────────────────────────────────────────────────────────
+// ── Admin ─────────────────────────────────────────────────────────────────────
+var ADMIN_EMAILS = [];
+var isAdmin = false;
+var adminEditingId = null;
+
+async function loadAdminEmails() {
+  try {
+    var snap = await window._fb.getDoc(window._fb.doc(window._fb.db, "config", "admins"));
+    if (snap.exists()) {
+      ADMIN_EMAILS = snap.data().emails || [];
+    }
+  } catch(e) { console.error("loadAdminEmails", e); }
+}
+
+function checkAdmin() {
+  if (!currentUser) return false;
+  return ADMIN_EMAILS.includes(currentUser.email);
+}
+
+async function renderAdmin() {
+  var wrap = el("admin-content");
+  if (!wrap) return;
+
+  await loadAdminEmails();
+  isAdmin = checkAdmin();
+
+  if (!currentUser) {
+    wrap.innerHTML = '<div class="admin-login-gate"><h2>Admin Access</h2><p>Sign in with an authorized admin account to continue.</p><button class="btn-primary" onclick="showAuth()">Sign In</button></div>';
+    return;
+  }
+  if (!isAdmin) {
+    wrap.innerHTML = '<div class="admin-login-gate"><h2>Access Denied</h2><p>' + currentUser.email + ' is not authorized as an admin.</p><button class="btn-secondary" onclick="showPage(&quot;home&quot;)">Go Home</button></div>';
+    return;
+  }
+
+  var avail = TOOLS.filter(function(t){ return t.available !== false; }).length;
+  var rented = TOOLS.length - avail;
+
+  wrap.innerHTML =
+    '<div class="admin-header">' +
+      '<div><div class="admin-title">Admin Dashboard</div><div class="admin-subtitle">Droveia inventory & order management</div></div>' +
+      '<div style="display:flex;gap:10px;flex-wrap:wrap">' +
+        '<button class="admin-add-btn" onclick="adminShowAddForm()">' +
+          '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>' +
+          'Add Tool' +
+        '</button>' +
+      '</div>' +
+    '</div>' +
+
+    '<div class="admin-stats">' +
+      '<div class="admin-stat"><div class="admin-stat-val">' + TOOLS.length + '</div><div class="admin-stat-label">Total Tools</div></div>' +
+      '<div class="admin-stat"><div class="admin-stat-val green">' + avail + '</div><div class="admin-stat-label">Available</div></div>' +
+      '<div class="admin-stat"><div class="admin-stat-val red">' + rented + '</div><div class="admin-stat-label">Rented Out</div></div>' +
+    '</div>' +
+
+    '<div class="admin-tabs" style="margin-bottom:24px">' +
+      '<button class="admin-tab active" data-panel="inventory" onclick="adminSwitchTab(this)">Inventory</button>' +
+      '<button class="admin-tab" data-panel="orders" onclick="adminSwitchTab(this)">Orders</button>' +
+    '</div>' +
+
+    '<div class="admin-panel active" id="admin-panel-inventory">' +
+      '<div id="admin-add-form-wrap"></div>' +
+      '<div id="admin-edit-form-wrap"></div>' +
+      adminInventoryTable() +
+    '</div>' +
+    '<div class="admin-panel" id="admin-panel-orders">' +
+      '<div id="admin-orders-content"><div style="color:var(--muted);font-size:14px;padding:20px">Loading orders...</div></div>' +
+    '</div>';
+
+  adminLoadOrders();
+}
+
+function adminSwitchTab(btn) {
+  var panel = btn.getAttribute("data-panel");
+  qsa(".admin-tab").forEach(function(b){ b.classList.remove("active"); });
+  qsa(".admin-panel").forEach(function(p){ p.classList.remove("active"); });
+  btn.classList.add("active");
+  var pg = el("admin-panel-" + panel);
+  if (pg) pg.classList.add("active");
+  if (panel === "orders") adminLoadOrders();
+}
+
+function adminInventoryTable() {
+  var cats = ["Workshop","Crafts","Office","Electronics"];
+  var rows = TOOLS.map(function(t) {
+    var avail = t.available !== false;
+    var rate = (t.pph && t.pph > 0) ? t.pph : ((t.retail * 0.70) / 48);
+    return '<tr>' +
+      '<td><strong>#' + t.id + '</strong></td>' +
+      '<td>' + t.name + '</td>' +
+      '<td><span style="font-size:11px;background:var(--surface2);padding:2px 8px;border-radius:6px">' + t.cat + '</span></td>' +
+      '<td>$' + t.retail + '</td>' +
+      '<td>$' + rate.toFixed(2) + '/hr</td>' +
+      '<td><span class="admin-avail-badge ' + (avail ? 'yes' : 'no') + '">' + (avail ? 'Available' : 'Rented') + '</span></td>' +
+      '<td>' +
+        '<button class="admin-action-btn" onclick="adminEditTool(' + t.id + ')">Edit</button>' +
+        (avail
+          ? '<button class="admin-action-btn" onclick="adminSetAvail(' + t.id + ',false)">Mark Rented</button>'
+          : '<button class="admin-action-btn green" onclick="adminSetAvail(' + t.id + ',true)">Mark Available</button>') +
+        '<button class="admin-action-btn red" onclick="adminDeleteTool(' + t.id + ')">Delete</button>' +
+      '</td>' +
+    '</tr>';
+  }).join("");
+
+  return '<div class="admin-table-wrap"><table class="admin-table">' +
+    '<thead><tr><th>#</th><th>Name</th><th>Category</th><th>Retail</th><th>Rate</th><th>Status</th><th>Actions</th></tr></thead>' +
+    '<tbody>' + rows + '</tbody>' +
+    '</table></div>';
+}
+
+function adminToolForm(tool, isEdit) {
+  var t = tool || { id:"", name:"", cat:"Workshop", retail:"", pph:0, rating:4.5, desc:"", eta:"", img:"" };
+  return '<div class="admin-form" id="' + (isEdit ? "admin-edit-form" : "admin-add-form") + '">' +
+    '<div class="admin-form-title">' + (isEdit ? "Edit Tool — " + t.name : "Add New Tool") + '</div>' +
+    '<div class="admin-form-grid">' +
+      adminField("Name", "text", "af-name", t.name, true) +
+      adminSelectField("Category", "af-cat", t.cat) +
+      adminField("Retail Price ($)", "number", "af-retail", t.retail, true) +
+      adminField("PPH (0 = auto)", "number", "af-pph", t.pph || 0, false) +
+      adminField("Rating", "number", "af-rating", t.rating || 4.5, false) +
+      adminField("ETA (e.g. 8 min)", "text", "af-eta", t.eta, true) +
+      adminField("Image URL", "text", "af-img", t.img !== "x" ? (t.img || "") : "", false) +
+    '</div>' +
+    '<div style="margin-top:12px">' + adminField("Description", "textarea", "af-desc", t.desc, true) + '</div>' +
+    '<div class="admin-form-actions">' +
+      '<button class="admin-save-btn" onclick="' + (isEdit ? "adminSaveEdit(" + t.id + ")" : "adminSaveAdd()") + '">' + (isEdit ? "Save Changes" : "Add Tool") + '</button>' +
+      '<button class="admin-cancel-btn" onclick="adminCancelForm(' + (isEdit ? "true" : "false") + ')">Cancel</button>' +
+    '</div>' +
+  '</div>';
+}
+
+function adminField(label, type, id, val, required) {
+  if (type === "textarea") {
+    return '<div class="admin-field"><label>' + label + '</label><textarea id="' + id + '">' + (val || "") + '</textarea></div>';
+  }
+  return '<div class="admin-field"><label>' + label + (required ? ' *' : '') + '</label><input type="' + type + '" id="' + id + '" value="' + (val || "") + '"></div>';
+}
+
+function adminSelectField(label, id, val) {
+  var opts = ["Workshop","Crafts","Office","Electronics"].map(function(c){
+    return '<option value="' + c + '"' + (c === val ? ' selected' : '') + '>' + c + '</option>';
+  }).join("");
+  return '<div class="admin-field"><label>' + label + ' *</label><select id="' + id + '">' + opts + '</select></div>';
+}
+
+function adminGetFormVals() {
+  return {
+    name:   (el("af-name")   || {}).value || "",
+    cat:    (el("af-cat")    || {}).value || "Workshop",
+    retail: parseFloat((el("af-retail") || {}).value) || 0,
+    pph:    parseFloat((el("af-pph")    || {}).value) || 0,
+    rating: parseFloat((el("af-rating") || {}).value) || 4.5,
+    eta:    (el("af-eta")    || {}).value || "",
+    img:    (el("af-img")    || {}).value || "x",
+    desc:   (el("af-desc")   || {}).value || "",
+  };
+}
+
+window.adminShowAddForm = function() {
+  var wrap = el("admin-add-form-wrap");
+  if (wrap) { wrap.innerHTML = adminToolForm(null, false); wrap.scrollIntoView({behavior:"smooth"}); }
+};
+
+window.adminCancelForm = function(isEdit) {
+  var wrap = el(isEdit ? "admin-edit-form-wrap" : "admin-add-form-wrap");
+  if (wrap) wrap.innerHTML = "";
+};
+
+window.adminSaveAdd = async function() {
+  var vals = adminGetFormVals();
+  if (!vals.name || !vals.retail || !vals.eta) { showToast("Fill in required fields"); return; }
+  var nextId = TOOLS.length ? Math.max.apply(null, TOOLS.map(function(t){ return t.id || 0; })) + 1 : 1;
+  var tool = Object.assign({ id: nextId, available: true }, vals);
+  if (!tool.img) tool.img = "x";
+  TOOLS.push(tool);
+  await adminSyncToRTDB();
+  showToast("Tool added");
+  renderAdmin();
+};
+
+window.adminEditTool = function(id) {
+  var tool = TOOLS.find(function(t){ return t.id === id; });
+  if (!tool) return;
+  var wrap = el("admin-edit-form-wrap");
+  if (wrap) { wrap.innerHTML = adminToolForm(tool, true); wrap.scrollIntoView({behavior:"smooth"}); }
+};
+
+window.adminSaveEdit = async function(id) {
+  var vals = adminGetFormVals();
+  var idx = TOOLS.findIndex(function(t){ return t.id === id; });
+  if (idx < 0) return;
+  TOOLS[idx] = Object.assign({}, TOOLS[idx], vals);
+  if (!TOOLS[idx].img) TOOLS[idx].img = "x";
+  await adminSyncToRTDB();
+  showToast("Tool updated");
+  renderAdmin();
+};
+
+window.adminSetAvail = async function(id, available) {
+  var tool = TOOLS.find(function(t){ return t.id === id; });
+  if (!tool) return;
+  tool.available = available;
+  await adminSyncToRTDB();
+  // Also update Firestore inventory
+  var fb = window._fb;
+  await fb.setDoc(fb.doc(fb.db, "inventory", String(id)), {
+    toolId: id, available: available,
+    updatedAt: fb.serverTimestamp(), updatedBy: currentUser.email
+  });
+  showToast(tool.name + " marked " + (available ? "available" : "rented"));
+  renderAdmin();
+};
+
+window.adminDeleteTool = async function(id) {
+  var tool = TOOLS.find(function(t){ return t.id === id; });
+  if (!tool) return;
+  if (!confirm("Delete " + tool.name + "? This cannot be undone.")) return;
+  TOOLS = TOOLS.filter(function(t){ return t.id !== id; });
+  await adminSyncToRTDB();
+  showToast("Tool deleted");
+  renderAdmin();
+};
+
+async function adminSyncToRTDB() {
+  var url = "https://droveia-default-rtdb.firebaseio.com/tools.json?auth=" + "NKLKSY1Cshm1pba0vuKK6RQOmjV2uOfeje7hzxkI";
+  await fetch(url, {
+    method: "PUT",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify(TOOLS)
+  });
+}
+
+async function adminLoadOrders() {
+  var wrap = el("admin-orders-content");
+  if (!wrap) return;
+  var fb = window._fb;
+  try {
+    var usersSnap = await fb.getDocs(fb.collection(fb.db, "users"));
+    var orders = [];
+    for (var i = 0; i < usersSnap.docs.length; i++) {
+      var uDoc = usersSnap.docs[i];
+      var oSnap = await fb.getDocs(
+        fb.query(fb.collection(fb.db, "users", uDoc.id, "orders"), fb.orderBy("createdAt","desc"), fb.limit(5))
+      );
+      oSnap.docs.forEach(function(d){ orders.push(Object.assign({_id:d.id, _uid:uDoc.id}, d.data())); });
+    }
+    orders.sort(function(a,b){ return (b.createdAt?.seconds||0) - (a.createdAt?.seconds||0); });
+    if (!orders.length) {
+      wrap.innerHTML = '<div style="color:var(--muted);font-size:14px;padding:20px">No orders found.</div>';
+      return;
+    }
+    wrap.innerHTML = orders.slice(0, 30).map(function(o) {
+      var items = (o.items||[]).map(function(i){ return '<span class="admin-order-item">' + i.name + ' · ' + i.hours + 'h</span>'; }).join("");
+      var addr = o.address ? o.address.building + ", Room " + o.address.room : "—";
+      var date = o.createdAt && o.createdAt.toDate ? o.createdAt.toDate().toLocaleString() : "";
+      var statusColor = o.status === "delivered" ? "var(--green)" : o.status === "in_flight" ? "var(--blue)" : "var(--muted)";
+      return '<div class="admin-order-card">' +
+        '<div class="admin-order-header">' +
+          '<div><span class="admin-order-id">#' + o._id.slice(0,12).toUpperCase() + '</span>' +
+          '<span style="margin-left:10px;font-size:11px;font-weight:700;color:' + statusColor + '">' + (o.status||"").replace("_"," ").toUpperCase() + '</span></div>' +
+          '<div class="admin-order-total">$' + (o.total||0).toFixed(2) + '</div>' +
+        '</div>' +
+        '<div class="admin-order-items">' + items + '</div>' +
+        '<div class="admin-order-addr">Deliver to: ' + addr + '  ·  ' + date + '</div>' +
+      '</div>';
+    }).join("");
+  } catch(e) {
+    wrap.innerHTML = '<div style="color:#ef4444;font-size:13px;padding:20px">Failed to load orders: ' + e.message + '</div>';
+  }
+}
+
+
 function startApp() {
   var fb = window._fb;
 
@@ -2465,277 +2737,6 @@ function renderHomeReviews(reviews) {
   }).join("");
 }
 
-
-// ── Admin ─────────────────────────────────────────────────────────────────────
-var ADMIN_EMAILS = [];
-var isAdmin = false;
-var adminEditingId = null;
-
-async function loadAdminEmails() {
-  try {
-    var snap = await window._fb.getDoc(window._fb.doc(window._fb.db, "config", "admins"));
-    if (snap.exists()) {
-      ADMIN_EMAILS = snap.data().emails || [];
-    }
-  } catch(e) { console.error("loadAdminEmails", e); }
-}
-
-function checkAdmin() {
-  if (!currentUser) return false;
-  return ADMIN_EMAILS.includes(currentUser.email);
-}
-
-async function renderAdmin() {
-  var wrap = el("admin-content");
-  if (!wrap) return;
-
-  await loadAdminEmails();
-  isAdmin = checkAdmin();
-
-  if (!currentUser) {
-    wrap.innerHTML = '<div class="admin-login-gate"><h2>Admin Access</h2><p>Sign in with an authorized admin account to continue.</p><button class="btn-primary" onclick="showAuth()">Sign In</button></div>';
-    return;
-  }
-  if (!isAdmin) {
-    wrap.innerHTML = '<div class="admin-login-gate"><h2>Access Denied</h2><p>' + currentUser.email + ' is not authorized as an admin.</p><button class="btn-secondary" onclick="showPage(&quot;home&quot;)">Go Home</button></div>';
-    return;
-  }
-
-  var avail = TOOLS.filter(function(t){ return t.available !== false; }).length;
-  var rented = TOOLS.length - avail;
-
-  wrap.innerHTML =
-    '<div class="admin-header">' +
-      '<div><div class="admin-title">Admin Dashboard</div><div class="admin-subtitle">Droveia inventory & order management</div></div>' +
-      '<div style="display:flex;gap:10px;flex-wrap:wrap">' +
-        '<button class="admin-add-btn" onclick="adminShowAddForm()">' +
-          '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>' +
-          'Add Tool' +
-        '</button>' +
-      '</div>' +
-    '</div>' +
-
-    '<div class="admin-stats">' +
-      '<div class="admin-stat"><div class="admin-stat-val">' + TOOLS.length + '</div><div class="admin-stat-label">Total Tools</div></div>' +
-      '<div class="admin-stat"><div class="admin-stat-val green">' + avail + '</div><div class="admin-stat-label">Available</div></div>' +
-      '<div class="admin-stat"><div class="admin-stat-val red">' + rented + '</div><div class="admin-stat-label">Rented Out</div></div>' +
-    '</div>' +
-
-    '<div class="admin-tabs" style="margin-bottom:24px">' +
-      '<button class="admin-tab active" data-panel="inventory" onclick="adminSwitchTab(this)">Inventory</button>' +
-      '<button class="admin-tab" data-panel="orders" onclick="adminSwitchTab(this)">Orders</button>' +
-    '</div>' +
-
-    '<div class="admin-panel active" id="admin-panel-inventory">' +
-      '<div id="admin-add-form-wrap"></div>' +
-      '<div id="admin-edit-form-wrap"></div>' +
-      adminInventoryTable() +
-    '</div>' +
-    '<div class="admin-panel" id="admin-panel-orders">' +
-      '<div id="admin-orders-content"><div style="color:var(--muted);font-size:14px;padding:20px">Loading orders...</div></div>' +
-    '</div>';
-
-  adminLoadOrders();
-}
-
-function adminSwitchTab(btn) {
-  var panel = btn.getAttribute("data-panel");
-  qsa(".admin-tab").forEach(function(b){ b.classList.remove("active"); });
-  qsa(".admin-panel").forEach(function(p){ p.classList.remove("active"); });
-  btn.classList.add("active");
-  var pg = el("admin-panel-" + panel);
-  if (pg) pg.classList.add("active");
-  if (panel === "orders") adminLoadOrders();
-}
-
-function adminInventoryTable() {
-  var cats = ["Workshop","Crafts","Office","Electronics"];
-  var rows = TOOLS.map(function(t) {
-    var avail = t.available !== false;
-    var rate = (t.pph && t.pph > 0) ? t.pph : ((t.retail * 0.70) / 48);
-    return '<tr>' +
-      '<td><strong>#' + t.id + '</strong></td>' +
-      '<td>' + t.name + '</td>' +
-      '<td><span style="font-size:11px;background:var(--surface2);padding:2px 8px;border-radius:6px">' + t.cat + '</span></td>' +
-      '<td>$' + t.retail + '</td>' +
-      '<td>$' + rate.toFixed(2) + '/hr</td>' +
-      '<td><span class="admin-avail-badge ' + (avail ? 'yes' : 'no') + '">' + (avail ? 'Available' : 'Rented') + '</span></td>' +
-      '<td>' +
-        '<button class="admin-action-btn" onclick="adminEditTool(' + t.id + ')">Edit</button>' +
-        (avail
-          ? '<button class="admin-action-btn" onclick="adminSetAvail(' + t.id + ',false)">Mark Rented</button>'
-          : '<button class="admin-action-btn green" onclick="adminSetAvail(' + t.id + ',true)">Mark Available</button>') +
-        '<button class="admin-action-btn red" onclick="adminDeleteTool(' + t.id + ')">Delete</button>' +
-      '</td>' +
-    '</tr>';
-  }).join("");
-
-  return '<div class="admin-table-wrap"><table class="admin-table">' +
-    '<thead><tr><th>#</th><th>Name</th><th>Category</th><th>Retail</th><th>Rate</th><th>Status</th><th>Actions</th></tr></thead>' +
-    '<tbody>' + rows + '</tbody>' +
-    '</table></div>';
-}
-
-function adminToolForm(tool, isEdit) {
-  var t = tool || { id:"", name:"", cat:"Workshop", retail:"", pph:0, rating:4.5, desc:"", eta:"", img:"" };
-  return '<div class="admin-form" id="' + (isEdit ? "admin-edit-form" : "admin-add-form") + '">' +
-    '<div class="admin-form-title">' + (isEdit ? "Edit Tool — " + t.name : "Add New Tool") + '</div>' +
-    '<div class="admin-form-grid">' +
-      adminField("Name", "text", "af-name", t.name, true) +
-      adminSelectField("Category", "af-cat", t.cat) +
-      adminField("Retail Price ($)", "number", "af-retail", t.retail, true) +
-      adminField("PPH (0 = auto)", "number", "af-pph", t.pph || 0, false) +
-      adminField("Rating", "number", "af-rating", t.rating || 4.5, false) +
-      adminField("ETA (e.g. 8 min)", "text", "af-eta", t.eta, true) +
-      adminField("Image URL", "text", "af-img", t.img !== "x" ? (t.img || "") : "", false) +
-    '</div>' +
-    '<div style="margin-top:12px">' + adminField("Description", "textarea", "af-desc", t.desc, true) + '</div>' +
-    '<div class="admin-form-actions">' +
-      '<button class="admin-save-btn" onclick="' + (isEdit ? "adminSaveEdit(" + t.id + ")" : "adminSaveAdd()") + '">' + (isEdit ? "Save Changes" : "Add Tool") + '</button>' +
-      '<button class="admin-cancel-btn" onclick="adminCancelForm(' + (isEdit ? "true" : "false") + ')">Cancel</button>' +
-    '</div>' +
-  '</div>';
-}
-
-function adminField(label, type, id, val, required) {
-  if (type === "textarea") {
-    return '<div class="admin-field"><label>' + label + '</label><textarea id="' + id + '">' + (val || "") + '</textarea></div>';
-  }
-  return '<div class="admin-field"><label>' + label + (required ? ' *' : '') + '</label><input type="' + type + '" id="' + id + '" value="' + (val || "") + '"></div>';
-}
-
-function adminSelectField(label, id, val) {
-  var opts = ["Workshop","Crafts","Office","Electronics"].map(function(c){
-    return '<option value="' + c + '"' + (c === val ? ' selected' : '') + '>' + c + '</option>';
-  }).join("");
-  return '<div class="admin-field"><label>' + label + ' *</label><select id="' + id + '">' + opts + '</select></div>';
-}
-
-function adminGetFormVals() {
-  return {
-    name:   (el("af-name")   || {}).value || "",
-    cat:    (el("af-cat")    || {}).value || "Workshop",
-    retail: parseFloat((el("af-retail") || {}).value) || 0,
-    pph:    parseFloat((el("af-pph")    || {}).value) || 0,
-    rating: parseFloat((el("af-rating") || {}).value) || 4.5,
-    eta:    (el("af-eta")    || {}).value || "",
-    img:    (el("af-img")    || {}).value || "x",
-    desc:   (el("af-desc")   || {}).value || "",
-  };
-}
-
-window.adminShowAddForm = function() {
-  var wrap = el("admin-add-form-wrap");
-  if (wrap) { wrap.innerHTML = adminToolForm(null, false); wrap.scrollIntoView({behavior:"smooth"}); }
-};
-
-window.adminCancelForm = function(isEdit) {
-  var wrap = el(isEdit ? "admin-edit-form-wrap" : "admin-add-form-wrap");
-  if (wrap) wrap.innerHTML = "";
-};
-
-window.adminSaveAdd = async function() {
-  var vals = adminGetFormVals();
-  if (!vals.name || !vals.retail || !vals.eta) { showToast("Fill in required fields"); return; }
-  var nextId = TOOLS.length ? Math.max.apply(null, TOOLS.map(function(t){ return t.id || 0; })) + 1 : 1;
-  var tool = Object.assign({ id: nextId, available: true }, vals);
-  if (!tool.img) tool.img = "x";
-  TOOLS.push(tool);
-  await adminSyncToRTDB();
-  showToast("Tool added");
-  renderAdmin();
-};
-
-window.adminEditTool = function(id) {
-  var tool = TOOLS.find(function(t){ return t.id === id; });
-  if (!tool) return;
-  var wrap = el("admin-edit-form-wrap");
-  if (wrap) { wrap.innerHTML = adminToolForm(tool, true); wrap.scrollIntoView({behavior:"smooth"}); }
-};
-
-window.adminSaveEdit = async function(id) {
-  var vals = adminGetFormVals();
-  var idx = TOOLS.findIndex(function(t){ return t.id === id; });
-  if (idx < 0) return;
-  TOOLS[idx] = Object.assign({}, TOOLS[idx], vals);
-  if (!TOOLS[idx].img) TOOLS[idx].img = "x";
-  await adminSyncToRTDB();
-  showToast("Tool updated");
-  renderAdmin();
-};
-
-window.adminSetAvail = async function(id, available) {
-  var tool = TOOLS.find(function(t){ return t.id === id; });
-  if (!tool) return;
-  tool.available = available;
-  await adminSyncToRTDB();
-  // Also update Firestore inventory
-  var fb = window._fb;
-  await fb.setDoc(fb.doc(fb.db, "inventory", String(id)), {
-    toolId: id, available: available,
-    updatedAt: fb.serverTimestamp(), updatedBy: currentUser.email
-  });
-  showToast(tool.name + " marked " + (available ? "available" : "rented"));
-  renderAdmin();
-};
-
-window.adminDeleteTool = async function(id) {
-  var tool = TOOLS.find(function(t){ return t.id === id; });
-  if (!tool) return;
-  if (!confirm("Delete " + tool.name + "? This cannot be undone.")) return;
-  TOOLS = TOOLS.filter(function(t){ return t.id !== id; });
-  await adminSyncToRTDB();
-  showToast("Tool deleted");
-  renderAdmin();
-};
-
-async function adminSyncToRTDB() {
-  var url = "https://droveia-default-rtdb.firebaseio.com/tools.json?auth=" + "NKLKSY1Cshm1pba0vuKK6RQOmjV2uOfeje7hzxkI";
-  await fetch(url, {
-    method: "PUT",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify(TOOLS)
-  });
-}
-
-async function adminLoadOrders() {
-  var wrap = el("admin-orders-content");
-  if (!wrap) return;
-  var fb = window._fb;
-  try {
-    var usersSnap = await fb.getDocs(fb.collection(fb.db, "users"));
-    var orders = [];
-    for (var i = 0; i < usersSnap.docs.length; i++) {
-      var uDoc = usersSnap.docs[i];
-      var oSnap = await fb.getDocs(
-        fb.query(fb.collection(fb.db, "users", uDoc.id, "orders"), fb.orderBy("createdAt","desc"), fb.limit(5))
-      );
-      oSnap.docs.forEach(function(d){ orders.push(Object.assign({_id:d.id, _uid:uDoc.id}, d.data())); });
-    }
-    orders.sort(function(a,b){ return (b.createdAt?.seconds||0) - (a.createdAt?.seconds||0); });
-    if (!orders.length) {
-      wrap.innerHTML = '<div style="color:var(--muted);font-size:14px;padding:20px">No orders found.</div>';
-      return;
-    }
-    wrap.innerHTML = orders.slice(0, 30).map(function(o) {
-      var items = (o.items||[]).map(function(i){ return '<span class="admin-order-item">' + i.name + ' · ' + i.hours + 'h</span>'; }).join("");
-      var addr = o.address ? o.address.building + ", Room " + o.address.room : "—";
-      var date = o.createdAt && o.createdAt.toDate ? o.createdAt.toDate().toLocaleString() : "";
-      var statusColor = o.status === "delivered" ? "var(--green)" : o.status === "in_flight" ? "var(--blue)" : "var(--muted)";
-      return '<div class="admin-order-card">' +
-        '<div class="admin-order-header">' +
-          '<div><span class="admin-order-id">#' + o._id.slice(0,12).toUpperCase() + '</span>' +
-          '<span style="margin-left:10px;font-size:11px;font-weight:700;color:' + statusColor + '">' + (o.status||"").replace("_"," ").toUpperCase() + '</span></div>' +
-          '<div class="admin-order-total">$' + (o.total||0).toFixed(2) + '</div>' +
-        '</div>' +
-        '<div class="admin-order-items">' + items + '</div>' +
-        '<div class="admin-order-addr">Deliver to: ' + addr + '  ·  ' + date + '</div>' +
-      '</div>';
-    }).join("");
-  } catch(e) {
-    wrap.innerHTML = '<div style="color:#ef4444;font-size:13px;padding:20px">Failed to load orders: ' + e.message + '</div>';
-  }
-}
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
 renderCatIcons();

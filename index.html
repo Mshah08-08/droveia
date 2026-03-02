@@ -834,6 +834,7 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
 .order-act-btn.red:hover{border-color:#ef4444;color:#ef4444}
 </style>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDcuU4-XXzzEU8O84rs3W7cWgVStNicBTo&callback=Function.prototype" async defer></script>
 </head>
 <body>
 
@@ -2862,8 +2863,9 @@ function startApp() {
       el("addr-stage-3").style.display = "none";
       el("addr-stage-1").style.display = "block";
       window.addrSetStep(1);
-      if (window._addrConfirmMap) { window._addrConfirmMap.remove(); window._addrConfirmMap = null; }
-      if (window._addrDropMap) { window._addrDropMap.remove(); window._addrDropMap = null; }
+      window._addrConfirmMap = null;
+      if (window._addrGMap) { window._addrGMap = null; }
+      window._addrDropMarkerG = null; window._addrHouseMarker = null;
       window._addrDropLat = null; window._addrDropLng = null;
       window._addrFootprint = null; window._addrBbox = null; window._addrHouseMarker = null; window._addrOutline = null;
     }, 600);
@@ -2911,70 +2913,40 @@ function startApp() {
     if (!addr) { showToast("Enter your street address"); return; }
     el("addr-stage-1").style.display = "none";
     el("addr-stage-2").style.display = "block";
-    addrSetStep(2);
+    window.addrSetStep(2);
     showToast("Finding your address...");
 
-    // Step 1: geocode with Nominatim
-    fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&addressdetails=1&q=" + encodeURIComponent(addr))
-      .then(function(r){ return r.json(); })
-      .then(function(results) {
-        if (!results || !results.length) {
-          showToast("Address not found — try including city and state");
-          el("addr-stage-1").style.display = "block";
-          el("addr-stage-2").style.display = "none";
-          addrSetStep(1);
-          return;
-        }
-        var res = results[0];
-        var lat = parseFloat(res.lat);
-        var lng = parseFloat(res.lon);
-        window._addrDropLat = lat;
-        window._addrDropLng = lng;
-        window._addrBbox    = null;
-        window._addrFootprint = null;
-
-        // Step 2: query Overpass for the building footprint at this point
-        showToast("Loading building outline...");
-        var overpassQuery =
-          "[out:json][timeout:10];way[\"building\"](around:40,"+lat+","+lng+");out geom;"
-        return fetch("https://overpass-api.de/api/interpreter", {
-          method: "POST",
-          body: "data=" + encodeURIComponent(overpassQuery)
-        })
-        .then(function(r){ return r.json(); })
-        .then(function(data) {
-          var footprint = null;
-          if (data && data.elements && data.elements.length) {
-            // Pick the closest building
-            var best = null, bestDist = Infinity;
-            data.elements.forEach(function(el) {
-              if (!el.geometry) return;
-              // Centroid
-              var clat = el.geometry.reduce(function(s,p){return s+p.lat;},0)/el.geometry.length;
-              var clng = el.geometry.reduce(function(s,p){return s+p.lon;},0)/el.geometry.length;
-              var d = Math.pow(clat-lat,2)+Math.pow(clng-lng,2);
-              if (d < bestDist) { bestDist=d; best=el; }
-            });
-            if (best) {
-              footprint = best.geometry.map(function(p){ return [p.lat, p.lon]; });
-            }
-          }
-          window._addrFootprint = footprint;
-          // Fall back to small circle if no footprint found
-          if (!footprint) {
-            var r = 0.00015; // ~15m radius
-            window._addrBbox = [lat-r, lat+r, lng-r, lng+r];
-          }
-          showToast("Found — pin your drop spot inside the outline");
-          setTimeout(function() { window.initAddrDropPin(lat, lng); }, 80);
-        });
-      })
-      .catch(function() {
-        showToast("Could not find address — check your connection");
+    // Use Google Geocoder for precise house-level coordinates
+    if (!window.google || !window.google.maps) {
+      showToast("Maps still loading, try again in a moment");
+      el("addr-stage-1").style.display = "block";
+      el("addr-stage-2").style.display = "none";
+      window.addrSetStep(1);
+      return;
+    }
+    var geocoder = new window.google.maps.Geocoder();
+    geocoder.geocode({ address: addr }, function(results, status) {
+      if (status !== "OK" || !results.length) {
+        showToast("Address not found — try including city and state");
         el("addr-stage-1").style.display = "block";
         el("addr-stage-2").style.display = "none";
-        addrSetStep(1);
-      });
+        window.addrSetStep(1);
+        return;
+      }
+      var loc  = results[0].geometry.location;
+      var lat  = loc.lat();
+      var lng  = loc.lng();
+      var vp   = results[0].geometry.viewport;
+
+      window._addrDropLat   = lat;
+      window._addrDropLng   = lng;
+      window._addrFootprint = null;
+      window._addrBbox      = null;
+      window._addrViewport  = vp;
+
+      showToast("Found — pin your drop spot");
+      setTimeout(function() { window.initAddrDropPin(lat, lng, vp); }, 80);
+    });
   };
 
   window.addrBack1 = function() {
@@ -3008,61 +2980,54 @@ function startApp() {
         '</div>' +
       '</div>';
 
-    // Init confirm map (read-only, shows pin + boundary)
+    // Init confirm map (Google Maps, read-only)
     setTimeout(function() {
-      if (!window.L) return;
+      if (!window.google || !window.google.maps) return;
       var mapEl = el("addr-confirm-map");
       if (!mapEl) return;
-      if (window._addrConfirmMap) {
-        window._addrConfirmMap.invalidateSize();
-        return;
-      }
+      if (window._addrConfirmMap) return;
+
       var lat = window._addrDropLat;
       var lng = window._addrDropLng;
-      window._addrConfirmMap = window.L.map("addr-confirm-map", {
-        zoomControl: false, attributionControl: false,
-        dragging: false, scrollWheelZoom: false, doubleClickZoom: false,
-        touchZoom: false, keyboard: false
-      }).setView([lat, lng], 19);
+      var latLng = new window.google.maps.LatLng(lat, lng);
 
-      window.L.tileLayer(
-        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-        { maxZoom: 21 }
-      ).addTo(window._addrConfirmMap);
-
-      // Draw building outline
-      var fp = window._addrFootprint;
-      var bb = window._addrBbox;
-      var confBounds = null;
-      if (fp) {
-        confBounds = window.L.polygon(fp, {
-          color:"#1a6ef0", weight:2.5, opacity:1,
-          fillColor:"#1a6ef0", fillOpacity:0.12, dashArray:"6 4"
-        }).addTo(window._addrConfirmMap).getBounds();
-      } else if (bb) {
-        var b2=[parseFloat(bb[0]),parseFloat(bb[1]),parseFloat(bb[2]),parseFloat(bb[3])];
-        confBounds = window.L.rectangle([[b2[0],b2[2]],[b2[1],b2[3]]], {
-          color:"#1a6ef0", weight:2.5, opacity:1,
-          fillColor:"#1a6ef0", fillOpacity:0.12, dashArray:"6 4"
-        }).addTo(window._addrConfirmMap).getBounds();
-      }
-      var houseIconC = window.L.divIcon({
-        html: '<div style="background:#fff;border:2px solid #1a6ef0;border-radius:6px;padding:3px 5px;font-size:16px;line-height:1;box-shadow:0 2px 8px rgba(0,0,0,.25)">\u{1F3E0}</div>',
-        iconSize:[32,32], iconAnchor:[16,32], className:""
+      window._addrConfirmMap = new window.google.maps.Map(mapEl, {
+        center: latLng,
+        zoom: 20,
+        mapTypeId: "satellite",
+        tilt: 0,
+        disableDefaultUI: true,
+        gestureHandling: "none"
       });
-      window.L.marker([lat,lng], {icon:houseIconC, zIndexOffset:500}).addTo(window._addrConfirmMap);
-      if (confBounds) window._addrConfirmMap.fitBounds(confBounds, {maxZoom:20, padding:[32,32]});
 
-      // Pin marker (static)
-      var pinIcon = window.L.divIcon({
-        html: '<div style="display:flex;flex-direction:column;align-items:center">' +
-                '<div style="width:22px;height:22px;background:#1a6ef0;border:3px solid #fff;border-radius:50%;box-shadow:0 3px 12px rgba(26,110,240,.6)"></div>' +
-                '<div style="width:2px;height:10px;background:#1a6ef0;margin-top:-2px"></div>' +
-              '</div>',
-        iconSize:[22,34], iconAnchor:[11,34], className:""
+      if (window._addrViewport) window._addrConfirmMap.fitBounds(window._addrViewport);
+
+      // House marker
+      var houseIconUrl = "data:image/svg+xml;utf8," + encodeURIComponent(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36">' +
+        '<rect x="2" y="2" width="32" height="32" rx="8" fill="white" stroke="#1a6ef0" stroke-width="2"/>' +
+        '<text x="18" y="25" text-anchor="middle" font-size="20">&#127968;</text>' +
+        '</svg>'
+      );
+      new window.google.maps.Marker({
+        position: new window.google.maps.LatLng(window._addrDropLat, window._addrDropLng),
+        map: window._addrConfirmMap,
+        icon: { url: houseIconUrl, scaledSize: new window.google.maps.Size(36,36), anchor: new window.google.maps.Point(18,36) },
+        zIndex: 10
       });
-      window.L.marker([lat, lng], { icon: pinIcon }).addTo(window._addrConfirmMap);
-      window._addrConfirmMap.invalidateSize();
+
+      // Drop pin
+      new window.google.maps.Marker({
+        position: latLng,
+        map: window._addrConfirmMap,
+        icon: {
+          path: window.google.maps.SymbolPath.CIRCLE,
+          scale: 10,
+          fillColor: "#1a6ef0", fillOpacity: 1,
+          strokeColor: "#fff", strokeWeight: 3
+        },
+        zIndex: 20
+      });
     }, 80);
   };
 
@@ -3076,8 +3041,8 @@ function startApp() {
   };
 
 
-  window.initAddrDropPin = function(lat, lng) {
-    if (!window.L) return;
+  window.initAddrDropPin = function(lat, lng, viewport) {
+    if (!window.google || !window.google.maps) return;
     var mapEl = el("addr-droppin-map");
     if (!mapEl) return;
 
@@ -3086,116 +3051,88 @@ function startApp() {
     window._addrDropLat = lat;
     window._addrDropLng = lng;
 
-    var footprint = window._addrFootprint || null;
-    var bbox      = window._addrBbox      || null;
+    var latLng = new window.google.maps.LatLng(lat, lng);
 
-    // Pin icon
-    var pinIcon = window.L.divIcon({
-      html: '<div style="display:flex;flex-direction:column;align-items:center">' +
-              '<div style="width:22px;height:22px;background:#1a6ef0;border:3px solid #fff;border-radius:50%;box-shadow:0 3px 12px rgba(26,110,240,.6)"></div>' +
-              '<div style="width:2px;height:10px;background:#1a6ef0;margin-top:-2px"></div>' +
-            '</div>',
-      iconSize:[22,34], iconAnchor:[11,34], className:""
-    });
-
-    // House icon at the geocoded centre
-    var houseIcon = window.L.divIcon({
-      html: '<div title="Your house" style="background:#fff;border:2px solid #1a6ef0;border-radius:6px;padding:3px 5px;font-size:16px;line-height:1;box-shadow:0 2px 8px rgba(0,0,0,.25)">🏠</div>',
-      iconSize:[32,32], iconAnchor:[16,32], className:""
-    });
-
-    function drawOutline(map) {
-      if (window._addrOutline) { window._addrOutline.remove(); window._addrOutline=null; }
-      if (footprint) {
-        window._addrOutline = window.L.polygon(footprint, {
-          color:"#1a6ef0", weight:2.5, opacity:1,
-          fillColor:"#1a6ef0", fillOpacity:0.12, dashArray:"6 4"
-        }).addTo(map);
-        return window._addrOutline.getBounds();
-      } else if (bbox) {
-        var b=[parseFloat(bbox[0]),parseFloat(bbox[1]),parseFloat(bbox[2]),parseFloat(bbox[3])];
-        window._addrOutline = window.L.rectangle([[b[0],b[2]],[b[1],b[3]]], {
-          color:"#1a6ef0", weight:2.5, opacity:1,
-          fillColor:"#1a6ef0", fillOpacity:0.12, dashArray:"6 4"
-        }).addTo(map);
-        return window._addrOutline.getBounds();
-      }
-      return null;
-    }
+    // House icon
+    var houseIconUrl = "data:image/svg+xml;utf8," + encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36">' +
+      '<rect x="2" y="2" width="32" height="32" rx="8" fill="white" stroke="#1a6ef0" stroke-width="2"/>' +
+      '<text x="18" y="25" text-anchor="middle" font-size="20">&#127968;</text>' +
+      '</svg>'
+    );
 
     function updateCoords(latv, lngv) {
       window._addrDropLat = latv;
       window._addrDropLng = lngv;
       var c = el("addr-droppin-coords");
-      if (!c) return;
-      var inside = checkInside(latv, lngv);
-      c.textContent = latv.toFixed(6) + ", " + lngv.toFixed(6) + (inside ? "" : "  — move pin inside the outline");
-      c.style.color = inside ? "var(--muted)" : "#ef4444";
+      if (c) c.textContent = latv.toFixed(6) + ", " + lngv.toFixed(6);
     }
 
-    function checkInside(latv, lngv) {
-      if (footprint) {
-        // Point-in-polygon (ray casting)
-        var inside = false;
-        for (var i=0,j=footprint.length-1; i<footprint.length; j=i++) {
-          var xi=footprint[i][1], yi=footprint[i][0];
-          var xj=footprint[j][1], yj=footprint[j][0];
-          var intersect=((yi>latv)!=(yj>latv))&&(lngv<(xj-xi)*(latv-yi)/(yj-yi)+xi);
-          if(intersect) inside=!inside;
-        }
-        return inside;
-      } else if (bbox) {
-        var tol=0.0003;
-        var b=[parseFloat(bbox[0]),parseFloat(bbox[1]),parseFloat(bbox[2]),parseFloat(bbox[3])];
-        return latv>=b[0]-tol&&latv<=b[1]+tol&&lngv>=b[2]-tol&&lngv<=b[3]+tol;
-      }
-      return true;
-    }
-
-    function makeSatLayer() {
-      return window.L.tileLayer(
-        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-        { maxZoom:21, attribution:"" }
-      );
-    }
-
-    if (window._addrDropMap) {
-      window._addrDropMap.setView([lat,lng], 20);
-      if (window._addrHouseMarker) window._addrHouseMarker.setLatLng([lat,lng]);
-      window._addrDropMarker.setLatLng([lat,lng]);
-      var bounds = drawOutline(window._addrDropMap);
-      if (bounds) window._addrDropMap.fitBounds(bounds, {maxZoom:20, padding:[32,32]});
+    if (window._addrGMap) {
+      // Map already exists — re-center
+      window._addrGMap.setCenter(latLng);
+      if (viewport) window._addrGMap.fitBounds(viewport);
+      if (window._addrHouseMarker) window._addrHouseMarker.setPosition(latLng);
+      if (window._addrDropMarkerG) window._addrDropMarkerG.setPosition(latLng);
       updateCoords(lat, lng);
-      window._addrDropMap.invalidateSize();
       return;
     }
 
-    window._addrDropMap = window.L.map("addr-droppin-map", {
-      zoomControl:true, attributionControl:false
-    }).setView([lat,lng], 20);
-
-    makeSatLayer().addTo(window._addrDropMap);
-
-    var bounds = drawOutline(window._addrDropMap);
-    if (bounds) window._addrDropMap.fitBounds(bounds, {maxZoom:20, padding:[32,32]});
-
-    // House marker at geocoded centre
-    window._addrHouseMarker = window.L.marker([lat,lng], {icon:houseIcon, zIndexOffset:500})
-      .addTo(window._addrDropMap);
-
-    // Drop pin (draggable)
-    window._addrDropMarker = window.L.marker([lat,lng], {icon:pinIcon, draggable:true})
-      .addTo(window._addrDropMap);
-    updateCoords(lat, lng);
-
-    window._addrDropMarker.on("drag",    function(e){ updateCoords(e.target.getLatLng().lat, e.target.getLatLng().lng); });
-    window._addrDropMarker.on("dragend", function(e){ updateCoords(e.target.getLatLng().lat, e.target.getLatLng().lng); });
-    window._addrDropMap.on("click", function(e) {
-      window._addrDropMarker.setLatLng(e.latlng);
-      updateCoords(e.latlng.lat, e.latlng.lng);
+    // Create Google Map
+    window._addrGMap = new window.google.maps.Map(mapEl, {
+      center: latLng,
+      zoom: 20,
+      mapTypeId: "satellite",
+      tilt: 0,
+      disableDefaultUI: false,
+      zoomControl: true,
+      mapTypeControl: false,
+      streetViewControl: false,
+      fullscreenControl: false
     });
 
-    window._addrDropMap.invalidateSize();
+    if (viewport) window._addrGMap.fitBounds(viewport);
+
+    // House marker at geocoded centre
+    window._addrHouseMarker = new window.google.maps.Marker({
+      position: latLng,
+      map: window._addrGMap,
+      icon: { url: houseIconUrl, scaledSize: new window.google.maps.Size(36, 36), anchor: new window.google.maps.Point(18, 36) },
+      title: "Your house",
+      zIndex: 10
+    });
+
+    // Draggable drop pin
+    var dropIcon = {
+      path: window.google.maps.SymbolPath.CIRCLE,
+      scale: 10,
+      fillColor: "#1a6ef0",
+      fillOpacity: 1,
+      strokeColor: "#ffffff",
+      strokeWeight: 3
+    };
+    window._addrDropMarkerG = new window.google.maps.Marker({
+      position: latLng,
+      map: window._addrGMap,
+      draggable: true,
+      icon: dropIcon,
+      title: "Drop location",
+      zIndex: 20
+    });
+    updateCoords(lat, lng);
+
+    window._addrDropMarkerG.addListener("drag", function() {
+      var p = window._addrDropMarkerG.getPosition();
+      updateCoords(p.lat(), p.lng());
+    });
+    window._addrDropMarkerG.addListener("dragend", function() {
+      var p = window._addrDropMarkerG.getPosition();
+      updateCoords(p.lat(), p.lng());
+    });
+    window._addrGMap.addListener("click", function(e) {
+      window._addrDropMarkerG.setPosition(e.latLng);
+      updateCoords(e.latLng.lat(), e.latLng.lng());
+    });
   };
   window.saveNotifications = function() {
     saveProfile({ notifications:{

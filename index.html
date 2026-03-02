@@ -1266,8 +1266,8 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
 
       <!-- Address -->
       <div class="account-panel" id="panel-address">
-        <div class="panel-title">Delivery Address</div>
-        <div class="panel-sub">Set where the drone delivers your tools</div>
+        <div class="panel-title" id="addr-panel-title">Delivery Address</div>
+        <div class="panel-sub" id="addr-panel-sub">Set where the drone delivers your tools</div>
 
         <!-- Step indicator -->
         <div class="addr-steps" id="addr-steps">
@@ -1317,7 +1317,8 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
 
         <!-- Stage 3: Summary -->
         <div id="addr-stage-3" style="display:none">
-          <div id="addr-summary" style="margin-top:16px"></div>
+          <div id="addr-confirm-map" style="width:100%;height:220px;border-radius:12px;overflow:hidden;border:1px solid var(--border);margin-top:16px"></div>
+          <div id="addr-summary" style="margin-top:12px"></div>
           <div style="display:flex;gap:10px;margin-top:14px">
             <button class="form-save" style="background:var(--bg3);color:var(--text);border:1px solid var(--border)" onclick="addrBack2()">Back</button>
             <button class="form-save" style="flex:1" onclick="saveAddress()">Save Address</button>
@@ -2118,10 +2119,19 @@ function renderAccount() {
   setText("stat-hours",   (userProfile.totalHours||0)+"h");
   setVal("addr-building", userProfile.building||"");
   setVal("addr-notes",    userProfile.dropNotes||"");
-  // Pre-load existing coords so step 2 can use them
+  // If address already saved, skip to confirm stage
   if (userProfile.dropLat) {
     window._addrDropLat = userProfile.dropLat;
     window._addrDropLng = userProfile.dropLng;
+    if (userProfile.dropBboxRaw) { window._addrBbox = JSON.parse(userProfile.dropBboxRaw); }
+    setTimeout(function() {
+      el("addr-stage-1").style.display = "none";
+      el("addr-stage-3").style.display = "block";
+      var t = el("addr-panel-title"); if (t) t.textContent = "Update Delivery Address";
+      var s = el("addr-panel-sub");   if (s) s.style.display = "none";
+      var steps = el("addr-steps");   if (steps) steps.style.display = "none";
+      if (window.addrNext2) window.addrNext2();
+    }, 200);
   }
   var n = userProfile.notifications||{};
   setChk("notif-delivery", n.delivery!==false);
@@ -2844,17 +2854,17 @@ function startApp() {
       window._addrDropLng = ll.lng;
     }
     saveProfile({
-      building:  building,
-      dropNotes: notes,
-      dropLat:   window._addrDropLat,
-      dropLng:   window._addrDropLng
+      building:     building,
+      dropNotes:    notes,
+      dropLat:      window._addrDropLat,
+      dropLng:      window._addrDropLng,
+      dropBboxRaw:  window._addrBbox ? JSON.stringify(window._addrBbox) : null
     });
-    // Reset wizard to stage 1 after save
     setTimeout(function() {
-      el("addr-stage-3").style.display = "none";
-      el("addr-stage-1").style.display = "block";
-      addrSetStep(1);
-    }, 800);
+      // Keep stage 3 visible — just update title to "Update Delivery Address"
+      var t = el("addr-panel-title"); if (t) t.textContent = "Update Delivery Address";
+      if (window._addrConfirmMap) { window._addrConfirmMap.invalidateSize(); }
+    }, 400);
   };
 
   window._addrDropLat = null;
@@ -2918,6 +2928,7 @@ function startApp() {
         var bbox = res.boundingbox;
         window._addrDropLat = lat;
         window._addrDropLng = lng;
+        window._addrBbox = bbox || null;
         showToast("Found — pin your exact drop spot");
         setTimeout(function() { window.initAddrDropPin(lat, lng, bbox); }, 80);
       })
@@ -2939,32 +2950,85 @@ function startApp() {
     if (!window._addrDropLat) { showToast("Place a pin on your property first"); return; }
     el("addr-stage-2").style.display = "none";
     el("addr-stage-3").style.display = "block";
-    addrSetStep(3);
-    // Render summary
+    window.addrSetStep(3);
+
+    // Update panel title
+    var t = el("addr-panel-title"); if (t) t.textContent = "Update Delivery Address";
+    var s = el("addr-panel-sub");   if (s) s.style.display = "none";
+    var steps = el("addr-steps");   if (steps) steps.style.display = "none";
+
     var addr  = (el("addr-building")||{value:""}).value.trim();
     var notes = (el("addr-notes")||{value:""}).value.trim();
-    var mapsUrl = "https://maps.google.com/?q=" + window._addrDropLat + "," + window._addrDropLng;
+
+    // Summary card
     el("addr-summary").innerHTML =
-      '<div style="background:var(--bg3);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px">' +
+      '<div style="background:var(--bg3);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px">' +
         '<div>' +
-          '<div style="font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px">Address</div>' +
+          '<div style="font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px">Address</div>' +
           '<div style="font-size:14px;font-weight:600">' + addr + '</div>' +
           (notes ? '<div style="font-size:12px;color:var(--muted);margin-top:2px">' + notes + '</div>' : '') +
         '</div>' +
         '<div>' +
-          '<div style="font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px">Drop Coordinates</div>' +
-          '<a href="' + mapsUrl + '" target="_blank" style="font-size:13px;font-weight:600;color:var(--blue)">' +
-            window._addrDropLat.toFixed(6) + ', ' + window._addrDropLng.toFixed(6) +
-          '</a>' +
-          '<div style="font-size:11px;color:var(--muted);margin-top:2px">View on Google Maps</div>' +
+          '<div style="font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px">Drop Coordinates</div>' +
+          '<div style="font-size:13px;font-weight:600;color:var(--blue)">' + window._addrDropLat.toFixed(6) + ', ' + window._addrDropLng.toFixed(6) + '</div>' +
         '</div>' +
       '</div>';
+
+    // Init confirm map (read-only, shows pin + boundary)
+    setTimeout(function() {
+      if (!window.L) return;
+      var mapEl = el("addr-confirm-map");
+      if (!mapEl) return;
+      if (window._addrConfirmMap) {
+        window._addrConfirmMap.invalidateSize();
+        return;
+      }
+      var lat = window._addrDropLat;
+      var lng = window._addrDropLng;
+      window._addrConfirmMap = window.L.map("addr-confirm-map", {
+        zoomControl: false, attributionControl: false,
+        dragging: false, scrollWheelZoom: false, doubleClickZoom: false,
+        touchZoom: false, keyboard: false
+      }).setView([lat, lng], 19);
+
+      window.L.tileLayer(
+        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+        { maxZoom: 21 }
+      ).addTo(window._addrConfirmMap);
+
+      // Draw bbox boundary
+      if (window._addrBbox) {
+        var b = window._addrBbox;
+        var minLat=parseFloat(b[0]),maxLat=parseFloat(b[1]),minLng=parseFloat(b[2]),maxLng=parseFloat(b[3]);
+        window.L.rectangle([[minLat,minLng],[maxLat,maxLng]], {
+          color:"#1a6ef0", weight:2, opacity:0.9,
+          fillColor:"#1a6ef0", fillOpacity:0.06, dashArray:"6 4"
+        }).addTo(window._addrConfirmMap);
+        window._addrConfirmMap.fitBounds([[minLat,minLng],[maxLat,maxLng]], { maxZoom:20, padding:[24,24] });
+      }
+
+      // Pin marker (static)
+      var pinIcon = window.L.divIcon({
+        html: '<div style="display:flex;flex-direction:column;align-items:center">' +
+                '<div style="width:22px;height:22px;background:#1a6ef0;border:3px solid #fff;border-radius:50%;box-shadow:0 3px 12px rgba(26,110,240,.6)"></div>' +
+                '<div style="width:2px;height:10px;background:#1a6ef0;margin-top:-2px"></div>' +
+              '</div>',
+        iconSize:[22,34], iconAnchor:[11,34], className:""
+      });
+      window.L.marker([lat, lng], { icon: pinIcon }).addTo(window._addrConfirmMap);
+      window._addrConfirmMap.invalidateSize();
+    }, 80);
   };
 
   window.addrBack2 = function() {
     el("addr-stage-3").style.display = "none";
     el("addr-stage-2").style.display = "block";
-    addrSetStep(2);
+    window.addrSetStep(2);
+    var t = el("addr-panel-title"); if (t) t.textContent = "Delivery Address";
+    var s = el("addr-panel-sub");   if (s) s.style.display = "";
+    var steps = el("addr-steps");   if (steps) steps.style.display = "";
+    // Destroy confirm map so it reinits fresh next time
+    if (window._addrConfirmMap) { window._addrConfirmMap.remove(); window._addrConfirmMap = null; }
     setTimeout(function(){ if(window._addrDropMap) window._addrDropMap.invalidateSize(); }, 80);
   };
 
@@ -2976,33 +3040,61 @@ function startApp() {
 
     lat = lat || (userProfile && userProfile.dropLat) || 35.7847;
     lng = lng || (userProfile && userProfile.dropLng) || -78.6821;
+    window._addrDropLat = lat;
+    window._addrDropLng = lng;
+    window._addrBbox = bbox || null;
 
     var pinIcon = window.L.divIcon({
       html: '<div style="display:flex;flex-direction:column;align-items:center">' +
-              '<div style="width:22px;height:22px;background:#1a6ef0;border:3px solid #fff;border-radius:50%;box-shadow:0 3px 10px rgba(26,110,240,.5)"></div>' +
+              '<div style="width:22px;height:22px;background:#1a6ef0;border:3px solid #fff;border-radius:50%;box-shadow:0 3px 12px rgba(26,110,240,.6)"></div>' +
               '<div style="width:2px;height:10px;background:#1a6ef0;margin-top:-2px"></div>' +
             '</div>',
       iconSize: [22, 34], iconAnchor: [11, 34], className: ""
     });
 
-    function updateCoords(latv, lngv) {
+    function makeSatLayer() {
+      return window.L.tileLayer(
+        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+        { maxZoom: 21, attribution: "" }
+      );
+    }
+
+    function drawBbox(map, bbox) {
+      if (window._addrRect) { window._addrRect.remove(); }
+      var b = [parseFloat(bbox[0]), parseFloat(bbox[1]), parseFloat(bbox[2]), parseFloat(bbox[3])];
+      window._addrRect = window.L.rectangle(
+        [[b[0], b[2]], [b[1], b[3]]],
+        { color: "#1a6ef0", weight: 2, opacity: 0.9, fillColor: "#1a6ef0", fillOpacity: 0.06, dashArray: "6 4" }
+      ).addTo(map);
+      return b;
+    }
+
+    function updateCoords(latv, lngv, map, bbox) {
       window._addrDropLat = latv;
       window._addrDropLng = lngv;
       var c = el("addr-droppin-coords");
-      if (c) c.textContent = latv.toFixed(6) + ", " + lngv.toFixed(6);
+      if (!c) return;
+      // Boundary check
+      if (bbox) {
+        var b = [parseFloat(bbox[0]), parseFloat(bbox[1]), parseFloat(bbox[2]), parseFloat(bbox[3])];
+        var tol = 0.0003;
+        var inside = latv >= b[0]-tol && latv <= b[1]+tol && lngv >= b[2]-tol && lngv <= b[3]+tol;
+        c.textContent = latv.toFixed(6) + ", " + lngv.toFixed(6) + (inside ? "" : "  — move pin inside the boundary");
+        c.style.color = inside ? "var(--muted)" : "#ef4444";
+      } else {
+        c.textContent = latv.toFixed(6) + ", " + lngv.toFixed(6);
+        c.style.color = "var(--muted)";
+      }
     }
 
     if (window._addrDropMap) {
-      // Map exists — just move to new location
       window._addrDropMap.setView([lat, lng], 19);
       window._addrDropMarker.setLatLng([lat, lng]);
-      updateCoords(lat, lng);
       if (bbox) {
-        window._addrDropMap.fitBounds([
-          [parseFloat(bbox[0]), parseFloat(bbox[2])],
-          [parseFloat(bbox[1]), parseFloat(bbox[3])]
-        ], { maxZoom: 19 });
+        var b2 = drawBbox(window._addrDropMap, bbox);
+        window._addrDropMap.fitBounds([[b2[0],b2[2]],[b2[1],b2[3]]], { maxZoom: 20, padding: [24,24] });
       }
+      updateCoords(lat, lng, window._addrDropMap, bbox);
       window._addrDropMap.invalidateSize();
       return;
     }
@@ -3011,31 +3103,22 @@ function startApp() {
       zoomControl: true, attributionControl: false
     }).setView([lat, lng], 19);
 
-    window.L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
-      maxZoom: 21, subdomains: "abcd"
-    }).addTo(window._addrDropMap);
+    makeSatLayer().addTo(window._addrDropMap);
 
-    // Fit to house bounding box if available
     if (bbox) {
-      window._addrDropMap.fitBounds([
-        [parseFloat(bbox[0]), parseFloat(bbox[2])],
-        [parseFloat(bbox[1]), parseFloat(bbox[3])]
-      ], { maxZoom: 19 });
+      var b3 = drawBbox(window._addrDropMap, bbox);
+      window._addrDropMap.fitBounds([[b3[0],b3[2]],[b3[1],b3[3]]], { maxZoom: 20, padding: [24,24] });
     }
 
     window._addrDropMarker = window.L.marker([lat, lng], { icon: pinIcon, draggable: true })
       .addTo(window._addrDropMap);
-    updateCoords(lat, lng);
+    updateCoords(lat, lng, window._addrDropMap, bbox);
 
-    window._addrDropMarker.on("drag", function(e) {
-      updateCoords(e.target.getLatLng().lat, e.target.getLatLng().lng);
-    });
-    window._addrDropMarker.on("dragend", function(e) {
-      updateCoords(e.target.getLatLng().lat, e.target.getLatLng().lng);
-    });
+    window._addrDropMarker.on("drag",    function(e){ updateCoords(e.target.getLatLng().lat, e.target.getLatLng().lng, window._addrDropMap, window._addrBbox); });
+    window._addrDropMarker.on("dragend", function(e){ updateCoords(e.target.getLatLng().lat, e.target.getLatLng().lng, window._addrDropMap, window._addrBbox); });
     window._addrDropMap.on("click", function(e) {
       window._addrDropMarker.setLatLng(e.latlng);
-      updateCoords(e.latlng.lat, e.latlng.lng);
+      updateCoords(e.latlng.lat, e.latlng.lng, window._addrDropMap, window._addrBbox);
     });
 
     window._addrDropMap.invalidateSize();

@@ -2858,14 +2858,7 @@ function startApp() {
       dropLng:      window._addrDropLng,
       dropBboxRaw:  window._addrBbox ? JSON.stringify(window._addrBbox) : null
     });
-    setTimeout(function() {
-      // Stay on stage 3 — hide steps/back, show "Update Delivery Address" state
-      var steps = el("addr-steps"); if (steps) steps.style.display = "none";
-      var backBtn = el("addr-back-btn"); if (backBtn) backBtn.style.display = "none";
-      var saveBtn = el("addr-save-btn");
-      if (saveBtn) { saveBtn.textContent = "Update Delivery Address"; saveBtn.onclick = window.addrStartOver; }
-      var sub = el("addr-panel-sub"); if (sub) sub.textContent = "Saved successfully";
-    }, 400);
+    setTimeout(function() { showAddrSavedState(); }, 400);
   };
 
   window._addrDropLat = null;
@@ -3028,13 +3021,21 @@ function startApp() {
     }, 80);
   };
 
+  function showAddrSavedState() {
+    var steps   = el("addr-steps");    if (steps)   steps.style.display   = "none";
+    var backBtn = el("addr-back-btn"); if (backBtn) backBtn.style.display  = "none";
+    var saveBtn = el("addr-save-btn");
+    if (saveBtn) { saveBtn.textContent = "Update Delivery Address"; saveBtn.onclick = window.addrStartOver; }
+    var sub = el("addr-panel-sub"); if (sub) sub.textContent = "Saved — tap Update Delivery Address to change";
+  }
+
   window.addrStartOver = function() {
     // Full reset back to stage 1
     el("addr-stage-3").style.display = "none";
     el("addr-stage-1").style.display = "block";
     window.addrSetStep(1);
-    var steps = el("addr-steps"); if (steps) steps.style.display = "";
-    var backBtn = el("addr-back-btn"); if (backBtn) backBtn.style.display = "";
+    var steps = el("addr-steps"); if (steps) steps.style.display = "flex";
+    var backBtn = el("addr-back-btn"); if (backBtn) backBtn.style.display = "none"; // back only shows mid-flow
     var saveBtn = el("addr-save-btn"); if (saveBtn) { saveBtn.textContent = "Save Address"; saveBtn.onclick = window.saveAddress; }
     var sub = el("addr-panel-sub"); if (sub) sub.textContent = "Set where the drone delivers your tools";
     // Clear maps

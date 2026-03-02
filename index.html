@@ -1255,20 +1255,25 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
       <!-- Address -->
       <div class="account-panel" id="panel-address">
         <div class="panel-title">Delivery Address</div>
-        <div class="panel-sub">Where drones will drop your tools</div>
+        <div class="panel-sub">Enter your house address to set your drop location</div>
         <div class="form-row">
-          <div class="form-group"><label class="form-label">BUILDING / HALL</label><input id="addr-building" class="form-input" type="text" placeholder="e.g. Buchanan Hall"/></div>
-          <div class="form-group"><label class="form-label">ROOM NUMBER</label><input id="addr-room" class="form-input" type="text" placeholder="e.g. 412"/></div>
+          <div class="form-group full"><label class="form-label">STREET ADDRESS</label>
+            <div style="display:flex;gap:8px">
+              <input id="addr-building" class="form-input" type="text" placeholder="e.g. 123 Maple St, Raleigh, NC" style="flex:1"/>
+              <button class="form-save" style="white-space:nowrap;padding:0 16px;margin:0" onclick="geocodeAddress()">Find</button>
+            </div>
+          </div>
         </div>
         <div class="form-row">
-          <div class="form-group full"><label class="form-label">DROP-OFF NOTES</label><input id="addr-notes" class="form-input" type="text" placeholder="e.g. Leave at front door"/></div>
+          <div class="form-group full"><label class="form-label">DROP-OFF NOTES</label><input id="addr-notes" class="form-input" type="text" placeholder="e.g. Leave on front porch"/></div>
         </div>
         <div id="addr-droppin-wrap" style="margin-top:16px;display:none">
-          <div style="font-size:11px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Drop Location</div>
-          <div style="font-size:12px;color:var(--muted);margin-bottom:8px">Click or drag the pin to where the drone should drop your package.</div>
-          <div id="addr-droppin-map" style="width:100%;height:260px;border-radius:12px;overflow:hidden;border:1px solid var(--border);cursor:crosshair"></div>
+          <div style="font-size:11px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Pin Drop Location</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Click anywhere on your property to mark the exact drop spot. Drag the pin to fine-tune.</div>
+          <div id="addr-droppin-map" style="width:100%;height:300px;border-radius:12px;overflow:hidden;border:1px solid var(--border);cursor:crosshair"></div>
+          <div id="addr-droppin-coords" style="font-size:11px;color:var(--muted);margin-top:8px;text-align:right"></div>
         </div>
-        <button class="form-save" onclick="saveAddress()">Save Address</button>
+        <button class="form-save" onclick="saveAddress()" style="margin-top:14px">Save Address</button>
       </div>
 
       <!-- Payment -->
@@ -1848,7 +1853,7 @@ window.checkout = function() {
 };
 
 window.showOrderConfirm = function(items) {
-  var addr    = (userProfile.building || "—") + (userProfile.room ? ", Rm " + userProfile.room : "");
+  var addr    = userProfile.building || "—";
   var mapsUrl = "https://maps.google.com/?q=" + userProfile.dropLat + "," + userProfile.dropLng;
   var subtotal = items.reduce(function(s,i){return s+calcCost(i,i.hours);},0);
 
@@ -2060,13 +2065,13 @@ function renderAccount() {
   setText("stat-saved",   "$"+Math.round(userProfile.totalSaved||0));
   setText("stat-hours",   (userProfile.totalHours||0)+"h");
   setVal("addr-building", userProfile.building||"");
-  setVal("addr-room",     userProfile.room||"");
   setVal("addr-notes",    userProfile.dropNotes||"");
-  // Show drop pin map if they already have an address set
-  if (userProfile.building) {
+  // Show drop pin map if they already have saved coordinates
+  if (userProfile.dropLat) {
+    window._addrDropLat = userProfile.dropLat;
+    window._addrDropLng = userProfile.dropLng;
     var wrap = el("addr-droppin-wrap");
     if (wrap) { wrap.style.display = "block"; setTimeout(window.initAddrDropPin, 200); }
-    if (userProfile.dropLat) { window._addrDropLat = userProfile.dropLat; window._addrDropLng = userProfile.dropLng; }
   }
   var n = userProfile.notifications||{};
   setChk("notif-delivery", n.delivery!==false);
@@ -2780,19 +2785,12 @@ function startApp() {
 
   window.saveAddress = function() {
     var building = (el("addr-building")||{value:""}).value.trim();
-    var room     = (el("addr-room")||{value:""}).value.trim();
     var notes    = (el("addr-notes")||{value:""}).value.trim();
 
-    if (!building) { showToast("Enter a building name"); return; }
+    if (!building) { showToast("Enter your house address"); return; }
+    if (!window._addrDropLat) { showToast("Pin your drop location on the map first"); return; }
 
-    // Show drop-pin map if not already shown
-    var wrap = el("addr-droppin-wrap");
-    if (wrap) {
-      wrap.style.display = "block";
-      setTimeout(function() { initAddrDropPin(); }, 80);
-    }
-
-    // Get latest pin position from marker if map is active
+    // Get latest pin position from marker
     if (window._addrDropMarker) {
       var ll = window._addrDropMarker.getLatLng();
       window._addrDropLat = ll.lat;
@@ -2800,10 +2798,9 @@ function startApp() {
     }
     saveProfile({
       building:  building,
-      room:      room,
       dropNotes: notes,
-      dropLat:   window._addrDropLat || null,
-      dropLng:   window._addrDropLng || null
+      dropLat:   window._addrDropLat,
+      dropLng:   window._addrDropLng
     });
   };
 
@@ -2812,22 +2809,65 @@ function startApp() {
   window._addrDropMap = null;
   window._addrDropMarker = null;
 
-  window.initAddrDropPin = function() {
+  // Geocode address then show map
+  window.geocodeAddress = function() {
+    var addr = (el("addr-building")||{value:""}).value.trim();
+    if (!addr) { showToast("Enter an address first"); return; }
+    showToast("Finding address...");
+    fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&q=" + encodeURIComponent(addr))
+      .then(function(r){ return r.json(); })
+      .then(function(results) {
+        if (!results || !results.length) { showToast("Address not found — try a more specific address"); return; }
+        var lat = parseFloat(results[0].lat);
+        var lng = parseFloat(results[0].lon);
+        var bbox = results[0].boundingbox; // [minlat, maxlat, minlng, maxlng]
+        window._addrDropLat = lat;
+        window._addrDropLng = lng;
+        var wrap = el("addr-droppin-wrap");
+        if (wrap) wrap.style.display = "block";
+        showToast("Found — pin your exact drop spot");
+        setTimeout(function() { window.initAddrDropPin(lat, lng, bbox); }, 80);
+      })
+      .catch(function() { showToast("Geocoding failed — check your connection"); });
+  };
+
+  window.initAddrDropPin = function(lat, lng, bbox) {
     if (!window.L) return;
     var mapEl = el("addr-droppin-map");
     if (!mapEl) return;
 
-    // Use saved coords or default to campus center
-    var lat = (userProfile && userProfile.dropLat) || 35.7847;
-    var lng = (userProfile && userProfile.dropLng) || -78.6821;
+    lat = lat || (userProfile && userProfile.dropLat) || 35.7847;
+    lng = lng || (userProfile && userProfile.dropLng) || -78.6821;
+
+    var pinIcon = window.L.divIcon({
+      html: '<div style="display:flex;flex-direction:column;align-items:center">' +
+              '<div style="width:22px;height:22px;background:#1a6ef0;border:3px solid #fff;border-radius:50%;box-shadow:0 3px 10px rgba(26,110,240,.5)"></div>' +
+              '<div style="width:2px;height:10px;background:#1a6ef0;margin-top:-2px"></div>' +
+            '</div>',
+      iconSize: [22, 34], iconAnchor: [11, 34], className: ""
+    });
+
+    function updateCoords(latv, lngv) {
+      window._addrDropLat = latv;
+      window._addrDropLng = lngv;
+      var c = el("addr-droppin-coords");
+      if (c) c.textContent = latv.toFixed(6) + ", " + lngv.toFixed(6);
+    }
 
     if (window._addrDropMap) {
+      // Map exists — just move to new location
+      window._addrDropMap.setView([lat, lng], 19);
+      window._addrDropMarker.setLatLng([lat, lng]);
+      updateCoords(lat, lng);
+      if (bbox) {
+        window._addrDropMap.fitBounds([
+          [parseFloat(bbox[0]), parseFloat(bbox[2])],
+          [parseFloat(bbox[1]), parseFloat(bbox[3])]
+        ], { maxZoom: 19 });
+      }
       window._addrDropMap.invalidateSize();
       return;
     }
-
-    window._addrDropLat = lat;
-    window._addrDropLng = lng;
 
     window._addrDropMap = window.L.map("addr-droppin-map", {
       zoomControl: true, attributionControl: false
@@ -2837,26 +2877,27 @@ function startApp() {
       maxZoom: 21, subdomains: "abcd"
     }).addTo(window._addrDropMap);
 
-    var pinIcon = window.L.divIcon({
-      html: '<div style="display:flex;flex-direction:column;align-items:center">' +
-              '<div style="width:24px;height:24px;background:#1a6ef0;border:3px solid #fff;border-radius:50%;box-shadow:0 3px 10px rgba(26,110,240,.5)"></div>' +
-              '<div style="width:2px;height:10px;background:#1a6ef0;margin-top:-2px"></div>' +
-            '</div>',
-      iconSize: [24, 36], iconAnchor: [12, 36], className: ""
-    });
+    // Fit to house bounding box if available
+    if (bbox) {
+      window._addrDropMap.fitBounds([
+        [parseFloat(bbox[0]), parseFloat(bbox[2])],
+        [parseFloat(bbox[1]), parseFloat(bbox[3])]
+      ], { maxZoom: 19 });
+    }
 
     window._addrDropMarker = window.L.marker([lat, lng], { icon: pinIcon, draggable: true })
       .addTo(window._addrDropMap);
+    updateCoords(lat, lng);
 
-    window._addrDropMarker.on("dragend", function(e) {
-      window._addrDropLat = e.target.getLatLng().lat;
-      window._addrDropLng = e.target.getLatLng().lng;
+    window._addrDropMarker.on("drag", function(e) {
+      updateCoords(e.target.getLatLng().lat, e.target.getLatLng().lng);
     });
-
+    window._addrDropMarker.on("dragend", function(e) {
+      updateCoords(e.target.getLatLng().lat, e.target.getLatLng().lng);
+    });
     window._addrDropMap.on("click", function(e) {
-      window._addrDropLat = e.latlng.lat;
-      window._addrDropLng = e.latlng.lng;
       window._addrDropMarker.setLatLng(e.latlng);
+      updateCoords(e.latlng.lat, e.latlng.lng);
     });
 
     window._addrDropMap.invalidateSize();

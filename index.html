@@ -443,6 +443,21 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:var(--nav-h);backgro
 .cart-empty h3{font-size:20px;font-weight:800;margin-bottom:8px}
 .cart-empty p{font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:24px}
 
+
+/* ── Drop-pin modal ──────────────────────────────────────────────────────── */
+.droppin-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);z-index:9000;display:flex;align-items:center;justify-content:center;padding:16px}
+.droppin-box{background:var(--surface);border:1px solid var(--border);border-radius:20px;width:100%;max-width:560px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.3)}
+.droppin-header{padding:18px 20px 14px;border-bottom:1px solid var(--border)}
+.droppin-title{font-size:16px;font-weight:800;letter-spacing:-.02em;margin-bottom:3px}
+.droppin-sub{font-size:12px;color:var(--muted)}
+#droppin-map{width:100%;height:320px;cursor:crosshair}
+.droppin-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px}
+.droppin-hint{font-size:12px;color:var(--muted);flex:1;line-height:1.5}
+.droppin-confirm{background:var(--blue);color:#fff;border:none;border-radius:10px;padding:10px 20px;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font);white-space:nowrap}
+.droppin-confirm:hover{background:var(--blue-hover)}
+.droppin-cancel{background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:10px;padding:10px 16px;font-size:14px;cursor:pointer;font-family:var(--font)}
+.droppin-pin-label{background:var(--blue);color:#fff;padding:4px 8px;border-radius:6px;font-size:11px;font-weight:700;white-space:nowrap}
+
 /* Delivery address card */
 .addr-card{background:var(--surface);border:1px solid var(--border2);border-radius:11px;padding:14px 16px;display:flex;align-items:center;gap:12px;margin-bottom:16px;cursor:pointer;transition:.15s}
 .addr-card:hover{border-color:var(--blue)}
@@ -820,7 +835,15 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
       <div class="auth-logo">
         <div class="nav-logo-mark" style="height:36px;width:auto">
+<<<<<<< Updated upstream
           <img src="1.png" style="height:36px;width:auto;display:block;border-radius:0"/>
+=======
+<<<<<<< HEAD
+          <img src="1.png" style="width:36px;height:auto;display:block;border-radius:0"/>
+=======
+          <img src="1.png" style="height:36px;width:auto;display:block;border-radius:0"/>
+>>>>>>> 57cbab118f1f157a435633a99584a9016915f4ad
+>>>>>>> Stashed changes
         </div>
         <span style="font-size:16px;font-weight:800;letter-spacing:-.03em">Droveia</span>
       </div>
@@ -896,7 +919,15 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
 <nav>
   <div class="nav-logo" onclick="showPage('home')">
     <div class="nav-logo-mark">
+<<<<<<< Updated upstream
       <img src="1.png" style="height:40px;width:auto;display:block;border-radius:0"/>
+=======
+<<<<<<< HEAD
+      <img src="1.png" style="width:40px;height:auto;display:block;border-radius:0"/>
+=======
+      <img src="1.png" style="height:40px;width:auto;display:block;border-radius:0"/>
+>>>>>>> 57cbab118f1f157a435633a99584a9016915f4ad
+>>>>>>> Stashed changes
     </div>
     <span class="nav-wordmark">Droveia</span>
   </div>
@@ -1246,6 +1277,11 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
         </div>
         <div class="form-row">
           <div class="form-group full"><label class="form-label">DROP-OFF NOTES</label><input id="addr-notes" class="form-input" type="text" placeholder="e.g. Leave at front door"/></div>
+        </div>
+        <div id="addr-droppin-wrap" style="margin-top:16px;display:none">
+          <div style="font-size:11px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Drop Location</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:8px">Click or drag the pin to where the drone should drop your package.</div>
+          <div id="addr-droppin-map" style="width:100%;height:260px;border-radius:12px;overflow:hidden;border:1px solid var(--border);cursor:crosshair"></div>
         </div>
         <button class="form-save" onclick="saveAddress()">Save Address</button>
       </div>
@@ -1807,8 +1843,77 @@ function renderCart() {
 window.checkout = function() {
   if (!currentUser) { showAuth(); return; }
   if (!cart.length) return;
-  placeOrder(cart.slice());
+
+  // Must have address set
+  if (!userProfile || !userProfile.building) {
+    showToast("Set a delivery address in your account first");
+    showPage("account");
+    return;
+  }
+
+  // Must have drop pin set
+  if (!userProfile.dropLat) {
+    showToast("Pin your drop location in Account > Delivery Address");
+    showPage("account");
+    return;
+  }
+
+  // Show confirm modal
+  showOrderConfirm(cart.slice());
 };
+
+window.showOrderConfirm = function(items) {
+  var addr    = (userProfile.building || "—") + (userProfile.room ? ", Rm " + userProfile.room : "");
+  var mapsUrl = "https://maps.google.com/?q=" + userProfile.dropLat + "," + userProfile.dropLng;
+  var subtotal = items.reduce(function(s,i){return s+calcCost(i,i.hours);},0);
+
+  var itemRows = items.map(function(i){
+    return '<div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;border-bottom:1px solid var(--border)">' +
+      '<span>' + i.name + ' <span style="color:var(--muted)">(' + i.hours + 'h)</span></span>' +
+      '<span style="font-weight:700">$' + calcCost(i,i.hours).toFixed(2) + '</span>' +
+    '</div>';
+  }).join("");
+
+  el("order-confirm-body").innerHTML =
+    '<div style="margin-bottom:14px">' +
+      '<div style="font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Items</div>' +
+      itemRows +
+      '<div style="display:flex;justify-content:space-between;font-size:14px;font-weight:800;padding-top:8px">' +
+        '<span>Total</span><span>$' + subtotal.toFixed(2) + '</span>' +
+      '</div>' +
+    '</div>' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">' +
+      '<div style="background:var(--bg3);border-radius:10px;padding:12px">' +
+        '<div style="font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Deliver To</div>' +
+        '<div style="font-size:13px;font-weight:600">' + addr + '</div>' +
+        (userProfile.dropNotes ? '<div style="font-size:11px;color:var(--muted);margin-top:3px">' + userProfile.dropNotes + '</div>' : '') +
+      '</div>' +
+      '<div style="background:var(--bg3);border-radius:10px;padding:12px">' +
+        '<div style="font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Drop Location</div>' +
+        '<a href="' + mapsUrl + '" target="_blank" style="font-size:12px;color:var(--blue);font-weight:600">' +
+          userProfile.dropLat.toFixed(5) + ', ' + userProfile.dropLng.toFixed(5) + '</a>' +
+        '<div style="font-size:11px;color:var(--muted);margin-top:3px">Click to view on map</div>' +
+      '</div>' +
+    '</div>';
+
+  el("order-confirm-overlay").classList.remove("hidden");
+  window._confirmCartItems = items;
+};
+
+window.closeOrderConfirm = function() {
+  el("order-confirm-overlay").classList.add("hidden");
+  window._confirmCartItems = null;
+};
+
+window.submitOrderConfirm = function() {
+  el("order-confirm-overlay").classList.add("hidden");
+  if (window._confirmCartItems) {
+    var drop = userProfile.dropLat ? [userProfile.dropLat, userProfile.dropLng] : null;
+    placeOrder(window._confirmCartItems, drop);
+    window._confirmCartItems = null;
+  }
+};
+
 
 // ── Orders ────────────────────────────────────────────────────────────────────
 
@@ -1972,6 +2077,12 @@ function renderAccount() {
   setVal("addr-building", userProfile.building||"");
   setVal("addr-room",     userProfile.room||"");
   setVal("addr-notes",    userProfile.dropNotes||"");
+  // Show drop pin map if they already have an address set
+  if (userProfile.building) {
+    var wrap = el("addr-droppin-wrap");
+    if (wrap) { wrap.style.display = "block"; setTimeout(window.initAddrDropPin, 200); }
+    if (userProfile.dropLat) { window._addrDropLat = userProfile.dropLat; window._addrDropLng = userProfile.dropLng; }
+  }
   var n = userProfile.notifications||{};
   setChk("notif-delivery", n.delivery!==false);
   setChk("notif-eta",      n.eta!==false);
@@ -2396,6 +2507,7 @@ async function adminLoadOrders() {
           '<div style="background:var(--bg3);border-radius:10px;padding:10px 12px">' +
             '<div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">Deliver To</div>' +
             '<div style="font-size:13px;font-weight:600">' + addr + '</div>' +
+            (o.address && o.address.dropLat ? '<a href="https://maps.google.com/?q=' + o.address.dropLat + ',' + o.address.dropLng + '" target="_blank" style="font-size:11px;color:var(--blue);margin-top:4px;display:inline-block">📍 View drop pin (' + o.address.dropLat.toFixed(5) + ', ' + o.address.dropLng.toFixed(5) + ')</a>' : '') +
             (dropNotes ? '<div style="font-size:11px;color:var(--muted);margin-top:2px">' + dropNotes + '</div>' : '') +
           '</div>' +
           '<div style="background:var(--bg3);border-radius:10px;padding:10px 12px">' +
@@ -2563,7 +2675,7 @@ function startApp() {
   }
 
   // Real placeOrder
-  placeOrder = async function(items) {
+  placeOrder = async function(items, dropLocation) {
     if (!currentUser) { showAuth(); return; }
     var total = parseFloat(items.reduce(function(s,i){return s+calcCost(i,i.hours);},0).toFixed(2));
     var saved = parseFloat(items.reduce(function(s,i){return s+(i.retail-calcCost(i,i.hours));},0).toFixed(2));
@@ -2575,7 +2687,7 @@ function startApp() {
           return {id:i.id,name:i.name,cat:i.cat,pph:i.pph,hours:i.hours,retail:i.retail};
         }),
         total:total, saved:saved,
-        address:{building:userProfile&&userProfile.building||"—",room:userProfile&&userProfile.room||"—"},
+        address:{building:userProfile&&userProfile.building||"—",room:userProfile&&userProfile.room||"—",dropLat:dropLocation?dropLocation[0]:null,dropLng:dropLocation?dropLocation[1]:null},
         createdAt:fb.serverTimestamp(), deliveredAt:null
       });
       await fb.updateDoc(pRef(currentUser.uid),{
@@ -2599,7 +2711,7 @@ function startApp() {
           return {id:i.id,name:i.name,cat:i.cat,pph:i.pph,hours:i.hours,retail:i.retail};
         }),
         total:total, saved:saved,
-        address:{building:userProfile&&userProfile.building||"—",room:userProfile&&userProfile.room||"—"},
+        address:{building:userProfile&&userProfile.building||"—",room:userProfile&&userProfile.room||"—",dropLat:dropLocation?dropLocation[0]:null,dropLng:dropLocation?dropLocation[1]:null},
         userId: currentUser.uid,
         userEmail: currentUser.email,
         createdAt: fb.serverTimestamp()
@@ -2682,11 +2794,87 @@ function startApp() {
   };
 
   window.saveAddress = function() {
+    var building = (el("addr-building")||{value:""}).value.trim();
+    var room     = (el("addr-room")||{value:""}).value.trim();
+    var notes    = (el("addr-notes")||{value:""}).value.trim();
+
+    if (!building) { showToast("Enter a building name"); return; }
+
+    // Show drop-pin map if not already shown
+    var wrap = el("addr-droppin-wrap");
+    if (wrap) {
+      wrap.style.display = "block";
+      setTimeout(function() { initAddrDropPin(); }, 80);
+    }
+
+    // Get latest pin position from marker if map is active
+    if (window._addrDropMarker) {
+      var ll = window._addrDropMarker.getLatLng();
+      window._addrDropLat = ll.lat;
+      window._addrDropLng = ll.lng;
+    }
     saveProfile({
-      building:  (el("addr-building")||{value:""}).value.trim(),
-      room:      (el("addr-room")||{value:""}).value.trim(),
-      dropNotes: (el("addr-notes")||{value:""}).value.trim()
+      building:  building,
+      room:      room,
+      dropNotes: notes,
+      dropLat:   window._addrDropLat || null,
+      dropLng:   window._addrDropLng || null
     });
+  };
+
+  window._addrDropLat = null;
+  window._addrDropLng = null;
+  window._addrDropMap = null;
+  window._addrDropMarker = null;
+
+  window.initAddrDropPin = function() {
+    if (!window.L) return;
+    var mapEl = el("addr-droppin-map");
+    if (!mapEl) return;
+
+    // Use saved coords or default to campus center
+    var lat = (userProfile && userProfile.dropLat) || 35.7847;
+    var lng = (userProfile && userProfile.dropLng) || -78.6821;
+
+    if (window._addrDropMap) {
+      window._addrDropMap.invalidateSize();
+      return;
+    }
+
+    window._addrDropLat = lat;
+    window._addrDropLng = lng;
+
+    window._addrDropMap = window.L.map("addr-droppin-map", {
+      zoomControl: true, attributionControl: false
+    }).setView([lat, lng], 19);
+
+    window.L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
+      maxZoom: 21, subdomains: "abcd"
+    }).addTo(window._addrDropMap);
+
+    var pinIcon = window.L.divIcon({
+      html: '<div style="display:flex;flex-direction:column;align-items:center">' +
+              '<div style="width:24px;height:24px;background:#1a6ef0;border:3px solid #fff;border-radius:50%;box-shadow:0 3px 10px rgba(26,110,240,.5)"></div>' +
+              '<div style="width:2px;height:10px;background:#1a6ef0;margin-top:-2px"></div>' +
+            '</div>',
+      iconSize: [24, 36], iconAnchor: [12, 36], className: ""
+    });
+
+    window._addrDropMarker = window.L.marker([lat, lng], { icon: pinIcon, draggable: true })
+      .addTo(window._addrDropMap);
+
+    window._addrDropMarker.on("dragend", function(e) {
+      window._addrDropLat = e.target.getLatLng().lat;
+      window._addrDropLng = e.target.getLatLng().lng;
+    });
+
+    window._addrDropMap.on("click", function(e) {
+      window._addrDropLat = e.latlng.lat;
+      window._addrDropLng = e.latlng.lng;
+      window._addrDropMarker.setLatLng(e.latlng);
+    });
+
+    window._addrDropMap.invalidateSize();
   };
   window.saveNotifications = function() {
     saveProfile({ notifications:{
@@ -3129,5 +3317,22 @@ if (_savedPage && _savedPage !== "admin") {
     <svg id="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
   </button>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+
+
+<!-- Order confirm modal -->
+<div id="order-confirm-overlay" class="droppin-overlay hidden">
+  <div class="droppin-box">
+    <div class="droppin-header">
+      <div class="droppin-title">Confirm Order</div>
+      <div class="droppin-sub">Review your delivery details before placing.</div>
+    </div>
+    <div id="order-confirm-body" style="padding:16px 20px"></div>
+    <div class="droppin-footer">
+      <button class="droppin-cancel" onclick="closeOrderConfirm()">Cancel</button>
+      <button class="droppin-confirm" onclick="submitOrderConfirm()">Place Order</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>

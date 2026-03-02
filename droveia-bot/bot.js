@@ -45,26 +45,28 @@ function calcRate(tool) {
 
 // ── Tool detail embed ─────────────────────────────────────────────────────────
 function toolEmbed(t, color = BLUE, label = null) {
-  const rate   = calcRate(t);
-  const avail  = t.available !== false;
-  const cost4h = (rate * 2.20 * 4).toFixed(2);
-  const cost1d = (rate * 1.20 * 24).toFixed(2);
-  const cost2d = (rate * 1.00 * 48).toFixed(2);
+  const rate      = calcRate(t);
+  const qty       = parseInt(t.qty)       || 1;
+  const rentedQty = parseInt(t.rentedQty) || 0;
+  const avail     = qty > rentedQty;
+  const cost4h    = (rate * 2.20 * 4).toFixed(2);
+  const cost1d    = (rate * 1.20 * 24).toFixed(2);
+  const cost2d    = (rate * 1.00 * 48).toFixed(2);
 
   const embed = new EmbedBuilder()
     .setColor(color)
     .setTitle(label ? `${label}  —  ${t.name}` : t.name)
     .setDescription(`\`#${t.id}\`  ·  ${t.cat}  ·  ${t.desc || "—"}`)
     .addFields(
-      { name: "Retail Price", value: `$${t.retail}`,           inline: true },
-      { name: "Base Rate",    value: `$${rate.toFixed(2)}/hr`, inline: true },
-      { name: "Status",       value: avail ? "Available" : "Unavailable", inline: true },
-      { name: "ETA",          value: t.eta || "—",             inline: true },
-      { name: "Rating",       value: `${t.rating || "N/A"} / 5`, inline: true },
-      { name: "\u200b",       value: "\u200b",                 inline: true },
-      { name: "4h rental",    value: `$${cost4h}`,             inline: true },
-      { name: "1 day rental", value: `$${cost1d}`,             inline: true },
-      { name: "2 day rental", value: `$${cost2d}`,             inline: true },
+      { name: "Retail Price", value: `$${t.retail}`,                            inline: true },
+      { name: "Base Rate",    value: `$${rate.toFixed(2)}/hr`,                  inline: true },
+      { name: "Status",       value: avail ? "✅ Available" : "❌ Out of Stock", inline: true },
+      { name: "In Stock",     value: `${qty - rentedQty} / ${qty}`,             inline: true },
+      { name: "Rented Out",   value: `${rentedQty}`,                            inline: true },
+      { name: "ETA",          value: t.eta || "—",                              inline: true },
+      { name: "4h rental",    value: `$${cost4h}`,                              inline: true },
+      { name: "1 day rental", value: `$${cost1d}`,                              inline: true },
+      { name: "2 day rental", value: `$${cost2d}`,                              inline: true },
     )
     .setFooter({ text: `Tool ID: ${t.id}` })
     .setTimestamp();
@@ -76,14 +78,16 @@ function toolEmbed(t, color = BLUE, label = null) {
 // ── Inventory embed ───────────────────────────────────────────────────────────
 function inventoryEmbed(tools) {
   const total     = tools.length;
-  const available = tools.filter(t => t.available !== false).length;
+  const totalQty  = tools.reduce((s, t) => s + (parseInt(t.qty) || 1), 0);
+  const rented    = tools.reduce((s, t) => s + (parseInt(t.rentedQty) || 0), 0);
+  const available = totalQty - rented;
   const cats      = ["Workshop", "Crafts", "Office", "Electronics"];
 
   const embed = new EmbedBuilder()
     .setColor(BLUE)
     .setTitle("Droveia  —  Inventory")
     .setDescription(
-      `**${total}** tools total  ·  **${available}** available  ·  **${total - available}** rented out`
+      `**${total}** tools  ·  **${available}** units available  ·  **${rented}** rented out`
     )
     .setTimestamp();
 
@@ -91,11 +95,15 @@ function inventoryEmbed(tools) {
     const catTools = tools.filter(t => t.cat === cat);
     if (!catTools.length) continue;
     const lines = catTools.map(t => {
-      const rate  = calcRate(t);
-      const state = t.available !== false ? "[ Available ]" : "[ Rented    ]";
-      const id    = `#${String(t.id).padStart(2, "0")}`;
-      const name  = t.name.substring(0, 16).padEnd(16, " ");
-      return `\`${id}  ${name}  $${rate.toFixed(2).padStart(5)}/hr  ${state}\``;
+      const rate      = calcRate(t);
+      const qty       = parseInt(t.qty) || 1;
+      const rentedQty = parseInt(t.rentedQty) || 0;
+      const avail     = qty > rentedQty;
+      const stock     = `${qty - rentedQty}/${qty}`;
+      const state     = avail ? "[ In Stock ]" : "[ Out      ]";
+      const id        = `#${String(t.id).padStart(2, "0")}`;
+      const name      = t.name.substring(0, 16).padEnd(16, " ");
+      return `\`${id}  ${name}  $${rate.toFixed(2).padStart(5)}/hr  ${stock.padStart(5)}  ${state}\``;
     }).join("\n");
     embed.addFields({ name: cat, value: lines });
   }
@@ -119,17 +127,20 @@ async function handleAddTool(interaction) {
   await interaction.deferReply();
   const tools  = await getTools();
   const nextId = tools.length ? Math.max(...tools.map(t => t.id || 0)) + 1 : 1;
+  const qty    = interaction.options.getInteger("qty") || 1;
 
   const tool = {
     id:        nextId,
     name:      interaction.options.getString("name"),
     cat:       interaction.options.getString("cat"),
     retail:    interaction.options.getNumber("retail"),
-    desc:      interaction.options.getString("desc"),
+    desc:      interaction.options.getString("desc") || "",
     eta:       interaction.options.getString("eta"),
     pph:       interaction.options.getNumber("pph") || 0,
     rating:    interaction.options.getNumber("rating") || 4.5,
     img:       interaction.options.getString("img") || "x",
+    qty:       qty,
+    rentedQty: 0,
     available: true,
   };
 
@@ -144,9 +155,10 @@ async function handleAddTool(interaction) {
         .setTitle("Tool Added")
         .setDescription(`**${tool.name}** has been added to inventory.`)
         .addFields(
-          { name: "ID",       value: `#${tool.id}`,    inline: true },
-          { name: "Category", value: tool.cat,         inline: true },
-          { name: "Retail",   value: `$${tool.retail}`,inline: true },
+          { name: "ID",       value: `#${tool.id}`,     inline: true },
+          { name: "Category", value: tool.cat,          inline: true },
+          { name: "Qty",      value: `${qty}`,          inline: true },
+          { name: "Retail",   value: `$${tool.retail}`, inline: true },
         )
         .setFooter({ text: `Added by ${interaction.user.tag}` })
         .setTimestamp()
@@ -196,16 +208,28 @@ async function handleEditTool(interaction) {
   const field = interaction.options.getString("field");
   const value = interaction.options.getString("value");
   const tools = await getTools();
-  const tool  = tools.find(t => t.id === id);
+  const idx   = tools.findIndex(t => t.id === id);
 
-  if (!tool) {
+  if (idx === -1) {
     return interaction.editReply({ embeds: [
       new EmbedBuilder().setColor(RED).setDescription(`No tool found with ID #${id}`)
     ]});
   }
 
+  const tool   = tools[idx];
   const oldVal = tool[field];
-  tool[field]  = ["retail", "pph", "rating"].includes(field) ? parseFloat(value) : value;
+
+  if (["retail", "pph", "rating", "qty", "rentedQty"].includes(field)) {
+    tool[field] = parseFloat(value);
+  } else {
+    tool[field] = value;
+  }
+
+  // Recompute available if stock fields changed
+  if (field === "qty" || field === "rentedQty") {
+    tool.available = (parseInt(tool.qty) || 1) > (parseInt(tool.rentedQty) || 0);
+  }
+
   await saveTools(tools);
 
   await interaction.editReply({ embeds: [
@@ -214,9 +238,9 @@ async function handleEditTool(interaction) {
       .setTitle("Tool Updated")
       .setDescription(`**${tool.name}**  ·  #${id}`)
       .addFields(
-        { name: "Field",     value: `\`${field}\``,  inline: true },
-        { name: "Old Value", value: String(oldVal),  inline: true },
-        { name: "New Value", value: String(value),   inline: true },
+        { name: "Field",     value: `\`${field}\``, inline: true },
+        { name: "Old Value", value: String(oldVal), inline: true },
+        { name: "New Value", value: String(value),  inline: true },
       )
       .setFooter({ text: `Updated by ${interaction.user.tag}` })
       .setTimestamp()
@@ -234,99 +258,109 @@ async function handleEditTool(interaction) {
   });
 }
 
-async function handleAvailability(interaction, available) {
-  await interaction.deferReply();
-  const id    = interaction.options.getInteger("id");
-  const tools = await getTools();
-  const tool  = tools.find(t => t.id === id);
-
-  if (!tool) {
-    return interaction.editReply({ embeds: [
-      new EmbedBuilder().setColor(RED).setDescription(`No tool found with ID #${id}`)
-    ]});
-  }
-
-  tool.available = available;
-  await saveTools(tools);
-
-  await db.collection("inventory").doc(String(id)).set({
-    toolId: id,
-    available,
-    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-    updatedBy: interaction.user.tag,
-  });
-
-  const color = available ? GREEN : RED;
-  const label = available ? "Available" : "Unavailable";
-
-  await interaction.editReply({ embeds: [
-    new EmbedBuilder()
-      .setColor(color)
-      .setTitle(`Marked ${label}`)
-      .setDescription(`**${tool.name}** is now **${label}**.`)
-      .addFields(
-        { name: "ID",       value: `#${id}`,  inline: true },
-        { name: "Category", value: tool.cat,  inline: true },
-        { name: "Status",   value: label,     inline: true },
-      )
-      .setFooter({ text: `Updated by ${interaction.user.tag}` })
-      .setTimestamp()
-  ]});
-
-  await notifyChannel(interaction.client, process.env.INVENTORY_CHANNEL_ID, {
-    embeds: [
-      new EmbedBuilder()
-        .setColor(color)
-        .setTitle("Availability Update")
-        .setDescription(`**${tool.name}** (#${id}) is now **${label}**.`)
-        .setFooter({ text: `By ${interaction.user.tag}` })
-        .setTimestamp()
-    ]
-  });
-}
-
+// ── Orders — reads from allOrders collection ──────────────────────────────────
 async function handleOrders(interaction) {
   await interaction.deferReply();
-  const usersSnap    = await db.collection("users").listDocuments();
-  const activeOrders = [];
+  const status = interaction.options.getString("status") || "in_flight";
+  const snap   = await db.collection("allOrders").where("status", "==", status).get();
 
-  for (const userDoc of usersSnap) {
-    const ordersSnap = await db
-      .collection("users").doc(userDoc.id)
-      .collection("orders")
-      .where("status", "==", "in_flight")
-      .get();
-    ordersSnap.docs.forEach(d =>
-      activeOrders.push({ ...d.data(), _id: d.id, _uid: userDoc.id })
-    );
-  }
+  const statusLabels = { in_flight: "In Flight ✈", delivered: "Delivered ✓", returned: "Returned ↩", cancelled: "Cancelled ✕" };
+  const statusColors = { in_flight: BLUE, delivered: GREEN, returned: GRAY, cancelled: RED };
 
-  if (!activeOrders.length) {
+  if (snap.empty) {
     return interaction.editReply({ embeds: [
       new EmbedBuilder()
-        .setColor(GRAY)
-        .setTitle("Active Orders")
-        .setDescription("No active orders right now.")
+        .setColor(statusColors[status] || GRAY)
+        .setTitle("Orders")
+        .setDescription(`No **${statusLabels[status] || status}** orders right now.`)
         .setTimestamp()
     ]});
   }
 
   const embed = new EmbedBuilder()
-    .setColor(BLUE)
-    .setTitle(`Active Orders  —  ${activeOrders.length} in flight`)
+    .setColor(statusColors[status] || BLUE)
+    .setTitle(`${statusLabels[status] || status}  —  ${snap.size} order${snap.size !== 1 ? "s" : ""}`)
     .setTimestamp();
 
-  activeOrders.slice(0, 10).forEach(o => {
-    const items = (o.items || []).map(it => it.name).join(", ");
-    const addr  = o.address ? `${o.address.building}, Room ${o.address.room}` : "—";
+  snap.docs.slice(0, 10).forEach(d => {
+    const o     = d.data();
+    const items = (o.items || []).map(it => `${it.name} (${it.hours}h)`).join(", ");
+    const addr  = o.address ? `${o.address.building}${o.address.room ? `, Rm ${o.address.room}` : ""}` : "—";
     const total = `$${(o.total || 0).toFixed(2)}`;
+    const date  = o.createdAt?._seconds
+      ? new Date(o.createdAt._seconds * 1000).toLocaleString()
+      : "—";
+
     embed.addFields({
-      name:  `#${o._id.slice(0, 8).toUpperCase()}  ·  ${total}`,
-      value: `\`Items\`       ${items}\n\`Deliver to\`  ${addr}`,
+      name:  `#${d.id.slice(0, 8).toUpperCase()}  ·  ${total}`,
+      value: `\`Items\`     ${items}\n\`Deliver\`  ${addr}\n\`Customer\` ${o.userEmail || "—"}\n\`Placed\`   ${date}`,
     });
   });
 
+  if (snap.size > 10) embed.setFooter({ text: `Showing 10 of ${snap.size} orders` });
+
   await interaction.editReply({ embeds: [embed] });
+}
+
+// ── Update order status ───────────────────────────────────────────────────────
+async function handleOrderStatus(interaction) {
+  await interaction.deferReply();
+  const orderId   = interaction.options.getString("order_id");
+  const newStatus = interaction.options.getString("status");
+
+  const orderSnap = await db.collection("allOrders").doc(orderId).get();
+  if (!orderSnap.exists) {
+    return interaction.editReply({ embeds: [
+      new EmbedBuilder().setColor(RED).setDescription(`Order \`${orderId}\` not found.`)
+    ]});
+  }
+
+  const order  = orderSnap.data();
+  const update = {
+    status:    newStatus,
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    ...(newStatus === "delivered" ? { deliveredAt: admin.firestore.FieldValue.serverTimestamp() } : {})
+  };
+
+  await db.collection("allOrders").doc(orderId).update(update);
+
+  // Update user's subcollection order too
+  if (order.userId && order.userOrderId) {
+    try {
+      await db.collection("users").doc(order.userId)
+        .collection("orders").doc(order.userOrderId).update(update);
+    } catch(e) { console.warn("Could not update user order:", e.message); }
+  }
+
+  // Restore stock on returned or cancelled — only touch rentedQty
+  if (newStatus === "returned" || newStatus === "cancelled") {
+    const tools = await getTools();
+    for (const item of (order.items || [])) {
+      if (!item.id) continue;
+      const idx = tools.findIndex(t => t.id === parseInt(item.id));
+      if (idx < 0) continue;
+      const qty       = parseInt(tools[idx].qty) || 1;
+      const rentedQty = Math.max(0, (parseInt(tools[idx].rentedQty) || 1) - 1);
+      await rtdb.ref(`tools/${idx}`).update({ rentedQty, available: rentedQty < qty });
+    }
+  }
+
+  const statusColors = { in_flight: BLUE, delivered: GREEN, returned: GRAY, cancelled: RED };
+  const color = statusColors[newStatus] || BLUE;
+
+  await interaction.editReply({ embeds: [
+    new EmbedBuilder()
+      .setColor(color)
+      .setTitle("Order Updated")
+      .setDescription(`Order \`${orderId.slice(0, 8).toUpperCase()}\` → **${newStatus.replace(/_/g, " ")}**`)
+      .addFields(
+        { name: "Customer", value: order.userEmail || "—",                    inline: true },
+        { name: "Total",    value: `$${(order.total || 0).toFixed(2)}`,       inline: true },
+        { name: "Items",    value: (order.items||[]).map(i=>i.name).join(", ") || "—", inline: false },
+      )
+      .setFooter({ text: `Updated by ${interaction.user.tag}` })
+      .setTimestamp()
+  ]});
 }
 
 async function handleTool(interaction) {
@@ -355,70 +389,11 @@ async function notifyChannel(client, channelId, payload) {
   }
 }
 
-// ── Firestore inventory watcher ───────────────────────────────────────────────
-function watchInventory() {
-  db.collection("inventory").onSnapshot(snap => {
-    snap.docChanges().forEach(async change => {
-      if (change.type !== "modified") return;
-      const data  = change.doc.data();
-      const tools = await getTools();
-      const tool  = tools.find(t => t.id === data.toolId);
-      if (!tool) return;
-
-      // Sync availability back to RTDB so bot stays in sync with site
-      if (tool.available !== data.available) {
-        tool.available = data.available;
-        await saveTools(tools);
-        console.log(`Synced #${tool.id} ${tool.name} -> ${data.available ? "available" : "unavailable"}`);
-      }
-
-      const label = data.available ? "Available" : "Unavailable";
-      const color = data.available ? GREEN : RED;
-      await notifyChannel(client, process.env.INVENTORY_CHANNEL_ID, {
-        embeds: [
-          new EmbedBuilder()
-            .setColor(color)
-            .setTitle("Availability Update")
-            .setDescription(`**${tool.name}** is now **${label}**.`)
-            .setTimestamp()
-        ]
-      });
-    });
-  });
-}
-
 // ── Bot ready ─────────────────────────────────────────────────────────────────
 client.once("ready", async () => {
   console.log(`Droveia Bot online as ${client.user.tag}`);
   client.user.setActivity("Droveia", { type: ActivityType.Watching });
-  await syncFirestoreToRTDB();
-  watchInventory();
 });
-
-// On startup: pull Firestore inventory into RTDB so they match
-async function syncFirestoreToRTDB() {
-  try {
-    const snap  = await db.collection("inventory").get();
-    const tools = await getTools();
-    let changed = 0;
-    snap.docs.forEach(d => {
-      const data = d.data();
-      const tool = tools.find(t => t.id === data.toolId);
-      if (tool && tool.available !== data.available) {
-        tool.available = data.available;
-        changed++;
-      }
-    });
-    if (changed) {
-      await saveTools(tools);
-      console.log(`Startup sync: updated ${changed} tools from Firestore`);
-    } else {
-      console.log("Startup sync: all tools in sync");
-    }
-  } catch(e) {
-    console.error("syncFirestoreToRTDB error:", e.message);
-  }
-}
 
 // ── Interaction handler ───────────────────────────────────────────────────────
 client.on("interactionCreate", async interaction => {
@@ -427,14 +402,13 @@ client.on("interactionCreate", async interaction => {
 
   try {
     switch (interaction.commandName) {
-      case "inventory":   await handleInventory(interaction);           break;
-      case "addtool":     await handleAddTool(interaction);             break;
-      case "removetool":  await handleRemoveTool(interaction);          break;
-      case "edittool":    await handleEditTool(interaction);            break;
-      case "available":   await handleAvailability(interaction, true);  break;
-      case "unavailable": await handleAvailability(interaction, false); break;
-      case "orders":      await handleOrders(interaction);              break;
-      case "tool":        await handleTool(interaction);                break;
+      case "inventory":   await handleInventory(interaction);   break;
+      case "addtool":     await handleAddTool(interaction);     break;
+      case "removetool":  await handleRemoveTool(interaction);  break;
+      case "edittool":    await handleEditTool(interaction);    break;
+      case "orders":      await handleOrders(interaction);      break;
+      case "orderstatus": await handleOrderStatus(interaction); break;
+      case "tool":        await handleTool(interaction);        break;
     }
   } catch (err) {
     console.error(`Error in /${interaction.commandName}:`, err);

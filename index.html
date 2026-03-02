@@ -834,7 +834,7 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
 .order-act-btn.red:hover{border-color:#ef4444;color:#ef4444}
 </style>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDcuU4-XXzzEU8O84rs3W7cWgVStNicBTo&libraries=marker&callback=Function.prototype&v=weekly" async defer></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDcuU4-XXzzEU8O84rs3W7cWgVStNicBTo&callback=Function.prototype" async defer></script>
 </head>
 <body>
 
@@ -1267,7 +1267,7 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
 
       <!-- Address -->
       <div class="account-panel" id="panel-address">
-        <div class="panel-title" id="addr-panel-title">Delivery Address</div>
+        <div class="panel-title">Delivery Address</div>
         <div class="panel-sub" id="addr-panel-sub">Set where the drone delivers your tools</div>
 
         <!-- Step indicator -->
@@ -1321,8 +1321,8 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
           <div id="addr-confirm-map" style="width:100%;height:220px;border-radius:12px;overflow:hidden;border:1px solid var(--border);margin-top:16px"></div>
           <div id="addr-summary" style="margin-top:12px"></div>
           <div style="display:flex;gap:10px;margin-top:14px">
-            <button class="form-save" style="background:var(--bg3);color:var(--text);border:1px solid var(--border)" onclick="addrBack2()">Back</button>
-            <button class="form-save" style="flex:1" onclick="saveAddress()">Save Address</button>
+            <button id="addr-back-btn" class="form-save" style="background:var(--bg3);color:var(--text);border:1px solid var(--border)" onclick="addrBack2()">Back</button>
+            <button id="addr-save-btn" class="form-save" style="flex:1" onclick="saveAddress()">Save Address</button>
           </div>
         </div>
 
@@ -2859,13 +2859,12 @@ function startApp() {
       dropBboxRaw:  window._addrBbox ? JSON.stringify(window._addrBbox) : null
     });
     setTimeout(function() {
-      // Stay on stage 3, update title and button to reflect saved state
-      var titleEl = el("addr-panel-title") || document.querySelector("#panel-address .panel-title");
-      if (titleEl) titleEl.textContent = "Delivery Address";
-      var subEl = el("addr-panel-sub") || document.querySelector("#panel-address .panel-sub");
-      if (subEl) subEl.textContent = "Saved — tap Update Address to change";
-      var saveBtn = document.querySelector("#addr-stage-3 .form-save:last-child");
-      if (saveBtn) { saveBtn.textContent = "Update Address"; saveBtn.style.background = "var(--bg3)"; saveBtn.style.color = "var(--text)"; saveBtn.style.border = "1px solid var(--border)"; }
+      // Stay on stage 3 — hide steps/back, show "Update Delivery Address" state
+      var steps = el("addr-steps"); if (steps) steps.style.display = "none";
+      var backBtn = el("addr-back-btn"); if (backBtn) backBtn.style.display = "none";
+      var saveBtn = el("addr-save-btn");
+      if (saveBtn) { saveBtn.textContent = "Update Delivery Address"; saveBtn.onclick = window.addrStartOver; }
+      var sub = el("addr-panel-sub"); if (sub) sub.textContent = "Saved successfully";
     }, 400);
   };
 
@@ -2959,29 +2958,31 @@ function startApp() {
     el("addr-stage-3").style.display = "block";
     window.addrSetStep(3);
 
+    // Update panel title
+
     var addr  = (el("addr-building")||{value:""}).value.trim();
     var notes = (el("addr-notes")||{value:""}).value.trim();
 
+    // Summary card
     el("addr-summary").innerHTML =
       '<div style="background:var(--bg3);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px">' +
-        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">' +
-          '<div>' +
-            '<div style="font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px">Address</div>' +
-            '<div style="font-size:13px;font-weight:600">' + addr + '</div>' +
-            (notes ? '<div style="font-size:11px;color:var(--muted);margin-top:2px">' + notes + '</div>' : '') +
-          '</div>' +
-          '<div>' +
-            '<div style="font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px">Drop Pin</div>' +
-            '<div style="font-size:12px;font-weight:600;color:var(--blue)">' + window._addrDropLat.toFixed(5) + ', ' + window._addrDropLng.toFixed(5) + '</div>' +
-            '<div style="font-size:10px;color:var(--muted);margin-top:2px">30m landing zone</div>' +
-          '</div>' +
+        '<div>' +
+          '<div style="font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px">Address</div>' +
+          '<div style="font-size:14px;font-weight:600">' + addr + '</div>' +
+          (notes ? '<div style="font-size:12px;color:var(--muted);margin-top:2px">' + notes + '</div>' : '') +
+        '</div>' +
+        '<div>' +
+          '<div style="font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px">Drop Coordinates</div>' +
+          '<div style="font-size:13px;font-weight:600;color:var(--blue)">' + window._addrDropLat.toFixed(6) + ', ' + window._addrDropLng.toFixed(6) + '</div>' +
         '</div>' +
       '</div>';
 
+    // Init confirm map (Google Maps, read-only)
     setTimeout(function() {
       if (!window.google || !window.google.maps) return;
       var mapEl = el("addr-confirm-map");
-      if (!mapEl || window._addrConfirmMap) return;
+      if (!mapEl) return;
+      if (window._addrConfirmMap) return;
 
       var lat = window._addrDropLat;
       var lng = window._addrDropLng;
@@ -2991,7 +2992,6 @@ function startApp() {
         center: latLng,
         zoom: 20,
         mapTypeId: "satellite",
-        mapId: "addr_confirm_map",
         tilt: 0,
         disableDefaultUI: true,
         gestureHandling: "none"
@@ -2999,49 +2999,63 @@ function startApp() {
 
       if (window._addrViewport) window._addrConfirmMap.fitBounds(window._addrViewport);
 
-      // Property box
-      var propBounds = window._addrViewport || new window.google.maps.LatLngBounds(
-        new window.google.maps.LatLng(lat - 0.0003, lng - 0.0003),
-        new window.google.maps.LatLng(lat + 0.0003, lng + 0.0003)
+      // House marker
+      var houseIconUrl = "data:image/svg+xml;utf8," + encodeURIComponent(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36">' +
+        '<rect x="2" y="2" width="32" height="32" rx="8" fill="white" stroke="#1a6ef0" stroke-width="2"/>' +
+        '<text x="18" y="25" text-anchor="middle" font-size="20">&#127968;</text>' +
+        '</svg>'
       );
-      new window.google.maps.Rectangle({
-        bounds: propBounds, map: window._addrConfirmMap,
-        strokeColor: "#1a6ef0", strokeOpacity: 0.9, strokeWeight: 2,
-        fillColor: "#1a6ef0", fillOpacity: 0.06, zIndex: 1
-      });
-
-      // Tolerance circle
-      new window.google.maps.Circle({
-        center: { lat: lat, lng: lng }, radius: 30,
-        map: window._addrConfirmMap,
-        strokeColor: "#22c55e", strokeOpacity: 0.9, strokeWeight: 2,
-        fillColor: "#22c55e", fillOpacity: 0.1, zIndex: 2
-      });
-
-      // House icon (fixed at geocoded center)
-      var houseElC = document.createElement("div");
-      houseElC.innerHTML = '<div style="background:#fff;border:2px solid #1a6ef0;border-radius:8px;padding:4px 6px;font-size:20px;line-height:1;box-shadow:0 2px 8px rgba(0,0,0,.3)">&#127968;</div>';
-      new window.google.maps.marker.AdvancedMarkerElement({
+      new window.google.maps.Marker({
         position: new window.google.maps.LatLng(window._addrDropLat, window._addrDropLng),
-        map: window._addrConfirmMap, content: houseElC, zIndex: 10
+        map: window._addrConfirmMap,
+        icon: { url: houseIconUrl, scaledSize: new window.google.maps.Size(36,36), anchor: new window.google.maps.Point(18,36) },
+        zIndex: 10
       });
 
       // Drop pin
-      var pinElC = document.createElement("div");
-      pinElC.innerHTML = '<div style="width:22px;height:22px;background:#1a6ef0;border:3px solid #fff;border-radius:50%;box-shadow:0 3px 12px rgba(26,110,240,.6)"></div>';
-      new window.google.maps.marker.AdvancedMarkerElement({
-        position: latLng, map: window._addrConfirmMap, content: pinElC, zIndex: 20
+      new window.google.maps.Marker({
+        position: latLng,
+        map: window._addrConfirmMap,
+        icon: {
+          path: window.google.maps.SymbolPath.CIRCLE,
+          scale: 10,
+          fillColor: "#1a6ef0", fillOpacity: 1,
+          strokeColor: "#fff", strokeWeight: 3
+        },
+        zIndex: 20
       });
     }, 80);
+  };
+
+  window.addrStartOver = function() {
+    // Full reset back to stage 1
+    el("addr-stage-3").style.display = "none";
+    el("addr-stage-1").style.display = "block";
+    window.addrSetStep(1);
+    var steps = el("addr-steps"); if (steps) steps.style.display = "";
+    var backBtn = el("addr-back-btn"); if (backBtn) backBtn.style.display = "";
+    var saveBtn = el("addr-save-btn"); if (saveBtn) { saveBtn.textContent = "Save Address"; saveBtn.onclick = window.saveAddress; }
+    var sub = el("addr-panel-sub"); if (sub) sub.textContent = "Set where the drone delivers your tools";
+    // Clear maps
+    window._addrConfirmMap = null;
+    var cmEl = el("addr-confirm-map"); if (cmEl) cmEl.innerHTML = "";
+    window._addrGMap = null;
+    var dmEl = el("addr-droppin-map"); if (dmEl) dmEl.innerHTML = "";
+    window._addrDropMarkerG = null; window._addrHouseMarker = null;
+    window._addrDropLat = null; window._addrDropLng = null;
+    window._addrViewport = null; window._addrPropertyBox = null; window._addrToleranceCircle = null;
   };
 
   window.addrBack2 = function() {
     el("addr-stage-3").style.display = "none";
     el("addr-stage-2").style.display = "block";
     window.addrSetStep(2);
-    // Destroy confirm map so it reinits fresh next time
-    if (window._addrConfirmMap) { window._addrConfirmMap.remove(); window._addrConfirmMap = null; }
-    setTimeout(function(){ if(window._addrDropMap) window._addrDropMap.invalidateSize(); }, 80);
+    // Google Maps has no .remove() — just null the reference so it reinits
+    window._addrConfirmMap = null;
+    var cmEl = el("addr-confirm-map");
+    if (cmEl) cmEl.innerHTML = "";
+    if (window._addrGMap) window._addrGMap.invalidateSize && window._addrGMap.invalidateSize();
   };
 
 
@@ -3057,81 +3071,36 @@ function startApp() {
 
     var latLng = new window.google.maps.LatLng(lat, lng);
 
-    // Tolerance: ~30m around geocoded point — drone safe landing zone
-    var TOLERANCE_M = 30;
-    var degPerMeter = 1 / 111320;
-    var tolDeg = TOLERANCE_M * degPerMeter;
-
-    function makeBounds(cLat, cLng, tolD) {
-      return new window.google.maps.LatLngBounds(
-        new window.google.maps.LatLng(cLat - tolD, cLng - tolD / Math.cos(cLat * Math.PI / 180)),
-        new window.google.maps.LatLng(cLat + tolD, cLng + tolD / Math.cos(cLat * Math.PI / 180))
-      );
-    }
-
-    function isInsideTolerance(latv, lngv) {
-      var dlat = (latv - lat) * 111320;
-      var dlng = (lngv - lng) * 111320 * Math.cos(lat * Math.PI / 180);
-      return Math.sqrt(dlat * dlat + dlng * dlng) <= TOLERANCE_M + 5; // +5m grace
-    }
+    // House icon
+    var houseIconUrl = "data:image/svg+xml;utf8," + encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36">' +
+      '<rect x="2" y="2" width="32" height="32" rx="8" fill="white" stroke="#1a6ef0" stroke-width="2"/>' +
+      '<text x="18" y="25" text-anchor="middle" font-size="20">&#127968;</text>' +
+      '</svg>'
+    );
 
     function updateCoords(latv, lngv) {
       window._addrDropLat = latv;
       window._addrDropLng = lngv;
       var c = el("addr-droppin-coords");
-      if (!c) return;
-      var inside = isInsideTolerance(latv, lngv);
-      c.textContent = latv.toFixed(6) + ", " + lngv.toFixed(6) + (inside ? "" : "  — move pin closer to your property");
-      c.style.color = inside ? "var(--muted)" : "#ef4444";
-    }
-
-    function drawOverlays(map) {
-      // Remove old overlays
-      if (window._addrPropertyBox) { window._addrPropertyBox.setMap(null); window._addrPropertyBox = null; }
-      if (window._addrToleranceCircle) { window._addrToleranceCircle.setMap(null); window._addrToleranceCircle = null; }
-
-      // Property boundary box (viewport bounds or fallback)
-      var propBounds = viewport || makeBounds(lat, lng, tolDeg * 2.5);
-      window._addrPropertyBox = new window.google.maps.Rectangle({
-        bounds: propBounds,
-        map: map,
-        strokeColor: "#1a6ef0",
-        strokeOpacity: 0.9,
-        strokeWeight: 2,
-        fillColor: "#1a6ef0",
-        fillOpacity: 0.06,
-        zIndex: 1
-      });
-
-      // Tolerance circle — where the drone can actually land
-      window._addrToleranceCircle = new window.google.maps.Circle({
-        center: { lat: lat, lng: lng },
-        radius: TOLERANCE_M,
-        map: map,
-        strokeColor: "#22c55e",
-        strokeOpacity: 0.9,
-        strokeWeight: 2,
-        fillColor: "#22c55e",
-        fillOpacity: 0.1,
-        zIndex: 2
-      });
+      if (c) c.textContent = latv.toFixed(6) + ", " + lngv.toFixed(6);
     }
 
     if (window._addrGMap) {
+      // Map already exists — re-center
       window._addrGMap.setCenter(latLng);
       if (viewport) window._addrGMap.fitBounds(viewport);
-      if (window._addrHouseMarker) window._addrHouseMarker.position = latLng;
-      if (window._addrDropMarkerG) window._addrDropMarkerG.position = latLng;
-      drawOverlays(window._addrGMap);
+      if (window._addrHouseMarker) window._addrHouseMarker.setPosition(latLng);
+      if (window._addrDropMarkerG) window._addrDropMarkerG.setPosition(latLng);
       updateCoords(lat, lng);
       return;
     }
 
+    // Create Google Map
     window._addrGMap = new window.google.maps.Map(mapEl, {
       center: latLng,
       zoom: 20,
       mapTypeId: "satellite",
-      mapId: "addr_drop_map",
       tilt: 0,
       disableDefaultUI: false,
       zoomControl: true,
@@ -3142,40 +3111,44 @@ function startApp() {
 
     if (viewport) window._addrGMap.fitBounds(viewport);
 
-    drawOverlays(window._addrGMap);
-
-    // House icon — fixed at geocoded center, never moves
-    var houseEl = document.createElement("div");
-    houseEl.innerHTML = '<div style="background:#fff;border:2px solid #1a6ef0;border-radius:8px;padding:4px 6px;font-size:20px;line-height:1;box-shadow:0 2px 8px rgba(0,0,0,.3);pointer-events:none">&#127968;</div>';
-    window._addrHouseMarker = new window.google.maps.marker.AdvancedMarkerElement({
+    // House marker at geocoded centre
+    window._addrHouseMarker = new window.google.maps.Marker({
       position: latLng,
       map: window._addrGMap,
-      content: houseEl,
+      icon: { url: houseIconUrl, scaledSize: new window.google.maps.Size(36, 36), anchor: new window.google.maps.Point(18, 36) },
       title: "Your house",
       zIndex: 10
     });
 
     // Draggable drop pin
-    var pinEl = document.createElement("div");
-    pinEl.innerHTML = '<div style="width:22px;height:22px;background:#1a6ef0;border:3px solid #fff;border-radius:50%;box-shadow:0 3px 12px rgba(26,110,240,.6);cursor:grab"></div>';
-    window._addrDropMarkerG = new window.google.maps.marker.AdvancedMarkerElement({
+    var dropIcon = {
+      path: window.google.maps.SymbolPath.CIRCLE,
+      scale: 10,
+      fillColor: "#1a6ef0",
+      fillOpacity: 1,
+      strokeColor: "#ffffff",
+      strokeWeight: 3
+    };
+    window._addrDropMarkerG = new window.google.maps.Marker({
       position: latLng,
       map: window._addrGMap,
-      content: pinEl,
+      draggable: true,
+      icon: dropIcon,
       title: "Drop location",
-      gmpDraggable: true,
       zIndex: 20
     });
     updateCoords(lat, lng);
 
-    window._addrDropMarkerG.addListener("drag", function(e) {
-      updateCoords(e.latLng.lat(), e.latLng.lng());
+    window._addrDropMarkerG.addListener("drag", function() {
+      var p = window._addrDropMarkerG.getPosition();
+      updateCoords(p.lat(), p.lng());
     });
-    window._addrDropMarkerG.addListener("dragend", function(e) {
-      updateCoords(e.latLng.lat(), e.latLng.lng());
+    window._addrDropMarkerG.addListener("dragend", function() {
+      var p = window._addrDropMarkerG.getPosition();
+      updateCoords(p.lat(), p.lng());
     });
     window._addrGMap.addListener("click", function(e) {
-      window._addrDropMarkerG.position = e.latLng;
+      window._addrDropMarkerG.setPosition(e.latLng);
       updateCoords(e.latLng.lat(), e.latLng.lng());
     });
   };

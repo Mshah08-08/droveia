@@ -1321,8 +1321,8 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
           <div id="addr-confirm-map" style="width:100%;height:220px;border-radius:12px;overflow:hidden;border:1px solid var(--border);margin-top:16px"></div>
           <div id="addr-summary" style="margin-top:12px"></div>
           <div style="display:flex;gap:10px;margin-top:14px">
-            <button id="addr-back-btn" class="form-save" style="background:var(--bg3);color:var(--text);border:1px solid var(--border)" onclick="addrBack2()">Back</button>
-            <button id="addr-save-btn" class="form-save" style="flex:1" onclick="saveAddress()">Save Address</button>
+            <button id="addr-back-btn" class="form-save" style="background:var(--bg3);color:var(--text);border:1px solid var(--border)">Back</button>
+            <button id="addr-save-btn" class="form-save" style="flex:1">Save Address</button>
           </div>
         </div>
 
@@ -2120,16 +2120,35 @@ function renderAccount() {
   setText("stat-hours",   (userProfile.totalHours||0)+"h");
   setVal("addr-building", userProfile.building||"");
   setVal("addr-notes",    userProfile.dropNotes||"");
-  // If address already saved, skip to confirm stage
+  // Address panel state — runs every time renderAccount is called
   if (userProfile.dropLat) {
     window._addrDropLat = userProfile.dropLat;
     window._addrDropLng = userProfile.dropLng;
-    if (userProfile.dropBboxRaw) { window._addrBbox = JSON.parse(userProfile.dropBboxRaw); }
-    setTimeout(function() {
-      el("addr-stage-1").style.display = "none";
-      el("addr-stage-3").style.display = "block";
-      if (window.addrNext2) window.addrNext2();
-    }, 200);
+    if (userProfile.dropBboxRaw) { try { window._addrBbox = JSON.parse(userProfile.dropBboxRaw); } catch(e){} }
+    el("addr-stage-1").style.display = "none";
+    el("addr-stage-2").style.display = "none";
+    el("addr-stage-3").style.display = "block";
+    // Apply saved UI state immediately — no setTimeout
+    var _steps   = el("addr-steps");    if (_steps)   _steps.style.display   = "none";
+    var _backBtn = el("addr-back-btn"); if (_backBtn) _backBtn.style.display  = "none";
+    var _saveBtn = el("addr-save-btn");
+    window._addrSavedMode = true;
+    if (_saveBtn) { _saveBtn.textContent = "Update Delivery Address"; }
+    var _sub = el("addr-panel-sub"); if (_sub) _sub.textContent = "Saved — tap Update Delivery Address to change";
+    // Init confirm map after delay (needs container visible)
+    window._addrConfirmMap = null;
+    var _cmEl = el("addr-confirm-map"); if (_cmEl) _cmEl.innerHTML = "";
+    setTimeout(function() { if (window.addrNext2) window.addrNext2(); }, 200);
+  } else {
+    el("addr-stage-1").style.display = "block";
+    el("addr-stage-2").style.display = "none";
+    el("addr-stage-3").style.display = "none";
+    var _steps2 = el("addr-steps");    if (_steps2)  _steps2.style.display   = "flex";
+    var _back2  = el("addr-back-btn"); if (_back2)   _back2.style.display    = "none";
+    var _save2  = el("addr-save-btn");
+    window._addrSavedMode = false;
+    if (_save2) { _save2.textContent = "Save Address"; }
+    var _sub2 = el("addr-panel-sub"); if (_sub2) _sub2.textContent = "Set where the drone delivers your tools";
   }
   var n = userProfile.notifications||{};
   setChk("notif-delivery", n.delivery!==false);
@@ -2195,6 +2214,18 @@ window.doGoogleSignIn   = function(){ showToast("Loading..."); };
 window.doForgotPassword = function(){ showToast("Loading..."); };
 window.doSignOut        = function(){ showToast("Loading..."); };
 window.saveAddress      = function(){ showToast("Loading..."); };
+
+// Wire addr buttons once — never use hardcoded onclick for these
+document.addEventListener("DOMContentLoaded", function() {
+  var saveBtn = el("addr-save-btn");
+  if (saveBtn) saveBtn.addEventListener("click", function() {
+    if (window._addrSavedMode) { if (window.addrStartOver) window.addrStartOver(); }
+    else { if (window.saveAddress) window.saveAddress(); }
+  });
+  var backBtn = el("addr-back-btn");
+  if (backBtn) backBtn.addEventListener("click", function() { if (window.addrBack2) window.addrBack2(); });
+});
+window._addrSavedMode = false;
 window.saveNotifications= function(){ showToast("Loading..."); };
 
 // ── Firebase app init ─────────────────────────────────────────────────────────
@@ -2858,7 +2889,7 @@ function startApp() {
       dropLng:      window._addrDropLng,
       dropBboxRaw:  window._addrBbox ? JSON.stringify(window._addrBbox) : null
     });
-    setTimeout(function() { showAddrSavedState(); }, 400);
+    setTimeout(function() { if (window.showAddrSavedState) window.showAddrSavedState(); }, 400);
   };
 
   window._addrDropLat = null;
@@ -3021,13 +3052,14 @@ function startApp() {
     }, 80);
   };
 
-  function showAddrSavedState() {
+  window.showAddrSavedState = function() {
     var steps   = el("addr-steps");    if (steps)   steps.style.display   = "none";
     var backBtn = el("addr-back-btn"); if (backBtn) backBtn.style.display  = "none";
     var saveBtn = el("addr-save-btn");
-    if (saveBtn) { saveBtn.textContent = "Update Delivery Address"; saveBtn.onclick = window.addrStartOver; }
+    window._addrSavedMode = true;
+    if (saveBtn) { saveBtn.textContent = "Update Delivery Address"; }
     var sub = el("addr-panel-sub"); if (sub) sub.textContent = "Saved — tap Update Delivery Address to change";
-  }
+  };
 
   window.addrStartOver = function() {
     // Full reset back to stage 1
@@ -3036,7 +3068,8 @@ function startApp() {
     window.addrSetStep(1);
     var steps = el("addr-steps"); if (steps) steps.style.display = "flex";
     var backBtn = el("addr-back-btn"); if (backBtn) backBtn.style.display = "none"; // back only shows mid-flow
-    var saveBtn = el("addr-save-btn"); if (saveBtn) { saveBtn.textContent = "Save Address"; saveBtn.onclick = window.saveAddress; }
+    window._addrSavedMode = false;
+    var saveBtn = el("addr-save-btn"); if (saveBtn) { saveBtn.textContent = "Save Address"; }
     var sub = el("addr-panel-sub"); if (sub) sub.textContent = "Set where the drone delivers your tools";
     // Clear maps
     window._addrConfirmMap = null;

@@ -3156,13 +3156,11 @@ function startApp() {
 
     // Draggable drop pin
     var dropIcon = {
-      path: window.google.maps.SymbolPath.CIRCLE,
-      scale: 10,
-      fillColor: "#1a6ef0",
-      fillOpacity: 1,
-      strokeColor: "#ffffff",
-      strokeWeight: 3
+      url: "1.png", // make sure this path is correct
+      scaledSize: new window.google.maps.Size(42, 42), // adjust size if needed
+      anchor: new window.google.maps.Point(21, 42) // center bottom of image
     };
+    
     window._addrDropMarkerG = new window.google.maps.Marker({
       position: latLng,
       map: window._addrGMap,

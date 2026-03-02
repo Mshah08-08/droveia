@@ -2884,6 +2884,16 @@ function startApp() {
       .catch(function() { showToast("Geocoding failed — check your connection"); });
   };
 
+  window.addrSetStep = function(n) {
+    [1,2,3].forEach(function(i) {
+      var dot = el("addr-step-dot-" + i);
+      if (!dot) return;
+      dot.classList.remove("active","done");
+      if (i < n)  dot.classList.add("done");
+      if (i === n) dot.classList.add("active");
+    });
+  }
+
   window.addrNext1 = function() {
     var addr = (el("addr-building")||{value:""}).value.trim();
     if (!addr) { showToast("Enter your street address"); return; }
@@ -2909,7 +2919,7 @@ function startApp() {
         window._addrDropLat = lat;
         window._addrDropLng = lng;
         showToast("Found — pin your exact drop spot");
-        setTimeout(function() { initAddrDropPin(lat, lng, bbox); }, 80);
+        setTimeout(function() { window.initAddrDropPin(lat, lng, bbox); }, 80);
       })
       .catch(function() {
         showToast("Could not find address — check your connection");

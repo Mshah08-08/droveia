@@ -913,7 +913,7 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
         <div class="form-group"><label class="form-label">UNIVERSITY EMAIL</label><input id="su-email" class="form-input" type="email" placeholder="you@university.edu"/></div>
         <div class="auth-fields-row">
           <div class="form-group"><label class="form-label">BUILDING</label><input id="su-building" class="form-input" type="text" placeholder="Buchanan Hall"/></div>
-          <div class="form-group"><label class="form-label">ROOM #</label><input id="su-room" class="form-input" type="text" placeholder="412"/></div>
+
         </div>
         <div class="auth-fields-row">
           <div class="form-group"><label class="form-label">PASSWORD</label><input id="su-pass" class="form-input" type="password" placeholder="Min. 8 characters"/></div>
@@ -1842,7 +1842,7 @@ function renderCart() {
   if (layout) layout.classList.add("has-items");
   var total = 0, saved = 0;
   for (var i=0;i<cart.length;i++) { var ic=calcCost(cart[i],cart[i].hours); total+=ic; saved+=(cart[i].retail-ic); }
-  var addr = userProfile ? (userProfile.building||"—")+", Room "+(userProfile.room||"—") : "Sign in to set delivery address";
+  var addr = userProfile ? (userProfile.building||"—") : "Sign in to set delivery address";
   items.innerHTML =
     '<div class="address-pill">'+
       '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>'+
@@ -2656,7 +2656,7 @@ async function adminLoadOrders() {
       var items = (o.items||[]).map(function(i){
         return '<span class="admin-order-item">' + i.name + '<span style="color:var(--muted)"> · ' + i.hours + 'h</span></span>';
       }).join("");
-      var addr = o.address ? o.address.building + (o.address.room ? ', Rm ' + o.address.room : '') : "—";
+      var addr = o.address ? (o.address.building || "—") : "—";
       var dropNotes = o.address && o.address.dropNotes ? o.address.dropNotes : "";
 
       // Action buttons
@@ -2830,7 +2830,7 @@ function startApp() {
         var parts = (currentUser.displayName||"").split(" ");
         userProfile = {
           firstName:parts[0]||"", lastName:parts.slice(1).join(" ")||"",
-          email:currentUser.email||"", building:"", room:"", dropNotes:"",
+          email:currentUser.email||"", building:"", dropNotes:"",
           totalRentals:0, totalSaved:0, totalHours:0,
           notifications:{delivery:true,eta:true,returns:true,promo:false},
           createdAt:fb.serverTimestamp()
@@ -2883,7 +2883,7 @@ function startApp() {
           return {id:i.id,name:i.name,cat:i.cat,pph:i.pph,hours:i.hours,retail:i.retail};
         }),
         total:total, saved:saved, stripePaymentId:stripePaymentId||null,
-        address:{building:userProfile&&userProfile.building||"—",room:userProfile&&userProfile.room||"—",dropLat:dropLocation?dropLocation[0]:null,dropLng:dropLocation?dropLocation[1]:null},
+        address:{building:userProfile&&userProfile.building||"—",dropLat:dropLocation?dropLocation[0]:null,dropLng:dropLocation?dropLocation[1]:null},
         createdAt:fb.serverTimestamp(), deliveredAt:null
       });
       await fb.updateDoc(pRef(currentUser.uid),{
@@ -2907,7 +2907,7 @@ function startApp() {
           return {id:i.id,name:i.name,cat:i.cat,pph:i.pph,hours:i.hours,retail:i.retail};
         }),
         total:total, saved:saved,
-        address:{building:userProfile&&userProfile.building||"—",room:userProfile&&userProfile.room||"—",dropLat:dropLocation?dropLocation[0]:null,dropLng:dropLocation?dropLocation[1]:null},
+        address:{building:userProfile&&userProfile.building||"—",dropLat:dropLocation?dropLocation[0]:null,dropLng:dropLocation?dropLocation[1]:null},
         userId: currentUser.uid,
         userEmail: currentUser.email,
         createdAt: fb.serverTimestamp()
@@ -2937,7 +2937,6 @@ function startApp() {
     var last  = (el("su-last")||{value:""}).value.trim()||"";
     var email = (el("su-email")||{value:""}).value.trim();
     var bldg  = (el("su-building")||{value:""}).value.trim()||"";
-    var room  = (el("su-room")||{value:""}).value.trim()||"";
     var pass  = (el("su-pass")||{value:""}).value;
     var phone = (el("su-phone")||{value:""}).value.trim()||"";
     if (!first||!email||!pass){ showToast("Please fill in required fields"); return; }
@@ -2949,7 +2948,7 @@ function startApp() {
       await fb.updateProfile(cred.user, {displayName:(first+" "+last).trim()});
       await fb.setDoc(pRef(cred.user.uid),{
         firstName:first,lastName:last,email:email,phone:phone,
-        building:bldg,room:room,dropNotes:"",
+        building:bldg,dropNotes:"",
         totalRentals:0,totalSaved:0,totalHours:0,
         notifications:{delivery:true,eta:true,returns:true,promo:false},
         createdAt:fb.serverTimestamp()

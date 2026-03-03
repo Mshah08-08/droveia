@@ -1355,20 +1355,7 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
         <div class="toggle-row"><div class="toggle-info"><h4>Deals & promotions</h4><p>New tools and discount alerts</p></div><label class="toggle"><input id="notif-promo" type="checkbox" onchange="saveNotifications()"/><span class="slider"></span></label></div>
       </div>
 
-      
-        <div style="background:linear-gradient(135deg,var(--blue-dim),rgba(26,110,240,.04));border:1px solid var(--blue-mid);border-radius:14px;padding:24px;text-align:center;margin-bottom:22px">
-          
-          <div style="font-size:18px;font-weight:700;margin-bottom:6px">Give $5, Get $5</div>
-          <div style="font-size:14px;color:var(--muted);line-height:1.7;font-weight:300">Share your link. When a friend completes their first rental, you both get $5 credit automatically.</div>
-        </div>
-        <div style="font-size:11px;font-weight:600;color:var(--dim);letter-spacing:.05em;margin-bottom:10px">YOUR REFERRAL LINK</div>
-        <div class="refer-link-row">
-          <input class="refer-link-input" id="refer-link-val" value="droveia.com/r/..." readonly/>
-          <button class="copy-btn" id="copy-btn" onclick="copyRef()">Copy link</button>
-        </div>
-        <div style="font-size:11px;font-weight:600;color:var(--dim);letter-spacing:.05em;margin-bottom:10px">YOUR BALANCE</div>
-        <div class="refer-credit"><span style="font-size:14px">Available credit</span><span style="font-size:18px;font-weight:800;color:var(--green)">$10.00</span></div>
-      </div>
+
 
       <!-- Support -->
       <div class="account-panel hidden" id="panel-support">
@@ -2260,43 +2247,62 @@ window.submitStripePayment = async function() {
   if (!_stripe || !_stripeCard || !_stripeOrderItems) return;
   var btn = el("stripe-pay-btn");
   if (btn) { btn.disabled=true; btn.textContent="Processing..."; }
-  var err = el("stripe-error");
-  if (err) { err.style.display="none"; }
+  var errEl = el("stripe-error");
+  if (errEl) { errEl.style.display="none"; }
+
+  // Snapshot items/drop NOW before anything clears them
+  var items    = _stripeOrderItems.slice();
+  var drop     = _stripeDropLocation ? _stripeDropLocation.slice() : null;
 
   try {
-    var total = _stripeOrderItems.reduce(function(s,i){return s+calcCost(i,i.hours);},0);
+    var total = items.reduce(function(s,i){return s+calcCost(i,i.hours);},0);
     var amountCents = Math.round(total * 100);
 
-    // Create PaymentIntent via Stripe API directly (test mode — client-side secret key)
+    // Step 1: create a PaymentMethod from the card element
+    var pmResult = await _stripe.createPaymentMethod({ type: "card", card: _stripeCard });
+    if (pmResult.error) throw new Error(pmResult.error.message);
+    var pmId = pmResult.paymentMethod.id;
+
+    // Step 2: create PaymentIntent with confirm=true + payment_method in one call
+    var body = [
+      "amount=" + amountCents,
+      "currency=usd",
+      "payment_method=" + pmId,
+      "confirm=true",
+      "return_url=https://droveia.com",
+      "payment_method_types[]=card"
+    ].join("&");
+
     var piRes = await fetch("https://api.stripe.com/v1/payment_intents", {
       method: "POST",
       headers: {
         "Authorization": "Bearer sk_test_51T5Wzl0vTQKecFQ6WAWE9VoFlcp3C4vG3fW23CZEzhB2xGSSiOK0Xz1MKtzuJtQt7gzP16c6AVOfmzD5ySCPCpbZ00gAYeWkwh",
         "Content-Type": "application/x-www-form-urlencoded"
       },
-      body: "amount=" + amountCents + "&currency=usd&payment_method_types[]=card"
+      body: body
     });
     var pi = await piRes.json();
-    if (!pi.client_secret) throw new Error(pi.error ? pi.error.message : "Payment setup failed");
+    if (pi.error) throw new Error(pi.error.message);
 
-    var result = await _stripe.confirmCardPayment(pi.client_secret, {
-      payment_method: { card: _stripeCard }
-    });
-
-    if (result.error) {
-      if (err) { err.style.display="block"; err.textContent=result.error.message; }
-      if (btn) { btn.disabled=false; btn.textContent="Pay & Place Order"; }
-      return;
+    // Handle 3DS if needed
+    if (pi.status === "requires_action" || pi.status === "requires_source_action") {
+      var actionResult = await _stripe.handleCardAction(pi.client_secret);
+      if (actionResult.error) throw new Error(actionResult.error.message);
+    } else if (pi.status !== "succeeded") {
+      throw new Error("Payment status: " + pi.status);
     }
 
-    // Payment succeeded — close modal and place order
-    window.closeStripeModal();
+    // Success — close modal then place order with snapshotted items
+    el("stripe-overlay").classList.add("hidden");
+    if (_stripeCard) { _stripeCard.unmount(); _stripeCard = null; }
+    _stripeOrderItems = null; _stripeDropLocation = null;
+
     showToast("✓ Payment confirmed!");
-    placeOrder(_stripeOrderItems, _stripeDropLocation, pi.id);
+    placeOrder(items, drop, pi.id);
 
   } catch(e) {
     console.error("Stripe error:", e);
-    if (err) { err.style.display="block"; err.textContent=e.message||"Payment failed, try again"; }
+    if (errEl) { errEl.style.display="block"; errEl.textContent=e.message||"Payment failed, try again"; }
     if (btn) { btn.disabled=false; btn.textContent="Pay & Place Order"; }
   }
 };
@@ -3105,15 +3111,22 @@ function startApp() {
         gestureHandling: "none"
       });
 
-      if (vp) {
-        window._addrConfirmMap.fitBounds(vp);
-        new window.google.maps.Rectangle({
-          bounds: vp, map: window._addrConfirmMap,
-          strokeColor: "#1a6ef0", strokeOpacity: 1, strokeWeight: 2.5,
-          fillColor: "#1a6ef0", fillOpacity: 0.10,
-          zIndex: 1, clickable: false
-        });
-      }
+      // Tight 40m box around the geocoded house centre
+      var cLat = window._addrDropLat, cLng = window._addrDropLng;
+      var dLat2 = 40 / 111320;
+      var dLng2 = 40 / (111320 * Math.cos(cLat * Math.PI / 180));
+      var tightBounds = new window.google.maps.LatLngBounds(
+        new window.google.maps.LatLng(cLat - dLat2, cLng - dLng2),
+        new window.google.maps.LatLng(cLat + dLat2, cLng + dLng2)
+      );
+      window._addrConfirmMap.setCenter(new window.google.maps.LatLng(cLat, cLng));
+      window._addrConfirmMap.setZoom(20);
+      new window.google.maps.Rectangle({
+        bounds: tightBounds, map: window._addrConfirmMap,
+        strokeColor: "#1a6ef0", strokeOpacity: 1, strokeWeight: 2.5,
+        fillColor: "#1a6ef0", fillOpacity: 0.12,
+        zIndex: 1, clickable: false
+      });
 
       // House icon
       var houseElC = document.createElement("div");
@@ -3199,17 +3212,24 @@ function startApp() {
       if (c) { c.textContent = latv.toFixed(6) + ", " + lngv.toFixed(6); c.style.color = "var(--muted)"; }
     }
 
-    function drawPropertyBox(map, vp) {
+    function drawPropertyBox(map) {
       if (window._addrPropertyBox) { window._addrPropertyBox.setMap(null); window._addrPropertyBox = null; }
-      if (!vp) return;
+      // 40m tight box around the geocoded house centre
+      var R = 40;
+      var dLat = R / 111320;
+      var dLng = R / (111320 * Math.cos(lat * Math.PI / 180));
+      var bounds = new window.google.maps.LatLngBounds(
+        new window.google.maps.LatLng(lat - dLat, lng - dLng),
+        new window.google.maps.LatLng(lat + dLat, lng + dLng)
+      );
       window._addrPropertyBox = new window.google.maps.Rectangle({
-        bounds: vp,
+        bounds: bounds,
         map: map,
         strokeColor: "#1a6ef0",
         strokeOpacity: 1,
         strokeWeight: 2.5,
         fillColor: "#1a6ef0",
-        fillOpacity: 0.10,
+        fillOpacity: 0.12,
         zIndex: 1,
         clickable: false
       });
@@ -3218,7 +3238,9 @@ function startApp() {
     // If map already exists, just update
     if (window._addrGMap) {
       window._addrGMap.setCenter(latLng);
-      if (viewport) { window._addrGMap.fitBounds(viewport); drawPropertyBox(window._addrGMap, viewport); }
+      window._addrGMap.setCenter(new window.google.maps.LatLng(lat, lng));
+      window._addrGMap.setZoom(20);
+      drawPropertyBox(window._addrGMap);
       if (window._addrHouseMarker) window._addrHouseMarker.position = latLng;
       if (window._addrDropMarkerG) window._addrDropMarkerG.position = latLng;
       updateCoords(lat, lng);
@@ -3238,10 +3260,9 @@ function startApp() {
       fullscreenControl: false
     });
 
-    if (viewport) {
-      window._addrGMap.fitBounds(viewport);
-      drawPropertyBox(window._addrGMap, viewport);
-    }
+    window._addrGMap.setCenter(new window.google.maps.LatLng(lat, lng));
+    window._addrGMap.setZoom(20);
+    drawPropertyBox(window._addrGMap);
 
     // House icon — fixed at geocoded centre, never moves
     var houseEl = document.createElement("div");

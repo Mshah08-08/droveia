@@ -1745,18 +1745,17 @@ window.openModal = openModal;
 // ── Pricing tiers ─────────────────────────────────────────────────────────────
 function calcCost(t, hours) {
   if (!t || !t.retail) return 0;
-  // If pph is manually set (non-zero), use it directly with tier discounts
-  // If pph is 0 or missing, auto-derive from retail (48h = 70% of retail)
+  // base: pph if manually set, otherwise auto-derive so 48h = 50% of retail
   var base = (parseFloat(t.pph) > 0)
     ? parseFloat(t.pph)
-    : (t.retail * 0.70) / 48;
+    : (t.retail * 0.50) / 48;
   var multiplier;
-  if      (hours >= 48) multiplier = 1.00;
-  else if (hours >= 24) multiplier = 1.20;
-  else if (hours >= 12) multiplier = 1.50;
-  else if (hours >= 8)  multiplier = 1.80;
-  else if (hours >= 4)  multiplier = 2.20;
-  else                  multiplier = 2.80;
+  if      (hours >= 48) multiplier = 1.00;  // 50% of retail
+  else if (hours >= 24) multiplier = 2.20;  // 55% of retail
+  else if (hours >= 12) multiplier = 3.20;  // 40% of retail
+  else if (hours >= 8)  multiplier = 3.60;  // 30% of retail
+  else if (hours >= 4)  multiplier = 4.80;  // 20% of retail
+  else                  multiplier = 11.52; // 12% of retail
   return parseFloat((base * multiplier * hours).toFixed(2));
 }
 function renderModal() {

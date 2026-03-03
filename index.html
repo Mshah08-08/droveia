@@ -102,9 +102,14 @@
 [data-theme="dark"] .modal-overlay {
   background:rgba(0,0,0,.7) !important;
 }
-[data-theme="dark"] .droppin-box {
+[data-theme="dark"] .droppin-box,
+[data-theme="dark"] .droppin-header,
+[data-theme="dark"] .droppin-footer,
+[data-theme="dark"] #order-confirm-body {
   background:linear-gradient(145deg,rgba(20,19,30,.98),rgba(14,13,24,.98)) !important;
-  border-color:var(--border2) !important;
+  border-color:rgba(255,255,255,0.08) !important;
+}
+[data-theme="dark"] .droppin-box {
   box-shadow:0 40px 100px rgba(0,0,0,.6) !important;
 }
 [data-theme="dark"] .auth-tabs {
@@ -464,12 +469,12 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:var(--nav-h);backgro
 /* ── Drop-pin modal ──────────────────────────────────────────────────────── */
 .droppin-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);z-index:9000;display:flex;align-items:center;justify-content:center;padding:16px}
 .droppin-overlay.hidden{display:none}
-.droppin-box{background:var(--surface);border:1px solid var(--border);border-radius:20px;width:100%;max-width:560px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.3)}
-.droppin-header{padding:18px 20px 14px;border-bottom:1px solid var(--border)}
+.droppin-box{background:#ffffff;border:1px solid #e2e8f0;border-radius:20px;width:100%;max-width:560px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.15)}
+.droppin-header{padding:18px 20px 14px;border-bottom:1px solid #e2e8f0;background:#ffffff}
 .droppin-title{font-size:16px;font-weight:800;letter-spacing:-.02em;margin-bottom:3px}
 .droppin-sub{font-size:12px;color:var(--muted)}
 #droppin-map{width:100%;height:320px;cursor:crosshair}
-.droppin-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px}
+.droppin-footer{padding:14px 20px;border-top:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;gap:12px;background:#ffffff}
 .droppin-hint{font-size:12px;color:var(--muted);flex:1;line-height:1.5}
 .droppin-confirm{background:var(--blue);color:#fff;border:none;border-radius:10px;padding:10px 20px;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font);white-space:nowrap}
 .droppin-confirm:hover{background:var(--blue-hover)}
@@ -3786,7 +3791,7 @@ if (_savedPage && _savedPage !== "admin") {
       <div class="droppin-title">Confirm Order</div>
       <div class="droppin-sub">Review your delivery details before placing.</div>
     </div>
-    <div id="order-confirm-body" style="padding:16px 20px"></div>
+    <div id="order-confirm-body" style="padding:16px 20px;background:#ffffff"></div>
     <div class="droppin-footer">
       <button class="droppin-cancel" onclick="closeOrderConfirm()">Cancel</button>
       <button class="droppin-confirm" onclick="submitOrderConfirm()">Place Order</button>

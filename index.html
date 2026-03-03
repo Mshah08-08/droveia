@@ -1828,7 +1828,7 @@ function renderCart() {
   }
   var cartLayout=el('cart-items-container')&&el('cart-items-container').closest('.cart-layout');
   if (!cart.length) {
-    var cl=el('cart-items-container');if(cl&&cl.closest('.cart-layout')){cl.closest('.cart-layout').classList.add('empty');}
+    var cl=el('cart-items-container');if(cl&&cl.closest('.cart-layout')){cl.closest('.cart-layout').classList.remove('has-items');cl.closest('.cart-layout').classList.add('empty');}
     items.innerHTML =
       '<div class="cart-empty">'+
         '<div class="cart-empty-icon">'+catIcon("All","#1a6ef0")+'</div>'+
@@ -1836,10 +1836,11 @@ function renderCart() {
         '<p>Browse our catalog and add tools you need.<br/>Drone-delivered straight to your dorm.</p>'+
         '<button class="btn-primary" onclick="showPage(\'browse\')">Browse Tools</button>'+
       '</div>';
-    if (sumEl) sumEl.innerHTML = "";
+    if (sumEl) { sumEl.innerHTML = ""; sumEl.style.display = "none"; }
     return;
   }
-  if (layout) layout.classList.add("has-items");
+  if (layout) { layout.classList.remove('empty'); layout.classList.add("has-items"); }
+  if (sumEl) sumEl.style.display = "";
   var total = 0, saved = 0;
   for (var i=0;i<cart.length;i++) { var ic=calcCost(cart[i],cart[i].hours); total+=ic; saved+=(cart[i].retail-ic); }
   var addr = userProfile ? (userProfile.building||"—") : "Sign in to set delivery address";

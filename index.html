@@ -835,6 +835,7 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
 </style>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDcuU4-XXzzEU8O84rs3W7cWgVStNicBTo&callback=Function.prototype" async defer></script>
+<script src="https://js.stripe.com/v3/"></script>
 </head>
 <body>
 
@@ -1246,10 +1247,7 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
           <div class="sidebar-nav-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg></div>
           Notifications
         </div>
-        <div class="sidebar-nav-item" onclick="showPanel('refer')">
-          <div class="sidebar-nav-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div>
-          Refer a Friend
-        </div>
+
         <div class="sidebar-nav-item" onclick="showPanel('support')">
           <div class="sidebar-nav-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
           Help & Support
@@ -1357,10 +1355,7 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
         <div class="toggle-row"><div class="toggle-info"><h4>Deals & promotions</h4><p>New tools and discount alerts</p></div><label class="toggle"><input id="notif-promo" type="checkbox" onchange="saveNotifications()"/><span class="slider"></span></label></div>
       </div>
 
-      <!-- Refer -->
-      <div class="account-panel hidden" id="panel-refer">
-        <div class="panel-title">Refer a Friend</div>
-        <div class="panel-sub">Give $5, get $5 when they complete their first rental</div>
+      
         <div style="background:linear-gradient(135deg,var(--blue-dim),rgba(26,110,240,.04));border:1px solid var(--blue-mid);border-radius:14px;padding:24px;text-align:center;margin-bottom:22px">
           
           <div style="font-size:18px;font-weight:700;margin-bottom:6px">Give $5, Get $5</div>
@@ -1953,8 +1948,9 @@ window.submitOrderConfirm = function() {
   el("order-confirm-overlay").classList.add("hidden");
   if (window._confirmCartItems) {
     var drop = userProfile.dropLat ? [userProfile.dropLat, userProfile.dropLng] : null;
-    placeOrder(window._confirmCartItems, drop);
+    var items = window._confirmCartItems;
     window._confirmCartItems = null;
+    window.openStripeModal(items, drop);
   }
 };
 
@@ -2214,6 +2210,97 @@ window.doGoogleSignIn   = function(){ showToast("Loading..."); };
 window.doForgotPassword = function(){ showToast("Loading..."); };
 window.doSignOut        = function(){ showToast("Loading..."); };
 window.saveAddress      = function(){ showToast("Loading..."); };
+
+// ── Stripe ────────────────────────────────────────────────────────────────────
+var _stripe = null;
+var _stripeCard = null;
+var _stripeOrderItems = null;
+var _stripeDropLocation = null;
+
+function initStripe() {
+  if (_stripe || !window.Stripe) return;
+  _stripe = window.Stripe('pk_test_51T5Wzl0vTQKecFQ6kZfuryNY5cvtwlBR6HUPHzxZ8DObvoky0M7HJijr78EBz8WKlMTI4Op0vvXRWaxoLBAYgIok00VSGiDDUd');
+}
+
+window.openStripeModal = function(items, dropLocation) {
+  initStripe();
+  if (!_stripe) { showToast("Payment unavailable, try again"); return; }
+  _stripeOrderItems   = items;
+  _stripeDropLocation = dropLocation;
+  var total = items.reduce(function(s,i){return s+calcCost(i,i.hours);},0);
+  el("stripe-amount-label").textContent = "$" + total.toFixed(2) + " — " + items.length + " item" + (items.length!==1?"s":"");
+  el("stripe-overlay").classList.remove("hidden");
+  var btn = el("stripe-pay-btn"); if(btn) { btn.disabled=false; btn.textContent="Pay & Place Order"; }
+  var err = el("stripe-error"); if(err) { err.style.display="none"; err.textContent=""; }
+
+  // Mount card element
+  if (_stripeCard) { _stripeCard.unmount(); _stripeCard = null; }
+  var elements = _stripe.elements();
+  _stripeCard = elements.create("card", {
+    style: {
+      base: { fontSize:"15px", color:"var(--text,#1a1a1a)", fontFamily:"system-ui,sans-serif",
+              "::placeholder": { color:"#a0aec0" } },
+      invalid: { color:"#e53e3e" }
+    }
+  });
+  _stripeCard.mount("#stripe-card-element");
+  _stripeCard.on("change", function(e) {
+    var err = el("stripe-error");
+    if (err) { err.style.display = e.error ? "block":"none"; err.textContent = e.error?e.error.message:""; }
+  });
+};
+
+window.closeStripeModal = function() {
+  el("stripe-overlay").classList.add("hidden");
+  if (_stripeCard) { _stripeCard.unmount(); _stripeCard = null; }
+  _stripeOrderItems = null; _stripeDropLocation = null;
+};
+
+window.submitStripePayment = async function() {
+  if (!_stripe || !_stripeCard || !_stripeOrderItems) return;
+  var btn = el("stripe-pay-btn");
+  if (btn) { btn.disabled=true; btn.textContent="Processing..."; }
+  var err = el("stripe-error");
+  if (err) { err.style.display="none"; }
+
+  try {
+    var total = _stripeOrderItems.reduce(function(s,i){return s+calcCost(i,i.hours);},0);
+    var amountCents = Math.round(total * 100);
+
+    // Create PaymentIntent via Stripe API directly (test mode — client-side secret key)
+    var piRes = await fetch("https://api.stripe.com/v1/payment_intents", {
+      method: "POST",
+      headers: {
+        "Authorization": "Bearer sk_test_51T5Wzl0vTQKecFQ6WAWE9VoFlcp3C4vG3fW23CZEzhB2xGSSiOK0Xz1MKtzuJtQt7gzP16c6AVOfmzD5ySCPCpbZ00gAYeWkwh",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      body: "amount=" + amountCents + "&currency=usd&payment_method_types[]=card"
+    });
+    var pi = await piRes.json();
+    if (!pi.client_secret) throw new Error(pi.error ? pi.error.message : "Payment setup failed");
+
+    var result = await _stripe.confirmCardPayment(pi.client_secret, {
+      payment_method: { card: _stripeCard }
+    });
+
+    if (result.error) {
+      if (err) { err.style.display="block"; err.textContent=result.error.message; }
+      if (btn) { btn.disabled=false; btn.textContent="Pay & Place Order"; }
+      return;
+    }
+
+    // Payment succeeded — close modal and place order
+    window.closeStripeModal();
+    showToast("✓ Payment confirmed!");
+    placeOrder(_stripeOrderItems, _stripeDropLocation, pi.id);
+
+  } catch(e) {
+    console.error("Stripe error:", e);
+    if (err) { err.style.display="block"; err.textContent=e.message||"Payment failed, try again"; }
+    if (btn) { btn.disabled=false; btn.textContent="Pay & Place Order"; }
+  }
+};
+
 
 // Wire addr buttons once — never use hardcoded onclick for these
 document.addEventListener("DOMContentLoaded", function() {
@@ -2755,7 +2842,7 @@ function startApp() {
   }
 
   // Real placeOrder
-  placeOrder = async function(items, dropLocation) {
+  placeOrder = async function(items, dropLocation, stripePaymentId) {
     if (!currentUser) { showAuth(); return; }
     var total = parseFloat(items.reduce(function(s,i){return s+calcCost(i,i.hours);},0).toFixed(2));
     var saved = parseFloat(items.reduce(function(s,i){return s+(i.retail-calcCost(i,i.hours));},0).toFixed(2));
@@ -2766,7 +2853,7 @@ function startApp() {
         items:  items.map(function(i){
           return {id:i.id,name:i.name,cat:i.cat,pph:i.pph,hours:i.hours,retail:i.retail};
         }),
-        total:total, saved:saved,
+        total:total, saved:saved, stripePaymentId:stripePaymentId||null,
         address:{building:userProfile&&userProfile.building||"—",room:userProfile&&userProfile.room||"—",dropLat:dropLocation?dropLocation[0]:null,dropLng:dropLocation?dropLocation[1]:null},
         createdAt:fb.serverTimestamp(), deliveredAt:null
       });
@@ -2982,75 +3069,74 @@ function startApp() {
     el("addr-stage-3").style.display = "block";
     window.addrSetStep(3);
 
-    // Update panel title
-
     var addr  = (el("addr-building")||{value:""}).value.trim();
     var notes = (el("addr-notes")||{value:""}).value.trim();
 
-    // Summary card
     el("addr-summary").innerHTML =
-      '<div style="background:var(--bg3);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px">' +
+      '<div style="background:var(--bg3);border-radius:12px;padding:14px;display:grid;grid-template-columns:1fr 1fr;gap:10px">' +
         '<div>' +
           '<div style="font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px">Address</div>' +
-          '<div style="font-size:14px;font-weight:600">' + addr + '</div>' +
-          (notes ? '<div style="font-size:12px;color:var(--muted);margin-top:2px">' + notes + '</div>' : '') +
+          '<div style="font-size:13px;font-weight:600">' + addr + '</div>' +
+          (notes ? '<div style="font-size:11px;color:var(--muted);margin-top:2px">' + notes + '</div>' : '') +
         '</div>' +
         '<div>' +
-          '<div style="font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px">Drop Coordinates</div>' +
-          '<div style="font-size:13px;font-weight:600;color:var(--blue)">' + window._addrDropLat.toFixed(6) + ', ' + window._addrDropLng.toFixed(6) + '</div>' +
+          '<div style="font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px">Landing Pin</div>' +
+          '<div style="font-size:12px;font-weight:600;color:var(--blue)">' + window._addrDropLat.toFixed(5) + ', ' + window._addrDropLng.toFixed(5) + '</div>' +
         '</div>' +
       '</div>';
 
-    // Init confirm map (Google Maps, read-only)
     setTimeout(function() {
       if (!window.google || !window.google.maps) return;
       var mapEl = el("addr-confirm-map");
-      if (!mapEl) return;
-      if (window._addrConfirmMap) return;
+      if (!mapEl || window._addrConfirmMap) return;
 
       var lat = window._addrDropLat;
       var lng = window._addrDropLng;
       var latLng = new window.google.maps.LatLng(lat, lng);
+      var vp = window._addrViewport;
 
       window._addrConfirmMap = new window.google.maps.Map(mapEl, {
         center: latLng,
         zoom: 20,
         mapTypeId: "satellite",
+        mapId: "addr_confirm_map",
         tilt: 0,
         disableDefaultUI: true,
         gestureHandling: "none"
       });
 
-      if (window._addrViewport) window._addrConfirmMap.fitBounds(window._addrViewport);
+      if (vp) {
+        window._addrConfirmMap.fitBounds(vp);
+        new window.google.maps.Rectangle({
+          bounds: vp, map: window._addrConfirmMap,
+          strokeColor: "#1a6ef0", strokeOpacity: 1, strokeWeight: 2.5,
+          fillColor: "#1a6ef0", fillOpacity: 0.10,
+          zIndex: 1, clickable: false
+        });
+      }
 
-      // House marker
-      var houseIconUrl = "data:image/svg+xml;utf8," + encodeURIComponent(
-        '<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36">' +
-        '<rect x="2" y="2" width="32" height="32" rx="8" fill="white" stroke="#1a6ef0" stroke-width="2"/>' +
-        '<text x="18" y="25" text-anchor="middle" font-size="20">&#127968;</text>' +
-        '</svg>'
-      );
-      new window.google.maps.Marker({
+      // House icon
+      var houseElC = document.createElement("div");
+      houseElC.innerHTML = '<div style="background:#fff;border:2px solid #1a6ef0;border-radius:8px;padding:4px 6px;font-size:20px;line-height:1;box-shadow:0 2px 8px rgba(0,0,0,.3)">&#127968;</div>';
+      new window.google.maps.marker.AdvancedMarkerElement({
         position: new window.google.maps.LatLng(window._addrDropLat, window._addrDropLng),
-        map: window._addrConfirmMap,
-        icon: { url: houseIconUrl, scaledSize: new window.google.maps.Size(36,36), anchor: new window.google.maps.Point(18,36) },
-        zIndex: 10
+        map: window._addrConfirmMap, content: houseElC, zIndex: 10
       });
 
-      // Drop pin
-      new window.google.maps.Marker({
-        position: latLng,
-        map: window._addrConfirmMap,
-        icon: {
-          path: window.google.maps.SymbolPath.CIRCLE,
-          scale: 10,
-          fillColor: "#1a6ef0", fillOpacity: 1,
-          strokeColor: "#fff", strokeWeight: 3
-        },
-        zIndex: 20
+      // Red landing marker
+      var pinElC = document.createElement("div");
+      pinElC.innerHTML =
+        '<div style="display:flex;flex-direction:column;align-items:center">' +
+          '<svg width="28" height="36" viewBox="0 0 28 36" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+            '<path d="M14 0C6.27 0 0 6.27 0 14c0 9.33 14 22 14 22S28 23.33 28 14C28 6.27 21.73 0 14 0z" fill="#e53e3e"/>' +
+            '<circle cx="14" cy="14" r="6" fill="white"/>' +
+          '</svg>' +
+        '</div>';
+      new window.google.maps.marker.AdvancedMarkerElement({
+        position: latLng, map: window._addrConfirmMap, content: pinElC, zIndex: 20
       });
     }, 80);
-  };
+  };;
 
   window.showAddrSavedState = function() {
     var steps   = el("addr-steps");    if (steps)   steps.style.display   = "none";
@@ -3102,39 +3188,48 @@ function startApp() {
     lng = lng || (userProfile && userProfile.dropLng) || -78.6821;
     window._addrDropLat = lat;
     window._addrDropLng = lng;
+    window._addrViewport = viewport || window._addrViewport;
 
     var latLng = new window.google.maps.LatLng(lat, lng);
-
-    // House icon
-    var houseIconUrl = "data:image/svg+xml;utf8," + encodeURIComponent(
-      '<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36">' +
-      '<rect x="2" y="2" width="32" height="32" rx="8" fill="white" stroke="#1a6ef0" stroke-width="2"/>' +
-      '<text x="18" y="25" text-anchor="middle" font-size="20">&#127968;</text>' +
-      '</svg>'
-    );
 
     function updateCoords(latv, lngv) {
       window._addrDropLat = latv;
       window._addrDropLng = lngv;
       var c = el("addr-droppin-coords");
-      if (c) c.textContent = latv.toFixed(6) + ", " + lngv.toFixed(6);
+      if (c) { c.textContent = latv.toFixed(6) + ", " + lngv.toFixed(6); c.style.color = "var(--muted)"; }
     }
 
+    function drawPropertyBox(map, vp) {
+      if (window._addrPropertyBox) { window._addrPropertyBox.setMap(null); window._addrPropertyBox = null; }
+      if (!vp) return;
+      window._addrPropertyBox = new window.google.maps.Rectangle({
+        bounds: vp,
+        map: map,
+        strokeColor: "#1a6ef0",
+        strokeOpacity: 1,
+        strokeWeight: 2.5,
+        fillColor: "#1a6ef0",
+        fillOpacity: 0.10,
+        zIndex: 1,
+        clickable: false
+      });
+    }
+
+    // If map already exists, just update
     if (window._addrGMap) {
-      // Map already exists — re-center
       window._addrGMap.setCenter(latLng);
-      if (viewport) window._addrGMap.fitBounds(viewport);
-      if (window._addrHouseMarker) window._addrHouseMarker.setPosition(latLng);
-      if (window._addrDropMarkerG) window._addrDropMarkerG.setPosition(latLng);
+      if (viewport) { window._addrGMap.fitBounds(viewport); drawPropertyBox(window._addrGMap, viewport); }
+      if (window._addrHouseMarker) window._addrHouseMarker.position = latLng;
+      if (window._addrDropMarkerG) window._addrDropMarkerG.position = latLng;
       updateCoords(lat, lng);
       return;
     }
 
-    // Create Google Map
     window._addrGMap = new window.google.maps.Map(mapEl, {
       center: latLng,
       zoom: 20,
       mapTypeId: "satellite",
+      mapId: "addr_drop_map",
       tilt: 0,
       disableDefaultUI: false,
       zoomControl: true,
@@ -3143,45 +3238,52 @@ function startApp() {
       fullscreenControl: false
     });
 
-    if (viewport) window._addrGMap.fitBounds(viewport);
+    if (viewport) {
+      window._addrGMap.fitBounds(viewport);
+      drawPropertyBox(window._addrGMap, viewport);
+    }
 
-    // House marker at geocoded centre
-    window._addrHouseMarker = new window.google.maps.Marker({
+    // House icon — fixed at geocoded centre, never moves
+    var houseEl = document.createElement("div");
+    houseEl.innerHTML = '<div style="background:#fff;border:2px solid #1a6ef0;border-radius:8px;padding:4px 6px;font-size:20px;line-height:1;box-shadow:0 2px 8px rgba(0,0,0,.3);pointer-events:none">&#127968;</div>';
+    window._addrHouseMarker = new window.google.maps.marker.AdvancedMarkerElement({
       position: latLng,
       map: window._addrGMap,
-      icon: { url: houseIconUrl, scaledSize: new window.google.maps.Size(36, 36), anchor: new window.google.maps.Point(18, 36) },
+      content: houseEl,
       title: "Your house",
       zIndex: 10
     });
 
-    // Draggable drop pin
-    var dropIcon = {
-      url: "https://maps.google.com/mapfiles/ms/icons/red-dot.png",
-      scaledSize: new google.maps.Size(40, 40)
-    };
-    window._addrDropMarkerG = new window.google.maps.Marker({
+    // Red landing marker (draggable)
+    var pinEl = document.createElement("div");
+    pinEl.innerHTML =
+      '<div style="display:flex;flex-direction:column;align-items:center;cursor:grab">' +
+        '<svg width="28" height="36" viewBox="0 0 28 36" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+          '<path d="M14 0C6.27 0 0 6.27 0 14c0 9.33 14 22 14 22S28 23.33 28 14C28 6.27 21.73 0 14 0z" fill="#e53e3e"/>' +
+          '<circle cx="14" cy="14" r="6" fill="white"/>' +
+        '</svg>' +
+      '</div>';
+    window._addrDropMarkerG = new window.google.maps.marker.AdvancedMarkerElement({
       position: latLng,
       map: window._addrGMap,
-      draggable: true,
-      icon: dropIcon,
-      title: "Drop location",
+      content: pinEl,
+      title: "Landing spot",
+      gmpDraggable: true,
       zIndex: 20
     });
     updateCoords(lat, lng);
 
-    window._addrDropMarkerG.addListener("drag", function() {
-      var p = window._addrDropMarkerG.getPosition();
-      updateCoords(p.lat(), p.lng());
-    });
-    window._addrDropMarkerG.addListener("dragend", function() {
-      var p = window._addrDropMarkerG.getPosition();
-      updateCoords(p.lat(), p.lng());
-    });
-    window._addrGMap.addListener("click", function(e) {
-      window._addrDropMarkerG.setPosition(e.latLng);
+    window._addrDropMarkerG.addListener("drag", function(e) {
       updateCoords(e.latLng.lat(), e.latLng.lng());
     });
-  };
+    window._addrDropMarkerG.addListener("dragend", function(e) {
+      updateCoords(e.latLng.lat(), e.latLng.lng());
+    });
+    window._addrGMap.addListener("click", function(e) {
+      window._addrDropMarkerG.position = e.latLng;
+      updateCoords(e.latLng.lat(), e.latLng.lng());
+    });
+  };;
   window.saveNotifications = function() {
     saveProfile({ notifications:{
       delivery: !!(el("notif-delivery")||{}).checked,
@@ -3641,6 +3743,32 @@ if (_savedPage && _savedPage !== "admin") {
     <div class="droppin-footer">
       <button class="droppin-cancel" onclick="closeOrderConfirm()">Cancel</button>
       <button class="droppin-confirm" onclick="submitOrderConfirm()">Place Order</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Stripe Payment Modal -->
+<div id="stripe-overlay" class="modal-overlay hidden" style="z-index:2000">
+  <div class="modal-box" style="max-width:420px;width:100%">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+      <div>
+        <div style="font-size:17px;font-weight:800">Payment</div>
+        <div id="stripe-amount-label" style="font-size:13px;color:var(--muted);margin-top:2px"></div>
+      </div>
+      <button onclick="closeStripeModal()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:20px;padding:4px">&#x2715;</button>
+    </div>
+    <!-- Stripe card element -->
+    <div id="stripe-card-wrap" style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px 12px;margin-bottom:16px">
+      <div id="stripe-card-element"></div>
+    </div>
+    <div id="stripe-error" style="color:#e53e3e;font-size:12px;margin-bottom:12px;display:none"></div>
+    <button id="stripe-pay-btn" onclick="submitStripePayment()" class="checkout-btn" style="margin:0">
+      Pay &amp; Place Order
+    </button>
+    <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:10px">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+      <span style="font-size:11px;color:var(--muted)">Secured by Stripe — test mode</span>
     </div>
   </div>
 </div>

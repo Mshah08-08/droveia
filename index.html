@@ -250,6 +250,13 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:var(--nav-h);backgro
 .nav-search-input{flex:1;background:none;border:none;padding:11px 14px;font-size:14px;color:var(--text);outline:none}
 .nav-search-input::placeholder{color:var(--muted)}
 .nav-search-btn{padding:0 14px;background:none;border:none;color:var(--muted);cursor:pointer;display:flex;align-items:center;height:100%;transition:.15s}.nav-search-drop{display:none;position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--bg2);border:1px solid var(--border);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.15);z-index:9999;overflow:hidden}.nav-search-drop.open{display:block}
+.nav-search-item{display:flex;align-items:center;gap:12px;padding:11px 14px;cursor:pointer;border-bottom:1px solid var(--border);transition:.15s}
+.nav-search-item:last-child{border-bottom:none}
+.nav-search-item:hover{background:var(--surface2)}
+.nav-search-item-icon{width:36px;height:36px;border-radius:9px;background:rgba(26,110,240,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.nav-search-item-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px}
+.nav-search-item-sub{font-size:11px;color:var(--muted)}
+.nav-search-item-price{margin-left:auto;font-size:13px;font-weight:700;color:var(--blue);white-space:nowrap;padding-left:8px}
 .nav-search-btn:hover{color:var(--blue)}
 
 .nav-links{display:flex;align-items:center;gap:4px;flex-shrink:0}
@@ -367,7 +374,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:var(--nav-h);backgro
 .tool-card:hover{border-color:rgba(26,110,240,.35);transform:translateY(-3px);box-shadow:0 12px 36px rgba(26,110,240,.12)}
 .tool-unavailable{opacity:.7;pointer-events:none}
 .tool-card:hover::after{opacity:1}
-.tool-card-img{width:100%;aspect-ratio:1.6;position:relative;border-radius:var(--radius) var(--radius) 0 0;overflow:hidden;background:linear-gradient(135deg,#dbeafe,#eff6ff)}.tool-card-price-row{display:flex;align-items:baseline;gap:2px;margin-bottom:10px}.tool-card-pph{font-size:20px;font-weight:800;color:var(--text);line-height:1}.tool-card-unit{font-size:12px;color:var(--muted);font-weight:500}.tool-card-retail{font-size:12px;color:var(--muted);text-decoration:line-through;margin-left:6px}.tool-card-eta-pill{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px}.tool-card-footer{display:flex;align-items:center;justify-content:space-between;gap:8px}.tool-card-add{padding:7px 14px;background:var(--blue);border:none;border-radius:8px;color:#fff;font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s}.tool-card-add:hover{background:#1560d8}
+.tool-card-img{width:100%;aspect-ratio:1.6;position:relative;border-radius:var(--radius) var(--radius) 0 0;overflow:hidden;background:#f8f9fb}.tool-card-price-row{display:flex;align-items:baseline;gap:2px;margin-bottom:10px}.tool-card-pph{font-size:20px;font-weight:800;color:var(--text);line-height:1}.tool-card-unit{font-size:12px;color:var(--muted);font-weight:500}.tool-card-retail{font-size:12px;color:var(--muted);text-decoration:line-through;margin-left:6px}.tool-card-eta-pill{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px}.tool-card-footer{display:flex;align-items:center;justify-content:space-between;gap:8px}.tool-card-add{padding:7px 14px;background:var(--blue);border:none;border-radius:8px;color:#fff;font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s}.tool-card-add:hover{background:#1560d8}
 .tool-card-top{display:flex;align-items:flex-start;justify-content:space-between}
 .tool-icon{width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,rgba(26,110,240,.18),rgba(26,110,240,.06));display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .save-badge{background:var(--green-dim);border:1px solid var(--green-mid);color:var(--green);font-size:11px;font-weight:700;border-radius:20px;padding:3px 9px;white-space:nowrap}
@@ -598,7 +605,7 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
 .modal-overlay{position:fixed;inset:0;background:rgba(15,20,60,.5);backdrop-filter:blur(8px);z-index:4000;display:flex;align-items:center;justify-content:center;animation:fadeIn .2s ease;padding:20px}
 .modal-overlay.hidden{display:none}
 .modal-box{background:#ffffff;border:1px solid var(--border);box-shadow:0 24px 80px rgba(0,0,0,.12);border-radius:22px;padding:28px;width:100%;max-width:420px;max-height:90vh;overflow-y:auto;position:relative;animation:scaleIn .25s ease;box-shadow:0 40px 100px rgba(0,0,0,.6)}
-.modal-close{position:absolute;top:16px;right:16px;width:30px;height:30px;border-radius:8px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s;line-height:1}
+.modal-close{position:absolute;top:16px;right:16px;width:32px;height:32px;border-radius:8px;background:#fff;border:1px solid var(--border);color:#555;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s;line-height:1;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,.12)}
 .modal-close:hover{background:var(--surface3);color:var(--text)}
 .modal-icon{width:50px;height:50px;border-radius:14px;background:linear-gradient(135deg,rgba(26,110,240,.22),rgba(26,110,240,.08));display:flex;align-items:center;justify-content:center;margin-bottom:14px}
 .modal-title{font-size:22px;font-weight:800;letter-spacing:-.02em;margin-bottom:6px}
@@ -1687,12 +1694,21 @@ window.filterByPrice = function(min, max) {
 window.navSearch = function(val) {
   var drop = el("nav-search-drop"); if(!drop) return;
   if (!val.trim()) { drop.classList.remove("open"); return; }
-  var res = TOOLS.filter(function(t){ return t.name.toLowerCase().indexOf(val.toLowerCase())>=0; }).slice(0,5);
-  if (!res.length) { drop.classList.remove("open"); return; }
+  var res = TOOLS.filter(function(t){ return t.name.toLowerCase().indexOf(val.toLowerCase())>=0; }).slice(0,6);
+  if (!res.length) {
+    drop.innerHTML = '<div style="padding:14px 16px;font-size:13px;color:var(--muted)">No tools found for "'+val+'"</div>';
+    drop.classList.add("open"); return;
+  }
+  // Navigate to browse and filter as user types
+  if (document.getElementById("page-browse") && !document.getElementById("page-browse").classList.contains("active")) {
+    showPage("browse");
+  }
+  var si = el("search-input"); if(si){ si.value = val; if(typeof renderTools==='function') renderTools(); }
+
   drop.innerHTML = res.map(function(t){
     return '<div class="nav-search-item" onclick="openModal('+t.id+');el(\'nav-search-drop\').classList.remove(\'open\')">'+
       '<div class="nav-search-item-icon">'+catIcon(t.cat,"#1a6ef0")+'</div>'+
-      '<div><div class="nav-search-item-name">'+t.name+'</div>'+
+      '<div style="flex:1;min-width:0"><div class="nav-search-item-name">'+t.name+'</div>'+
       '<div class="nav-search-item-sub">'+t.cat+' · ~'+t.eta+'</div></div>'+
       '<div class="nav-search-item-price">$'+calcCost(t,1).toFixed(2)+'/hr</div>'+
     '</div>';
@@ -1753,9 +1769,11 @@ function renderModal() {
     return '<button class="dur-preset'+(currentHours===h?' active':'')+'" onclick="setHours('+h+')">'+lbl+'<span class="dur-preset-price">$'+c2+'</span></button>';
   }).join("");
   el("modal-content").innerHTML =
-    '<div style="width:100%;height:160px;border-radius:12px;overflow:hidden;margin-bottom:16px;background:var(--blue-dim);position:relative">'+
-    '<img src="'+t.img+'" style="width:100%;height:100%;object-fit:cover;display:block"/>'+
-  '</div>'+
+    (t.img && t.img !== 'x'
+      ? '<div style="width:100%;height:180px;border-radius:12px;overflow:hidden;margin-bottom:16px;background:#f4f6fb;display:flex;align-items:center;justify-content:center">'+
+          '<img src="'+t.img+'" style="max-width:100%;max-height:100%;width:100%;height:100%;object-fit:contain;object-position:center;display:block;padding:10px"/>'+
+        '</div>'
+      : '') +
     '<div class="modal-title">'+t.name+'</div>'+
     '<div class="modal-meta">'+stars(t.rating)+
       '<span style="color:var(--dim)">·</span>'+

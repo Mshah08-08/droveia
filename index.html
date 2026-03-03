@@ -834,7 +834,7 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
 .order-act-btn.red:hover{border-color:#ef4444;color:#ef4444}
 </style>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDcuU4-XXzzEU8O84rs3W7cWgVStNicBTo&libraries=marker&v=weekly&callback=Function.prototype" async defer></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDcuU4-XXzzEU8O84rs3W7cWgVStNicBTo&callback=Function.prototype" async defer></script>
 <script src="https://js.stripe.com/v3/"></script>
 </head>
 <body>
@@ -1894,31 +1894,31 @@ window.showOrderConfirm = function(items) {
   var subtotal = items.reduce(function(s,i){return s+calcCost(i,i.hours);},0);
 
   var itemRows = items.map(function(i){
-    return '<div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;border-bottom:1px solid var(--border)">' +
-      '<span>' + i.name + ' <span style="color:var(--muted)">(' + i.hours + 'h)</span></span>' +
-      '<span style="font-weight:700">$' + calcCost(i,i.hours).toFixed(2) + '</span>' +
+    return '<div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:7px 0;border-bottom:1px solid var(--border)">' +
+      '<span style="color:var(--text);font-weight:500">' + i.name + ' <span style="color:var(--muted);font-weight:400">(' + i.hours + 'h)</span></span>' +
+      '<span style="font-weight:700;color:var(--text)">$' + calcCost(i,i.hours).toFixed(2) + '</span>' +
     '</div>';
   }).join("");
 
   el("order-confirm-body").innerHTML =
-    '<div style="margin-bottom:14px">' +
-      '<div style="font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Items</div>' +
+    '<div style="margin-bottom:16px">' +
+      '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Items</div>' +
       itemRows +
-      '<div style="display:flex;justify-content:space-between;font-size:14px;font-weight:800;padding-top:8px">' +
-        '<span>Total</span><span>$' + subtotal.toFixed(2) + '</span>' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;font-size:15px;font-weight:800;padding-top:10px;margin-top:2px">' +
+        '<span>Total</span><span style="color:var(--blue)">$' + subtotal.toFixed(2) + '</span>' +
       '</div>' +
     '</div>' +
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">' +
-      '<div style="background:var(--bg3);border-radius:10px;padding:12px">' +
-        '<div style="font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Deliver To</div>' +
-        '<div style="font-size:13px;font-weight:600">' + addr + '</div>' +
-        (userProfile.dropNotes ? '<div style="font-size:11px;color:var(--muted);margin-top:3px">' + userProfile.dropNotes + '</div>' : '') +
+      '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px">' +
+        '<div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Deliver To</div>' +
+        '<div style="font-size:13px;font-weight:700;color:var(--text)">' + addr + '</div>' +
+        (userProfile.dropNotes ? '<div style="font-size:11px;color:var(--muted);margin-top:4px">' + userProfile.dropNotes + '</div>' : '') +
       '</div>' +
-      '<div style="background:var(--bg3);border-radius:10px;padding:12px">' +
-        '<div style="font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Drop Location</div>' +
-        '<a href="' + mapsUrl + '" target="_blank" style="font-size:12px;color:var(--blue);font-weight:600">' +
+      '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px">' +
+        '<div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Drop Location</div>' +
+        '<a href="' + mapsUrl + '" target="_blank" style="font-size:12px;color:var(--blue);font-weight:700;text-decoration:none">' +
           userProfile.dropLat.toFixed(5) + ', ' + userProfile.dropLng.toFixed(5) + '</a>' +
-        '<div style="font-size:11px;color:var(--muted);margin-top:3px">Click to view on map</div>' +
+        '<div style="font-size:11px;color:var(--muted);margin-top:4px">Tap to view on map</div>' +
       '</div>' +
     '</div>';
 
@@ -3105,7 +3105,6 @@ function startApp() {
         center: latLng,
         zoom: 20,
         mapTypeId: "satellite",
-        mapId: "addr_confirm_map",
         tilt: 0,
         disableDefaultUI: true,
         gestureHandling: "none"
@@ -3129,24 +3128,25 @@ function startApp() {
       });
 
       // House icon
-      var houseElC = document.createElement("div");
-      houseElC.innerHTML = '<div style="background:#fff;border:2px solid #1a6ef0;border-radius:8px;padding:4px 6px;font-size:20px;line-height:1;box-shadow:0 2px 8px rgba(0,0,0,.3)">&#127968;</div>';
-      new window.google.maps.marker.AdvancedMarkerElement({
+      new window.google.maps.Marker({
         position: new window.google.maps.LatLng(window._addrDropLat, window._addrDropLng),
-        map: window._addrConfirmMap, content: houseElC, zIndex: 10
+        map: window._addrConfirmMap,
+        label: { text: "\u{1F3E0}", fontSize: "20px" },
+        title: "Your house",
+        zIndex: 10
       });
 
       // Red landing marker
-      var pinElC = document.createElement("div");
-      pinElC.innerHTML =
-        '<div style="display:flex;flex-direction:column;align-items:center">' +
-          '<svg width="28" height="36" viewBox="0 0 28 36" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-            '<path d="M14 0C6.27 0 0 6.27 0 14c0 9.33 14 22 14 22S28 23.33 28 14C28 6.27 21.73 0 14 0z" fill="#e53e3e"/>' +
-            '<circle cx="14" cy="14" r="6" fill="white"/>' +
-          '</svg>' +
-        '</div>';
-      new window.google.maps.marker.AdvancedMarkerElement({
-        position: latLng, map: window._addrConfirmMap, content: pinElC, zIndex: 20
+      new window.google.maps.Marker({
+        position: latLng,
+        map: window._addrConfirmMap,
+        icon: {
+          path: window.google.maps.SymbolPath.CIRCLE,
+          scale: 10, fillColor: "#e53e3e", fillOpacity: 1,
+          strokeColor: "#fff", strokeWeight: 3
+        },
+        title: "Landing spot",
+        zIndex: 20
       });
     }, 80);
   };;
@@ -3241,8 +3241,8 @@ function startApp() {
       window._addrGMap.setCenter(new window.google.maps.LatLng(lat, lng));
       window._addrGMap.setZoom(20);
       drawPropertyBox(window._addrGMap);
-      if (window._addrHouseMarker) window._addrHouseMarker.position = latLng;
-      if (window._addrDropMarkerG) window._addrDropMarkerG.position = latLng;
+      if (window._addrHouseMarker) window._addrHouseMarker.setPosition(latLng);
+      if (window._addrDropMarkerG) window._addrDropMarkerG.setPosition(latLng);
       updateCoords(lat, lng);
       return;
     }
@@ -3251,7 +3251,6 @@ function startApp() {
       center: latLng,
       zoom: 20,
       mapTypeId: "satellite",
-      mapId: "addr_drop_map",
       tilt: 0,
       disableDefaultUI: false,
       zoomControl: true,
@@ -3265,43 +3264,40 @@ function startApp() {
     drawPropertyBox(window._addrGMap);
 
     // House icon — fixed at geocoded centre, never moves
-    var houseEl = document.createElement("div");
-    houseEl.innerHTML = '<div style="background:#fff;border:2px solid #1a6ef0;border-radius:8px;padding:4px 6px;font-size:20px;line-height:1;box-shadow:0 2px 8px rgba(0,0,0,.3);pointer-events:none">&#127968;</div>';
-    window._addrHouseMarker = new window.google.maps.marker.AdvancedMarkerElement({
+    window._addrHouseMarker = new window.google.maps.Marker({
       position: latLng,
       map: window._addrGMap,
-      content: houseEl,
+      label: { text: "\u{1F3E0}", fontSize: "20px" },
       title: "Your house",
-      zIndex: 10
+      zIndex: 10,
+      clickable: false
     });
 
     // Red landing marker (draggable)
-    var pinEl = document.createElement("div");
-    pinEl.innerHTML =
-      '<div style="display:flex;flex-direction:column;align-items:center;cursor:grab">' +
-        '<svg width="28" height="36" viewBox="0 0 28 36" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-          '<path d="M14 0C6.27 0 0 6.27 0 14c0 9.33 14 22 14 22S28 23.33 28 14C28 6.27 21.73 0 14 0z" fill="#e53e3e"/>' +
-          '<circle cx="14" cy="14" r="6" fill="white"/>' +
-        '</svg>' +
-      '</div>';
-    window._addrDropMarkerG = new window.google.maps.marker.AdvancedMarkerElement({
+    window._addrDropMarkerG = new window.google.maps.Marker({
       position: latLng,
       map: window._addrGMap,
-      content: pinEl,
+      draggable: true,
+      icon: {
+        path: window.google.maps.SymbolPath.CIRCLE,
+        scale: 10, fillColor: "#e53e3e", fillOpacity: 1,
+        strokeColor: "#fff", strokeWeight: 3
+      },
       title: "Landing spot",
-      gmpDraggable: true,
       zIndex: 20
     });
     updateCoords(lat, lng);
 
-    window._addrDropMarkerG.addListener("drag", function(e) {
-      updateCoords(e.latLng.lat(), e.latLng.lng());
+    window._addrDropMarkerG.addListener("drag", function() {
+      var p = window._addrDropMarkerG.getPosition();
+      updateCoords(p.lat(), p.lng());
     });
-    window._addrDropMarkerG.addListener("dragend", function(e) {
-      updateCoords(e.latLng.lat(), e.latLng.lng());
+    window._addrDropMarkerG.addListener("dragend", function() {
+      var p = window._addrDropMarkerG.getPosition();
+      updateCoords(p.lat(), p.lng());
     });
     window._addrGMap.addListener("click", function(e) {
-      window._addrDropMarkerG.position = e.latLng;
+      window._addrDropMarkerG.setPosition(e.latLng);
       updateCoords(e.latLng.lat(), e.latLng.lng());
     });
   };;

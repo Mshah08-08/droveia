@@ -1854,7 +1854,7 @@ function renderCart() {
           '<div class="cart-item-icon">'+catIcon(c.cat)+'</div>'+
           '<div class="cart-item-info">'+
             '<div class="cart-item-name">'+c.name+'</div>'+
-            '<div class="cart-item-sub">'+c.hours+'h rental · $'+c.pph+'/hr</div>'+
+            '<div class="cart-item-sub">'+c.hours+'h rental · $'+(c.pph && c.pph > 0 ? parseFloat(c.pph).toFixed(2) : ((c.retail*0.70)/48).toFixed(2))+'/hr</div>'+
           '</div>'+
           '<div style="text-align:right">'+
             '<div class="cart-item-price">$'+calcCost(c,c.hours).toFixed(2)+'</div>'+
@@ -1903,10 +1903,9 @@ window.showOrderConfirm = function(items) {
   var mapsUrl = "https://maps.google.com/?q=" + userProfile.dropLat + "," + userProfile.dropLng;
   var subtotal = items.reduce(function(s,i){return s+calcCost(i,i.hours);},0);
 
-  var _isDark2 = document.documentElement.getAttribute('data-theme')==='dark';
-  var _itextCol = _isDark2 ? '#f0f0f8' : '#0f0f1a';
-  var _imutedCol= _isDark2 ? '#8888aa' : '#6b7280';
-  var _ibdrCol  = _isDark2 ? 'rgba(255,255,255,0.08)' : '#e2e8f0';
+  var _itextCol = '#0f0f1a';
+  var _imutedCol= '#6b7280';
+  var _ibdrCol  = '#e2e8f0';
   var itemRows = items.map(function(i){
     return '<div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:8px 0;border-bottom:1px solid '+_ibdrCol+'">' +
       '<span style="color:'+_itextCol+';font-weight:500">' + i.name + ' <span style="color:'+_imutedCol+';font-weight:400">('+i.hours+'h)</span></span>' +
@@ -1914,12 +1913,11 @@ window.showOrderConfirm = function(items) {
     '</div>';
   }).join("");
 
-  var isDark = document.documentElement.getAttribute('data-theme')==='dark';
-  var cardBg  = isDark ? 'rgba(255,255,255,0.05)' : '#f4f6fb';
-  var cardBdr = isDark ? 'rgba(255,255,255,0.10)' : '#e2e8f0';
-  var textCol = isDark ? '#f0f0f8' : '#0f0f1a';
-  var mutedCol= isDark ? '#8888aa' : '#6b7280';
-  var labelCol= isDark ? '#6666aa' : '#94a3b8';
+  var cardBg  = '#f4f6fb';
+  var cardBdr = '#e2e8f0';
+  var textCol = '#0f0f1a';
+  var mutedCol= '#6b7280';
+  var labelCol= '#94a3b8';
 
   el("order-confirm-body").innerHTML =
     '<div style="margin-bottom:16px">' +
@@ -1948,7 +1946,8 @@ window.showOrderConfirm = function(items) {
   window._confirmCartItems = items;
 };
 
-window.closeOrderConfirm = function() {
+window.closeOrderConfirm = function(e) {
+  if (e && e.target !== el("order-confirm-overlay")) return;
   el("order-confirm-overlay").classList.add("hidden");
   window._confirmCartItems = null;
 };
@@ -3785,16 +3784,16 @@ if (_savedPage && _savedPage !== "admin") {
 
 
 <!-- Order confirm modal -->
-<div id="order-confirm-overlay" class="droppin-overlay hidden">
-  <div class="droppin-box">
-    <div class="droppin-header">
-      <div class="droppin-title">Confirm Order</div>
-      <div class="droppin-sub">Review your delivery details before placing.</div>
+<div id="order-confirm-overlay" class="modal-overlay hidden" onclick="closeOrderConfirm(event)" style="z-index:4500">
+  <div class="modal-box" style="max-width:480px;padding:0;overflow:hidden;background:#fff" onclick="event.stopPropagation()">
+    <div style="padding:20px 24px 16px;border-bottom:1px solid #e2e8f0;background:#fff">
+      <div style="font-size:17px;font-weight:800;letter-spacing:-.02em;color:#0f0f1a">Confirm Order</div>
+      <div style="font-size:12px;color:#6b7280;margin-top:3px">Review your delivery details before placing.</div>
     </div>
-    <div id="order-confirm-body" style="padding:16px 20px;background:#ffffff"></div>
-    <div class="droppin-footer">
-      <button class="droppin-cancel" onclick="closeOrderConfirm()">Cancel</button>
-      <button class="droppin-confirm" onclick="submitOrderConfirm()">Place Order</button>
+    <div id="order-confirm-body" style="padding:16px 24px;background:#fff"></div>
+    <div style="padding:14px 24px;border-top:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;gap:12px;background:#fff">
+      <button onclick="closeOrderConfirm()" style="background:transparent;color:#6b7280;border:1px solid #e2e8f0;border-radius:10px;padding:10px 18px;font-size:14px;cursor:pointer;font-family:inherit">Cancel</button>
+      <button onclick="submitOrderConfirm()" style="background:#1a6ef0;color:#fff;border:none;border-radius:10px;padding:10px 24px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">Place Order</button>
     </div>
   </div>
 </div>

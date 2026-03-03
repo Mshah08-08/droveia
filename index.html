@@ -2105,8 +2105,10 @@ function renderAccount() {
   setVal("addr-notes",    userProfile.dropNotes||"");
   // Address panel state — runs every time renderAccount is called
   if (userProfile.dropLat) {
-    window._addrDropLat = userProfile.dropLat;
-    window._addrDropLng = userProfile.dropLng;
+    window._addrHouseLat = userProfile.houseLat || userProfile.dropLat;
+    window._addrHouseLng = userProfile.houseLng || userProfile.dropLng;
+    window._addrDropLat  = userProfile.dropLat;
+    window._addrDropLng  = userProfile.dropLng;
     if (userProfile.dropBboxRaw) { try { window._addrBbox = JSON.parse(userProfile.dropBboxRaw); } catch(e){} }
     el("addr-stage-1").style.display = "none";
     el("addr-stage-2").style.display = "none";
@@ -2978,6 +2980,8 @@ function startApp() {
     saveProfile({
       building:     building,
       dropNotes:    notes,
+      houseLat:     window._addrHouseLat || window._addrDropLat,
+      houseLng:     window._addrHouseLng || window._addrDropLng,
       dropLat:      window._addrDropLat,
       dropLng:      window._addrDropLng,
       dropBboxRaw:  window._addrBbox ? JSON.stringify(window._addrBbox) : null
@@ -3052,7 +3056,9 @@ function startApp() {
       var lng  = loc.lng();
       var vp   = results[0].geometry.viewport;
 
-      window._addrDropLat   = lat;
+      window._addrHouseLat  = lat;  // geocoded house centre — never changes
+      window._addrHouseLng  = lng;
+      window._addrDropLat   = lat;  // user's drop pin — starts at house
       window._addrDropLng   = lng;
       window._addrFootprint = null;
       window._addrBbox      = null;
@@ -3111,7 +3117,8 @@ function startApp() {
       });
 
       // Tight 40m box around the geocoded house centre
-      var cLat = window._addrDropLat, cLng = window._addrDropLng;
+      var cLat = window._addrHouseLat || window._addrDropLat;
+      var cLng = window._addrHouseLng || window._addrDropLng;
       var dLat2 = 20 / 111320;
       var dLng2 = 20 / (111320 * Math.cos(cLat * Math.PI / 180));
       var tightBounds = new window.google.maps.LatLngBounds(
@@ -3127,9 +3134,11 @@ function startApp() {
         zIndex: 1, clickable: false
       });
 
-      // House icon
+      // House icon — fixed at geocoded house centre
+      var hLat = window._addrHouseLat || window._addrDropLat;
+      var hLng = window._addrHouseLng || window._addrDropLng;
       new window.google.maps.Marker({
-        position: new window.google.maps.LatLng(window._addrDropLat, window._addrDropLng),
+        position: new window.google.maps.LatLng(hLat, hLng),
         map: window._addrConfirmMap,
         label: { text: "\u{1F3E0}", fontSize: "20px" },
         title: "Your house",
@@ -3177,6 +3186,7 @@ function startApp() {
     var dmEl = el("addr-droppin-map"); if (dmEl) dmEl.innerHTML = "";
     window._addrDropMarkerG = null; window._addrHouseMarker = null;
     window._addrDropLat = null; window._addrDropLng = null;
+    window._addrHouseLat = null; window._addrHouseLng = null;
     window._addrViewport = null; window._addrPropertyBox = null; window._addrToleranceCircle = null;
   };
 
@@ -3199,11 +3209,16 @@ function startApp() {
 
     lat = lat || (userProfile && userProfile.dropLat) || 35.7847;
     lng = lng || (userProfile && userProfile.dropLng) || -78.6821;
+
+    // House centre — use stored geocoded point, not the moveable drop pin
+    var houseLat = window._addrHouseLat || lat;
+    var houseLng = window._addrHouseLng || lng;
+    var houseLLng = new window.google.maps.LatLng(houseLat, houseLng);
+
+    // Drop pin starts at last saved position (or house if new)
     window._addrDropLat = lat;
     window._addrDropLng = lng;
-    window._addrViewport = viewport || window._addrViewport;
-
-    var latLng = new window.google.maps.LatLng(lat, lng);
+    var dropLatLng = new window.google.maps.LatLng(lat, lng);
 
     function updateCoords(latv, lngv) {
       window._addrDropLat = latv;
@@ -3214,41 +3229,33 @@ function startApp() {
 
     function drawPropertyBox(map) {
       if (window._addrPropertyBox) { window._addrPropertyBox.setMap(null); window._addrPropertyBox = null; }
-      // 40m tight box around the geocoded house centre
       var R = 20;
       var dLat = R / 111320;
-      var dLng = R / (111320 * Math.cos(lat * Math.PI / 180));
+      var dLng = R / (111320 * Math.cos(houseLat * Math.PI / 180));
       var bounds = new window.google.maps.LatLngBounds(
-        new window.google.maps.LatLng(lat - dLat, lng - dLng),
-        new window.google.maps.LatLng(lat + dLat, lng + dLng)
+        new window.google.maps.LatLng(houseLat - dLat, houseLng - dLng),
+        new window.google.maps.LatLng(houseLat + dLat, houseLng + dLng)
       );
       window._addrPropertyBox = new window.google.maps.Rectangle({
-        bounds: bounds,
-        map: map,
-        strokeColor: "#1a6ef0",
-        strokeOpacity: 1,
-        strokeWeight: 2.5,
-        fillColor: "#1a6ef0",
-        fillOpacity: 0.12,
-        zIndex: 1,
-        clickable: false
+        bounds: bounds, map: map,
+        strokeColor: "#1a6ef0", strokeOpacity: 1, strokeWeight: 2.5,
+        fillColor: "#1a6ef0", fillOpacity: 0.12,
+        zIndex: 1, clickable: false
       });
     }
 
-    // If map already exists, just update
     if (window._addrGMap) {
-      window._addrGMap.setCenter(latLng);
-      window._addrGMap.setCenter(new window.google.maps.LatLng(lat, lng));
+      window._addrGMap.setCenter(houseLLng);
       window._addrGMap.setZoom(20);
       drawPropertyBox(window._addrGMap);
-      if (window._addrHouseMarker) window._addrHouseMarker.setPosition(latLng);
-      if (window._addrDropMarkerG) window._addrDropMarkerG.setPosition(latLng);
+      if (window._addrHouseMarker) window._addrHouseMarker.setPosition(houseLLng);
+      if (window._addrDropMarkerG) window._addrDropMarkerG.setPosition(dropLatLng);
       updateCoords(lat, lng);
       return;
     }
 
     window._addrGMap = new window.google.maps.Map(mapEl, {
-      center: latLng,
+      center: houseLLng,
       zoom: 20,
       mapTypeId: "satellite",
       tilt: 0,
@@ -3259,13 +3266,11 @@ function startApp() {
       fullscreenControl: false
     });
 
-    window._addrGMap.setCenter(new window.google.maps.LatLng(lat, lng));
-    window._addrGMap.setZoom(20);
     drawPropertyBox(window._addrGMap);
 
-    // House icon — fixed at geocoded centre, never moves
+    // House marker — always fixed at geocoded centre
     window._addrHouseMarker = new window.google.maps.Marker({
-      position: latLng,
+      position: houseLLng,
       map: window._addrGMap,
       label: { text: "\u{1F3E0}", fontSize: "20px" },
       title: "Your house",
@@ -3273,9 +3278,9 @@ function startApp() {
       clickable: false
     });
 
-    // Red landing marker (draggable)
+    // Draggable red drop pin — starts at last saved drop position
     window._addrDropMarkerG = new window.google.maps.Marker({
-      position: latLng,
+      position: dropLatLng,
       map: window._addrGMap,
       draggable: true,
       icon: {
@@ -3300,7 +3305,7 @@ function startApp() {
       window._addrDropMarkerG.setPosition(e.latLng);
       updateCoords(e.latLng.lat(), e.latLng.lng());
     });
-  };;
+  };;;
   window.saveNotifications = function() {
     saveProfile({ notifications:{
       delivery: !!(el("notif-delivery")||{}).checked,

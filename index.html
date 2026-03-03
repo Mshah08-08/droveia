@@ -1551,7 +1551,7 @@ window.switchAuth = switchAuth;
 // ── Tools rendering ───────────────────────────────────────────────────────────
 function toolCard(t) {
   if (!t || !t.name || !t.retail) return "";
-  var pct = Math.max(0, Math.round((1 - calcCost(t,4) / t.retail) * 100));
+  var pct = Math.max(0, Math.round((1 - calcCost(t,1) / t.retail) * 100));
   var unavail = t.available === false;
   var baseRate = calcCost(t, 1);  // show 1-hour price to match modal default
   var h = "";
@@ -1559,7 +1559,7 @@ function toolCard(t) {
   h += '<div class="tool-card-img" style="position:relative">';
   if (unavail) h += '<div style="position:absolute;inset:0;background:rgba(0,0,0,.5);z-index:2;display:flex;align-items:center;justify-content:center"><span style="color:#fff;font-weight:800;font-size:13px">UNAVAILABLE</span></div>';
   h += t.img && t.img !== 'x' ? '<img src="' + t.img + '" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center;display:block;padding:8px">' : '';
-  h += '<div style="position:absolute;top:10px;right:10px;background:var(--green);color:#000;font-size:10px;font-weight:800;padding:3px 8px;border-radius:6px;z-index:1">Save ' + pct + '%</div>';
+  h += '<div style="position:absolute;top:10px;right:10px;background:#1a6ef0;color:#fff;font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;z-index:1">Save ' + pct + '%</div>';
   h += '</div>';
   h += '<div class="tool-card-body">';
   h += '<div class="tool-card-cat-tag">' + t.cat + '</div>';
@@ -1776,7 +1776,7 @@ function renderModal() {
     '<div class="modal-title">'+t.name+'</div>'+
     '<div class="modal-meta">'+stars(t.rating)+
       '<span style="color:var(--dim)">·</span>'+
-      '<span style="color:var(--green);font-size:12px;font-weight:700;background:var(--green-dim);padding:2px 8px;border-radius:6px">Save '+pct+'%</span>'+
+      '<span style="color:#fff;font-size:12px;font-weight:700;background:#1a6ef0;padding:2px 8px;border-radius:6px">Save '+pct+'%</span>'+
     '</div>'+
     '<div class="modal-desc">'+t.desc+'</div>'+
     '<div class="dur-label">RENTAL DURATION</div>'+

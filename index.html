@@ -1190,6 +1190,12 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
   <div class="orders-layout">
     <h2 style="font-size:22px;font-weight:800;margin-bottom:20px;letter-spacing:-.02em">My Orders</h2>
     <div id="active-order-section" style="display:none">
+      <!-- carousel nav header -->
+      <div id="active-order-nav" style="display:none;align-items:center;justify-content:space-between;margin-bottom:8px;padding:0 2px">
+        <button id="active-order-prev" onclick="shiftActiveOrder(-1)" style="background:none;border:none;cursor:pointer;padding:6px;color:var(--muted);font-size:18px;line-height:1">&#8592;</button>
+        <div id="active-order-dots" style="display:flex;gap:6px;align-items:center"></div>
+        <button id="active-order-next" onclick="shiftActiveOrder(1)" style="background:none;border:none;cursor:pointer;padding:6px;color:var(--muted);font-size:18px;line-height:1">&#8594;</button>
+      </div>
       <div class="orders-hero">
         <div class="orders-hero-header">
           <div>
@@ -1201,10 +1207,7 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
             ETA ~<span id="order-eta-display">7</span> min
           </div>
         </div>
-
-        <!-- Leaflet map -->
         <div id="order-map" style="width:100%;height:220px;border-radius:10px;margin:14px 0;overflow:hidden;z-index:1"></div>
-
         <div class="order-progress"><div class="order-progress-bar"></div></div>
         <div class="order-steps">
           <span class="done">✓ Order placed</span>
@@ -2051,16 +2054,14 @@ function renderOrders() {
     listEl.innerHTML = '<div style="text-align:center;padding:48px 0;color:var(--muted);font-size:14px"><div style="font-size:32px;margin-bottom:12px;opacity:.3"></div><div style="font-weight:600;margin-bottom:8px">Sign in to see your orders</div><button class="btn-primary" style="margin-top:8px" onclick="showAuth()">Sign In</button></div>';
     return;
   }
-  var active = null;
-  for (var i=0;i<liveOrders.length;i++) if (liveOrders[i].status==="in_flight") { active=liveOrders[i]; break; }
+  var activeOrders = liveOrders.filter(function(o){ return o.status==="in_flight"; });
+  window._activeOrders = activeOrders;
+  if (typeof window._activeOrderIdx === "undefined" || window._activeOrderIdx >= activeOrders.length) {
+    window._activeOrderIdx = 0;
+  }
   if (activeEl) {
-    activeEl.style.display = active ? "block" : "none";
-    if (active) {
-      var nameEl = el("order-name-display")||activeEl.querySelector(".order-name");
-      var idEl   = el("order-id-display")||activeEl.querySelector(".order-id");
-      if (nameEl) nameEl.textContent = active.items.map(function(i){return i.name;}).join(", ");
-      if (idEl)   idEl.textContent   = "#"+active._id.slice(0,8).toUpperCase()+" · $"+(active.total||0).toFixed(2);
-    }
+    activeEl.style.display = activeOrders.length ? "block" : "none";
+    if (activeOrders.length) renderActiveOrderCard(window._activeOrderIdx);
   }
   var past = liveOrders.filter(function(o){ return o.status!=="in_flight"; });
   if (!past.length) {
@@ -2102,6 +2103,48 @@ function renderOrders() {
       }).join("");
   }).join("");
 }
+
+function renderActiveOrderCard(idx) {
+  var orders = window._activeOrders || [];
+  if (!orders.length) return;
+  idx = Math.max(0, Math.min(idx, orders.length - 1));
+  window._activeOrderIdx = idx;
+  var active = orders[idx];
+
+  var nameEl = el("order-name-display");
+  var idEl   = el("order-id-display");
+  if (nameEl) nameEl.textContent = active.items.map(function(i){return i.name;}).join(", ");
+  if (idEl)   idEl.textContent   = "#"+active._id.slice(0,8).toUpperCase()+" · $"+(active.total||0).toFixed(2);
+
+  // Show/hide nav
+  var nav = el("active-order-nav");
+  if (nav) nav.style.display = orders.length > 1 ? "flex" : "none";
+
+  // Dots
+  var dotsEl = el("active-order-dots");
+  if (dotsEl) {
+    dotsEl.innerHTML = orders.map(function(_, i) {
+      return '<div onclick="shiftActiveOrderTo('+i+')" style="width:'+(i===idx?'20px':'8px')+';height:8px;border-radius:4px;background:'+(i===idx?'var(--blue)':'var(--border2)')+';cursor:pointer;transition:all .2s"></div>';
+    }).join("");
+  }
+
+  // Prev/next button visibility
+  var prev = el("active-order-prev");
+  var next = el("active-order-next");
+  if (prev) prev.style.opacity = idx > 0 ? "1" : "0.3";
+  if (next) next.style.opacity = idx < orders.length-1 ? "1" : "0.3";
+}
+
+window.shiftActiveOrder = function(dir) {
+  var orders = window._activeOrders || [];
+  var next = (window._activeOrderIdx || 0) + dir;
+  if (next < 0 || next >= orders.length) return;
+  renderActiveOrderCard(next);
+};
+
+window.shiftActiveOrderTo = function(idx) {
+  renderActiveOrderCard(idx);
+};
 
 function fmtDate(d) {
   var now=new Date(); now.setHours(0,0,0,0);

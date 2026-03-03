@@ -834,7 +834,7 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
 .order-act-btn.red:hover{border-color:#ef4444;color:#ef4444}
 </style>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDcuU4-XXzzEU8O84rs3W7cWgVStNicBTo&callback=Function.prototype" async defer></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDcuU4-XXzzEU8O84rs3W7cWgVStNicBTo&libraries=marker&v=weekly&callback=Function.prototype" async defer></script>
 <script src="https://js.stripe.com/v3/"></script>
 </head>
 <body>
@@ -2298,7 +2298,7 @@ window.submitStripePayment = async function() {
     _stripeOrderItems = null; _stripeDropLocation = null;
 
     showToast("✓ Payment confirmed!");
-    placeOrder(items, drop, pi.id);
+    (window._realPlaceOrder || placeOrder)(items, drop, pi.id);
 
   } catch(e) {
     console.error("Stripe error:", e);
@@ -2848,7 +2848,7 @@ function startApp() {
   }
 
   // Real placeOrder
-  placeOrder = async function(items, dropLocation, stripePaymentId) {
+  window._realPlaceOrder = placeOrder = async function(items, dropLocation, stripePaymentId) {
     if (!currentUser) { showAuth(); return; }
     var total = parseFloat(items.reduce(function(s,i){return s+calcCost(i,i.hours);},0).toFixed(2));
     var saved = parseFloat(items.reduce(function(s,i){return s+(i.retail-calcCost(i,i.hours));},0).toFixed(2));
@@ -3113,8 +3113,8 @@ function startApp() {
 
       // Tight 40m box around the geocoded house centre
       var cLat = window._addrDropLat, cLng = window._addrDropLng;
-      var dLat2 = 40 / 111320;
-      var dLng2 = 40 / (111320 * Math.cos(cLat * Math.PI / 180));
+      var dLat2 = 20 / 111320;
+      var dLng2 = 20 / (111320 * Math.cos(cLat * Math.PI / 180));
       var tightBounds = new window.google.maps.LatLngBounds(
         new window.google.maps.LatLng(cLat - dLat2, cLng - dLng2),
         new window.google.maps.LatLng(cLat + dLat2, cLng + dLng2)
@@ -3215,7 +3215,7 @@ function startApp() {
     function drawPropertyBox(map) {
       if (window._addrPropertyBox) { window._addrPropertyBox.setMap(null); window._addrPropertyBox = null; }
       // 40m tight box around the geocoded house centre
-      var R = 40;
+      var R = 20;
       var dLat = R / 111320;
       var dLng = R / (111320 * Math.cos(lat * Math.PI / 180));
       var bounds = new window.google.maps.LatLngBounds(

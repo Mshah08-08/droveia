@@ -1559,7 +1559,7 @@ function toolCard(t) {
   h += '<div class="tool-card-img" style="position:relative">';
   if (unavail) h += '<div style="position:absolute;inset:0;background:rgba(0,0,0,.5);z-index:2;display:flex;align-items:center;justify-content:center"><span style="color:#fff;font-weight:800;font-size:13px">UNAVAILABLE</span></div>';
   h += t.img && t.img !== 'x' ? '<img src="' + t.img + '" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center;display:block;padding:8px">' : '';
-  h += '<div style="position:absolute;top:10px;right:10px;background:#1a6ef0;color:#fff;font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;z-index:1">Save ' + pct + '%</div>';
+
   h += '</div>';
   h += '<div class="tool-card-body">';
   h += '<div class="tool-card-cat-tag">' + t.cat + '</div>';
@@ -1569,6 +1569,7 @@ function toolCard(t) {
   h += '<div class="tool-card-price-row">';
   h += '<div class="tool-card-pph">$' + baseRate.toFixed(2) + '<span class="tool-card-unit">/hr</span></div>';
   h += '<div class="tool-card-retail">$' + t.retail + '</div>';
+  h += '<span style="background:#1a6ef0;color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px;margin-left:6px">Save ' + pct + '%</span>';
   h += '</div>';
   h += '<div class="tool-card-footer">';
   h += '<div class="tool-card-eta-pill">~' + t.eta + '</div>';
@@ -1745,18 +1746,21 @@ window.openModal = openModal;
 // ── Pricing tiers ─────────────────────────────────────────────────────────────
 function calcCost(t, hours) {
   if (!t || !t.retail) return 0;
-  // base: pph if manually set, otherwise auto-derive so 48h = 50% of retail
-  var base = (parseFloat(t.pph) > 0)
-    ? parseFloat(t.pph)
-    : (t.retail * 0.50) / 48;
-  var multiplier;
-  if      (hours >= 48) multiplier = 1.00;  // 50% of retail
-  else if (hours >= 24) multiplier = 2.20;  // 55% of retail
-  else if (hours >= 12) multiplier = 3.20;  // 40% of retail
-  else if (hours >= 8)  multiplier = 3.60;  // 30% of retail
-  else if (hours >= 4)  multiplier = 4.80;  // 20% of retail
-  else                  multiplier = 11.52; // 12% of retail
-  return parseFloat((base * multiplier * hours).toFixed(2));
+  // If pph manually set, use as hourly rate directly
+  if (parseFloat(t.pph) > 0) {
+    return parseFloat((parseFloat(t.pph) * hours).toFixed(2));
+  }
+  // Auto-price: flat total cost tiers as % of retail (always ascending)
+  // 1h=8%, 4h=18%, 8h=28%, 12h=38%, 24h=48%, 48h=58%
+  var r = t.retail;
+  var total;
+  if      (hours >= 48) total = r * 0.58;
+  else if (hours >= 24) total = r * 0.48;
+  else if (hours >= 12) total = r * 0.38;
+  else if (hours >= 8)  total = r * 0.28;
+  else if (hours >= 4)  total = r * 0.18;
+  else                  total = r * 0.08 * hours; // scales for 1-3h
+  return parseFloat(Math.max(total, 0.01).toFixed(2));
 }
 function renderModal() {
   var t    = currentTool;

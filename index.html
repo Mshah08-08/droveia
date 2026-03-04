@@ -368,7 +368,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:var(--nav-h);backgro
 .see-all-btn:hover{color:#60a5fa}
 
 /* ── Tool Cards (improved) ──────────────────── */
-.tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;width:100%}
+.tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;width:100%;align-items:stretch}.tools-grid .tool-card{height:100%}
 .tool-card{background:#ffffff;border:1px solid var(--border);border-radius:var(--radius);padding:20px;cursor:pointer;transition:.22s;position:relative;overflow:hidden;display:flex;flex-direction:column;gap:10px}
 .tool-card::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent,rgba(26,110,240,.03));opacity:0;transition:.2s;pointer-events:none}
 .tool-card:hover{border-color:rgba(26,110,240,.35);transform:translateY(-3px);box-shadow:0 12px 36px rgba(26,110,240,.12)}
@@ -1748,21 +1748,22 @@ window.openModal = openModal;
 // ── Pricing tiers ─────────────────────────────────────────────────────────────
 function calcCost(t, hours) {
   if (!t || !t.retail) return 0;
-  // If pph manually set, use as hourly rate directly
   if (parseFloat(t.pph) > 0) {
     return parseFloat((parseFloat(t.pph) * hours).toFixed(2));
   }
-  // Auto-price: flat total cost tiers as % of retail (always ascending)
-  // 1h=8%, 4h=18%, 8h=28%, 12h=38%, 24h=48%, 48h=58%
+  // Interpolate linearly between anchor tiers so every +/- 1hr updates price
   var r = t.retail;
-  var total;
-  if      (hours >= 48) total = r * 0.58;
-  else if (hours >= 24) total = r * 0.48;
-  else if (hours >= 12) total = r * 0.38;
-  else if (hours >= 8)  total = r * 0.28;
-  else if (hours >= 4)  total = r * 0.18;
-  else                  total = r * 0.08 * hours; // scales for 1-3h
-  return parseFloat(Math.max(total, 0.01).toFixed(2));
+  var anchors = [[1,0.08],[4,0.18],[8,0.28],[12,0.38],[24,0.48],[48,0.58]];
+  var h = Math.min(48, Math.max(1, hours));
+  for (var i = 0; i < anchors.length - 1; i++) {
+    var h0=anchors[i][0], p0=anchors[i][1];
+    var h1=anchors[i+1][0], p1=anchors[i+1][1];
+    if (h <= h1) {
+      var frac = (h - h0) / (h1 - h0);
+      return parseFloat(Math.max(r * (p0 + frac*(p1-p0)), 0.01).toFixed(2));
+    }
+  }
+  return parseFloat((r * 0.58).toFixed(2));
 }
 function renderModal() {
   var t    = currentTool;

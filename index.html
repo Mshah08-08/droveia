@@ -311,7 +311,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:var(--nav-h);backgro
 /* ── Pages ──────────────────────────────────── */
 .page{display:none;min-height:calc(100vh - var(--nav-h))}
 .page.active{display:block}
-#page-browse{min-height:calc(100vh - var(--nav-h))}
+#page-browse{min-height:calc(100vh - var(--nav-h));display:flex;flex-direction:column}
 .container{max-width:1280px;margin:0 auto;padding:0 24px}
 
 /* ── Promo Banner ───────────────────────────── */
@@ -402,7 +402,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:var(--nav-h);backgro
 .hiw-desc{font-size:13px;color:var(--muted);line-height:1.6;font-weight:300}
 
 /* ── Browse Page ────────────────────────────── */
-.browse-layout{display:grid;grid-template-columns:220px 1fr;gap:0;flex:1;overflow:hidden}
+.browse-layout{display:grid;grid-template-columns:220px 1fr;gap:0;flex:1;min-height:0}
 .browse-sidebar{height:100%;overflow-y:auto;padding:24px 20px;border-right:1px solid var(--border);flex-shrink:0}
 .sidebar-section{margin-bottom:24px}
 .sidebar-section-title{font-size:11px;font-weight:700;letter-spacing:.07em;color:var(--muted);margin-bottom:10px;text-transform:uppercase}

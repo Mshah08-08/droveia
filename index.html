@@ -368,7 +368,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:var(--nav-h);backgro
 .see-all-btn:hover{color:#60a5fa}
 
 /* ── Tool Cards (improved) ──────────────────── */
-.tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;width:100%;align-items:stretch}.tools-grid .tool-card{height:100%}
+.tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;width:100%;align-items:stretch}.tools-grid .tool-card{height:100%;max-width:320px}
 .tool-card{background:#ffffff;border:1px solid var(--border);border-radius:var(--radius);padding:20px;cursor:pointer;transition:.22s;position:relative;overflow:hidden;display:flex;flex-direction:column;gap:10px}
 .tool-card::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent,rgba(26,110,240,.03));opacity:0;transition:.2s;pointer-events:none}
 .tool-card:hover{border-color:rgba(26,110,240,.35);transform:translateY(-3px);box-shadow:0 12px 36px rgba(26,110,240,.12)}

@@ -3462,11 +3462,12 @@ function startApp() {
       if (c) { c.textContent = "Finding property boundary…"; c.style.color = "var(--blue)"; }
       try {
         var token = "eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJyZWdyaWQuY29tIiwiaWF0IjoxNzczMDk4NDk3LCJleHAiOjE3NzU2OTA0OTcsInUiOjcwNjczMywiZyI6MjMxNTMsImNhcCI6InBhOnRzOnBzOmJmOm1hOnR5OmVvOnpvOnNiIn0.oBEfPMry0ocrF6b49LpFlbBtbAMPU5a9vcvXtbchjzA";
-        var address = (el("addr-building")||{value:""}).value.trim();
-        var url = "https://app.regrid.com/api/v1/search.json?query=" + encodeURIComponent(address) + "&limit=1&token=" + token;
+        // Use the geocoded coordinates from Google Maps — Regrid recommends lat/lon over address search
+        var url = "https://app.regrid.com/api/v1/search.json?lat=" + houseLat + "&lon=" + houseLng + "&radius=50&limit=1&token=" + token;
         var resp = await fetch(url);
         var data = await resp.json();
         var features = (data.results || []);
+        console.log("Regrid query lat/lon:", houseLat, houseLng, "| Results:", features.length, features[0] && features[0].properties && features[0].properties.fields && features[0].properties.fields.address);
         if (features.length && features[0].geometry && features[0].geometry.coordinates) {
           var ring = features[0].geometry.coordinates[0]; // GeoJSON: [lng, lat]
           var coords = ring.map(function(p){ return {lat: p[1], lng: p[0]}; });

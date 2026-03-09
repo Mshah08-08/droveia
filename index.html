@@ -3346,37 +3346,6 @@ function startApp() {
   };
 
 
-  // Point-in-polygon (ray casting) — works with [{lat,lng}] arrays
-  window._pointInPolygon = function(lat, lng, polygon) {
-    var inside = false;
-    for (var i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-      var xi = polygon[i].lat, yi = polygon[i].lng;
-      var xj = polygon[j].lat, yj = polygon[j].lng;
-      var intersect = ((yi > lng) !== (yj > lng)) &&
-        (lat < (xj - xi) * (lng - yi) / (yj - yi) + xi);
-      if (intersect) inside = !inside;
-    }
-    return inside;
-  };
-
-  // Clamp a point to nearest edge of polygon if outside
-  window._clampToPolygon = function(lat, lng, polygon) {
-    if (window._pointInPolygon(lat, lng, polygon)) return {lat: lat, lng: lng};
-    var best = null, bestDist = Infinity;
-    for (var i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-      // Project point onto each edge, find closest point on boundary
-      var ax = polygon[j].lat, ay = polygon[j].lng;
-      var bx = polygon[i].lat, by = polygon[i].lng;
-      var dx = bx - ax, dy = by - ay;
-      var len2 = dx*dx + dy*dy;
-      var t = len2 > 0 ? Math.max(0, Math.min(1, ((lat-ax)*dx + (lng-ay)*dy) / len2)) : 0;
-      var cx = ax + t*dx, cy = ay + t*dy;
-      var dist = (lat-cx)*(lat-cx) + (lng-cy)*(lng-cy);
-      if (dist < bestDist) { bestDist = dist; best = {lat: cx, lng: cy}; }
-    }
-    return best || {lat: lat, lng: lng};
-  };
-
   window.initAddrDropPin = function(lat, lng, viewport) {
     if (!window.google || !window.google.maps) return;
     var mapEl = el("addr-droppin-map");
@@ -3393,9 +3362,6 @@ function startApp() {
     window._addrDropLng = lng;
     var dropLatLng = new window.google.maps.LatLng(lat, lng);
 
-    // Current building polygon (array of {lat,lng}) — null until Overpass loads
-    window._addrBuildingPolygon = null;
-
     function updateCoords(latv, lngv) {
       window._addrDropLat = latv;
       window._addrDropLng = lngv;
@@ -3403,13 +3369,14 @@ function startApp() {
       if (c) { c.textContent = latv.toFixed(6) + ", " + lngv.toFixed(6); c.style.color = "var(--muted)"; }
     }
 
-    function drawFallbackBox(map) {
-      // Only used if Overpass finds no building
+    function drawPropertyBox(map) {
       if (window._addrPropertyBox) { window._addrPropertyBox.setMap(null); window._addrPropertyBox = null; }
-      var R = 20, dLat = R/111320, dLng = R/(111320*Math.cos(houseLat*Math.PI/180));
+      var R = 20;
+      var dLat = R / 111320;
+      var dLng = R / (111320 * Math.cos(houseLat * Math.PI / 180));
       var bounds = new window.google.maps.LatLngBounds(
-        new window.google.maps.LatLng(houseLat-dLat, houseLng-dLng),
-        new window.google.maps.LatLng(houseLat+dLat, houseLng+dLng)
+        new window.google.maps.LatLng(houseLat - dLat, houseLng - dLng),
+        new window.google.maps.LatLng(houseLat + dLat, houseLng + dLng)
       );
       window._addrPropertyBox = new window.google.maps.Rectangle({
         bounds: bounds, map: map,
@@ -3417,85 +3384,15 @@ function startApp() {
         fillColor: "#1a6ef0", fillOpacity: 0.12,
         zIndex: 1, clickable: false
       });
-      // Build fallback polygon for point-in-polygon checks
-      window._addrBuildingPolygon = [
-        {lat: houseLat-dLat, lng: houseLng-dLng},
-        {lat: houseLat+dLat, lng: houseLng-dLng},
-        {lat: houseLat+dLat, lng: houseLng+dLng},
-        {lat: houseLat-dLat, lng: houseLng+dLng}
-      ];
-    }
-
-    function drawBuildingPolygon(map, coords) {
-      // Clear old shapes
-      if (window._addrPropertyBox) { window._addrPropertyBox.setMap(null); window._addrPropertyBox = null; }
-      if (window._addrBuildingPoly) { window._addrBuildingPoly.setMap(null); window._addrBuildingPoly = null; }
-      var path = coords.map(function(c){ return new window.google.maps.LatLng(c.lat, c.lng); });
-      window._addrBuildingPoly = new window.google.maps.Polygon({
-        paths: path, map: map,
-        strokeColor: "#1a6ef0", strokeOpacity: 1, strokeWeight: 2.5,
-        fillColor: "#1a6ef0", fillOpacity: 0.15,
-        zIndex: 1, clickable: false
-      });
-      window._addrBuildingPolygon = coords;
-      // Fit map to polygon bounds
-      var bounds = new window.google.maps.LatLngBounds();
-      path.forEach(function(p){ bounds.extend(p); });
-      map.fitBounds(bounds, {top:60, right:60, bottom:60, left:60});
-      window.google.maps.event.addListenerOnce(map, 'idle', function() {
-        if (map.getZoom() > 21) map.setZoom(21);
-        if (map.getZoom() < 18) map.setZoom(18);
-      });
-      // Snap drop pin inside polygon if it's now outside
-      if (!window._pointInPolygon(window._addrDropLat, window._addrDropLng, coords)) {
-        // Centre of polygon bounds as starting pin
-        var ctr = bounds.getCenter();
-        window._addrDropMarkerG && window._addrDropMarkerG.setPosition(ctr);
-        updateCoords(ctr.lat(), ctr.lng());
-      }
-      var c = el("addr-droppin-coords");
-      if (c) { c.style.color = "var(--green)"; setTimeout(function(){ if(c) c.style.color="var(--muted)"; }, 1500); }
-    }
-
-    async function fetchBuildingPolygon(map) {
-      var c = el("addr-droppin-coords");
-      if (c) { c.textContent = "Finding property boundary…"; c.style.color = "var(--blue)"; }
-      try {
-        var token = "eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJyZWdyaWQuY29tIiwiaWF0IjoxNzczMDk4NDk3LCJleHAiOjE3NzU2OTA0OTcsInUiOjcwNjczMywiZyI6MjMxNTMsImNhcCI6InBhOnRzOnBzOmJmOm1hOnR5OmVvOnpvOnNiIn0.oBEfPMry0ocrF6b49LpFlbBtbAMPU5a9vcvXtbchjzA";
-        // Use the geocoded coordinates from Google Maps — Regrid recommends lat/lon over address search
-        var url = "https://app.regrid.com/api/v1/search.json?lat=" + houseLat + "&lon=" + houseLng + "&radius=50&limit=1&token=" + token;
-        var resp = await fetch(url);
-        var data = await resp.json();
-        var features = (data.results || []);
-        console.log("Regrid query lat/lon:", houseLat, houseLng, "| Results:", features.length, features[0] && features[0].properties && features[0].properties.fields && features[0].properties.fields.address);
-        if (features.length && features[0].geometry && features[0].geometry.coordinates) {
-          var ring = features[0].geometry.coordinates[0]; // GeoJSON: [lng, lat]
-          var coords = ring.map(function(p){ return {lat: p[1], lng: p[0]}; });
-          drawBuildingPolygon(map, coords);
-          showToast("✓ Property boundary loaded");
-        } else {
-          drawFallbackBox(map);
-          if (c) { c.textContent = "No parcel found — using approx. area"; c.style.color = "var(--muted)"; }
-        }
-      } catch(e) {
-        console.warn("Regrid failed:", e);
-        drawFallbackBox(map);
-        if (c) { c.textContent = "Could not load boundary — using approx. area"; c.style.color = "var(--muted)"; }
-      }
-    }
-
-    function constrainPin(latv, lngv) {
-      if (!window._addrBuildingPolygon) return {lat: latv, lng: lngv};
-      return window._clampToPolygon(latv, lngv, window._addrBuildingPolygon);
     }
 
     if (window._addrGMap) {
       window._addrGMap.setCenter(houseLLng);
       window._addrGMap.setZoom(20);
+      drawPropertyBox(window._addrGMap);
       if (window._addrHouseMarker) window._addrHouseMarker.setPosition(houseLLng);
       if (window._addrDropMarkerG) window._addrDropMarkerG.setPosition(dropLatLng);
       updateCoords(lat, lng);
-      fetchBuildingPolygon(window._addrGMap);
       return;
     }
 
@@ -3511,7 +3408,8 @@ function startApp() {
       fullscreenControl: false
     });
 
-    // House marker
+    drawPropertyBox(window._addrGMap);
+
     window._addrHouseMarker = new window.google.maps.Marker({
       position: houseLLng,
       map: window._addrGMap,
@@ -3521,7 +3419,6 @@ function startApp() {
       clickable: false
     });
 
-    // Draggable red drop pin
     window._addrDropMarkerG = new window.google.maps.Marker({
       position: dropLatLng,
       map: window._addrGMap,
@@ -3531,33 +3428,23 @@ function startApp() {
         scale: 10, fillColor: "#e53e3e", fillOpacity: 1,
         strokeColor: "#fff", strokeWeight: 3
       },
-      title: "Landing spot — drag to set",
+      title: "Landing spot",
       zIndex: 20
     });
     updateCoords(lat, lng);
 
+    window._addrDropMarkerG.addListener("drag", function() {
+      var p = window._addrDropMarkerG.getPosition();
+      updateCoords(p.lat(), p.lng());
+    });
     window._addrDropMarkerG.addListener("dragend", function() {
       var p = window._addrDropMarkerG.getPosition();
-      var clamped = constrainPin(p.lat(), p.lng());
-      window._addrDropMarkerG.setPosition(new window.google.maps.LatLng(clamped.lat, clamped.lng));
-      updateCoords(clamped.lat, clamped.lng);
-      if (clamped.lat !== p.lat() || clamped.lng !== p.lng()) {
-        showToast("Snapped to building boundary");
-      }
+      updateCoords(p.lat(), p.lng());
     });
-
     window._addrGMap.addListener("click", function(e) {
-      var clamped = constrainPin(e.latLng.lat(), e.latLng.lng());
-      var ll = new window.google.maps.LatLng(clamped.lat, clamped.lng);
-      window._addrDropMarkerG.setPosition(ll);
-      updateCoords(clamped.lat, clamped.lng);
-      if (clamped.lat !== e.latLng.lat() || clamped.lng !== e.latLng.lng()) {
-        showToast("Snapped to building boundary");
-      }
+      window._addrDropMarkerG.setPosition(e.latLng);
+      updateCoords(e.latLng.lat(), e.latLng.lng());
     });
-
-    // Fetch real building polygon from OpenStreetMap
-    fetchBuildingPolygon(window._addrGMap);
   };;;
   window.saveNotifications = function() {
     saveProfile({ notifications:{

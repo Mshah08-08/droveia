@@ -3457,72 +3457,29 @@ function startApp() {
       if (c) { c.style.color = "var(--green)"; setTimeout(function(){ if(c) c.style.color="var(--muted)"; }, 1500); }
     }
 
-    // Compute polygon area (shoelace) — larger = more likely to be the lot
-    function polyArea(geom) {
-      var a = 0;
-      for (var i = 0, j = geom.length-1; i < geom.length; j = i++) {
-        a += (geom[j].lon + geom[i].lon) * (geom[j].lat - geom[i].lat);
-      }
-      return Math.abs(a / 2);
-    }
-
     async function fetchBuildingPolygon(map) {
       var c = el("addr-droppin-coords");
-      if (c) { c.textContent = "Finding property outline…"; c.style.color = "var(--blue)"; }
+      if (c) { c.textContent = "Finding property boundary…"; c.style.color = "var(--blue)"; }
       try {
-        // Query building footprint AND parcel/lot tags simultaneously
-        var query = '[out:json][timeout:15];('
-          + 'way[building](around:80,' + houseLat + ',' + houseLng + ');'
-          + 'way["landuse"~"residential|grass|garden|farmyard"](around:80,' + houseLat + ',' + houseLng + ');'
-          + 'way["boundary"="lot"](around:80,' + houseLat + ',' + houseLng + ');'
-          + 'way["amenity"="residential"](around:80,' + houseLat + ',' + houseLng + ');'
-          + 'relation["landuse"~"residential"](around:80,' + houseLat + ',' + houseLng + ');'
-          + ');out geom;';
-        var url = 'https://overpass-api.de/api/interpreter?data=' + encodeURIComponent(query);
+        var token = "eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJyZWdyaWQuY29tIiwiaWF0IjoxNzczMDk4NDk3LCJleHAiOjE3NzU2OTA0OTcsInUiOjcwNjczMywiZyI6MjMxNTMsImNhcCI6InBhOnRzOnBzOmJmOm1hOnR5OmVvOnpvOnNiIn0.oBEfPMry0ocrF6b49LpFlbBtbAMPU5a9vcvXtbchjzA";
+        var address = (el("addr-building")||{value:""}).value.trim();
+        var url = "https://app.regrid.com/api/v1/search.json?query=" + encodeURIComponent(address) + "&limit=1&token=" + token;
         var resp = await fetch(url);
         var data = await resp.json();
-        var elements = (data.elements || []).filter(function(e){
-          return e.geometry && e.geometry.length >= 3;
-        });
-
-        if (!elements.length) { drawFallbackBox(map); if(c){c.textContent="No property data — using approx. area";c.style.color="var(--muted)";} return; }
-
-        // Score each polygon: prefer ones that contain the geocoded point,
-        // then prefer lot/boundary tags over building tags, then prefer larger area
-        function tagScore(e) {
-          var tags = e.tags || {};
-          if (tags.boundary === 'lot') return 4;
-          if (tags.landuse) return 3;
-          if (tags.amenity === 'residential') return 2;
-          if (tags.building) return 1;
-          return 0;
-        }
-
-        var best = null, bestScore = -1;
-        elements.forEach(function(way) {
-          var coords = way.geometry.map(function(p){ return {lat:p.lat, lng:p.lon}; });
-          var contains = window._pointInPolygon(houseLat, houseLng, coords);
-          var area = polyArea(way.geometry);
-          var tag = tagScore(way);
-          // Primary: contains geocoded point; secondary: tag priority; tertiary: larger area
-          var score = (contains ? 1000 : 0) + tag * 10 + Math.min(area * 1e8, 9);
-          if (score > bestScore) { bestScore = score; best = way; }
-        });
-
-        if (best) {
-          var coords = best.geometry.map(function(p){ return {lat:p.lat, lng:p.lon}; });
-          var label = (best.tags && best.tags.boundary === 'lot') ? 'Property lot' :
-                      (best.tags && best.tags.landuse) ? 'Land parcel' : 'Building footprint';
+        var features = (data.results || []);
+        if (features.length && features[0].geometry && features[0].geometry.coordinates) {
+          var ring = features[0].geometry.coordinates[0]; // GeoJSON: [lng, lat]
+          var coords = ring.map(function(p){ return {lat: p[1], lng: p[0]}; });
           drawBuildingPolygon(map, coords);
-          showToast("✓ " + label + " loaded");
+          showToast("✓ Property boundary loaded");
         } else {
           drawFallbackBox(map);
-          if (c) { c.textContent = "No property data — using approx. area"; c.style.color = "var(--muted)"; }
+          if (c) { c.textContent = "No parcel found — using approx. area"; c.style.color = "var(--muted)"; }
         }
       } catch(e) {
-        console.warn("Overpass failed:", e);
+        console.warn("Regrid failed:", e);
         drawFallbackBox(map);
-        if (c) { c.textContent = "Could not load outline — using approx. area"; c.style.color = "var(--muted)"; }
+        if (c) { c.textContent = "Could not load boundary — using approx. area"; c.style.color = "var(--muted)"; }
       }
     }
 

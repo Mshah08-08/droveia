@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-  <link rel="icon" type="image/png" href="1.png">
+  <link rel="icon" type="image/png" href="DroveiaLogo.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Droveia</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
@@ -20,8 +20,8 @@
   --surface:rgba(26,110,240,0.04);
   --surface2:rgba(26,110,240,0.07);
   --surface3:rgba(26,110,240,0.11);
-  --border:rgba(0,0,0,0.07);
-  --border2:rgba(0,0,0,0.11);
+  --border:rgba(0,0,0,0.08);
+  --border2:rgba(0,0,0,0.13);
   --text:#0d0f1a;
   --text2:#2a2d3e;
   --muted:#6b7280;
@@ -38,7 +38,7 @@
   --font:'Sora',sans-serif;
   --nav-h:64px;
   --toast-bg:#1a1a2e;
-  --toast-border:rgba(255,255,255,.12);
+  --toast-border:rgba(255,255,255,.14);
   --toast-text:#f0f3ff;
   --search-h:54px;
 }
@@ -238,7 +238,7 @@ img{max-width:100%}
 .auth-footer a{color:var(--blue);cursor:pointer}
 
 /* ── Navigation ─────────────────────────────── */
-nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:var(--nav-h);background:rgba(255,255,255,.92);backdrop-filter:blur(20px) saturate(160%);border-bottom:1px solid var(--border);box-shadow:0 1px 20px rgba(0,0,0,.06);display:flex;align-items:center;padding:0 24px;gap:16px}
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:var(--nav-h);background:rgba(250,248,244,.95);backdrop-filter:blur(20px) saturate(160%);border-bottom:1px solid var(--border);box-shadow:0 1px 20px rgba(0,0,0,.05);display:flex;align-items:center;padding:0 24px;gap:16px}
 .nav-logo{display:flex;align-items:center;gap:9px;cursor:pointer;flex-shrink:0}
 .nav-logo-mark{height:40px;width:auto;background:transparent;border:none;box-shadow:none;display:flex;align-items:center;justify-content:center;}
 .nav-wordmark{font-size:17px;font-weight:800;letter-spacing:-.03em}
@@ -263,7 +263,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:var(--nav-h);backgro
 .nav-link{padding:8px 12px;border-radius:8px;font-size:13px;font-weight:500;color:var(--muted);transition:.15s;cursor:pointer;position:relative}
 .nav-link:hover{color:var(--text);background:var(--surface)}
 .nav-link.active{color:var(--text)}
-.nav-link.active::after{content:'';position:absolute;bottom:-1px;left:50%;transform:translateX(-50%);width:20px;height:2px;background:var(--blue);border-radius:2px}
+.nav-link.active::after{content:'';position:absolute;bottom:-1px;left:50%;transform:translateX(-50%);width:20px;height:2px;background:#1a6ef0;border-radius:2px}
 .nav-right{display:flex;align-items:center;gap:10px;flex-shrink:0;margin-left:auto}
 
 .theme-fab{
@@ -321,13 +321,13 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:var(--nav-h);backgro
 /* ── Hero ───────────────────────────────────── */
 .hero{padding:60px 0 50px;overflow:hidden;background:linear-gradient(160deg,#f0f5ff 0%,#e8efff 50%,#f5f7ff 100%)}
 .hero-inner{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:48px;max-width:1280px;margin:0 auto;padding:0 24px}
-.hero-badge{display:inline-flex;align-items:center;gap:7px;background:#dbeafe;border:1px solid rgba(26,110,240,.25);border-radius:20px;padding:6px 12px;font-size:12px;font-weight:600;color:#1d4ed8;margin-bottom:20px;letter-spacing:.02em}
+.hero-badge{display:inline-flex;align-items:center;gap:7px;background:#e8f0fd;border:1px solid rgba(26,110,240,.22);border-radius:20px;padding:6px 12px;font-size:12px;font-weight:600;color:#1560d8;margin-bottom:20px;letter-spacing:.02em}
 .hero-h1{font-size:clamp(36px,4.5vw,58px);font-weight:800;line-height:1.08;letter-spacing:-.04em;margin-bottom:18px}
 .hero-h1 span{background:linear-gradient(135deg,#1a6ef0,#2563eb);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .hero-sub{font-size:16px;color:var(--text2);line-height:1.7;font-weight:300;margin-bottom:28px;max-width:460px}
 .hero-ctas{display:flex;gap:12px;margin-bottom:36px;flex-wrap:wrap}
 .btn-primary{display:inline-flex;align-items:center;gap:8px;background:var(--blue);color:#fff;border-radius:12px;padding:13px 22px;font-size:14px;font-weight:600;transition:.18s;cursor:pointer;border:none;font-family:var(--font)}
-.btn-primary:hover{background:var(--blue-hover);transform:translateY(-1px);box-shadow:0 8px 24px rgba(26,110,240,.35)}
+.btn-primary:hover{background:var(--blue-hover);transform:translateY(-1px);box-shadow:0 6px 20px rgba(26,110,240,.4)}
 .btn-primary:active{transform:none}
 .btn-secondary{display:inline-flex;align-items:center;gap:8px;background:var(--surface2);color:var(--text);border:1px solid var(--border2);border-radius:12px;padding:13px 22px;font-size:14px;font-weight:500;transition:.18s;cursor:pointer;font-family:var(--font)}
 .btn-secondary:hover{background:var(--surface3);transform:translateY(-1px)}
@@ -372,7 +372,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:var(--nav-h);backgro
 .tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;width:100%;align-items:stretch}.tools-grid .tool-card{height:100%;max-width:320px}
 .tool-card{background:#ffffff;border:1px solid var(--border);border-radius:var(--radius);padding:20px;cursor:pointer;transition:.22s;position:relative;overflow:hidden;display:flex;flex-direction:column;gap:10px}
 .tool-card::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent,rgba(26,110,240,.03));opacity:0;transition:.2s;pointer-events:none}
-.tool-card:hover{border-color:rgba(26,110,240,.35);transform:translateY(-3px);box-shadow:0 12px 36px rgba(26,110,240,.12)}
+.tool-card:hover{border-color:rgba(26,110,240,.3);transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,.12)}
 .tool-unavailable{opacity:.7;pointer-events:none}
 .tool-card:hover::after{opacity:1}
 .tool-card-img{width:100%;aspect-ratio:1.6;position:relative;border-radius:var(--radius) var(--radius) 0 0;overflow:hidden;background:#ffffff}.tool-card-body{display:flex;flex-direction:column;flex:1}.tool-card-price-row{display:flex;align-items:baseline;gap:2px;margin-bottom:10px}.tool-card-pph{font-size:20px;font-weight:800;color:var(--text);line-height:1}.tool-card-unit{font-size:12px;color:var(--muted);font-weight:500}.tool-card-retail{font-size:12px;color:var(--muted);text-decoration:line-through;margin-left:6px}.tool-card-eta-pill{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px}.tool-card-footer{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:auto}.tool-card-add{padding:7px 14px;background:var(--blue);border:none;border-radius:8px;color:#fff;font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s}.tool-card-add:hover{background:#1560d8}
@@ -536,7 +536,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:var(--nav-h);backgro
 .avatar-inner{position:relative;width:100%;height:100%;border-radius:50%;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;z-index:1;border:3px solid var(--bg2)}
 .profile-name{font-size:16px;font-weight:800;letter-spacing:-.01em}
 .profile-email{font-size:12px;color:var(--muted);margin-bottom:10px}
-.verified-pill{display:inline-flex;align-items:center;gap:5px;background:#dbeafe;border:1px solid rgba(26,110,240,.25);border-radius:20px;padding:4px 10px;font-size:11px;font-weight:600;color:#93c5fd}
+.verified-pill{display:inline-flex;align-items:center;gap:5px;background:#e8f0fd;border:1px solid rgba(26,110,240,.22);border-radius:20px;padding:4px 10px;font-size:11px;font-weight:600;color:#93c5fd}
 .sidebar-nav{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
 .sidebar-nav-item{display:flex;align-items:center;gap:10px;padding:13px 16px;cursor:pointer;transition:.15s;font-size:14px;font-weight:500;color:var(--text2);border-bottom:1px solid var(--border)}
 .sidebar-nav-item:last-of-type{border-bottom:none}
@@ -699,7 +699,7 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
 /* Mobile bottom nav */
 .mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--bg2);border-top:1px solid var(--border);z-index:900;padding:8px 0 max(8px,env(safe-area-inset-bottom));gap:0}
 .mobile-nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 4px;background:none;border:none;color:var(--muted);font-family:var(--font);font-size:10px;font-weight:600;letter-spacing:.04em;cursor:pointer;transition:.15s}
-.mobile-nav-item.active{color:var(--blue)}
+.mobile-nav-item.active{color:#1a6ef0}
 .mobile-nav-item svg{transition:.15s}
 .mobile-nav-item.active svg{stroke:var(--blue)}
 @media(max-width:640px){
@@ -1573,7 +1573,7 @@ function toolCard(t) {
   h += '</div>';
   h += '<div class="tool-card-footer">';
   h += '<div style="display:flex;flex-direction:column;gap:4px">';
-  h += '<span style="background:rgba(34,197,94,.15);color:#16a34a;font-size:10px;font-weight:700;padding:2px 8px;border-radius:5px;width:fit-content">Save ' + pct + '%</span>';
+  h += '<span style="background:rgba(22,163,74,.12);color:#15803d;font-size:10px;font-weight:700;padding:2px 8px;border-radius:5px;width:fit-content">Save ' + pct + '%</span>';
   h += '<div class="tool-card-eta-pill">~' + t.eta + '</div>';
   h += '</div>';
   h += unavail
@@ -3891,10 +3891,7 @@ if (_savedPage && _savedPage !== "admin") {
   </div>
 </div>
 
-  <button class="theme-fab" id="theme-toggle" onclick="toggleTheme()" title="Toggle dark/light mode">
-    <svg id="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
-    <svg id="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-  </button>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 
 

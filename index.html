@@ -3457,32 +3457,67 @@ function startApp() {
       if (c) { c.style.color = "var(--green)"; setTimeout(function(){ if(c) c.style.color="var(--muted)"; }, 1500); }
     }
 
+    // Compute polygon area (shoelace) — larger = more likely to be the lot
+    function polyArea(geom) {
+      var a = 0;
+      for (var i = 0, j = geom.length-1; i < geom.length; j = i++) {
+        a += (geom[j].lon + geom[i].lon) * (geom[j].lat - geom[i].lat);
+      }
+      return Math.abs(a / 2);
+    }
+
     async function fetchBuildingPolygon(map) {
       var c = el("addr-droppin-coords");
-      if (c) { c.textContent = "Finding building outline…"; c.style.color = "var(--blue)"; }
+      if (c) { c.textContent = "Finding property outline…"; c.style.color = "var(--blue)"; }
       try {
-        var query = '[out:json][timeout:10];way[building](around:60,' + houseLat + ',' + houseLng + ');out geom;';
+        // Query building footprint AND parcel/lot tags simultaneously
+        var query = '[out:json][timeout:15];('
+          + 'way[building](around:80,' + houseLat + ',' + houseLng + ');'
+          + 'way["landuse"~"residential|grass|garden|farmyard"](around:80,' + houseLat + ',' + houseLng + ');'
+          + 'way["boundary"="lot"](around:80,' + houseLat + ',' + houseLng + ');'
+          + 'way["amenity"="residential"](around:80,' + houseLat + ',' + houseLng + ');'
+          + 'relation["landuse"~"residential"](around:80,' + houseLat + ',' + houseLng + ');'
+          + ');out geom;';
         var url = 'https://overpass-api.de/api/interpreter?data=' + encodeURIComponent(query);
         var resp = await fetch(url);
         var data = await resp.json();
-        var elements = (data.elements || []);
-        // Pick closest building to geocoded point
-        var best = null, bestDist = Infinity;
-        elements.forEach(function(way) {
-          if (!way.geometry || way.geometry.length < 3) return;
-          // Compute centroid
-          var cLat = way.geometry.reduce(function(s,p){return s+p.lat;},0)/way.geometry.length;
-          var cLng = way.geometry.reduce(function(s,p){return s+p.lon;},0)/way.geometry.length;
-          var d = Math.pow(cLat-houseLat,2)+Math.pow(cLng-houseLng,2);
-          if (d < bestDist) { bestDist = d; best = way; }
+        var elements = (data.elements || []).filter(function(e){
+          return e.geometry && e.geometry.length >= 3;
         });
-        if (best && best.geometry.length >= 3) {
+
+        if (!elements.length) { drawFallbackBox(map); if(c){c.textContent="No property data — using approx. area";c.style.color="var(--muted)";} return; }
+
+        // Score each polygon: prefer ones that contain the geocoded point,
+        // then prefer lot/boundary tags over building tags, then prefer larger area
+        function tagScore(e) {
+          var tags = e.tags || {};
+          if (tags.boundary === 'lot') return 4;
+          if (tags.landuse) return 3;
+          if (tags.amenity === 'residential') return 2;
+          if (tags.building) return 1;
+          return 0;
+        }
+
+        var best = null, bestScore = -1;
+        elements.forEach(function(way) {
+          var coords = way.geometry.map(function(p){ return {lat:p.lat, lng:p.lon}; });
+          var contains = window._pointInPolygon(houseLat, houseLng, coords);
+          var area = polyArea(way.geometry);
+          var tag = tagScore(way);
+          // Primary: contains geocoded point; secondary: tag priority; tertiary: larger area
+          var score = (contains ? 1000 : 0) + tag * 10 + Math.min(area * 1e8, 9);
+          if (score > bestScore) { bestScore = score; best = way; }
+        });
+
+        if (best) {
           var coords = best.geometry.map(function(p){ return {lat:p.lat, lng:p.lon}; });
+          var label = (best.tags && best.tags.boundary === 'lot') ? 'Property lot' :
+                      (best.tags && best.tags.landuse) ? 'Land parcel' : 'Building footprint';
           drawBuildingPolygon(map, coords);
-          showToast("✓ Building outline loaded");
+          showToast("✓ " + label + " loaded");
         } else {
           drawFallbackBox(map);
-          if (c) { c.textContent = "No building found — using approx. area"; c.style.color = "var(--muted)"; }
+          if (c) { c.textContent = "No property data — using approx. area"; c.style.color = "var(--muted)"; }
         }
       } catch(e) {
         console.warn("Overpass failed:", e);

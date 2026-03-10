@@ -965,6 +965,7 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
     <button class="nav-link" id="nav-browse" onclick="showPage('browse')">Browse</button>
     <button class="nav-link" id="nav-orders" onclick="showPage('orders')">Orders</button>
     <button class="nav-link" id="nav-partners" onclick="showPage('partners')">Partners</button>
+    <button class="nav-link" id="nav-dashboard" onclick="showPage('admin')" style="display:none">Dashboard</button>
   </div>
 
   <div class="nav-right">
@@ -996,9 +997,9 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
             Browse Tools
           </button>
-          <button class="btn-secondary" id="hero-admin-btn" onclick="sessionStorage.setItem('openAdmin','1'); window.open(location.href.split('#')[0], '_blank')" style="display:none">
+          <button class="btn-secondary" id="hero-admin-btn" onclick="showPage('admin')" style="display:none">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-            Admin
+            <span id="hero-admin-btn-label">Dashboard</span>
           </button>
           <button class="btn-secondary" id="hero-signup-btn" onclick="switchAuth('signup');showAuth()">
             Create Free Account
@@ -1525,7 +1526,7 @@ function showPage(id) {
   sessionStorage.setItem("currentPage", id);
   qsa(".nav-link").forEach(function(l){ l.classList.remove("active"); });
   var nl = el("nav-"+id); if(nl) nl.classList.add("active");
-  if (id === "admin") { renderAdmin(); }
+  if (id === "admin") { isPartner && !checkAdmin() ? renderPartnerDashboard() : renderAdmin(); }
   window.scrollTo(0,0);
   updateMobileNav(id);
   if (id==="browse")  renderTools();
@@ -3475,6 +3476,143 @@ function startApp() {
 
 
 
+
+  // ── PARTNER DASHBOARD ──
+  var PARTNER_EMAILS = [];
+  var isPartner = false;
+  var currentPartnerDoc = null;
+
+  async function loadPartnerEmails() {
+    try {
+      var fb = window._fb;
+      var snap = await fb.getDocs(
+        fb.query(fb.collection(fb.db, "partners"), fb.where("status","==","active"))
+      );
+      PARTNER_EMAILS = snap.docs.map(function(d){ return d.data().email; });
+      // Also store the partner doc for the current user
+      snap.docs.forEach(function(d){
+        if (currentUser && d.data().email === currentUser.email) {
+          currentPartnerDoc = Object.assign({ _id: d.id }, d.data());
+        }
+      });
+    } catch(e) { console.warn("loadPartnerEmails", e); }
+  }
+
+  function checkPartner() {
+    if (!currentUser) return false;
+    return PARTNER_EMAILS.includes(currentUser.email);
+  }
+
+  async function renderPartnerDashboard() {
+    var wrap = el("admin-content");
+    if (!wrap) return;
+
+    await loadToolsFromRTDB();
+    await loadPartnerEmails();
+    isPartner = checkPartner();
+
+    if (!currentUser) {
+      wrap.innerHTML = '<div class="admin-login-gate"><h2>Partner Access</h2><p>Sign in with your partner account to continue.</p><button class="btn-primary" onclick="showAuth()">Sign In</button></div>';
+      return;
+    }
+    if (!isPartner && !checkAdmin()) {
+      wrap.innerHTML = '<div class="admin-login-gate"><h2>Access Denied</h2><p>' + currentUser.email + ' is not a registered partner.</p><button class="btn-secondary" onclick="showPage(\'home\')">Go Home</button></div>';
+      return;
+    }
+
+    // If admin, show admin dashboard instead
+    if (checkAdmin()) { renderAdmin(); return; }
+
+    var p = currentPartnerDoc || {};
+    var partnerName = p.name || currentUser.email;
+
+    // Filter tools belonging to this partner
+    var myTools = TOOLS.filter(function(t){ return t.partnerEmail === currentUser.email; });
+
+    // Filter orders that contain partner tools
+    var myToolIds = myTools.map(function(t){ return t.id; });
+    var allPartnerOrders = [];
+    try {
+      var fb = window._fb;
+      var oSnap = await fb.getDocs(
+        fb.query(fb.collection(fb.db, "allOrders"), fb.orderBy("createdAt","desc"), fb.limit(100))
+      );
+      oSnap.docs.forEach(function(d){
+        var o = Object.assign({ _id: d.id }, d.data());
+        var hasMyItem = (o.items||[]).some(function(i){ return myToolIds.includes(i.id); });
+        if (hasMyItem) allPartnerOrders.push(o);
+      });
+    } catch(e) { console.warn("partner orders load failed", e); }
+
+    // Earnings
+    var totalEarnings = allPartnerOrders.reduce(function(sum, o) {
+      var myShare = (o.items||[]).filter(function(i){ return myToolIds.includes(i.id); })
+        .reduce(function(s,i){ return s + (i.subtotal || 0); }, 0);
+      return sum + myShare * 0.7;
+    }, 0);
+    var activeRentals = allPartnerOrders.filter(function(o){ return o.status === "in_flight" || o.status === "delivered"; }).length;
+
+    wrap.innerHTML =
+      '<div class="admin-header">' +
+        '<div><div class="admin-title">Partner Dashboard</div><div class="admin-subtitle">' + partnerName + ' &middot; ' + currentUser.email + '</div></div>' +
+      '</div>' +
+      '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:28px">' +
+        '<div class="admin-stat" style="flex:1"><div class="admin-stat-val" style="color:var(--blue)">' + myTools.length + '</div><div class="admin-stat-label">Your Listings</div></div>' +
+        '<div class="admin-stat" style="flex:1"><div class="admin-stat-val green">' + activeRentals + '</div><div class="admin-stat-label">Active Rentals</div></div>' +
+        '<div class="admin-stat" style="flex:1"><div class="admin-stat-val">' + allPartnerOrders.length + '</div><div class="admin-stat-label">Total Orders</div></div>' +
+        '<div class="admin-stat" style="flex:1"><div class="admin-stat-val" style="color:var(--green)">$' + totalEarnings.toFixed(2) + '</div><div class="admin-stat-label">Est. Earnings (70%)</div></div>' +
+      '</div>' +
+
+      // My inventory
+      '<div style="font-size:16px;font-weight:800;margin-bottom:14px;letter-spacing:-.01em">Your Inventory</div>' +
+      (myTools.length === 0
+        ? '<div style="background:var(--bg2);border:1px dashed var(--border);border-radius:14px;padding:32px;text-align:center;color:var(--muted);font-size:14px;margin-bottom:28px">No tools listed yet. Contact Droveia to add your inventory.</div>'
+        : '<div style="display:grid;gap:10px;margin-bottom:28px">' +
+            myTools.map(function(t){
+              return '<div class="admin-order-card" style="display:flex;align-items:center;gap:14px">' +
+                (t.img && t.img!=="x" ? '<img src="'+t.img+'" style="width:52px;height:52px;object-fit:contain;border-radius:8px;background:var(--bg3);flex-shrink:0">' : '<div style="width:52px;height:52px;border-radius:8px;background:var(--bg3);flex-shrink:0"></div>')+
+                '<div style="flex:1">' +
+                  '<div style="font-weight:700;font-size:15px">' + t.name + '</div>' +
+                  '<div style="font-size:12px;color:var(--muted);margin-top:2px">' + t.cat + ' &middot; $' + (t.pph||0).toFixed(2) + '/hr</div>' +
+                '</div>' +
+                '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">' +
+                  (t.available !== false
+                    ? '<span style="background:rgba(22,163,74,.1);color:#15803d;font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px">In Stock</span>'
+                    : '<span style="background:rgba(239,68,68,.1);color:#ef4444;font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px">Rented Out</span>')+
+                  '<div style="font-size:11px;color:var(--muted)">' + (t.rentedQty||0) + '/' + (t.qty||1) + ' rented</div>' +
+                '</div>' +
+              '</div>';
+            }).join("") +
+          '</div>'
+      ) +
+
+      // Recent orders
+      '<div style="font-size:16px;font-weight:800;margin-bottom:14px;letter-spacing:-.01em">Recent Orders</div>' +
+      (allPartnerOrders.length === 0
+        ? '<div style="background:var(--bg2);border:1px dashed var(--border);border-radius:14px;padding:32px;text-align:center;color:var(--muted);font-size:14px">No orders yet.</div>'
+        : '<div style="display:grid;gap:10px">' +
+            allPartnerOrders.slice(0,20).map(function(o){
+              var statusColor = o.status==="cancelled" ? "#ef4444" : o.status==="returned" ? "var(--muted)" : o.status==="in_flight" ? "var(--blue)" : "var(--green)";
+              var statusLabel = o.status==="in_flight" ? "In Flight" : o.status==="delivered" ? "Delivered" : o.status==="returned" ? "Returned" : o.status==="cancelled" ? "Cancelled" : o.status;
+              var myItems = (o.items||[]).filter(function(i){ return myToolIds.includes(i.id); });
+              var myRevenue = myItems.reduce(function(s,i){return s+(i.subtotal||0);},0)*0.7;
+              var date = o.createdAt && o.createdAt.toDate ? o.createdAt.toDate().toLocaleString([],{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}) : "";
+              return '<div class="admin-order-card" style="display:flex;align-items:center;gap:14px">' +
+                '<div style="flex:1">' +
+                  '<div style="font-weight:700;font-size:14px">#' + o._id.slice(0,8).toUpperCase() + '</div>' +
+                  '<div style="font-size:12px;color:var(--muted);margin-top:2px">' + myItems.map(function(i){return i.name+(i.hours?" ("+i.hours+"h)":"");}).join(", ") + '</div>' +
+                  (date ? '<div style="font-size:11px;color:var(--dim);margin-top:2px">' + date + '</div>' : "") +
+                '</div>' +
+                '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">' +
+                  '<span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px;background:' + statusColor.replace("var(--","rgba(").replace(")",",0.1)") + ';color:' + statusColor + '">' + statusLabel + '</span>' +
+                  '<div style="font-size:12px;font-weight:700;color:var(--green)">+$' + myRevenue.toFixed(2) + '</div>' +
+                '</div>' +
+              '</div>';
+            }).join("") +
+          '</div>'
+      );
+  }
+
   // ── PARTNERS ──
   window.submitPartnerApp = async function() {
     var name  = (el("pf-name")||{}).value.trim();
@@ -3667,7 +3805,13 @@ function startApp() {
       // Show admin button only for admin users
       await loadAdminEmails();
       var adminBtn = el("hero-admin-btn");
-      if (adminBtn) adminBtn.style.display = checkAdmin() ? "" : "none";
+      await loadPartnerEmails();
+      isPartner = checkPartner();
+      if (adminBtn) adminBtn.style.display = (checkAdmin() || checkPartner()) ? "" : "none";
+      var adminLbl = el('hero-admin-btn-label');
+      if (adminLbl) adminLbl.textContent = checkPartner() && !checkAdmin() ? 'Partner Dashboard' : 'Admin';
+      var dashNav = el('nav-dashboard');
+      if (dashNav) { dashNav.style.display = (checkAdmin() || checkPartner()) ? '' : 'none'; dashNav.textContent = checkPartner() && !checkAdmin() ? 'Partner' : 'Admin'; }
       await loadProfile();
       await loadCart();
       subscribeOrders();
@@ -3684,6 +3828,8 @@ function startApp() {
       if (heroBtn) heroBtn.style.display = "";
       var adminBtn = el("hero-admin-btn");
       if (adminBtn) adminBtn.style.display = "none";
+      var dashNav = el('nav-dashboard');
+      if (dashNav) dashNav.style.display = 'none';
     }
   });
 }

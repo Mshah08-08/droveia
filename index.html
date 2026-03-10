@@ -2228,7 +2228,7 @@ function renderOrders() {
         rows += '<div style="padding:6px 0"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:4px">Items</div>'+itemRows+'</div>';
 
         var cancelBtn = (o.status!=="cancelled" && o.status!=="returned")
-          ? '<button onclick="event.stopPropagation();userCancelOrder(&quot;'+ uid +'&quot;)" style="margin-top:12px;width:100%;padding:9px;border-radius:9px;background:rgba(239,68,68,.07);color:#ef4444;border:1px solid rgba(239,68,68,.18);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font)">Cancel Order</button>'
+          ? '<button data-oid="'+ uid +'" onclick="event.stopPropagation();userCancelOrder(this.dataset.oid)" style="margin-top:12px;width:100%;padding:9px;border-radius:9px;background:rgba(239,68,68,.07);color:#ef4444;border:1px solid rgba(239,68,68,.18);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font)">Cancel Order</button>'
           : "";
 
         var detailPanel = '<div id="'+expandId+'" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">'+
@@ -2237,7 +2237,7 @@ function renderOrders() {
           cancelBtn +
         '</div>';
 
-        return '<div class="past-order" onclick="toggleOrderExpand(&quot;'+ uid +'&quot;)" style="cursor:pointer;flex-direction:column;gap:0;padding:16px 18px;transition:.15s">'+
+        return '<div class="past-order" data-uid="'+ uid +'" onclick="toggleOrderExpand(this.dataset.uid)" style="cursor:pointer;flex-direction:column;gap:0;padding:16px 18px;transition:.15s">'+
           '<div style="display:flex;align-items:center;gap:13px">'+
             '<div style="width:40px;height:40px;border-radius:10px;background:var(--blue-dim);display:flex;align-items:center;justify-content:center;flex-shrink:0">'+catIcon(cat)+'</div>'+
             '<div style="flex:1;min-width:0">'+
@@ -2590,7 +2590,7 @@ async function renderAdmin() {
     return;
   }
   if (!isAdmin) {
-    wrap.innerHTML = '<div class="admin-login-gate"><h2>Access Denied</h2><p>' + currentUser.email + ' is not authorized as an admin.</p><button class="btn-secondary" onclick="showPage(&quot;home&quot;)">Go Home</button></div>';
+    wrap.innerHTML = '<div class="admin-login-gate"><h2>Access Denied</h2><p>' + currentUser.email + ' is not authorized as an admin.</p><button class="btn-secondary" onclick="showPage(this.dataset.pg)" data-pg="home">Go Home</button></div>';
     return;
   }
 

@@ -2536,6 +2536,7 @@ async function renderAdmin() {
     '<div class="admin-tabs" style="margin-bottom:24px">' +
       '<button class="admin-tab active" data-panel="inventory" onclick="adminSwitchTab(this)">Inventory</button>' +
       '<button class="admin-tab" data-panel="orders" onclick="adminSwitchTab(this)">Orders</button>' +
+      '<button class="admin-tab" data-panel="pending" onclick="adminSwitchTab(this)" id="admin-tab-pending">Pending Inventory</button>' +
     '</div>' +
 
     '<div class="admin-panel active" id="admin-panel-inventory">' +
@@ -2545,9 +2546,13 @@ async function renderAdmin() {
     '</div>' +
     '<div class="admin-panel" id="admin-panel-orders">' +
       '<div id="admin-orders-content"><div style="color:var(--muted);font-size:14px;padding:20px">Loading orders...</div></div>' +
+    '</div>' +
+    '<div class="admin-panel" id="admin-panel-pending">' +
+      '<div id="admin-pending-content"><div style="color:var(--muted);font-size:14px;padding:20px">Loading pending inventory...</div></div>' +
     '</div>';
 
   adminLoadOrders();
+  adminLoadPendingInventory();
 }
 
 function adminSwitchTab(btn) {
@@ -2558,6 +2563,7 @@ function adminSwitchTab(btn) {
   var pg = el("admin-panel-" + panel);
   if (pg) pg.classList.add("active");
   if (panel === "orders") adminLoadOrders();
+  if (panel === "pending") adminLoadPendingInventory();
 }
 
 function adminInventoryTable() {
@@ -3565,7 +3571,28 @@ function startApp() {
       '</div>' +
 
       // My inventory
-      '<div style="font-size:16px;font-weight:800;margin-bottom:14px;letter-spacing:-.01em">Your Inventory</div>' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">' +
+        '<div style="font-size:16px;font-weight:800;letter-spacing:-.01em">Your Inventory</div>' +
+        '<button onclick="showPartnerAddInventory()" style="display:flex;align-items:center;gap:6px;padding:8px 14px;background:var(--blue);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font)">+ Add Item</button>' +
+      '</div>' +
+      // Add inventory form (hidden by default)
+      '<div id="partner-inventory-form-wrap" style="display:none;background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:24px;margin-bottom:20px">' +
+        '<div style="font-weight:700;font-size:15px;margin-bottom:16px">Submit New Item for Approval</div>' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">' +
+          '<div><label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Name *</label><input id="pi-name" class="form-input" placeholder="e.g. DJI Mini 4 Pro" style="width:100%;box-sizing:border-box"></div>' +
+          '<div><label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Category *</label><select id="pi-cat" class="form-input" style="width:100%;box-sizing:border-box"><option>Workshop</option><option>Crafts</option><option>Office</option><option>Electronics</option></select></div>' +
+          '<div><label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Retail Price ($) *</label><input id="pi-retail" class="form-input" type="number" placeholder="299" style="width:100%;box-sizing:border-box"></div>' +
+          '<div><label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Price/hr (0 = auto)</label><input id="pi-pph" class="form-input" type="number" placeholder="0" style="width:100%;box-sizing:border-box"></div>' +
+          '<div><label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">ETA *</label><input id="pi-eta" class="form-input" placeholder="e.g. 10 min" style="width:100%;box-sizing:border-box"></div>' +
+          '<div><label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Qty in Stock</label><input id="pi-qty" class="form-input" type="number" placeholder="1" style="width:100%;box-sizing:border-box"></div>' +
+        '</div>' +
+        '<div style="margin-bottom:12px"><label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Image URL</label><input id="pi-img" class="form-input" placeholder="https://..." style="width:100%;box-sizing:border-box"></div>' +
+        '<div style="margin-bottom:16px"><label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Description *</label><textarea id="pi-desc" class="form-input" rows="3" placeholder="Describe the item, condition, included accessories..." style="width:100%;box-sizing:border-box;resize:vertical"></textarea></div>' +
+        '<div style="display:flex;gap:10px">' +
+          '<button id="pi-submit-btn" onclick="submitPartnerInventory()" style="flex:1;padding:11px;background:var(--blue);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font)">Submit for Approval</button>' +
+          '<button onclick="showPartnerAddInventory()" style="padding:11px 16px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--font)">Cancel</button>' +
+        '</div>' +
+      '</div>' +
       (myTools.length === 0
         ? '<div style="background:var(--bg2);border:1px dashed var(--border);border-radius:14px;padding:32px;text-align:center;color:var(--muted);font-size:14px;margin-bottom:28px">No tools listed yet. Contact Droveia to add your inventory.</div>'
         : '<div style="display:grid;gap:10px;margin-bottom:28px">' +
@@ -3613,6 +3640,151 @@ function startApp() {
           '</div>'
       );
   }
+
+
+  // ── PARTNER INVENTORY SUBMISSION ──
+  window.showPartnerAddInventory = function() {
+    var wrap = el("partner-inventory-form-wrap");
+    if (!wrap) return;
+    wrap.style.display = wrap.style.display === "none" ? "block" : "none";
+  };
+
+  window.submitPartnerInventory = async function() {
+    var name   = (el("pi-name")   ||{}).value.trim();
+    var cat    = (el("pi-cat")    ||{}).value;
+    var retail = parseFloat((el("pi-retail")||{}).value) || 0;
+    var pph    = parseFloat((el("pi-pph")   ||{}).value) || 0;
+    var eta    = (el("pi-eta")    ||{}).value.trim();
+    var qty    = parseInt((el("pi-qty")     ||{}).value) || 1;
+    var img    = (el("pi-img")    ||{}).value.trim() || "x";
+    var desc   = (el("pi-desc")   ||{}).value.trim();
+    if (!name || !retail || !eta || !desc) { showToast("Fill in all required fields"); return; }
+    var btn = el("pi-submit-btn");
+    if (btn) { btn.disabled = true; btn.textContent = "Submitting..."; }
+    try {
+      var fb = window._fb;
+      await fb.addDoc(fb.collection(fb.db, "pendingInventory"), {
+        name, cat, retail, pph, eta, qty, img, desc,
+        partnerEmail: currentUser.email,
+        partnerName: currentPartnerDoc ? currentPartnerDoc.name : currentUser.email,
+        status: "pending",
+        createdAt: fb.serverTimestamp()
+      });
+      showToast("Submitted for admin approval!");
+      var wrap = el("partner-inventory-form-wrap");
+      if (wrap) wrap.style.display = "none";
+      // reset form
+      ["pi-name","pi-retail","pi-pph","pi-eta","pi-qty","pi-img","pi-desc"].forEach(function(id){
+        var el2 = el(id); if (el2) el2.value = "";
+      });
+      if (btn) { btn.disabled = false; btn.textContent = "Submit for Approval"; }
+    } catch(e) {
+      showToast("Error: " + e.message);
+      if (btn) { btn.disabled = false; btn.textContent = "Submit for Approval"; }
+    }
+  };
+
+  // ── ADMIN: LOAD & APPROVE/REJECT PENDING INVENTORY ──
+  window.adminLoadPendingInventory = async function() {
+    var wrap = el("admin-pending-content");
+    if (!wrap) return;
+    wrap.innerHTML = '<div style="color:var(--muted);font-size:14px;padding:20px">Loading...</div>';
+    try {
+      var fb = window._fb;
+      var snap = await fb.getDocs(
+        fb.query(fb.collection(fb.db, "pendingInventory"), fb.orderBy("createdAt","desc"))
+      );
+      // Update tab badge
+      var pending = snap.docs.filter(function(d){ return d.data().status === "pending"; });
+      var tabBtn = el("admin-tab-pending");
+      if (tabBtn) tabBtn.textContent = "Pending Inventory" + (pending.length ? " ("+pending.length+")" : "");
+
+      if (snap.empty) {
+        wrap.innerHTML = '<div style="color:var(--muted);font-size:14px;padding:20px">No pending submissions.</div>';
+        return;
+      }
+      wrap.innerHTML = snap.docs.map(function(d) {
+        var item = d.data();
+        var isPending = item.status === "pending";
+        var date = item.createdAt && item.createdAt.toDate ? item.createdAt.toDate().toLocaleString([],{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}) : "";
+        return '<div class="admin-order-card" style="margin-bottom:12px">' +
+          '<div style="display:flex;align-items:flex-start;gap:14px">' +
+            (item.img && item.img !== "x" ? '<img src="' + item.img + '" style="width:60px;height:60px;object-fit:contain;border-radius:10px;background:var(--bg3);flex-shrink:0">' : '<div style="width:60px;height:60px;border-radius:10px;background:var(--bg3);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:24px">&#x1F4E6;</div>')+
+            '<div style="flex:1">' +
+              '<div style="font-weight:700;font-size:15px">' + item.name + '</div>' +
+              '<div style="font-size:12px;color:var(--muted);margin-top:3px">' + item.cat + ' &middot; $' + (item.retail||0) + ' retail &middot; $' + (item.pph||0).toFixed(2) + '/hr &middot; Qty: ' + (item.qty||1) + ' &middot; ETA: ' + item.eta + '</div>' +
+              '<div style="font-size:12px;color:var(--muted);margin-top:2px">From: <strong>' + (item.partnerName||item.partnerEmail) + '</strong> &middot; ' + date + '</div>' +
+              '<div style="font-size:13px;color:var(--text2);margin-top:6px;line-height:1.5">' + (item.desc||"") + '</div>' +
+            '</div>' +
+            '<div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;flex-shrink:0">' +
+              (isPending
+                ? '<button onclick="adminApprovePendingItem(\'' + d.id + '\')" style="padding:7px 14px;border-radius:9px;background:rgba(22,163,74,.12);color:#15803d;border:1px solid rgba(22,163,74,.25);font-size:12px;font-weight:700;cursor:pointer">Approve</button>' +
+                  '<button onclick="adminRejectPendingItem(\'' + d.id + '\')" style="padding:7px 14px;border-radius:9px;background:rgba(239,68,68,.08);color:#ef4444;border:1px solid rgba(239,68,68,.2);font-size:12px;font-weight:700;cursor:pointer">Reject</button>'
+                : '<span style="font-size:12px;font-weight:700;padding:5px 12px;border-radius:8px;background:' + (item.status==="approved"?"rgba(22,163,74,.1)":"rgba(239,68,68,.08)") + ';color:' + (item.status==="approved"?"#15803d":"#ef4444") + '">' + (item.status==="approved"?"Approved":"Rejected") + '</span>'
+              ) +
+            '</div>' +
+          '</div>' +
+        '</div>';
+      }).join("");
+    } catch(e) {
+      wrap.innerHTML = '<div style="color:#ef4444;font-size:14px;padding:20px">Error loading: ' + e.message + '</div>';
+    }
+  };
+
+  window.adminApprovePendingItem = async function(docId) {
+    showConfirm({
+      title: "Approve & Add to Inventory",
+      msg: "This will add the item to the live RTDB inventory immediately.",
+      okLabel: "Approve",
+      color: "green",
+      onOk: async function() {
+        try {
+          var fb = window._fb;
+          var snap = await fb.getDoc(fb.doc(fb.db, "pendingInventory", docId));
+          var item = snap.data();
+          if (!item) { showToast("Item not found"); return; }
+          // Add to RTDB tools array
+          await loadToolsFromRTDB();
+          var nextId = TOOLS.length ? Math.max.apply(null, TOOLS.map(function(t){ return t.id||0; })) + 1 : 1;
+          var tool = {
+            id: nextId,
+            name: item.name, cat: item.cat, retail: item.retail,
+            pph: item.pph||0, eta: item.eta, qty: item.qty||1,
+            img: item.img||"x", desc: item.desc, rating: 4.5,
+            available: true, rentedQty: 0,
+            partnerEmail: item.partnerEmail
+          };
+          TOOLS.push(tool);
+          await adminSyncToRTDB();
+          // Mark as approved in Firestore
+          await fb.updateDoc(fb.doc(fb.db, "pendingInventory", docId), {
+            status: "approved", approvedAt: fb.serverTimestamp()
+          });
+          showToast("Approved and added to inventory!");
+          adminLoadPendingInventory();
+        } catch(e) { showToast("Error: " + e.message); }
+      }
+    });
+  };
+
+  window.adminRejectPendingItem = async function(docId) {
+    showConfirm({
+      title: "Reject Submission",
+      msg: "This will mark the submission as rejected. The partner will not be notified automatically.",
+      okLabel: "Reject",
+      color: "red",
+      onOk: async function() {
+        try {
+          var fb = window._fb;
+          await fb.updateDoc(fb.doc(fb.db, "pendingInventory", docId), {
+            status: "rejected", rejectedAt: fb.serverTimestamp()
+          });
+          showToast("Submission rejected");
+          adminLoadPendingInventory();
+        } catch(e) { showToast("Error: " + e.message); }
+      }
+    });
+  };
 
   // ── PARTNERS ──
   window.submitPartnerApp = async function() {

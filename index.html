@@ -1534,7 +1534,7 @@ function showPage(id) {
   if (id==="orders")  { renderOrders(); setTimeout(initOrderMap, 100); }
   if (id==="account") renderAccount();
   if (id==="partners") window.loadPartners && window.loadPartners();
-  if (id==="admin") { window.isPartner && !window.checkAdmin && !window.checkAdmin() ? window.renderPartnerDashboard && window.renderPartnerDashboard() : renderAdmin(); }
+  if (id==="admin") { isPartner && !checkAdmin() ? (window.renderPartnerDashboard && window.renderPartnerDashboard()) : renderAdmin(); }
 }
 window.showPage = showPage;
 
@@ -2486,6 +2486,7 @@ window.saveNotifications= function(){ showToast("Loading..."); };
 // ── Admin ─────────────────────────────────────────────────────────────────────
 var ADMIN_EMAILS = [];
 var isAdmin = false;
+var isPartner = false;
 var adminEditingId = null;
 
 async function loadAdminEmails() {

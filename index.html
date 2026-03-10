@@ -1577,7 +1577,7 @@ function toolCard(t) {
   h += '<div class="tool-card-eta-pill">~' + t.eta + '</div>';
   h += '</div>';
   h += unavail
-    ? '<button class="tool-card-add" style="background:var(--dim);cursor:default;opacity:.6" disabled>Unavailable</button>'
+    ? '<button class="tool-card-add" style="background:var(--blue);opacity:.85" onclick="event.stopPropagation();openWaitlist(' + t.id + ')">🔔 Waitlist</button>'
     : '<button class="tool-card-add" onclick="event.stopPropagation();quickAdd(' + t.id + ')">+ Add</button>';
   h += '</div></div></div>';
   return h;
@@ -1805,7 +1805,9 @@ function renderModal() {
         '<div style="color:var(--green)">Save $'+Math.max(0, t.retail - calcCost(t, currentHours)).toFixed(2)+'</div>'+
       '</div>'+
     '</div>'+
-    '<button class="modal-add-btn" onclick="addToCart('+t.id+')">Add to Cart · $'+cost+'</button>';
+    (t.available === false
+      ? '<button class="modal-add-btn" style="background:var(--blue);opacity:.85" onclick="openWaitlist('+t.id+')">🔔 Join Waitlist — Notify Me When Available</button>'
+      : '<button class="modal-add-btn" onclick="addToCart('+t.id+')">Add to Cart · $'+cost+'</button>');
 }
 
 window.setHours = function(h) {
@@ -2158,6 +2160,7 @@ function renderOrders() {
             ? '<div class="delivered-badge" style="background:var(--surface2);color:var(--muted);border-color:var(--border)">Returned</div>'
             : '<div class="delivered-badge">Delivered</div>')+
           buildReviewBtns(o)+
+          (o.status !== "cancelled" ? '<button onclick="rentAgain(\''+o._id+'\')" style="font-size:11px;font-weight:700;padding:5px 10px;border-radius:8px;background:rgba(26,110,240,.1);color:var(--blue);border:1px solid rgba(26,110,240,.2);cursor:pointer;white-space:nowrap">Rent Again</button>' : '')+
           '</div>'+
         '</div>';
       }).join("");
@@ -3446,6 +3449,90 @@ function startApp() {
       updateCoords(e.latLng.lat(), e.latLng.lng());
     });
   };;;
+
+  // ── ONBOARDING ──
+  window.onboardNext = function(step) {
+    [1,2,3].forEach(function(n){
+      var s = el("onboard-step-"+n);
+      var d = el("odot-"+n);
+      if(s) s.style.display = n===step ? "block" : "none";
+      if(d) d.classList.toggle("active", n===step);
+    });
+  };
+  window.closeOnboarding = function() {
+    el("onboarding-overlay").classList.add("hidden");
+    try { localStorage.setItem("droveia_onboarded","1"); } catch(e){}
+  };
+  function maybeShowOnboarding() {
+    try { if (localStorage.getItem("droveia_onboarded")) return; } catch(e){}
+    setTimeout(function(){
+      var ov = el("onboarding-overlay");
+      if(ov) ov.classList.remove("hidden");
+    }, 800);
+  }
+  maybeShowOnboarding();
+
+  // ── WAITLIST ──
+  window._waitlistToolId = null;
+  window.openWaitlist = function(toolId) {
+    if (!currentUser) { showAuth(); return; }
+    window._waitlistToolId = toolId;
+    var t = getTool(toolId);
+    var nameEl = el("waitlist-tool-name");
+    if(nameEl) nameEl.textContent = t ? t.name : "this tool";
+    var sucEl = el("waitlist-success");
+    var btnEl = el("waitlist-submit-btn");
+    if(sucEl) sucEl.style.display = "none";
+    if(btnEl) { btnEl.style.display = "block"; btnEl.disabled = false; btnEl.textContent = "Notify Me When Available"; }
+    el("waitlist-overlay").classList.remove("hidden");
+  };
+  window.closeWaitlist = function(e) {
+    if (!e || e.target === el("waitlist-overlay")) el("waitlist-overlay").classList.add("hidden");
+  };
+  window.submitWaitlist = async function() {
+    if (!currentUser || !window._waitlistToolId) return;
+    var btn = el("waitlist-submit-btn");
+    if(btn) { btn.disabled = true; btn.textContent = "Saving..."; }
+    try {
+      var fb = window._fb;
+      await fb.setDoc(
+        fb.doc(fb.db, "waitlist", window._waitlistToolId + "_" + currentUser.uid),
+        { toolId: window._waitlistToolId, uid: currentUser.uid, email: currentUser.email, createdAt: fb.serverTimestamp() }
+      );
+      if(btn) btn.style.display = "none";
+      var suc = el("waitlist-success");
+      if(suc) suc.style.display = "block";
+      showToast("You're on the waitlist!");
+    } catch(e) {
+      showToast("Error joining waitlist");
+      if(btn) { btn.disabled = false; btn.textContent = "Notify Me When Available"; }
+    }
+  };
+
+  // ── RENT AGAIN ──
+  window.rentAgain = async function(orderId) {
+    var order = liveOrders.find(function(o){ return o._id === orderId; });
+    if (!order || !order.items) { showToast("Order not found"); return; }
+    var added = 0;
+    order.items.forEach(function(item) {
+      var t = getTool(item.id);
+      if (t && t.available !== false) {
+        // Add to cart if not already in it
+        if (!cart.find(function(c){ return c.id === item.id; })) {
+          cart.push({ id: item.id, hours: item.hours || 1 });
+          added++;
+        }
+      }
+    });
+    if (added > 0) {
+      updateBadge(); saveCart();
+      showToast("Added " + added + " item" + (added>1?"s":"") + " to cart");
+      navigate("cart");
+    } else {
+      showToast("All items already in cart or unavailable");
+    }
+  };
+
   window.saveNotifications = function() {
     saveProfile({ notifications:{
       delivery: !!(el("notif-delivery")||{}).checked,
@@ -3931,6 +4018,55 @@ if (_savedPage && _savedPage !== "admin") {
     </div>
   </div>
 </div>
+
+<!-- ── ONBOARDING OVERLAY ── -->
+<div id="onboarding-overlay" class="modal-overlay hidden" style="z-index:5000;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:20px;padding:36px 32px;max-width:420px;width:100%;position:relative;box-shadow:0 24px 80px rgba(0,0,0,.18)">
+    <div id="onboard-steps">
+      <div class="onboard-step" id="onboard-step-1">
+        <div style="font-size:48px;margin-bottom:16px">&#x1F681;</div>
+        <h2 style="font-size:22px;font-weight:800;letter-spacing:-.02em;margin-bottom:10px">Welcome to Droveia</h2>
+        <p style="font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:24px">Rent professional drones and tools delivered by drone directly to your campus location &mdash; in minutes.</p>
+        <button class="btn-primary" style="width:100%" onclick="onboardNext(2)">Get Started &rarr;</button>
+      </div>
+      <div class="onboard-step" id="onboard-step-2" style="display:none">
+        <div style="font-size:48px;margin-bottom:16px">&#x1F4CD;</div>
+        <h2 style="font-size:22px;font-weight:800;letter-spacing:-.02em;margin-bottom:10px">Set Your Drop Zone</h2>
+        <p style="font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:24px">Pin exactly where you want the drone to land &mdash; your backyard, rooftop, or open space. Set it once in your account settings.</p>
+        <button class="btn-primary" style="width:100%" onclick="onboardNext(3)">Next &rarr;</button>
+        <button style="width:100%;margin-top:10px;background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer" onclick="onboardNext(3)">Skip</button>
+      </div>
+      <div class="onboard-step" id="onboard-step-3" style="display:none">
+        <div style="font-size:48px;margin-bottom:16px">&#x26A1;</div>
+        <h2 style="font-size:22px;font-weight:800;letter-spacing:-.02em;margin-bottom:10px">Rent in 60 Seconds</h2>
+        <p style="font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:24px">Browse tools, pick your rental duration, checkout &mdash; your gear arrives by drone. Return it the same way when done.</p>
+        <button class="btn-primary" style="width:100%" onclick="closeOnboarding()">Start Browsing &#x1F389;</button>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:center;gap:6px;margin-top:20px">
+      <div class="onboard-dot active" id="odot-1"></div>
+      <div class="onboard-dot" id="odot-2"></div>
+      <div class="onboard-dot" id="odot-3"></div>
+    </div>
+  </div>
+</div>
+
+<!-- WAITLIST OVERLAY -->
+<div id="waitlist-overlay" class="modal-overlay hidden" onclick="closeWaitlist(event)" style="z-index:5000">
+  <div style="background:#fff;border-radius:20px;padding:32px;max-width:380px;width:100%;position:relative;box-shadow:0 24px 80px rgba(0,0,0,.18)" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="el('waitlist-overlay').classList.add('hidden')" style="position:absolute;top:16px;right:16px">&#x2715;</button>
+    <div style="font-size:40px;margin-bottom:12px">&#x1F514;</div>
+    <h2 style="font-size:20px;font-weight:800;letter-spacing:-.02em;margin-bottom:8px">Join the Waitlist</h2>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:20px;line-height:1.5">We'll notify you the moment <strong id="waitlist-tool-name"></strong> becomes available again.</p>
+    <button class="btn-primary" style="width:100%" onclick="submitWaitlist()" id="waitlist-submit-btn">Notify Me When Available</button>
+    <p id="waitlist-success" style="display:none;text-align:center;color:var(--green);font-size:14px;font-weight:600;margin-top:12px">&#x2713; You're on the list!</p>
+  </div>
+</div>
+
+<style>
+.onboard-dot{width:8px;height:8px;border-radius:50%;background:var(--border);transition:.2s}
+.onboard-dot.active{background:var(--blue);width:20px;border-radius:4px}
+</style>
 
 </body>
 </html>

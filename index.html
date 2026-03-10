@@ -2161,7 +2161,7 @@ function renderOrders() {
   if (!listEl) return;
   if (!currentUser) {
     if (activeEl) activeEl.style.display = "none";
-    listEl.innerHTML = '<div style="text-align:center;padding:48px 0;color:var(--muted);font-size:14px"><div style="font-size:32px;margin-bottom:12px;opacity:.3"></div><div style="font-weight:600;margin-bottom:8px">Sign in to see your orders</div><button class="btn-primary" style="margin-top:8px" onclick="showAuth()">Sign In</button></div>';
+    listEl.innerHTML = '<div style="text-align:center;padding:48px 0;color:var(--muted);font-size:14px"><div style="font-weight:600;margin-bottom:8px">Sign in to see your orders</div><button class="btn-primary" style="margin-top:8px" onclick="showAuth()">Sign In</button></div>';
     return;
   }
   var activeOrders = liveOrders.filter(function(o){ return o.status==="in_flight"; });
@@ -2188,8 +2188,9 @@ function renderOrders() {
     groups[lbl].push(oc);
   }
   listEl.innerHTML = groupOrder.map(function(lbl){
-    return '<div style="font-size:11px;font-weight:600;color:var(--dim);letter-spacing:.05em;margin:14px 0 8px">'+lbl.toUpperCase()+'</div>'+
+    return '<div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;margin:20px 0 8px;padding-left:2px">'+lbl+'</div>'+
       groups[lbl].map(function(o){
+        var uid     = o._id;
         var t2      = getTool((o.items[0]||{}).id);
         var cat     = t2 ? t2.cat : "All";
         var name    = (o.items[0]||{}).name||"Order";
@@ -2202,38 +2203,66 @@ function renderOrders() {
           : (o.status==="returned" && o.updatedAt && o.updatedAt.toDate
             ? o.updatedAt.toDate().toLocaleString([],{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}) : null);
         var totalHours = (o.items||[]).reduce(function(s,i){return s+(i.hours||0);},0);
-        var itemNames  = (o.items||[]).map(function(i){return i.name+(i.hours?" ("+i.hours+"h)":"");}).join(", ");
-        var statusBadge = o.status==="cancelled"
-          ? '<div class="delivered-badge" style="background:rgba(239,68,68,.1);color:#ef4444;border-color:rgba(239,68,68,.2)">Cancelled</div>'
-          : o.status==="returned"
-          ? '<div class="delivered-badge" style="background:var(--surface2);color:var(--muted);border-color:var(--border)">Returned</div>'
-          : '<div class="delivered-badge">Delivered</div>';
+
+        var statusColor = o.status==="cancelled" ? "#ef4444"
+          : o.status==="returned" ? "var(--muted)"
+          : o.status==="delivered" ? "var(--green)" : "var(--blue)";
+        var statusBg = o.status==="cancelled" ? "rgba(239,68,68,.08)"
+          : o.status==="returned" ? "var(--bg3)"
+          : o.status==="delivered" ? "rgba(22,163,74,.08)" : "rgba(26,110,240,.08)";
+        var statusLabel = o.status==="cancelled" ? "Cancelled"
+          : o.status==="returned" ? "Returned"
+          : o.status==="delivered" ? "Delivered" : "In Transit";
+
+        var expandId = "order-expand-" + uid;
+
+        // Detail panel (hidden by default)
+        var rows = "";
+        rows += '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted);font-size:13px">Ordered</span><span style="font-size:13px;font-weight:500">'+orderedTime+'</span></div>';
+        if (deliveredStr) rows += '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted);font-size:13px">Delivered</span><span style="font-size:13px;font-weight:500">'+deliveredStr+'</span></div>';
+        if (returnedStr)  rows += '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted);font-size:13px">Returned</span><span style="font-size:13px;font-weight:500">'+returnedStr+'</span></div>';
+        if (totalHours)   rows += '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted);font-size:13px">Duration</span><span style="font-size:13px;font-weight:500">'+totalHours+'h</span></div>';
+        var itemRows = (o.items||[]).map(function(i){
+          return '<div style="display:flex;justify-content:space-between;padding:5px 0"><span style="font-size:13px;color:var(--text2)">'+i.name+(i.hours?' · '+i.hours+'h':'')+'</span><span style="font-size:13px;font-weight:600">$'+(i.subtotal||0).toFixed(2)+'</span></div>';
+        }).join("");
+        rows += '<div style="padding:6px 0"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:4px">Items</div>'+itemRows+'</div>';
+
         var cancelBtn = (o.status!=="cancelled" && o.status!=="returned")
-          ? '<button onclick="userCancelOrder(\''+ o._id +'\')" style="font-size:11px;font-weight:700;padding:5px 10px;border-radius:8px;background:rgba(239,68,68,.08);color:#ef4444;border:1px solid rgba(239,68,68,.2);cursor:pointer;white-space:nowrap;margin-top:2px">Cancel Order</button>'
+          ? '<button onclick="event.stopPropagation();userCancelOrder(''+uid+'')" style="margin-top:12px;width:100%;padding:9px;border-radius:9px;background:rgba(239,68,68,.07);color:#ef4444;border:1px solid rgba(239,68,68,.18);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font)">Cancel Order</button>'
           : "";
-        var timeline = '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:4px">';
-        timeline += '<div style="font-size:11px;color:var(--muted)">&#128230; Ordered: <span style="color:var(--text2);font-weight:500">'+orderedTime+'</span></div>';
-        if (deliveredStr) timeline += '<div style="font-size:11px;color:var(--muted)">&#9992;&#65039; Delivered: <span style="color:var(--text2);font-weight:500">'+deliveredStr+'</span></div>';
-        if (returnedStr)  timeline += '<div style="font-size:11px;color:var(--muted)">&#9989; Returned: <span style="color:var(--text2);font-weight:500">'+returnedStr+'</span></div>';
-        if (totalHours)   timeline += '<div style="font-size:11px;color:var(--muted)">&#9201; Duration: <span style="color:var(--text2);font-weight:500">'+totalHours+'h total</span></div>';
-        timeline += '<div style="font-size:11px;color:var(--muted)">&#128295; Items: <span style="color:var(--text2);font-weight:500">'+itemNames+'</span></div>';
-        timeline += '</div>';
-        return '<div class="past-order" style="flex-direction:column;gap:0;padding:16px">'+
-          '<div style="display:flex;align-items:flex-start;gap:12px">'+
-            '<div style="width:44px;height:44px;border-radius:11px;background:linear-gradient(135deg,rgba(26,110,240,.15),rgba(26,110,240,.04));display:flex;align-items:center;justify-content:center;flex-shrink:0">'+catIcon(cat)+'</div>'+
+
+        var detailPanel = '<div id="'+expandId+'" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">'+
+          rows +
+          buildReviewBtns(o) +
+          cancelBtn +
+        '</div>';
+
+        return '<div class="past-order" onclick="toggleOrderExpand(''+uid+'')" style="cursor:pointer;flex-direction:column;gap:0;padding:16px 18px;transition:.15s">'+
+          '<div style="display:flex;align-items:center;gap:13px">'+
+            '<div style="width:40px;height:40px;border-radius:10px;background:var(--blue-dim);display:flex;align-items:center;justify-content:center;flex-shrink:0">'+catIcon(cat)+'</div>'+
             '<div style="flex:1;min-width:0">'+
-              '<div style="font-weight:700;font-size:15px">'+name+more+'</div>'+
-              '<div style="font-size:12px;color:var(--muted);margin-top:2px">#'+o._id.slice(0,8).toUpperCase()+' &middot; $'+(o.total||0).toFixed(2)+'</div>'+
+              '<div style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+name+more+'</div>'+
+              '<div style="font-size:12px;color:var(--muted);margin-top:1px">#'+uid.slice(0,8).toUpperCase()+' &middot; $'+(o.total||0).toFixed(2)+'</div>'+
             '</div>'+
-            '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0">'+
-              statusBadge+buildReviewBtns(o)+cancelBtn+
+            '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0">'+
+              '<span style="font-size:11px;font-weight:700;padding:3px 9px;border-radius:6px;background:'+statusBg+';color:'+statusColor+'">'+statusLabel+'</span>'+
+              '<svg id="order-chevron-'+uid+'" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="color:var(--dim);transition:transform .2s"><polyline points="6 9 12 15 18 9"/></svg>'+
             '</div>'+
           '</div>'+
-          timeline+
+          detailPanel+
         '</div>';
       }).join("");
   }).join("");
 }
+
+window.toggleOrderExpand = function(uid) {
+  var panel = el("order-expand-" + uid);
+  var chevron = el("order-chevron-" + uid);
+  if (!panel) return;
+  var open = panel.style.display === "block";
+  panel.style.display = open ? "none" : "block";
+  if (chevron) chevron.style.transform = open ? "" : "rotate(180deg)";
+};
 
 function renderActiveOrderCard(idx) {
   var orders = window._activeOrders || [];

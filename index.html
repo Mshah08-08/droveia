@@ -964,6 +964,7 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
     <button class="nav-link active" id="nav-home" onclick="showPage('home')">Home</button>
     <button class="nav-link" id="nav-browse" onclick="showPage('browse')">Browse</button>
     <button class="nav-link" id="nav-orders" onclick="showPage('orders')">Orders</button>
+    <button class="nav-link" id="nav-partners" onclick="showPage('partners')">Partners</button>
   </div>
 
   <div class="nav-right">
@@ -1330,7 +1331,7 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
 
         <!-- Stage 2: Map pin -->
         <div id="addr-stage-2" style="display:none">
-          <div style="font-size:12px;color:var(--muted);margin:14px 0 10px">Click on your property to place the drop pin. The shaded area shows your property boundary — keep the pin inside it.</div>
+          <div style="font-size:12px;color:var(--muted);margin:14px 0 10px">Click on your property to place the drop pin. The shaded area shows your property boundary - keep the pin inside it.</div>
           <div id="addr-droppin-map" style="width:100%;height:320px;border-radius:12px;overflow:hidden;border:1px solid var(--border);cursor:crosshair"></div>
           <div id="addr-droppin-coords" style="font-size:11px;color:var(--muted);margin-top:8px;text-align:right;min-height:16px"></div>
           <div style="display:flex;gap:10px;margin-top:10px">
@@ -1416,7 +1417,7 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
 </div>
 
 <!-- ══════════════════════════════════════════════════════════════
-  FIREBASE — live config
+  FIREBASE - live config
 ══════════════════════════════════════════════════════════════ -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -1453,8 +1454,8 @@ document.dispatchEvent(new Event("fbready"));
 
 
 // =============================================================================
-// DROVEIA — Full App Script
-// All functions are plain globals — no module scope, no const in attributes
+// DROVEIA - Full App Script
+// All functions are plain globals - no module scope, no const in attributes
 // =============================================================================
 
 // ── Data ──────────────────────────────────────────────────────────────────────
@@ -1531,6 +1532,7 @@ function showPage(id) {
   if (id==="cart")    renderCart();
   if (id==="orders")  { renderOrders(); setTimeout(initOrderMap, 100); }
   if (id==="account") renderAccount();
+  if (id==="partners") loadPartners();
 }
 window.showPage = showPage;
 
@@ -1806,7 +1808,7 @@ function renderModal() {
       '</div>'+
     '</div>'+
     (t.available === false
-      ? '<button class="modal-add-btn" style="background:var(--blue);opacity:.85" onclick="openWaitlist('+t.id+')">🔔 Join Waitlist — Notify Me When Available</button>'
+      ? '<button class="modal-add-btn" style="background:var(--blue);opacity:.85" onclick="openWaitlist('+t.id+')">🔔 Join Waitlist - Notify Me When Available</button>'
       : '<button class="modal-add-btn" onclick="addToCart('+t.id+')">Add to Cart · $'+cost+'</button>');
 }
 
@@ -2025,7 +2027,7 @@ function initOrderMap() {
       maxZoom:19, subdomains:"abcd"
     }).addTo(_map);
 
-    // Destination marker — red landing pin
+    // Destination marker - red landing pin
     var destIcon = L.divIcon({
       html: '<div style="display:flex;flex-direction:column;align-items:center">' +
               '<svg width="26" height="34" viewBox="0 0 28 36" fill="none" xmlns="http://www.w3.org/2000/svg">' +
@@ -2037,7 +2039,7 @@ function initOrderMap() {
     });
     _destMarker = L.marker(dest, {icon:destIcon}).addTo(_map).bindPopup("Drop location");
 
-    // Drone marker — animated blue circle with drone SVG
+    // Drone marker - animated blue circle with drone SVG
     var droneIcon = L.divIcon({
       html: '<div style="width:38px;height:38px;background:#1a6ef0;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(26,110,240,.6);animation:pulse 1.4s ease-in-out infinite">' +
             '<svg width="20" height="20" viewBox="0 0 100 100" fill="none" stroke="white" stroke-width="6" stroke-linecap="round">' +
@@ -2142,26 +2144,46 @@ function renderOrders() {
   listEl.innerHTML = groupOrder.map(function(lbl){
     return '<div style="font-size:11px;font-weight:600;color:var(--dim);letter-spacing:.05em;margin:14px 0 8px">'+lbl.toUpperCase()+'</div>'+
       groups[lbl].map(function(o){
-        var t2   = getTool((o.items[0]||{}).id);
-        var cat  = t2 ? t2.cat : "All";
-        var name = (o.items[0]||{}).name||"Order";
-        var more = o.items.length>1 ? " +"+(o.items.length-1)+" more":"";
-        var time = o._d.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"});
-        return '<div class="past-order">'+
-          '<div style="width:44px;height:44px;border-radius:11px;background:linear-gradient(135deg,rgba(26,110,240,.15),rgba(26,110,240,.04));display:flex;align-items:center;justify-content:center;flex-shrink:0">'+catIcon(cat)+'</div>'+
-          '<div style="flex:1">'+
-            '<div style="font-weight:600;font-size:15px">'+name+more+'</div>'+
-            '<div style="font-size:12px;color:var(--muted)">#'+o._id.slice(0,8).toUpperCase()+' · '+time+' · $'+(o.total||0).toFixed(2)+'</div>'+
+        var t2      = getTool((o.items[0]||{}).id);
+        var cat     = t2 ? t2.cat : "All";
+        var name    = (o.items[0]||{}).name||"Order";
+        var more    = o.items.length>1 ? " +"+(o.items.length-1)+" more":"";
+        var orderedTime = o._d.toLocaleString([],{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});
+        var deliveredStr = o.deliveredAt && o.deliveredAt.toDate
+          ? o.deliveredAt.toDate().toLocaleString([],{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}) : null;
+        var returnedStr = o.returnedAt && o.returnedAt.toDate
+          ? o.returnedAt.toDate().toLocaleString([],{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"})
+          : (o.status==="returned" && o.updatedAt && o.updatedAt.toDate
+            ? o.updatedAt.toDate().toLocaleString([],{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}) : null);
+        var totalHours = (o.items||[]).reduce(function(s,i){return s+(i.hours||0);},0);
+        var itemNames  = (o.items||[]).map(function(i){return i.name+(i.hours?" ("+i.hours+"h)":"");}).join(", ");
+        var statusBadge = o.status==="cancelled"
+          ? '<div class="delivered-badge" style="background:rgba(239,68,68,.1);color:#ef4444;border-color:rgba(239,68,68,.2)">Cancelled</div>'
+          : o.status==="returned"
+          ? '<div class="delivered-badge" style="background:var(--surface2);color:var(--muted);border-color:var(--border)">Returned</div>'
+          : '<div class="delivered-badge">Delivered</div>';
+        var cancelBtn = (o.status!=="cancelled" && o.status!=="returned")
+          ? '<button onclick="userCancelOrder(\''+ o._id +'\')" style="font-size:11px;font-weight:700;padding:5px 10px;border-radius:8px;background:rgba(239,68,68,.08);color:#ef4444;border:1px solid rgba(239,68,68,.2);cursor:pointer;white-space:nowrap;margin-top:2px">Cancel Order</button>'
+          : "";
+        var timeline = '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:4px">';
+        timeline += '<div style="font-size:11px;color:var(--muted)">&#128230; Ordered: <span style="color:var(--text2);font-weight:500">'+orderedTime+'</span></div>';
+        if (deliveredStr) timeline += '<div style="font-size:11px;color:var(--muted)">&#9992;&#65039; Delivered: <span style="color:var(--text2);font-weight:500">'+deliveredStr+'</span></div>';
+        if (returnedStr)  timeline += '<div style="font-size:11px;color:var(--muted)">&#9989; Returned: <span style="color:var(--text2);font-weight:500">'+returnedStr+'</span></div>';
+        if (totalHours)   timeline += '<div style="font-size:11px;color:var(--muted)">&#9201; Duration: <span style="color:var(--text2);font-weight:500">'+totalHours+'h total</span></div>';
+        timeline += '<div style="font-size:11px;color:var(--muted)">&#128295; Items: <span style="color:var(--text2);font-weight:500">'+itemNames+'</span></div>';
+        timeline += '</div>';
+        return '<div class="past-order" style="flex-direction:column;gap:0;padding:16px">'+
+          '<div style="display:flex;align-items:flex-start;gap:12px">'+
+            '<div style="width:44px;height:44px;border-radius:11px;background:linear-gradient(135deg,rgba(26,110,240,.15),rgba(26,110,240,.04));display:flex;align-items:center;justify-content:center;flex-shrink:0">'+catIcon(cat)+'</div>'+
+            '<div style="flex:1;min-width:0">'+
+              '<div style="font-weight:700;font-size:15px">'+name+more+'</div>'+
+              '<div style="font-size:12px;color:var(--muted);margin-top:2px">#'+o._id.slice(0,8).toUpperCase()+' &middot; $'+(o.total||0).toFixed(2)+'</div>'+
+            '</div>'+
+            '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0">'+
+              statusBadge+buildReviewBtns(o)+cancelBtn+
+            '</div>'+
           '</div>'+
-          '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">'+
-          (o.status === "cancelled"
-            ? '<div class="delivered-badge" style="background:rgba(239,68,68,.1);color:#ef4444;border-color:rgba(239,68,68,.2)">Cancelled</div>'
-            : o.status === "returned"
-            ? '<div class="delivered-badge" style="background:var(--surface2);color:var(--muted);border-color:var(--border)">Returned</div>'
-            : '<div class="delivered-badge">Delivered</div>')+
-          buildReviewBtns(o)+
-          (o.status !== "cancelled" ? '<button onclick="rentAgain(\''+o._id+'\')" style="font-size:11px;font-weight:700;padding:5px 10px;border-radius:8px;background:rgba(26,110,240,.1);color:var(--blue);border:1px solid rgba(26,110,240,.2);cursor:pointer;white-space:nowrap">Rent Again</button>' : '')+
-          '</div>'+
+          timeline+
         '</div>';
       }).join("");
   }).join("");
@@ -2238,7 +2260,7 @@ function renderAccount() {
   setText("stat-hours",   (userProfile.totalHours||0)+"h");
   setVal("addr-building", userProfile.building||"");
   setVal("addr-notes",    userProfile.dropNotes||"");
-  // Address panel state — runs every time renderAccount is called
+  // Address panel state - runs every time renderAccount is called
   if (userProfile.dropLat) {
     window._addrHouseLat = userProfile.houseLat || userProfile.dropLat;
     window._addrHouseLng = userProfile.houseLng || userProfile.dropLng;
@@ -2248,13 +2270,13 @@ function renderAccount() {
     el("addr-stage-1").style.display = "none";
     el("addr-stage-2").style.display = "none";
     el("addr-stage-3").style.display = "block";
-    // Apply saved UI state immediately — no setTimeout
+    // Apply saved UI state immediately - no setTimeout
     var _steps   = el("addr-steps");    if (_steps)   _steps.style.display   = "none";
     var _backBtn = el("addr-back-btn"); if (_backBtn) _backBtn.style.display  = "none";
     var _saveBtn = el("addr-save-btn");
     window._addrSavedMode = true;
     if (_saveBtn) { _saveBtn.textContent = "Update Delivery Address"; }
-    var _sub = el("addr-panel-sub"); if (_sub) _sub.textContent = "Saved — tap Update Delivery Address to change";
+    var _sub = el("addr-panel-sub"); if (_sub) _sub.textContent = "Saved - tap Update Delivery Address to change";
     // Init confirm map after delay (needs container visible)
     window._addrConfirmMap = null;
     var _cmEl = el("addr-confirm-map"); if (_cmEl) _cmEl.innerHTML = "";
@@ -2319,13 +2341,13 @@ function fbErrMsg(code) {
     "auth/invalid-email":         "Invalid email address",
     "auth/weak-password":         "Password must be at least 6 characters",
     "auth/too-many-requests":     "Too many attempts, try again later",
-    "auth/network-request-failed":"Network error — check connection"
+    "auth/network-request-failed":"Network error - check connection"
   };
   return m[code]||("Error: "+code);
 }
 
 // ── Firebase-dependent functions (set up in startApp) ─────────────────────────
-// Stubs — replaced once Firebase loads
+// Stubs - replaced once Firebase loads
 function saveCart() {}
 function placeOrder() { showToast("Loading..."); }
 window.doSignIn         = function(){ showToast("Loading..."); };
@@ -2352,7 +2374,7 @@ window.openStripeModal = function(items, dropLocation) {
   _stripeOrderItems   = items;
   _stripeDropLocation = dropLocation;
   var total = items.reduce(function(s,i){return s+calcCost(i,i.hours);},0);
-  el("stripe-amount-label").textContent = "$" + total.toFixed(2) + " — " + items.length + " item" + (items.length!==1?"s":"");
+  el("stripe-amount-label").textContent = "$" + total.toFixed(2) + " - " + items.length + " item" + (items.length!==1?"s":"");
   el("stripe-overlay").classList.remove("hidden");
   var btn = el("stripe-pay-btn"); if(btn) { btn.disabled=false; btn.textContent="Pay & Place Order"; }
   var err = el("stripe-error"); if(err) { err.style.display="none"; err.textContent=""; }
@@ -2429,7 +2451,7 @@ window.submitStripePayment = async function() {
       throw new Error("Payment status: " + pi.status);
     }
 
-    // Success — close modal then place order with snapshotted items
+    // Success - close modal then place order with snapshotted items
     el("stripe-overlay").classList.add("hidden");
     if (_stripeCard) { _stripeCard.unmount(); _stripeCard = null; }
     _stripeOrderItems = null; _stripeDropLocation = null;
@@ -2445,7 +2467,7 @@ window.submitStripePayment = async function() {
 };
 
 
-// Wire addr buttons once — never use hardcoded onclick for these
+// Wire addr buttons once - never use hardcoded onclick for these
 document.addEventListener("DOMContentLoaded", function() {
   var saveBtn = el("addr-save-btn");
   if (saveBtn) saveBtn.addEventListener("click", function() {
@@ -2596,7 +2618,7 @@ function adminInventoryTable() {
 function adminToolForm(tool, isEdit) {
   var t = tool || { id:"", name:"", cat:"Workshop", retail:"", pph:0, rating:4.5, desc:"", eta:"", img:"" };
   return '<div class="admin-form" id="' + (isEdit ? "admin-edit-form" : "admin-add-form") + '">' +
-    '<div class="admin-form-title">' + (isEdit ? "Edit Tool — " + t.name : "Add New Tool") + '</div>' +
+    '<div class="admin-form-title">' + (isEdit ? "Edit Tool - " + t.name : "Add New Tool") + '</div>' +
     '<div class="admin-form-grid">' +
       adminField("Name", "text", "af-name", t.name, true) +
       adminSelectField("Category", "af-cat", t.cat) +
@@ -2689,7 +2711,7 @@ window.adminSetAvail = async function(id, available) {
   if (!tool) return;
   var idx = TOOLS.findIndex(function(t){ return t.id === id; });
   tool.available = available;
-  // Just PATCH available in RTDB — never touch qty or rentedQty here
+  // Just PATCH available in RTDB - never touch qty or rentedQty here
   try {
     await fetch("https://droveia-default-rtdb.firebaseio.com/tools/" + idx + ".json?auth=NKLKSY1Cshm1pba0vuKK6RQOmjV2uOfeje7hzxkI", {
       method: "PATCH",
@@ -2720,7 +2742,7 @@ window.adminDeleteTool = function(id) {
 
 async function adminSyncToRTDB(preserveQtyIds) {
   var url = "https://droveia-default-rtdb.firebaseio.com/tools.json?auth=NKLKSY1Cshm1pba0vuKK6RQOmjV2uOfeje7hzxkI";
-  // preserveQtyIds: array of tool ids whose qty was just edited — don't overwrite from live
+  // preserveQtyIds: array of tool ids whose qty was just edited - don't overwrite from live
   var keepIds = preserveQtyIds || [];
   try {
     var cur = await fetch(url).then(function(r){ return r.json(); });
@@ -2865,6 +2887,7 @@ window.adminOrderAction = function(btn) {
 
         var update = { status: newStatus, updatedAt: fb.serverTimestamp() };
         if (newStatus === "delivered") update.deliveredAt = fb.serverTimestamp();
+        if (newStatus === "returned")  update.returnedAt  = fb.serverTimestamp();
 
         // Update allOrders (admin view)
         await fb.updateDoc(fb.doc(fb.db, "allOrders", orderId), update);
@@ -3141,7 +3164,7 @@ function startApp() {
     fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&q=" + encodeURIComponent(addr))
       .then(function(r){ return r.json(); })
       .then(function(results) {
-        if (!results || !results.length) { showToast("Address not found — try a more specific address"); return; }
+        if (!results || !results.length) { showToast("Address not found - try a more specific address"); return; }
         var lat = parseFloat(results[0].lat);
         var lng = parseFloat(results[0].lon);
         var bbox = results[0].boundingbox; // [minlat, maxlat, minlng, maxlng]
@@ -3149,10 +3172,10 @@ function startApp() {
         window._addrDropLng = lng;
         var wrap = el("addr-droppin-wrap");
         if (wrap) wrap.style.display = "block";
-        showToast("Found — pin your exact drop spot");
+        showToast("Found - pin your exact drop spot");
         setTimeout(function() { window.initAddrDropPin(lat, lng, bbox); }, 80);
       })
-      .catch(function() { showToast("Geocoding failed — check your connection"); });
+      .catch(function() { showToast("Geocoding failed - check your connection"); });
   };
 
   window.addrSetStep = function(n) {
@@ -3184,7 +3207,7 @@ function startApp() {
     var geocoder = new window.google.maps.Geocoder();
     geocoder.geocode({ address: addr }, function(results, status) {
       if (status !== "OK" || !results.length) {
-        showToast("Address not found — try including city and state");
+        showToast("Address not found - try including city and state");
         el("addr-stage-1").style.display = "block";
         el("addr-stage-2").style.display = "none";
         window.addrSetStep(1);
@@ -3195,15 +3218,15 @@ function startApp() {
       var lng  = loc.lng();
       var vp   = results[0].geometry.viewport;
 
-      window._addrHouseLat  = lat;  // geocoded house centre — never changes
+      window._addrHouseLat  = lat;  // geocoded house centre - never changes
       window._addrHouseLng  = lng;
-      window._addrDropLat   = lat;  // user's drop pin — starts at house
+      window._addrDropLat   = lat;  // user's drop pin - starts at house
       window._addrDropLng   = lng;
       window._addrFootprint = null;
       window._addrBbox      = null;
       window._addrViewport  = vp;
 
-      showToast("Found — pin your drop spot");
+      showToast("Found - pin your drop spot");
       setTimeout(function() { window.initAddrDropPin(lat, lng, vp); }, 80);
     });
   };
@@ -3281,7 +3304,7 @@ function startApp() {
         zIndex: 1, clickable: false
       });
 
-      // House icon — fixed at geocoded house centre
+      // House icon - fixed at geocoded house centre
       var hLat = window._addrHouseLat || window._addrDropLat;
       var hLng = window._addrHouseLng || window._addrDropLng;
       new window.google.maps.Marker({
@@ -3313,7 +3336,7 @@ function startApp() {
     var saveBtn = el("addr-save-btn");
     window._addrSavedMode = true;
     if (saveBtn) { saveBtn.textContent = "Update Delivery Address"; }
-    var sub = el("addr-panel-sub"); if (sub) sub.textContent = "Saved — tap Update Delivery Address to change";
+    var sub = el("addr-panel-sub"); if (sub) sub.textContent = "Saved - tap Update Delivery Address to change";
   };
 
   window.addrStartOver = function() {
@@ -3341,7 +3364,7 @@ function startApp() {
     el("addr-stage-3").style.display = "none";
     el("addr-stage-2").style.display = "block";
     window.addrSetStep(2);
-    // Google Maps has no .remove() — just null the reference so it reinits
+    // Google Maps has no .remove() - just null the reference so it reinits
     window._addrConfirmMap = null;
     var cmEl = el("addr-confirm-map");
     if (cmEl) cmEl.innerHTML = "";
@@ -3449,6 +3472,96 @@ function startApp() {
       updateCoords(e.latLng.lat(), e.latLng.lng());
     });
   };;;
+
+
+
+  // ── PARTNERS ──
+  window.submitPartnerApp = async function() {
+    var name  = (el("pf-name")||{}).value.trim();
+    var email = (el("pf-email")||{}).value.trim();
+    var inv   = (el("pf-inventory")||{}).value.trim();
+    var notes = (el("pf-notes")||{}).value.trim();
+    if (!name || !email) { showToast("Please fill in name and email"); return; }
+    var btn = document.querySelector("#partner-form-wrap .btn-primary");
+    if (btn) { btn.disabled = true; btn.textContent = "Submitting..."; }
+    try {
+      var fb = window._fb;
+      await fb.addDoc(fb.collection(fb.db, "partnerApplications"), {
+        name, email, inventory: inv, notes,
+        status: "pending",
+        createdAt: fb.serverTimestamp()
+      });
+      var wrap = el("partner-form-wrap");
+      var suc  = el("partner-form-success");
+      if (wrap) wrap.style.display = "none";
+      if (suc)  suc.style.display  = "block";
+      showToast("Application submitted!");
+    } catch(e) {
+      showToast("Error: " + e.message);
+      if (btn) { btn.disabled = false; btn.textContent = "Submit Application"; }
+    }
+  };
+
+  async function loadPartners() {
+    var listEl = el("partners-list");
+    if (!listEl) return;
+    try {
+      var fb = window._fb;
+      var snap = await fb.getDocs(
+        fb.query(fb.collection(fb.db, "partners"), fb.where("status", "==", "active"))
+      );
+      if (snap.empty) {
+        listEl.innerHTML = '<div style="text-align:center;padding:32px;color:var(--muted);font-size:13px;grid-column:1/-1">No partners yet. Be the first!</div>';
+        return;
+      }
+      listEl.innerHTML = snap.docs.map(function(d) {
+        var p = d.data();
+        return '<div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:8px">'+
+          '<div style="display:flex;align-items:center;gap:10px">'+
+            '<div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,rgba(26,110,240,.15),rgba(26,110,240,.04));display:flex;align-items:center;justify-content:center;font-size:20px">&#x1F3EA;</div>'+
+            '<div>'+
+              '<div style="font-weight:700;font-size:14px">' + (p.name||"Partner") + '</div>'+
+              (p.category ? '<div style="font-size:11px;color:var(--muted)">' + p.category + '</div>' : '')+
+            '</div>'+
+          '</div>'+
+          (p.description ? '<div style="font-size:12px;color:var(--muted);line-height:1.5">' + p.description + '</div>' : '')+
+          '<div style="display:inline-flex;align-items:center;gap:4px;background:rgba(22,163,74,.1);color:#15803d;font-size:10px;font-weight:700;padding:3px 8px;border-radius:5px;width:fit-content">&#x2713; Active Partner</div>'+
+        '</div>';
+      }).join("");
+    } catch(e) {
+      console.warn("Could not load partners:", e);
+      var listEl2 = el("partners-list");
+      if (listEl2) listEl2.innerHTML = '<div style="text-align:center;padding:32px;color:var(--muted);font-size:13px;grid-column:1/-1">Could not load partners.</div>';
+    }
+  }
+
+  // ── USER CANCEL ORDER ──
+  window.userCancelOrder = async function(orderId) {
+    showConfirm({
+      title: "Cancel Order",
+      msg: "Are you sure you want to cancel this order? The tools will be released back to stock.",
+      okLabel: "Yes, Cancel",
+      color: "red",
+      onOk: async function() {
+        var fb = window._fb;
+        try {
+          var orderSnap = await fb.getDoc(fb.doc(fb.db, "allOrders", orderId));
+          var orderData = orderSnap.data();
+          if (!orderData) { showToast("Order not found"); return; }
+          var update = { status: "cancelled", updatedAt: fb.serverTimestamp() };
+          await fb.updateDoc(fb.doc(fb.db, "allOrders", orderId), update);
+          if (orderData.userId && orderData.userOrderId) {
+            await fb.updateDoc(fb.doc(fb.db, "users", orderData.userId, "orders", orderData.userOrderId), update);
+          }
+          var items = orderData.items || [];
+          for (var i = 0; i < items.length; i++) {
+            if (items[i].id) await markToolAvailable(fb, items[i].id);
+          }
+          showToast("Order cancelled");
+        } catch(e) { showToast("Failed: " + e.message); }
+      }
+    });
+  };
 
   // ── ONBOARDING ──
   window.onboardNext = function(step) {
@@ -3599,7 +3712,7 @@ window.toggleTheme = function() {
 applyTheme(_theme);
 
 
-// ── Firebase Realtime DB — tool inventory ────────────────────────────────────
+// ── Firebase Realtime DB - tool inventory ────────────────────────────────────
 var RTDB_URL = "https://droveia-default-rtdb.firebaseio.com/tools.json";
 
 async function loadToolsFromRTDB() {
@@ -3788,7 +3901,7 @@ window.submitReview = async function() {
   try {
     var first = (userProfile && userProfile.firstName) || 
                 (currentUser.displayName || currentUser.email).split(/[\s@]/)[0];
-    // Save review to Firestore — coerce all to safe types
+    // Save review to Firestore - coerce all to safe types
     await fb.addDoc(fb.collection(fb.db, "reviews"), {
       toolId:    Number(_reviewToolId) || String(_reviewToolId || "unknown"),
       toolName:  String(_reviewToolName || "Tool"),
@@ -3853,7 +3966,7 @@ function renderHomeReviews(reviews) {
   var g = el("home-reviews");
   if (!g) return;
   if (!reviews.length) {
-    g.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted);font-size:14px">No reviews yet — be the first to rent and review!</div>';
+    g.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted);font-size:14px">No reviews yet - be the first to rent and review!</div>';
     return;
   }
   g.innerHTML = reviews.map(function(r) {
@@ -3879,7 +3992,7 @@ function renderHomeReviews(reviews) {
 // ── Boot ──────────────────────────────────────────────────────────────────────
 renderCatIcons();
 
-// Load live inventory from Firebase Realtime DB — renders tools once loaded
+// Load live inventory from Firebase Realtime DB - renders tools once loaded
 loadToolsFromRTDB();
 // Auto-refresh inventory every 60 seconds
 setInterval(loadToolsFromRTDB, 60000);
@@ -3890,7 +4003,7 @@ if (window._fbReady) {
   document.addEventListener("fbready", startApp, {once:true});
 }
 
-// Hash routing — open admin page if #admin in URL
+// Hash routing - open admin page if #admin in URL
 if (sessionStorage.getItem("openAdmin") === "1") {
   sessionStorage.removeItem("openAdmin");
   window._openAdminOnAuth = true;
@@ -4014,7 +4127,7 @@ if (_savedPage && _savedPage !== "admin") {
     </button>
     <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:10px">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-      <span style="font-size:11px;color:var(--muted)">Secured by Stripe — test mode</span>
+      <span style="font-size:11px;color:var(--muted)">Secured by Stripe - test mode</span>
     </div>
   </div>
 </div>
@@ -4026,7 +4139,7 @@ if (_savedPage && _savedPage !== "admin") {
       <div class="onboard-step" id="onboard-step-1">
         <div style="font-size:48px;margin-bottom:16px">&#x1F681;</div>
         <h2 style="font-size:22px;font-weight:800;letter-spacing:-.02em;margin-bottom:10px">Welcome to Droveia</h2>
-        <p style="font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:24px">Rent professional drones and tools delivered by drone directly to your campus location &mdash; in minutes.</p>
+        <p style="font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:24px">Rent professional drones and tools delivered by drone directly to your campus location, in minutes.</p>
         <button class="btn-primary" style="width:100%" onclick="onboardNext(2)">Get Started &rarr;</button>
       </div>
       <div class="onboard-step" id="onboard-step-2" style="display:none">
@@ -4067,6 +4180,86 @@ if (_savedPage && _savedPage !== "admin") {
 .onboard-dot{width:8px;height:8px;border-radius:50%;background:var(--border);transition:.2s}
 .onboard-dot.active{background:var(--blue);width:20px;border-radius:4px}
 </style>
+
+<!-- PARTNERS PAGE -->
+<div class="page" id="page-partners" style="min-height:calc(100vh - var(--nav-h));padding-bottom:80px">
+  <div style="background:linear-gradient(135deg,#0a0a0a 0%,#1a1a2e 100%);padding:60px 0 50px;text-align:center;color:#fff">
+    <div class="container">
+      <div style="display:inline-flex;align-items:center;gap:7px;background:rgba(26,110,240,.2);border:1px solid rgba(26,110,240,.35);border-radius:20px;padding:6px 14px;font-size:12px;font-weight:600;color:#7eb8ff;margin-bottom:18px;letter-spacing:.04em">BECOME A PARTNER</div>
+      <h1 style="font-size:clamp(32px,4vw,52px);font-weight:800;letter-spacing:-.03em;margin-bottom:16px">Grow your store with<br><span style="background:linear-gradient(135deg,#1a6ef0,#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">drone delivery</span></h1>
+      <p style="font-size:16px;color:rgba(255,255,255,.6);max-width:520px;margin:0 auto 32px;line-height:1.7">List your inventory on Droveia and reach students across campus. We handle the fleet, you handle the gear.</p>
+      <div style="display:flex;justify-content:center;gap:24px;flex-wrap:wrap;margin-bottom:40px">
+        <div style="text-align:center"><div style="font-size:28px;font-weight:800;color:#fff">70%</div><div style="font-size:12px;color:rgba(255,255,255,.45);margin-top:2px">Revenue share</div></div>
+        <div style="width:1px;background:rgba(255,255,255,.1)"></div>
+        <div style="text-align:center"><div style="font-size:28px;font-weight:800;color:#fff">$0</div><div style="font-size:12px;color:rgba(255,255,255,.45);margin-top:2px">Upfront cost</div></div>
+        <div style="width:1px;background:rgba(255,255,255,.1)"></div>
+        <div style="text-align:center"><div style="font-size:28px;font-weight:800;color:#fff">24h</div><div style="font-size:12px;color:rgba(255,255,255,.45);margin-top:2px">Onboarding time</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container" style="max-width:900px;margin:0 auto;padding:48px 24px 0">
+    <!-- How it works -->
+    <h2 style="font-size:20px;font-weight:800;letter-spacing:-.02em;margin-bottom:20px">How it works</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:48px">
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:22px 18px">
+        <div style="font-size:28px;margin-bottom:10px">&#x1F4E6;</div>
+        <div style="font-weight:700;font-size:15px;margin-bottom:6px">List Your Inventory</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.6">Submit your tools and equipment. We review and approve listings within 24 hours.</div>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:22px 18px">
+        <div style="font-size:28px;margin-bottom:10px">&#x1F681;</div>
+        <div style="font-weight:700;font-size:15px;margin-bottom:6px">We Handle Delivery</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.6">Our drone fleet picks up from your location and delivers directly to students on campus.</div>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:22px 18px">
+        <div style="font-size:28px;margin-bottom:10px">&#x1F4B0;</div>
+        <div style="font-weight:700;font-size:15px;margin-bottom:6px">Earn Per Rental</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.6">You earn 70% of every rental. Payouts processed weekly directly to your account.</div>
+      </div>
+    </div>
+
+    <!-- Application form -->
+    <div style="background:#fff;border:1px solid var(--border);border-radius:18px;padding:32px;box-shadow:0 4px 24px rgba(0,0,0,.06)">
+      <h2 style="font-size:20px;font-weight:800;letter-spacing:-.02em;margin-bottom:6px">Apply to Partner</h2>
+      <p style="font-size:14px;color:var(--muted);margin-bottom:24px">Fill out the form and we'll be in touch within 48 hours.</p>
+      <div id="partner-form-wrap">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+          <div>
+            <label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px">Business / Store Name</label>
+            <input id="pf-name" class="form-input" placeholder="e.g. Campus Tech Lab" style="width:100%;box-sizing:border-box">
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px">Contact Email</label>
+            <input id="pf-email" class="form-input" type="email" placeholder="you@store.com" style="width:100%;box-sizing:border-box">
+          </div>
+        </div>
+        <div style="margin-bottom:14px">
+          <label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px">What do you sell / rent?</label>
+          <input id="pf-inventory" class="form-input" placeholder="e.g. Drones, cameras, AV equipment, power tools..." style="width:100%;box-sizing:border-box">
+        </div>
+        <div style="margin-bottom:20px">
+          <label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px">Anything else you want us to know?</label>
+          <textarea id="pf-notes" class="form-input" rows="3" placeholder="Location, estimated inventory size, questions..." style="width:100%;box-sizing:border-box;resize:vertical"></textarea>
+        </div>
+        <button class="btn-primary" style="width:100%" onclick="submitPartnerApp()">Submit Application</button>
+      </div>
+      <div id="partner-form-success" style="display:none;text-align:center;padding:24px 0">
+        <div style="font-size:40px;margin-bottom:12px">&#x1F91D;</div>
+        <div style="font-weight:800;font-size:18px;margin-bottom:8px">Application received!</div>
+        <div style="font-size:14px;color:var(--muted)">We'll reach out to the email you provided within 48 hours.</div>
+      </div>
+    </div>
+
+    <!-- Active partners section -->
+    <div style="margin-top:40px">
+      <h2 style="font-size:20px;font-weight:800;letter-spacing:-.02em;margin-bottom:16px">Current Partners</h2>
+      <div id="partners-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px">
+        <div style="text-align:center;padding:32px;color:var(--muted);font-size:13px;grid-column:1/-1">Loading partners...</div>
+      </div>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>

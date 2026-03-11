@@ -1577,7 +1577,9 @@ function toolCard(t) {
   h += '<div class="tool-card-body">';
   h += '<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:6px">';
   h += '<div class="tool-card-cat-tag">' + t.cat + '</div>';
-  if (t.partnerName) h += '<div style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px;background:rgba(217,119,6,.1);color:#b45309;border:1px solid rgba(217,119,6,.2)">Partner: ' + t.partnerName + '</div>';
+  var _pLabel = (window._partnerNameCache && t.partnerEmail && window._partnerNameCache[t.partnerEmail])
+    || (t.partnerName && !t.partnerName.includes("@") ? t.partnerName : null);
+  if (t.partnerEmail) h += '<div style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:5px;background:var(--blue-dim);color:var(--blue);border:1px solid var(--blue-mid)">' + (_pLabel || "Partner") + '</div>';
   h += '</div>';
   h += '<div class="tool-name">' + t.name + '</div>';
   h += '<div class="tool-desc">' + t.desc + '</div>';
@@ -1673,7 +1675,7 @@ window.renderPartnerSidebar = function() {
   TOOLS.forEach(function(t) {
     if (t.partnerEmail && !seen[t.partnerEmail]) {
       seen[t.partnerEmail] = true;
-      partners.push({ email: t.partnerEmail, name: t.partnerName || t.partnerEmail });
+      partners.push({ email: t.partnerEmail, name: (window._partnerNameCache && window._partnerNameCache[t.partnerEmail]) || (t.partnerName && !t.partnerName.includes('@') ? t.partnerName : null) || t.partnerEmail });
     }
   });
   if (!partners.length) { wrap.style.display = "none"; return; }
@@ -1830,7 +1832,7 @@ function renderModal() {
         '</div>'
       : '') +
     '<div class="modal-title">'+t.name+'</div>'+
-    (t.partnerName ? '<div style="display:inline-flex;align-items:center;gap:6px;margin-bottom:8px;font-size:12px;font-weight:700;padding:4px 10px;border-radius:7px;background:rgba(217,119,6,.1);color:#b45309;border:1px solid rgba(217,119,6,.2)">🏪 Partner: '+t.partnerName+'</div>' : '')+
+    (t.partnerEmail ? '<div style="display:inline-flex;align-items:center;gap:5px;margin-bottom:8px;font-size:12px;font-weight:700;padding:4px 11px;border-radius:7px;background:var(--blue-dim);color:var(--blue);border:1px solid var(--blue-mid)">&#x1F3EA; ' + ((window._partnerNameCache && window._partnerNameCache[t.partnerEmail]) || (t.partnerName && !t.partnerName.includes("@") ? t.partnerName : null) || "Partner") + '</div>' : '')+
     '<div class="modal-meta">'+stars(t.rating)+
       '<span style="color:var(--dim)">·</span>'+
       '<span style="color:#fff;font-size:12px;font-weight:700;background:#1a6ef0;padding:2px 8px;border-radius:6px">Save '+pct+'%</span>'+
@@ -1939,7 +1941,7 @@ function renderCart() {
           '<div class="cart-item-info">'+
             '<div class="cart-item-name">'+c.name+'</div>'+
             '<div class="cart-item-sub">'+c.hours+'h rental · $'+(c.pph && c.pph > 0 ? parseFloat(c.pph).toFixed(2) : ((c.retail*0.70)/48).toFixed(2))+'/hr</div>'+
-            (c.partnerName ? '<div style="font-size:11px;font-weight:600;color:#b45309;margin-top:2px">Sold by '+c.partnerName+'</div>' : '')+
+            (c.partnerEmail ? '<div style="font-size:11px;font-weight:600;color:var(--blue);margin-top:2px">Sold by ' + (c.partnerName && !c.partnerName.includes("@") ? c.partnerName : (window._partnerNameCache && window._partnerNameCache[c.partnerEmail]) || "Partner") + '</div>' : '')+
           '</div>'+
           '<div style="text-align:right">'+
             '<div class="cart-item-price">$'+calcCost(c,c.hours).toFixed(2)+'</div>'+
@@ -3682,7 +3684,7 @@ function startApp() {
                 (t.img && t.img!=="x" ? '<img src="'+t.img+'" style="width:52px;height:52px;object-fit:contain;border-radius:8px;background:var(--bg3);flex-shrink:0">' : '<div style="width:52px;height:52px;border-radius:8px;background:var(--bg3);flex-shrink:0"></div>')+
                 '<div style="flex:1">' +
                   '<div style="font-weight:700;font-size:15px">' + t.name + '</div>' +
-                  '<div style="font-size:12px;color:var(--muted);margin-top:2px">' + t.cat + ' &middot; $' + (t.pph||0).toFixed(2) + '/hr</div>' +
+                  '<div style="font-size:12px;color:var(--muted);margin-top:2px">' + t.cat + ' &middot; $' + calcCost(t,1).toFixed(2) + '/hr</div>' +
                 '</div>' +
                 '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">' +
                   (t.available !== false
@@ -4186,7 +4188,7 @@ function startApp() {
                   (t.img && t.img !== "x" ? '<img src="' + t.img + '" style="width:46px;height:46px;object-fit:contain;border-radius:8px;background:var(--bg3);flex-shrink:0">' : '<div style="width:46px;height:46px;border-radius:8px;background:var(--bg3);flex-shrink:0"></div>') +
                   '<div style="flex:1">' +
                     '<div style="font-weight:700;font-size:14px">' + t.name + '</div>' +
-                    '<div style="font-size:12px;color:var(--muted);margin-top:1px">' + t.cat + ' &middot; $' + (t.pph||0).toFixed(2) + '/hr</div>' +
+                    '<div style="font-size:12px;color:var(--muted);margin-top:1px">' + t.cat + ' &middot; $' + calcCost(t,1).toFixed(2) + '/hr</div>' +
                   '</div>' +
                   '<div style="text-align:right">' +
                     '<div style="font-size:12px;font-weight:700;color:' + (stock>0?'#15803d':'#ef4444') + '">' + (stock>0?stock+' in stock':'Out of stock') + '</div>' +

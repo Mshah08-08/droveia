@@ -4370,6 +4370,36 @@ applyTheme(_theme);
 
 
 // ── Firebase Realtime DB - tool inventory ────────────────────────────────────
+window._partnerNameCache = {}; // email -> name
+
+async function resolvePartnerNames() {
+  var fb = window._fb;
+  if (!fb) return; // Firebase not ready yet, will retry after fbready
+  try {
+    var snap = await fb.getDocs(fb.collection(fb.db, "partners"));
+    snap.docs.forEach(function(d) {
+      var data = d.data();
+      if (data.email && data.name) window._partnerNameCache[data.email] = data.name;
+    });
+    var changed = false;
+    TOOLS.forEach(function(t) {
+      if (t.partnerEmail && window._partnerNameCache[t.partnerEmail]) {
+        t.partnerName = window._partnerNameCache[t.partnerEmail];
+        changed = true;
+      }
+    });
+    if (changed) {
+      renderTools();
+      if (window.renderPartnerSidebar) renderPartnerSidebar();
+    }
+  } catch(e) { console.warn("resolvePartnerNames failed", e); }
+}
+
+// Re-resolve after Firebase is ready (handles first load timing)
+document.addEventListener("fbready", function() {
+  if (TOOLS.length) resolvePartnerNames();
+}, {once: true});
+
 var RTDB_URL = "https://droveia-default-rtdb.firebaseio.com/tools.json";
 
 async function loadToolsFromRTDB() {
@@ -4399,9 +4429,11 @@ async function loadToolsFromRTDB() {
         rentedQty: parseInt(t.rentedQty) || 0,
         available: (parseInt(t.qty) || 1) > (parseInt(t.rentedQty) || 0),
         partnerEmail: t.partnerEmail || null,
-        partnerName:  t.partnerName  || null
+        partnerName:  t.partnerName  || (t.partnerEmail ? (window._partnerNameCache && window._partnerNameCache[t.partnerEmail]) || t.partnerEmail : null)
       };
     });
+    // Resolve any missing partnerNames from cache or Firestore
+    await resolvePartnerNames();
     renderCatIcons();
     renderFeatured();
     renderTools();

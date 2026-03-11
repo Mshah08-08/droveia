@@ -968,7 +968,6 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
     <button class="nav-link" id="nav-browse" onclick="showPage('browse')">Browse</button>
     <button class="nav-link" id="nav-orders" onclick="showPage('orders')">Orders</button>
     <button class="nav-link" id="nav-partners" onclick="showPage('partners')">Partners</button>
-    <button class="nav-link" id="nav-dashboard" onclick="showPage('admin')" style="display:none">Dashboard</button>
   </div>
 
   <div class="nav-right">
@@ -1000,10 +999,7 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
             Browse Tools
           </button>
-          <button class="btn-secondary" id="hero-admin-btn" onclick="showPage('admin')" style="display:none">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-            <span id="hero-admin-btn-label">Dashboard</span>
-          </button>
+
           <button class="btn-secondary" id="hero-signup-btn" onclick="switchAuth('signup');showAuth()">
             Create Free Account
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
@@ -1083,6 +1079,22 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
   </section>
 
   <!-- Featured tools -->
+  <!-- Dashboard card — shown only for admin/partner -->
+  <section id="home-dashboard-section" style="display:none;padding:24px 0 0">
+    <div class="container">
+      <div id="home-dashboard-card" onclick="showPage('admin')" style="background:var(--blue);border-radius:16px;padding:20px 24px;display:flex;align-items:center;gap:16px;cursor:pointer;transition:.18s;user-select:none" onmouseenter="this.style.background='#1560d8'" onmouseleave="this.style.background='var(--blue)'">
+        <div style="width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        </div>
+        <div style="flex:1">
+          <div id="home-dashboard-label" style="font-weight:800;font-size:15px;color:#fff">Dashboard</div>
+          <div id="home-dashboard-sub" style="font-size:12px;color:rgba(255,255,255,.7);margin-top:2px">Manage inventory, orders and partners</div>
+        </div>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.6)" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </div>
+    </div>
+  </section>
+
   <section style="padding:48px 0">
     <div class="container">
       <div class="section-header">
@@ -4433,8 +4445,6 @@ function startApp() {
       if (adminBtn) adminBtn.style.display = (checkAdmin() || checkPartner()) ? "" : "none";
       var adminLbl = el('hero-admin-btn-label');
       if (adminLbl) adminLbl.textContent = checkPartner() && !checkAdmin() ? 'Partner Dashboard' : 'Admin';
-      var dashNav = el('nav-dashboard');
-      if (dashNav) { dashNav.style.display = (checkAdmin() || checkPartner()) ? '' : 'none'; dashNav.textContent = checkPartner() && !checkAdmin() ? 'Partner' : 'Admin'; }
       await loadProfile();
       await loadCart();
       subscribeOrders();
@@ -4449,10 +4459,8 @@ function startApp() {
       if(btn){ btn.textContent="Sign In"; btn.onclick=showAuth; }
       var heroBtn = el("hero-signup-btn");
       if (heroBtn) heroBtn.style.display = "";
-      var adminBtn = el("hero-admin-btn");
-      if (adminBtn) adminBtn.style.display = "none";
-      var dashNav = el('nav-dashboard');
-      if (dashNav) dashNav.style.display = 'none';
+      var dashSec = el("home-dashboard-section");
+      if (dashSec) dashSec.style.display = "none";
     }
   });
 }

@@ -3973,41 +3973,74 @@ function startApp() {
   window.adminLoadPartnersPanel = async function() {
     var wrap = el("admin-partners-content");
     if (!wrap) return;
-    wrap.innerHTML = '<div style="color:var(--muted);font-size:14px;padding:20px">Loading partners...</div>';
+    wrap.innerHTML = '<div style="color:var(--muted);font-size:14px;padding:20px">Loading...</div>';
     try {
       var fb = window._fb;
-      // Load all partners
       var partnerSnap = await fb.getDocs(fb.collection(fb.db, "partners"));
       var partners = partnerSnap.docs.map(function(d){ return Object.assign({_id:d.id}, d.data()); });
 
-      // Load all pendingInventory
-      var pendingSnap = await fb.getDocs(fb.collection(fb.db, "pendingInventory"));
-      var allPending = pendingSnap.docs.map(function(d){ return Object.assign({_id:d.id}, d.data()); });
+      var pendingInvSnap = await fb.getDocs(fb.collection(fb.db, "pendingInventory"));
+      var allPendingInv = pendingInvSnap.docs.map(function(d){ return Object.assign({_id:d.id}, d.data()); });
 
-      // Update tab badge
-      var totalPending = allPending.filter(function(p){ return p.status === "pending"; }).length;
+      var appSnap = await fb.getDocs(
+        fb.query(fb.collection(fb.db, "partnerApplications"), fb.orderBy("createdAt", "desc"))
+      );
+      var applications = appSnap.docs.map(function(d){ return Object.assign({_id:d.id}, d.data()); });
+      var pendingApps = applications.filter(function(a){ return a.status === "pending"; });
+
+      // Tab badge: pending applications + pending inventory
+      var pendingInvCount = allPendingInv.filter(function(p){ return p.status === "pending"; }).length;
+      var totalBadge = pendingApps.length + pendingInvCount;
       var tabBtn = el("admin-tab-partners");
       if (tabBtn) {
         tabBtn.style.position = "relative";
-        tabBtn.innerHTML = "Partners" + (totalPending > 0
-          ? '<span style="position:absolute;top:-6px;right:-6px;min-width:16px;height:16px;border-radius:8px;background:#ef4444;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;padding:0 4px;line-height:1">' + totalPending + '</span>'
+        tabBtn.innerHTML = "Partners" + (totalBadge > 0
+          ? '<span style="position:absolute;top:-6px;right:-6px;min-width:16px;height:16px;border-radius:8px;background:#ef4444;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;padding:0 4px;line-height:1">' + totalBadge + '</span>'
           : "");
       }
 
-      if (!partners.length) {
-        wrap.innerHTML = '<div style="color:var(--muted);font-size:14px;padding:40px;text-align:center">No partners yet.</div>';
-        return;
+      var html = "";
+
+      // ── Pending Applications ──
+      if (pendingApps.length > 0) {
+        html += '<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:12px">Applications (' + pendingApps.length + ')</div>';
+        html += '<div style="display:grid;gap:10px;margin-bottom:32px">';
+        html += pendingApps.map(function(a) {
+          var date = a.createdAt && a.createdAt.toDate ? a.createdAt.toDate().toLocaleString([],{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}) : "";
+          return '<div class="admin-order-card">' +
+            '<div style="display:flex;align-items:flex-start;gap:14px">' +
+              (a.logoUrl
+                ? '<img src="' + a.logoUrl + '" style="width:52px;height:52px;object-fit:contain;border-radius:10px;background:var(--bg3);border:1px solid var(--border);flex-shrink:0;padding:4px">'
+                : '<div style="width:52px;height:52px;border-radius:12px;background:var(--blue-dim);color:var(--blue);font-weight:800;font-size:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0">' + (a.name||"?")[0].toUpperCase() + '</div>'
+              ) +
+              '<div style="flex:1">' +
+                '<div style="font-weight:700;font-size:15px">' + (a.name||"—") + '</div>' +
+                '<div style="font-size:12px;color:var(--muted);margin-top:2px">' + (a.email||"") + '</div>' +
+                (a.inventory ? '<div style="font-size:12px;color:var(--text2);margin-top:4px"><strong>Inventory:</strong> ' + a.inventory + '</div>' : '') +
+                (a.notes ? '<div style="font-size:12px;color:var(--text2);margin-top:3px">' + a.notes + '</div>' : '') +
+                (date ? '<div style="font-size:11px;color:var(--dim);margin-top:4px">Applied ' + date + '</div>' : '') +
+              '</div>' +
+              '<div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;flex-shrink:0">' +
+                '<button data-aid="' + a._id + '" data-aname="' + (a.name||"").replace(/"/g,"") + '" data-aemail="' + (a.email||"") + '" data-alogo="' + (a.logoUrl||"") + '" onclick="adminApprovePartnerApp(this)" style="padding:7px 16px;border-radius:9px;background:rgba(22,163,74,.12);color:#15803d;border:1px solid rgba(22,163,74,.25);font-size:13px;font-weight:700;cursor:pointer">Approve</button>' +
+                '<button data-aid="' + a._id + '" onclick="adminRejectPartnerApp(this)" style="padding:7px 16px;border-radius:9px;background:rgba(239,68,68,.08);color:#ef4444;border:1px solid rgba(239,68,68,.2);font-size:13px;font-weight:700;cursor:pointer">Reject</button>' +
+              '</div>' +
+            '</div>' +
+          '</div>';
+        }).join("");
+        html += '</div>';
       }
 
-      wrap.innerHTML = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">' +
-        partners.map(function(p) {
-          var myPending = allPending.filter(function(i){ return i.partnerEmail === p.email && i.status === "pending"; });
-          var myTools   = TOOLS.filter(function(t){ return t.partnerEmail === p.email; });
+      // ── Active Partners ──
+      if (partners.length > 0) {
+        html += '<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:12px">Active Partners (' + partners.length + ')</div>';
+        html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">';
+        html += partners.map(function(p) {
+          var myPendingInv = allPendingInv.filter(function(i){ return i.partnerEmail === p.email && i.status === "pending"; });
+          var myTools = TOOLS.filter(function(t){ return t.partnerEmail === p.email; });
           var displayName = p.name || p.email;
           return '<div data-email="' + p.email + '" style="position:relative;background:var(--bg2);border:1.5px solid var(--border);border-radius:14px;padding:20px 16px;cursor:pointer;transition:.15s;text-align:center" onmouseenter="this.style.borderColor=\'rgba(26,110,240,.35)\'" onmouseleave="this.style.borderColor=\'rgba(0,0,0,.08)\'" onclick="adminViewPartner(this.dataset.email)">' +
-            // notification bubble top-right
-            (myPending.length > 0
-              ? '<div style="position:absolute;top:-7px;right:-7px;min-width:20px;height:20px;border-radius:10px;background:#ef4444;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;padding:0 5px;border:2px solid var(--bg)">' + myPending.length + '</div>'
+            (myPendingInv.length > 0
+              ? '<div style="position:absolute;top:-7px;right:-7px;min-width:20px;height:20px;border-radius:10px;background:#ef4444;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;padding:0 5px;border:2px solid var(--bg)">' + myPendingInv.length + '</div>'
               : ''
             ) +
             (p.logoUrl
@@ -4015,13 +4048,72 @@ function startApp() {
               : '<div style="width:48px;height:48px;border-radius:14px;background:var(--blue-dim);color:var(--blue);font-weight:800;font-size:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px">' + displayName[0].toUpperCase() + '</div>'
             ) +
             '<div style="font-weight:700;font-size:14px;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + displayName + '</div>' +
-            '<div style="font-size:11px;color:var(--muted)">' + myTools.length + ' listing' + (myTools.length!==1?'s':'') + (myPending.length?' · <span style="color:#ef4444;font-weight:700">' + myPending.length + ' pending</span>':'') + '</div>' +
+            '<div style="font-size:11px;color:var(--muted)">' + myTools.length + ' listing' + (myTools.length!==1?'s':'') + (myPendingInv.length?' · <span style="color:#ef4444;font-weight:700">' + myPendingInv.length + ' pending</span>':'') + '</div>' +
           '</div>';
-        }).join("") +
-      '</div>';
+        }).join("");
+        html += '</div>';
+      }
+
+      if (!partners.length && !pendingApps.length) {
+        html = '<div style="text-align:center;padding:60px 0;color:var(--muted);font-size:14px">No partners or applications yet.</div>';
+      }
+
+      wrap.innerHTML = html;
     } catch(e) {
       wrap.innerHTML = '<div style="color:#ef4444;font-size:14px;padding:20px">Error: ' + e.message + '</div>';
     }
+  };
+
+  window.adminApprovePartnerApp = async function(btn) {
+    var docId = btn.dataset.aid;
+    var name  = btn.dataset.aname;
+    var email = btn.dataset.aemail;
+    var logo  = btn.dataset.alogo || null;
+    showConfirm({
+      title: "Approve " + name + "?",
+      msg: "This will create a partner account for " + email + ". They will be able to log in and submit inventory.",
+      okLabel: "Approve",
+      color: "green",
+      onOk: async function() {
+        try {
+          var fb = window._fb;
+          await fb.addDoc(fb.collection(fb.db, "partners"), {
+            name: name,
+            email: email,
+            logoUrl: logo || null,
+            status: "active",
+            createdAt: fb.serverTimestamp()
+          });
+          await fb.updateDoc(fb.doc(fb.db, "partnerApplications", docId), {
+            status: "approved",
+            approvedAt: fb.serverTimestamp()
+          });
+          showToast(name + " approved as partner!");
+          adminLoadPartnersPanel();
+        } catch(e) { showToast("Error: " + e.message); }
+      }
+    });
+  };
+
+  window.adminRejectPartnerApp = async function(btn) {
+    var docId = btn.dataset.aid;
+    showConfirm({
+      title: "Reject Application",
+      msg: "This will mark the application as rejected.",
+      okLabel: "Reject",
+      color: "red",
+      onOk: async function() {
+        try {
+          var fb = window._fb;
+          await fb.updateDoc(fb.doc(fb.db, "partnerApplications", docId), {
+            status: "rejected",
+            rejectedAt: fb.serverTimestamp()
+          });
+          showToast("Application rejected");
+          adminLoadPartnersPanel();
+        } catch(e) { showToast("Error: " + e.message); }
+      }
+    });
   };
 
   window.adminViewPartner = async function(email) {

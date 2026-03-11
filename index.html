@@ -1939,6 +1939,7 @@ function renderCart() {
           '<div class="cart-item-info">'+
             '<div class="cart-item-name">'+c.name+'</div>'+
             '<div class="cart-item-sub">'+c.hours+'h rental · $'+(c.pph && c.pph > 0 ? parseFloat(c.pph).toFixed(2) : ((c.retail*0.70)/48).toFixed(2))+'/hr</div>'+
+            (c.partnerName ? '<div style="font-size:11px;font-weight:600;color:#b45309;margin-top:2px">Sold by '+c.partnerName+'</div>' : '')+
           '</div>'+
           '<div style="text-align:right">'+
             '<div class="cart-item-price">$'+calcCost(c,c.hours).toFixed(2)+'</div>'+
@@ -3683,11 +3684,16 @@ function startApp() {
                   '<div style="font-weight:700;font-size:15px">' + t.name + '</div>' +
                   '<div style="font-size:12px;color:var(--muted);margin-top:2px">' + t.cat + ' &middot; $' + (t.pph||0).toFixed(2) + '/hr</div>' +
                 '</div>' +
-                '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">' +
+                '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">' +
                   (t.available !== false
                     ? '<span style="background:rgba(22,163,74,.1);color:#15803d;font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px">In Stock</span>'
                     : '<span style="background:rgba(239,68,68,.1);color:#ef4444;font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px">Rented Out</span>')+
                   '<div style="font-size:11px;color:var(--muted)">' + (t.rentedQty||0) + '/' + (t.qty||1) + ' rented</div>' +
+                  '<div style="display:flex;align-items:center;gap:6px">' +
+                    '<button onclick="event.stopPropagation();partnerDecrQty(' + t.id + ')" style="width:24px;height:24px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center">−</button>' +
+                    '<span style="font-size:12px;font-weight:700;min-width:18px;text-align:center">' + (t.qty||1) + '</span>' +
+                    '<button onclick="event.stopPropagation();partnerIncrQty(' + t.id + ')" style="width:24px;height:24px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center">+</button>' +
+                  '</div>' +
                 '</div>' +
               '</div>';
             }).join("") +
@@ -3782,6 +3788,40 @@ function startApp() {
       '</div>';
     } catch(e) { wrap.innerHTML = '<div style="color:#ef4444;font-size:14px;padding:20px">Error: ' + e.message + '</div>'; }
   };
+
+
+  // ── PARTNER QTY EDIT ──
+  window.partnerIncrQty = async function(toolId) {
+    var tool = TOOLS.find(function(t){ return t.id === toolId; });
+    if (!tool || tool.partnerEmail !== currentUser.email) return;
+    tool.qty = (parseInt(tool.qty)||1) + 1;
+    await partnerSyncToolQty(tool);
+    renderPartnerDashboard();
+    showToast("Stock updated: " + tool.qty + " in stock");
+  };
+
+  window.partnerDecrQty = async function(toolId) {
+    var tool = TOOLS.find(function(t){ return t.id === toolId; });
+    if (!tool || tool.partnerEmail !== currentUser.email) return;
+    var minQty = parseInt(tool.rentedQty)||0;
+    if ((parseInt(tool.qty)||1) <= minQty + 1) { showToast("Can't go below rented quantity"); return; }
+    tool.qty = (parseInt(tool.qty)||1) - 1;
+    await partnerSyncToolQty(tool);
+    renderPartnerDashboard();
+    showToast("Stock updated: " + tool.qty + " in stock");
+  };
+
+  async function partnerSyncToolQty(tool) {
+    try {
+      var idx = TOOLS.findIndex(function(t){ return t.id === tool.id; });
+      if (idx < 0) return;
+      await fetch("https://droveia-default-rtdb.firebaseio.com/tools/" + idx + ".json?auth=NKLKSY1Cshm1pba0vuKK6RQOmjV2uOfeje7hzxkI", {
+        method: "PATCH",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ qty: tool.qty, available: tool.qty > (parseInt(tool.rentedQty)||0) })
+      });
+    } catch(e) { showToast("Sync error: " + e.message); }
+  }
 
   // ── PARTNER INVENTORY SUBMISSION ──
   window.showPartnerAddInventory = function() {
@@ -3959,28 +3999,22 @@ function startApp() {
         return;
       }
 
-      wrap.innerHTML = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px">' +
+      wrap.innerHTML = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">' +
         partners.map(function(p) {
           var myPending = allPending.filter(function(i){ return i.partnerEmail === p.email && i.status === "pending"; });
           var myTools   = TOOLS.filter(function(t){ return t.partnerEmail === p.email; });
-          var statusColor = p.status === "active" ? "#15803d" : "#d97706";
-          var statusBg    = p.status === "active" ? "rgba(22,163,74,.1)" : "rgba(217,119,6,.1)";
-          return '<div data-email="' + p.email + '" style="position:relative;background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:20px;cursor:pointer;transition:.15s" onmouseenter="this.style.borderColor=\'rgba(26,110,240,.35)\'" onmouseleave="this.style.borderColor=\'rgba(0,0,0,.08)\'" onclick="adminViewPartner(this.dataset.email)">' +
-            // notification dot
+          var displayName = p.name || p.email;
+          return '<div data-email="' + p.email + '" style="position:relative;background:var(--bg2);border:1.5px solid var(--border);border-radius:14px;padding:20px 16px;cursor:pointer;transition:.15s;text-align:center" onmouseenter="this.style.borderColor=\'rgba(26,110,240,.35)\'" onmouseleave="this.style.borderColor=\'rgba(0,0,0,.08)\'" onclick="adminViewPartner(this.dataset.email)">' +
+            // notification bubble top-right
             (myPending.length > 0
-              ? '<div style="position:absolute;top:12px;right:12px;min-width:20px;height:20px;border-radius:10px;background:#ef4444;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;padding:0 5px">' + myPending.length + '</div>'
-              : '<div style="position:absolute;top:12px;right:12px;width:8px;height:8px;border-radius:4px;background:#22c55e"></div>'
+              ? '<div style="position:absolute;top:-7px;right:-7px;min-width:20px;height:20px;border-radius:10px;background:#ef4444;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;padding:0 5px;border:2px solid var(--bg)">' + myPending.length + '</div>'
+              : ''
             ) +
-            // Avatar
-            '<div style="width:44px;height:44px;border-radius:12px;background:var(--blue-dim);color:var(--blue);font-weight:800;font-size:18px;display:flex;align-items:center;justify-content:center;margin-bottom:12px">' +
-              (p.name||p.email)[0].toUpperCase() +
+            '<div style="width:48px;height:48px;border-radius:14px;background:var(--blue-dim);color:var(--blue);font-weight:800;font-size:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px">' +
+              displayName[0].toUpperCase() +
             '</div>' +
-            '<div style="font-weight:700;font-size:15px;margin-bottom:3px">' + (p.name||p.email) + '</div>' +
-            '<div style="font-size:12px;color:var(--muted);margin-bottom:10px">' + p.email + '</div>' +
-            '<div style="display:flex;gap:8px;align-items:center">' +
-              '<span style="font-size:11px;font-weight:700;padding:2px 9px;border-radius:6px;background:' + statusBg + ';color:' + statusColor + '">' + (p.status||"active") + '</span>' +
-              '<span style="font-size:11px;color:var(--muted)">' + myTools.length + ' listing' + (myTools.length!==1?'s':'') + '</span>' +
-            '</div>' +
+            '<div style="font-weight:700;font-size:14px;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + displayName + '</div>' +
+            '<div style="font-size:11px;color:var(--muted)">' + myTools.length + ' listing' + (myTools.length!==1?'s':'') + (myPending.length?' · <span style="color:#ef4444;font-weight:700">' + myPending.length + ' pending</span>':'') + '</div>' +
           '</div>';
         }).join("") +
       '</div>';

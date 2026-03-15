@@ -3647,8 +3647,9 @@ function startApp() {
 
     // Earnings
     var totalEarnings = allPartnerOrders.reduce(function(sum, o) {
+      if (o.status === "cancelled") return sum;
       var myShare = (o.items||[]).filter(function(i){ return myToolIds.includes(i.id); })
-        .reduce(function(s,i){ return s + (i.subtotal || 0); }, 0);
+        .reduce(function(s,i){ return s + (i.subtotal != null ? i.subtotal : calcCost(i, i.hours||1)); }, 0);
       return sum + myShare * 0.9;
     }, 0);
     var activeRentals = allPartnerOrders.filter(function(o){ return o.status === "in_flight" || o.status === "delivered"; }).length;
@@ -3722,31 +3723,7 @@ function startApp() {
 
       '</div>' +
       '<div class="admin-panel" id="partner-panel-porders">' +
-      // Earnings summary
-      (function(){
-        var totalGross = allPartnerOrders.filter(function(o){ return o.status !== "cancelled"; }).reduce(function(s,o){
-          return s + (o.items||[]).filter(function(i){ return myToolIds.includes(i.id); }).reduce(function(s2,i){ return s2+(i.subtotal != null ? i.subtotal : calcCost(i, i.hours||1)); }, 0);
-        }, 0);
-        var totalEarnings = totalGross * 0.9;
-        var activeOrders = allPartnerOrders.filter(function(o){ return o.status === "in_flight" || o.status === "delivered"; }).length;
-        return '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px">' +
-          '<div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px">' +
-            '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Est. Earnings</div>' +
-            '<div style="font-size:22px;font-weight:800;color:var(--green)">$' + totalEarnings.toFixed(2) + '</div>' +
-            '<div style="font-size:11px;color:var(--dim);margin-top:3px">90% of gross revenue</div>' +
-          '</div>' +
-          '<div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px">' +
-            '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Gross Revenue</div>' +
-            '<div style="font-size:22px;font-weight:800">$' + totalGross.toFixed(2) + '</div>' +
-            '<div style="font-size:11px;color:var(--dim);margin-top:3px">All completed orders</div>' +
-          '</div>' +
-          '<div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px">' +
-            '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Active Orders</div>' +
-            '<div style="font-size:22px;font-weight:800">' + activeOrders + '</div>' +
-            '<div style="font-size:11px;color:var(--dim);margin-top:3px">In flight or delivered</div>' +
-          '</div>' +
-        '</div>';
-      })() +
+
       '<div style="font-size:16px;font-weight:800;margin-bottom:14px;letter-spacing:-.01em">Recent Orders</div>' +
       (allPartnerOrders.length === 0
         ? '<div style="background:var(--bg2);border:1px dashed var(--border);border-radius:14px;padding:32px;text-align:center;color:var(--muted);font-size:14px">No orders yet.</div>'

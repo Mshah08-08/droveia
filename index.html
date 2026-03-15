@@ -4437,14 +4437,17 @@ function startApp() {
       if (btn) { btn.textContent=first; btn.onclick=function(){showPage("account");}; }
       var heroBtn = el("hero-signup-btn");
       if (heroBtn) heroBtn.style.display = "none";
-      // Show admin button only for admin users
       await loadAdminEmails();
-      var adminBtn = el("hero-admin-btn");
       await window.loadPartnerEmails();
-      window.isPartner = window.checkPartner ? window.checkPartner() : false; var isPartner = window.isPartner;
-      if (adminBtn) adminBtn.style.display = (checkAdmin() || checkPartner()) ? "" : "none";
-      var adminLbl = el('hero-admin-btn-label');
-      if (adminLbl) adminLbl.textContent = checkPartner() && !checkAdmin() ? 'Partner Dashboard' : 'Admin';
+      window.isPartner = window.checkPartner ? window.checkPartner() : false;
+      var _isAdminUser = checkAdmin();
+      var _isPartnerUser = window.isPartner && !_isAdminUser;
+      var dashSec = el('home-dashboard-section');
+      var dashLbl = el('home-dashboard-label');
+      var dashSub = el('home-dashboard-sub');
+      if (dashSec) dashSec.style.display = (_isAdminUser || window.isPartner) ? '' : 'none';
+      if (dashLbl) dashLbl.textContent = _isPartnerUser ? 'Partner Dashboard' : 'Admin Dashboard';
+      if (dashSub) dashSub.textContent = _isPartnerUser ? 'Manage your listings and track orders' : 'Manage inventory, orders and partners';
       await loadProfile();
       await loadCart();
       subscribeOrders();

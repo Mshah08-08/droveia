@@ -3124,7 +3124,7 @@ function startApp() {
       var orderRef = await fb.addDoc(oCol(currentUser.uid), {
         status: "in_flight",
         items:  items.map(function(i){
-          return {id:i.id,name:i.name,cat:i.cat,pph:i.pph,hours:i.hours,retail:i.retail};
+          return {id:i.id,name:i.name,cat:i.cat,pph:i.pph,hours:i.hours,retail:i.retail,subtotal:parseFloat(calcCost(i,i.hours).toFixed(2))};
         }),
         total:total, saved:saved, stripePaymentId:stripePaymentId||null,
         address:{building:userProfile&&userProfile.building||"—",dropLat:dropLocation?dropLocation[0]:null,dropLng:dropLocation?dropLocation[1]:null},
@@ -3148,7 +3148,7 @@ function startApp() {
       // Also write to top-level allOrders for admin dashboard
       var orderData = {
         status: "in_flight", items: items.map(function(i){
-          return {id:i.id,name:i.name,cat:i.cat,pph:i.pph,hours:i.hours,retail:i.retail};
+          return {id:i.id,name:i.name,cat:i.cat,pph:i.pph,hours:i.hours,retail:i.retail,subtotal:parseFloat(calcCost(i,i.hours).toFixed(2))};
         }),
         total:total, saved:saved,
         address:{building:userProfile&&userProfile.building||"—",dropLat:dropLocation?dropLocation[0]:null,dropLng:dropLocation?dropLocation[1]:null},
@@ -3725,7 +3725,7 @@ function startApp() {
       // Earnings summary
       (function(){
         var totalGross = allPartnerOrders.filter(function(o){ return o.status !== "cancelled"; }).reduce(function(s,o){
-          return s + (o.items||[]).filter(function(i){ return myToolIds.includes(i.id); }).reduce(function(s2,i){ return s2+(i.subtotal||0); }, 0);
+          return s + (o.items||[]).filter(function(i){ return myToolIds.includes(i.id); }).reduce(function(s2,i){ return s2+(i.subtotal != null ? i.subtotal : calcCost(i, i.hours||1)); }, 0);
         }, 0);
         var totalEarnings = totalGross * 0.9;
         var activeOrders = allPartnerOrders.filter(function(o){ return o.status === "in_flight" || o.status === "delivered"; }).length;
@@ -3755,7 +3755,7 @@ function startApp() {
               var statusColor = o.status==="cancelled" ? "#ef4444" : o.status==="returned" ? "var(--muted)" : o.status==="in_flight" ? "var(--blue)" : "var(--green)";
               var statusLabel = o.status==="in_flight" ? "In Flight" : o.status==="delivered" ? "Delivered" : o.status==="returned" ? "Returned" : o.status==="cancelled" ? "Cancelled" : o.status;
               var myItems = (o.items||[]).filter(function(i){ return myToolIds.includes(i.id); });
-              var myGross = myItems.reduce(function(s,i){ return s+(i.subtotal||0); }, 0);
+              var myGross = myItems.reduce(function(s,i){ return s+(i.subtotal != null ? i.subtotal : calcCost(i, i.hours||1)); }, 0);
               var myEarnings = myGross * 0.9;
               var date = o.createdAt && o.createdAt.toDate ? o.createdAt.toDate().toLocaleString([],{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}) : "";
               return '<div class="admin-order-card" style="display:flex;align-items:center;gap:14px">' +

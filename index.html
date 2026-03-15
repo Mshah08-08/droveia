@@ -1000,6 +1000,10 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
             Browse Tools
           </button>
 
+          <button class="btn-secondary" id="hero-dashboard-btn" onclick="showPage('admin')" style="display:none">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            <span id="hero-dashboard-btn-label">Dashboard</span>
+          </button>
           <button class="btn-secondary" id="hero-signup-btn" onclick="switchAuth('signup');showAuth()">
             Create Free Account
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
@@ -4442,10 +4446,17 @@ function startApp() {
       window.isPartner = window.checkPartner ? window.checkPartner() : false;
       var _isAdminUser = checkAdmin();
       var _isPartnerUser = window.isPartner && !_isAdminUser;
+      var _showDash = _isAdminUser || window.isPartner;
+      // Hero button
+      var heroDashBtn = el('hero-dashboard-btn');
+      var heroDashLbl = el('hero-dashboard-btn-label');
+      if (heroDashBtn) heroDashBtn.style.display = _showDash ? '' : 'none';
+      if (heroDashLbl) heroDashLbl.textContent = _isPartnerUser ? 'Partner Dashboard' : 'Admin Dashboard';
+      // Dashboard card section
       var dashSec = el('home-dashboard-section');
       var dashLbl = el('home-dashboard-label');
       var dashSub = el('home-dashboard-sub');
-      if (dashSec) dashSec.style.display = (_isAdminUser || window.isPartner) ? '' : 'none';
+      if (dashSec) dashSec.style.display = _showDash ? '' : 'none';
       if (dashLbl) dashLbl.textContent = _isPartnerUser ? 'Partner Dashboard' : 'Admin Dashboard';
       if (dashSub) dashSub.textContent = _isPartnerUser ? 'Manage your listings and track orders' : 'Manage inventory, orders and partners';
       await loadProfile();
@@ -4462,8 +4473,10 @@ function startApp() {
       if(btn){ btn.textContent="Sign In"; btn.onclick=showAuth; }
       var heroBtn = el("hero-signup-btn");
       if (heroBtn) heroBtn.style.display = "";
-      var dashSec = el("home-dashboard-section");
-      if (dashSec) dashSec.style.display = "none";
+      var heroDashBtn = el('hero-dashboard-btn');
+      if (heroDashBtn) heroDashBtn.style.display = 'none';
+      var dashSec = el('home-dashboard-section');
+      if (dashSec) dashSec.style.display = 'none';
     }
   });
 }

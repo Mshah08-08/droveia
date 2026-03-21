@@ -20,8 +20,8 @@
   --surface:rgba(26,110,240,0.04);
   --surface2:rgba(26,110,240,0.07);
   --surface3:rgba(26,110,240,0.11);
-  --border:rgba(0,0,0,0.08);
-  --border2:rgba(0,0,0,0.13);
+  --border:rgba(0,0,0,0.07);
+  --border2:rgba(0,0,0,0.11);
   --text:#0d0f1a;
   --text2:#2a2d3e;
   --muted:#6b7280;
@@ -38,7 +38,7 @@
   --font:'Sora',sans-serif;
   --nav-h:64px;
   --toast-bg:#1a1a2e;
-  --toast-border:rgba(255,255,255,.14);
+  --toast-border:rgba(255,255,255,.12);
   --toast-text:#f0f3ff;
   --search-h:54px;
 }
@@ -238,7 +238,7 @@ img{max-width:100%}
 .auth-footer a{color:var(--blue);cursor:pointer}
 
 /* ── Navigation ─────────────────────────────── */
-nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:var(--nav-h);background:rgba(255,255,255,.95);backdrop-filter:blur(20px) saturate(160%);border-bottom:1px solid var(--border);box-shadow:0 1px 20px rgba(0,0,0,.05);display:flex;align-items:center;padding:0 24px;gap:16px}
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:var(--nav-h);background:rgba(255,255,255,.92);backdrop-filter:blur(20px) saturate(160%);border-bottom:1px solid var(--border);box-shadow:0 1px 20px rgba(0,0,0,.06);display:flex;align-items:center;padding:0 24px;gap:16px}
 .nav-logo{display:flex;align-items:center;gap:9px;cursor:pointer;flex-shrink:0}
 .nav-logo-mark{height:40px;width:auto;background:transparent;border:none;box-shadow:none;display:flex;align-items:center;justify-content:center;}
 .nav-wordmark{font-size:17px;font-weight:800;letter-spacing:-.03em}
@@ -263,7 +263,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:var(--nav-h);backgro
 .nav-link{padding:8px 12px;border-radius:8px;font-size:13px;font-weight:500;color:var(--muted);transition:.15s;cursor:pointer;position:relative}
 .nav-link:hover{color:var(--text);background:var(--surface)}
 .nav-link.active{color:var(--text)}
-.nav-link.active::after{content:'';position:absolute;bottom:-1px;left:50%;transform:translateX(-50%);width:20px;height:2px;background:#1a6ef0;border-radius:2px}
+.nav-link.active::after{content:'';position:absolute;bottom:-1px;left:50%;transform:translateX(-50%);width:20px;height:2px;background:var(--blue);border-radius:2px}
 .nav-right{display:flex;align-items:center;gap:10px;flex-shrink:0;margin-left:auto}
 
 .theme-fab{
@@ -311,8 +311,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:var(--nav-h);backgro
 /* ── Pages ──────────────────────────────────── */
 .page{display:none;min-height:calc(100vh - var(--nav-h))}
 .page.active{display:block}
-#page-browse{min-height:calc(100vh - var(--nav-h));flex-direction:column}
-#page-browse.active{display:flex}
+#page-browse{min-height:calc(100vh - var(--nav-h))}
 .container{max-width:1280px;margin:0 auto;padding:0 24px}
 
 /* ── Promo Banner ───────────────────────────── */
@@ -321,13 +320,13 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:var(--nav-h);backgro
 /* ── Hero ───────────────────────────────────── */
 .hero{padding:60px 0 50px;overflow:hidden;background:linear-gradient(160deg,#f0f5ff 0%,#e8efff 50%,#f5f7ff 100%)}
 .hero-inner{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:48px;max-width:1280px;margin:0 auto;padding:0 24px}
-.hero-badge{display:inline-flex;align-items:center;gap:7px;background:#e8f0fd;border:1px solid rgba(26,110,240,.22);border-radius:20px;padding:6px 12px;font-size:12px;font-weight:600;color:#1560d8;margin-bottom:20px;letter-spacing:.02em}
+.hero-badge{display:inline-flex;align-items:center;gap:7px;background:#dbeafe;border:1px solid rgba(26,110,240,.25);border-radius:20px;padding:6px 12px;font-size:12px;font-weight:600;color:#1d4ed8;margin-bottom:20px;letter-spacing:.02em}
 .hero-h1{font-size:clamp(36px,4.5vw,58px);font-weight:800;line-height:1.08;letter-spacing:-.04em;margin-bottom:18px}
 .hero-h1 span{background:linear-gradient(135deg,#1a6ef0,#2563eb);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .hero-sub{font-size:16px;color:var(--text2);line-height:1.7;font-weight:300;margin-bottom:28px;max-width:460px}
 .hero-ctas{display:flex;gap:12px;margin-bottom:36px;flex-wrap:wrap}
 .btn-primary{display:inline-flex;align-items:center;gap:8px;background:var(--blue);color:#fff;border-radius:12px;padding:13px 22px;font-size:14px;font-weight:600;transition:.18s;cursor:pointer;border:none;font-family:var(--font)}
-.btn-primary:hover{background:var(--blue-hover);transform:translateY(-1px);box-shadow:0 6px 20px rgba(26,110,240,.4)}
+.btn-primary:hover{background:var(--blue-hover);transform:translateY(-1px);box-shadow:0 8px 24px rgba(26,110,240,.35)}
 .btn-primary:active{transform:none}
 .btn-secondary{display:inline-flex;align-items:center;gap:8px;background:var(--surface2);color:var(--text);border:1px solid var(--border2);border-radius:12px;padding:13px 22px;font-size:14px;font-weight:500;transition:.18s;cursor:pointer;font-family:var(--font)}
 .btn-secondary:hover{background:var(--surface3);transform:translateY(-1px)}
@@ -369,18 +368,18 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:var(--nav-h);backgro
 .see-all-btn:hover{color:#60a5fa}
 
 /* ── Tool Cards (improved) ──────────────────── */
-.tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;width:100%;align-items:stretch}.tools-grid .tool-card{height:100%;max-width:320px}
+.tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;width:100%}
 .tool-card{background:#ffffff;border:1px solid var(--border);border-radius:var(--radius);padding:20px;cursor:pointer;transition:.22s;position:relative;overflow:hidden;display:flex;flex-direction:column;gap:10px}
 .tool-card::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent,rgba(26,110,240,.03));opacity:0;transition:.2s;pointer-events:none}
-.tool-card:hover{border-color:rgba(26,110,240,.3);transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,.12)}
+.tool-card:hover{border-color:rgba(26,110,240,.35);transform:translateY(-3px);box-shadow:0 12px 36px rgba(26,110,240,.12)}
 .tool-unavailable{opacity:.7;pointer-events:none}
 .tool-card:hover::after{opacity:1}
-.tool-card-img{width:100%;aspect-ratio:1.6;position:relative;border-radius:var(--radius) var(--radius) 0 0;overflow:hidden;background:#ffffff}.tool-card-body{display:flex;flex-direction:column;flex:1}.tool-card-price-row{display:flex;align-items:baseline;gap:2px;margin-bottom:10px}.tool-card-pph{font-size:20px;font-weight:800;color:var(--text);line-height:1}.tool-card-unit{font-size:12px;color:var(--muted);font-weight:500}.tool-card-retail{font-size:12px;color:var(--muted);text-decoration:line-through;margin-left:6px}.tool-card-eta-pill{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px}.tool-card-footer{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:auto}.tool-card-add{padding:7px 14px;background:var(--blue);border:none;border-radius:8px;color:#fff;font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s}.tool-card-add:hover{background:#1560d8}
+.tool-card-img{width:100%;aspect-ratio:1.6;position:relative;border-radius:var(--radius) var(--radius) 0 0;overflow:hidden;background:#ffffff}.tool-card-price-row{display:flex;align-items:baseline;gap:2px;margin-bottom:10px}.tool-card-pph{font-size:20px;font-weight:800;color:var(--text);line-height:1}.tool-card-unit{font-size:12px;color:var(--muted);font-weight:500}.tool-card-retail{font-size:12px;color:var(--muted);text-decoration:line-through;margin-left:6px}.tool-card-eta-pill{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px}.tool-card-footer{display:flex;align-items:center;justify-content:space-between;gap:8px}.tool-card-add{padding:7px 14px;background:var(--blue);border:none;border-radius:8px;color:#fff;font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s}.tool-card-add:hover{background:#1560d8}
 .tool-card-top{display:flex;align-items:flex-start;justify-content:space-between}
 .tool-icon{width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,rgba(26,110,240,.18),rgba(26,110,240,.06));display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .save-badge{background:var(--green-dim);border:1px solid var(--green-mid);color:var(--green);font-size:11px;font-weight:700;border-radius:20px;padding:3px 9px;white-space:nowrap}
 .tool-name{font-size:16px;font-weight:700;letter-spacing:-.01em;line-height:1.2}
-.tool-desc{font-size:12px;color:var(--muted);line-height:1.6;font-weight:400}
+.tool-desc{font-size:12px;color:var(--muted);line-height:1.6;font-weight:400;flex:1}
 .tool-stars{display:flex;align-items:center;gap:6px}
 .stars{color:var(--amber);font-size:13px;display:flex;gap:1px}
 .star.empty{opacity:.25}
@@ -403,16 +402,13 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:var(--nav-h);backgro
 .hiw-desc{font-size:13px;color:var(--muted);line-height:1.6;font-weight:300}
 
 /* ── Browse Page ────────────────────────────── */
-.browse-layout{display:grid;grid-template-columns:220px 1fr;gap:0;flex:1;min-height:0}
+.browse-layout{display:grid;grid-template-columns:220px 1fr;gap:0;flex:1;overflow:hidden}
 .browse-sidebar{height:100%;overflow-y:auto;padding:24px 20px;border-right:1px solid var(--border);flex-shrink:0}
 .sidebar-section{margin-bottom:24px}
 .sidebar-section-title{font-size:11px;font-weight:700;letter-spacing:.07em;color:var(--muted);margin-bottom:10px;text-transform:uppercase}
 .sidebar-filter-item{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:8px;cursor:pointer;transition:.15s;font-size:13px;color:var(--text2);margin-bottom:2px}
 .sidebar-filter-item:hover{background:var(--surface);color:var(--text)}
 .sidebar-filter-item.active{background:var(--blue);color:#fff;font-weight:600}
-.sidebar-partner-item{display:flex;align-items:center;padding:8px 10px;border-radius:8px;cursor:pointer;transition:.15s;font-size:13px;color:var(--text2);margin-bottom:2px}
-.sidebar-partner-item:hover{background:var(--surface);color:var(--text)}
-.sidebar-partner-item.active{background:var(--blue);color:#fff;font-weight:600}
 .sidebar-filter-count{font-size:11px;color:var(--dim);background:var(--surface);border-radius:20px;padding:2px 7px}
 .browse-main{}
 .browse-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
@@ -539,7 +535,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:var(--nav-h);backgro
 .avatar-inner{position:relative;width:100%;height:100%;border-radius:50%;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;z-index:1;border:3px solid var(--bg2)}
 .profile-name{font-size:16px;font-weight:800;letter-spacing:-.01em}
 .profile-email{font-size:12px;color:var(--muted);margin-bottom:10px}
-.verified-pill{display:inline-flex;align-items:center;gap:5px;background:#e8f0fd;border:1px solid rgba(26,110,240,.22);border-radius:20px;padding:4px 10px;font-size:11px;font-weight:600;color:#93c5fd}
+.verified-pill{display:inline-flex;align-items:center;gap:5px;background:#dbeafe;border:1px solid rgba(26,110,240,.25);border-radius:20px;padding:4px 10px;font-size:11px;font-weight:600;color:#93c5fd}
 .sidebar-nav{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
 .sidebar-nav-item{display:flex;align-items:center;gap:10px;padding:13px 16px;cursor:pointer;transition:.15s;font-size:14px;font-weight:500;color:var(--text2);border-bottom:1px solid var(--border)}
 .sidebar-nav-item:last-of-type{border-bottom:none}
@@ -702,7 +698,7 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
 /* Mobile bottom nav */
 .mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--bg2);border-top:1px solid var(--border);z-index:900;padding:8px 0 max(8px,env(safe-area-inset-bottom));gap:0}
 .mobile-nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 4px;background:none;border:none;color:var(--muted);font-family:var(--font);font-size:10px;font-weight:600;letter-spacing:.04em;cursor:pointer;transition:.15s}
-.mobile-nav-item.active{color:#1a6ef0}
+.mobile-nav-item.active{color:var(--blue)}
 .mobile-nav-item svg{transition:.15s}
 .mobile-nav-item.active svg{stroke:var(--blue)}
 @media(max-width:640px){
@@ -967,11 +963,11 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
     <button class="nav-link active" id="nav-home" onclick="showPage('home')">Home</button>
     <button class="nav-link" id="nav-browse" onclick="showPage('browse')">Browse</button>
     <button class="nav-link" id="nav-orders" onclick="showPage('orders')">Orders</button>
-    <button class="nav-link" id="nav-partners" onclick="showPage('partners')">Partners</button>
+    <button class="nav-link" id="nav-api" onclick="showPage('api')" style="display:none">API</button>
   </div>
 
   <div class="nav-right">
-
+    <div class="nav-live"><span class="live-dot"></span>LIVE</div>
 
     <button class="cart-btn" onclick="showPage('cart')">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
@@ -999,10 +995,9 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
             Browse Tools
           </button>
-
-          <button class="btn-secondary" id="hero-dashboard-btn" onclick="showPage('admin')" style="display:none">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-            <span id="hero-dashboard-btn-label">Dashboard</span>
+          <button class="btn-secondary" id="hero-admin-btn" onclick="sessionStorage.setItem('openAdmin','1'); window.open(location.href.split('#')[0], '_blank')" style="display:none">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            Admin
           </button>
           <button class="btn-secondary" id="hero-signup-btn" onclick="switchAuth('signup');showAuth()">
             Create Free Account
@@ -1083,22 +1078,6 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
   </section>
 
   <!-- Featured tools -->
-  <!-- Dashboard card — shown only for admin/partner -->
-  <section id="home-dashboard-section" style="display:none;padding:24px 0 0">
-    <div class="container">
-      <div id="home-dashboard-card" onclick="showPage('admin')" style="background:var(--blue);border-radius:16px;padding:20px 24px;display:flex;align-items:center;gap:16px;cursor:pointer;transition:.18s;user-select:none" onmouseenter="this.style.background='#1560d8'" onmouseleave="this.style.background='var(--blue)'">
-        <div style="width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-        </div>
-        <div style="flex:1">
-          <div id="home-dashboard-label" style="font-weight:800;font-size:15px;color:#fff">Dashboard</div>
-          <div id="home-dashboard-sub" style="font-size:12px;color:rgba(255,255,255,.7);margin-top:2px">Manage inventory, orders and partners</div>
-        </div>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.6)" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </div>
-    </div>
-  </section>
-
   <section style="padding:48px 0">
     <div class="container">
       <div class="section-header">
@@ -1173,9 +1152,6 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
         <div class="sidebar-filter-item" onclick="setFilter(this,'price','0-2')">Under $2/hr</div>
         <div class="sidebar-filter-item" onclick="setFilter(this,'price','2-5')">$2–5/hr</div>
         <div class="sidebar-filter-item" onclick="setFilter(this,'price','5-99')">$5+/hr</div>
-      </div>
-      <div class="sidebar-section" id="sidebar-partners-section" style="display:none">
-        <!-- populated by renderPartnerSidebar() -->
       </div>
       <div class="sidebar-section">
         <div class="sidebar-section-title">ETA</div>
@@ -1354,7 +1330,7 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
 
         <!-- Stage 2: Map pin -->
         <div id="addr-stage-2" style="display:none">
-          <div style="font-size:12px;color:var(--muted);margin:14px 0 10px">Click on your property to place the drop pin. The shaded area shows your property boundary - keep the pin inside it.</div>
+          <div style="font-size:12px;color:var(--muted);margin:14px 0 10px">Click on your property to place the drop pin. The shaded area shows your property boundary — keep the pin inside it.</div>
           <div id="addr-droppin-map" style="width:100%;height:320px;border-radius:12px;overflow:hidden;border:1px solid var(--border);cursor:crosshair"></div>
           <div id="addr-droppin-coords" style="font-size:11px;color:var(--muted);margin-top:8px;text-align:right;min-height:16px"></div>
           <div style="display:flex;gap:10px;margin-top:10px">
@@ -1440,7 +1416,7 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
 </div>
 
 <!-- ══════════════════════════════════════════════════════════════
-  FIREBASE - live config
+  FIREBASE — live config
 ══════════════════════════════════════════════════════════════ -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -1477,8 +1453,8 @@ document.dispatchEvent(new Event("fbready"));
 
 
 // =============================================================================
-// DROVEIA - Full App Script
-// All functions are plain globals - no module scope, no const in attributes
+// DROVEIA — Full App Script
+// All functions are plain globals — no module scope, no const in attributes
 // =============================================================================
 
 // ── Data ──────────────────────────────────────────────────────────────────────
@@ -1548,14 +1524,22 @@ function showPage(id) {
   sessionStorage.setItem("currentPage", id);
   qsa(".nav-link").forEach(function(l){ l.classList.remove("active"); });
   var nl = el("nav-"+id); if(nl) nl.classList.add("active");
+  if (id === "admin") { renderAdmin(); }
+  if (id === "api") {
+    // Only partners and admins can see this page
+    var _adm = typeof checkAdmin === "function" && checkAdmin();
+    var _prt = window._isPartnerUser || false;
+    if (!currentUser) { showAuth(); return; }
+    if (!_adm && !_prt) { showToast("Partner access only"); showPage("home"); return; }
+    renderPartnerApiPage();
+    return;
+  }
   window.scrollTo(0,0);
   updateMobileNav(id);
   if (id==="browse")  renderTools();
   if (id==="cart")    renderCart();
   if (id==="orders")  { renderOrders(); setTimeout(initOrderMap, 100); }
   if (id==="account") renderAccount();
-  if (id==="partners") window.loadPartners && window.loadPartners();
-  if (id==="admin") { (window.isPartner && !window.checkAdmin()) ? (window.renderPartnerDashboard && window.renderPartnerDashboard()) : renderAdmin(); }
 }
 window.showPage = showPage;
 
@@ -1587,28 +1571,22 @@ function toolCard(t) {
   h += t.img && t.img !== 'x' ? '<img src="' + t.img + '" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center;display:block;padding:8px">' : '';
 
   h += '</div>';
-  var stockLeft = (t.qty||1) - (t.rentedQty||0);
-  var stockLabel = unavail ? 'Out of stock' : stockLeft <= 2 ? 'Only ' + stockLeft + ' left' : stockLeft + ' in stock';
-  var stockColor = unavail ? '#ef4444' : stockLeft <= 2 ? '#d97706' : '#16a34a';
   h += '<div class="tool-card-body">';
-  h += '<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:6px">';
   h += '<div class="tool-card-cat-tag">' + t.cat + '</div>';
-  var _pLabel = (window._partnerNameCache && t.partnerEmail && window._partnerNameCache[t.partnerEmail])
-    || (t.partnerName && !t.partnerName.includes("@") ? t.partnerName : null);
-  if (t.partnerEmail) h += '<div style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:5px;background:var(--blue-dim);color:var(--blue);border:1px solid var(--blue-mid)">' + (_pLabel || "Partner") + '</div>';
-  h += '</div>';
   h += '<div class="tool-name">' + t.name + '</div>';
   h += '<div class="tool-desc">' + t.desc + '</div>';
-  h += '<div class="tool-stars" style="margin-bottom:8px">' + stars(t.rating) + '</div>';
+  h += '<div class="tool-stars" style="margin-bottom:10px">' + stars(t.rating) + '</div>';
   h += '<div class="tool-card-price-row">';
   h += '<div class="tool-card-pph">$' + baseRate.toFixed(2) + '<span class="tool-card-unit">/hr</span></div>';
   h += '<div class="tool-card-retail">$' + t.retail + '</div>';
   h += '</div>';
-  h += '<div style="font-size:11px;font-weight:600;color:' + stockColor + ';margin-bottom:8px">' + stockLabel + '</div>';
   h += '<div class="tool-card-footer">';
+  h += '<div style="display:flex;flex-direction:column;gap:4px">';
+  h += '<span style="background:rgba(34,197,94,.15);color:#16a34a;font-size:10px;font-weight:700;padding:2px 8px;border-radius:5px;width:fit-content">Save ' + pct + '%</span>';
   h += '<div class="tool-card-eta-pill">~' + t.eta + '</div>';
+  h += '</div>';
   h += unavail
-    ? '<button class="tool-card-add" style="background:var(--blue);opacity:.85" onclick="event.stopPropagation();openWaitlist(' + t.id + ')">Waitlist</button>'
+    ? '<button class="tool-card-add" style="background:var(--dim);cursor:default;opacity:.6" disabled>Unavailable</button>'
     : '<button class="tool-card-add" onclick="event.stopPropagation();quickAdd(' + t.id + ')">+ Add</button>';
   h += '</div></div></div>';
   return h;
@@ -1620,10 +1598,6 @@ function renderTools() {
     if (currentCat!=="All" && t.cat!==currentCat) return false;
     if (t.name.toLowerCase().indexOf(q)<0) return false;
     if (currentAvailFilter==="available" && t.available===false) return false;
-    if (currentPartnerFilter !== "all") {
-      if (currentPartnerFilter === "droveia" && t.partnerEmail) return false;
-      if (currentPartnerFilter !== "droveia" && t.partnerEmail !== currentPartnerFilter) return false;
-    }
     // price filter
     if (currentPriceFilter!=="all") {
       var parts = currentPriceFilter.split("-");
@@ -1675,36 +1649,6 @@ function renderFeatured() {
 
 window.filterTools = renderTools;
 
-var currentPartnerFilter = currentPartnerFilter || "all";
-window.setPartnerFilter = function(btn, val) {
-  currentPartnerFilter = val;
-  qsa(".sidebar-partner-item").forEach(function(b){ b.classList.remove("active"); });
-  if (btn) btn.classList.add("active");
-  renderTools();
-};
-
-window.renderPartnerSidebar = function() {
-  var wrap = el("sidebar-partners-section");
-  if (!wrap) return;
-  var partners = [];
-  var seen = {};
-  TOOLS.forEach(function(t) {
-    if (t.partnerEmail && !seen[t.partnerEmail]) {
-      seen[t.partnerEmail] = true;
-      partners.push({ email: t.partnerEmail, name: (window._partnerNameCache && window._partnerNameCache[t.partnerEmail]) || (t.partnerName && !t.partnerName.includes('@') ? t.partnerName : null) || t.partnerEmail });
-    }
-  });
-  if (!partners.length) { wrap.style.display = "none"; return; }
-  wrap.style.display = "block";
-  var html = '<div class="sidebar-section-title">By Partner</div>';
-  html += '<div class="sidebar-partner-item active" onclick="setPartnerFilter(this,\'all\')">All Sources</div>';
-  html += '<div class="sidebar-partner-item" onclick="setPartnerFilter(this,\'droveia\')">Droveia Only</div>';
-  partners.forEach(function(p) {
-    html += '<div class="sidebar-partner-item" onclick="setPartnerFilter(this,\'' + p.email + '\')">' + p.name + '</div>';
-  });
-  wrap.innerHTML = html;
-};
-
 function setCatAndBrowse(cat) {
   currentCat = cat;
   qsa(".sidebar-cat-item").forEach(function(i){
@@ -1731,10 +1675,9 @@ window.sortTools = function(val) {
 };
 
 // active filter state
-var currentPriceFilter  = "all";
-var currentEtaFilter    = "all";
-var currentAvailFilter  = "all";
-var currentPartnerFilter = "all";
+var currentPriceFilter = "all";
+var currentEtaFilter   = "all";
+var currentAvailFilter = "all";
 
 window.setAvailFilter = function(elem, val) {
   document.querySelectorAll("#avail-all, #avail-available").forEach(function(i){ i.classList.remove("active"); });
@@ -1815,22 +1758,21 @@ window.openModal = openModal;
 // ── Pricing tiers ─────────────────────────────────────────────────────────────
 function calcCost(t, hours) {
   if (!t || !t.retail) return 0;
+  // If pph manually set, use as hourly rate directly
   if (parseFloat(t.pph) > 0) {
     return parseFloat((parseFloat(t.pph) * hours).toFixed(2));
   }
-  // Interpolate linearly between anchor tiers so every +/- 1hr updates price
+  // Auto-price: flat total cost tiers as % of retail (always ascending)
+  // 1h=8%, 4h=18%, 8h=28%, 12h=38%, 24h=48%, 48h=58%
   var r = t.retail;
-  var anchors = [[1,0.08],[4,0.18],[8,0.28],[12,0.38],[24,0.48],[48,0.58]];
-  var h = Math.min(48, Math.max(1, hours));
-  for (var i = 0; i < anchors.length - 1; i++) {
-    var h0=anchors[i][0], p0=anchors[i][1];
-    var h1=anchors[i+1][0], p1=anchors[i+1][1];
-    if (h <= h1) {
-      var frac = (h - h0) / (h1 - h0);
-      return parseFloat(Math.max(r * (p0 + frac*(p1-p0)), 0.01).toFixed(2));
-    }
-  }
-  return parseFloat((r * 0.58).toFixed(2));
+  var total;
+  if      (hours >= 48) total = r * 0.58;
+  else if (hours >= 24) total = r * 0.48;
+  else if (hours >= 12) total = r * 0.38;
+  else if (hours >= 8)  total = r * 0.28;
+  else if (hours >= 4)  total = r * 0.18;
+  else                  total = r * 0.08 * hours; // scales for 1-3h
+  return parseFloat(Math.max(total, 0.01).toFixed(2));
 }
 function renderModal() {
   var t    = currentTool;
@@ -1848,7 +1790,6 @@ function renderModal() {
         '</div>'
       : '') +
     '<div class="modal-title">'+t.name+'</div>'+
-    (t.partnerEmail ? '<div style="display:inline-flex;align-items:center;gap:5px;margin-bottom:8px;font-size:12px;font-weight:700;padding:4px 11px;border-radius:7px;background:var(--blue-dim);color:var(--blue);border:1px solid var(--blue-mid)">&#x1F3EA; ' + ((window._partnerNameCache && window._partnerNameCache[t.partnerEmail]) || (t.partnerName && !t.partnerName.includes("@") ? t.partnerName : null) || "Partner") + '</div>' : '')+
     '<div class="modal-meta">'+stars(t.rating)+
       '<span style="color:var(--dim)">·</span>'+
       '<span style="color:#fff;font-size:12px;font-weight:700;background:#1a6ef0;padding:2px 8px;border-radius:6px">Save '+pct+'%</span>'+
@@ -1872,9 +1813,7 @@ function renderModal() {
         '<div style="color:var(--green)">Save $'+Math.max(0, t.retail - calcCost(t, currentHours)).toFixed(2)+'</div>'+
       '</div>'+
     '</div>'+
-    (t.available === false
-      ? '<button class="modal-add-btn" style="background:var(--blue);opacity:.85" onclick="openWaitlist('+t.id+')">🔔 Join Waitlist - Notify Me When Available</button>'
-      : '<button class="modal-add-btn" onclick="addToCart('+t.id+')">Add to Cart · $'+cost+'</button>');
+    '<button class="modal-add-btn" onclick="addToCart('+t.id+')">Add to Cart · $'+cost+'</button>';
 }
 
 window.setHours = function(h) {
@@ -1957,7 +1896,6 @@ function renderCart() {
           '<div class="cart-item-info">'+
             '<div class="cart-item-name">'+c.name+'</div>'+
             '<div class="cart-item-sub">'+c.hours+'h rental · $'+(c.pph && c.pph > 0 ? parseFloat(c.pph).toFixed(2) : ((c.retail*0.90)/48).toFixed(2))+'/hr</div>'+
-            (c.partnerEmail ? '<div style="font-size:11px;font-weight:600;color:var(--blue);margin-top:2px">Sold by ' + (c.partnerName && !c.partnerName.includes("@") ? c.partnerName : (window._partnerNameCache && window._partnerNameCache[c.partnerEmail]) || "Partner") + '</div>' : '')+
           '</div>'+
           '<div style="text-align:right">'+
             '<div class="cart-item-price">$'+calcCost(c,c.hours).toFixed(2)+'</div>'+
@@ -2093,7 +2031,7 @@ function initOrderMap() {
       maxZoom:19, subdomains:"abcd"
     }).addTo(_map);
 
-    // Destination marker - red landing pin
+    // Destination marker — red landing pin
     var destIcon = L.divIcon({
       html: '<div style="display:flex;flex-direction:column;align-items:center">' +
               '<svg width="26" height="34" viewBox="0 0 28 36" fill="none" xmlns="http://www.w3.org/2000/svg">' +
@@ -2105,7 +2043,7 @@ function initOrderMap() {
     });
     _destMarker = L.marker(dest, {icon:destIcon}).addTo(_map).bindPopup("Drop location");
 
-    // Drone marker - animated blue circle with drone SVG
+    // Drone marker — animated blue circle with drone SVG
     var droneIcon = L.divIcon({
       html: '<div style="width:38px;height:38px;background:#1a6ef0;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(26,110,240,.6);animation:pulse 1.4s ease-in-out infinite">' +
             '<svg width="20" height="20" viewBox="0 0 100 100" fill="none" stroke="white" stroke-width="6" stroke-linecap="round">' +
@@ -2181,7 +2119,7 @@ function renderOrders() {
   if (!listEl) return;
   if (!currentUser) {
     if (activeEl) activeEl.style.display = "none";
-    listEl.innerHTML = '<div style="text-align:center;padding:48px 0;color:var(--muted);font-size:14px"><div style="font-weight:600;margin-bottom:8px">Sign in to see your orders</div><button class="btn-primary" style="margin-top:8px" onclick="showAuth()">Sign In</button></div>';
+    listEl.innerHTML = '<div style="text-align:center;padding:48px 0;color:var(--muted);font-size:14px"><div style="font-size:32px;margin-bottom:12px;opacity:.3"></div><div style="font-weight:600;margin-bottom:8px">Sign in to see your orders</div><button class="btn-primary" style="margin-top:8px" onclick="showAuth()">Sign In</button></div>';
     return;
   }
   var activeOrders = liveOrders.filter(function(o){ return o.status==="in_flight"; });
@@ -2208,81 +2146,31 @@ function renderOrders() {
     groups[lbl].push(oc);
   }
   listEl.innerHTML = groupOrder.map(function(lbl){
-    return '<div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;margin:20px 0 8px;padding-left:2px">'+lbl+'</div>'+
+    return '<div style="font-size:11px;font-weight:600;color:var(--dim);letter-spacing:.05em;margin:14px 0 8px">'+lbl.toUpperCase()+'</div>'+
       groups[lbl].map(function(o){
-        var uid     = o._id;
-        var t2      = getTool((o.items[0]||{}).id);
-        var cat     = t2 ? t2.cat : "All";
-        var name    = (o.items[0]||{}).name||"Order";
-        var more    = o.items.length>1 ? " +"+(o.items.length-1)+" more":"";
-        var orderedTime = o._d.toLocaleString([],{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});
-        var deliveredStr = o.deliveredAt && o.deliveredAt.toDate
-          ? o.deliveredAt.toDate().toLocaleString([],{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}) : null;
-        var returnedStr = o.returnedAt && o.returnedAt.toDate
-          ? o.returnedAt.toDate().toLocaleString([],{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"})
-          : (o.status==="returned" && o.updatedAt && o.updatedAt.toDate
-            ? o.updatedAt.toDate().toLocaleString([],{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}) : null);
-        var totalHours = (o.items||[]).reduce(function(s,i){return s+(i.hours||0);},0);
-
-        var statusColor = o.status==="cancelled" ? "#ef4444"
-          : o.status==="returned" ? "var(--muted)"
-          : o.status==="delivered" ? "var(--green)" : "var(--blue)";
-        var statusBg = o.status==="cancelled" ? "rgba(239,68,68,.08)"
-          : o.status==="returned" ? "var(--bg3)"
-          : o.status==="delivered" ? "rgba(22,163,74,.08)" : "rgba(26,110,240,.08)";
-        var statusLabel = o.status==="cancelled" ? "Cancelled"
-          : o.status==="returned" ? "Returned"
-          : o.status==="delivered" ? "Delivered" : "In Transit";
-
-        var expandId = "order-expand-" + uid;
-
-        // Detail panel (hidden by default)
-        var rows = "";
-        rows += '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted);font-size:13px">Ordered</span><span style="font-size:13px;font-weight:500">'+orderedTime+'</span></div>';
-        if (deliveredStr) rows += '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted);font-size:13px">Delivered</span><span style="font-size:13px;font-weight:500">'+deliveredStr+'</span></div>';
-        if (returnedStr)  rows += '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted);font-size:13px">Returned</span><span style="font-size:13px;font-weight:500">'+returnedStr+'</span></div>';
-        if (totalHours)   rows += '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted);font-size:13px">Duration</span><span style="font-size:13px;font-weight:500">'+totalHours+'h</span></div>';
-        var itemRows = (o.items||[]).map(function(i){
-          return '<div style="display:flex;justify-content:space-between;padding:5px 0"><span style="font-size:13px;color:var(--text2)">'+i.name+(i.hours?' · '+i.hours+'h':'')+'</span><span style="font-size:13px;font-weight:600">$'+(i.subtotal||0).toFixed(2)+'</span></div>';
-        }).join("");
-        rows += '<div style="padding:6px 0"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:4px">Items</div>'+itemRows+'</div>';
-
-        var cancelBtn = (o.status!=="cancelled" && o.status!=="returned")
-          ? '<button data-oid="'+ uid +'" onclick="event.stopPropagation();userCancelOrder(this.dataset.oid)" style="margin-top:12px;width:100%;padding:9px;border-radius:9px;background:rgba(239,68,68,.07);color:#ef4444;border:1px solid rgba(239,68,68,.18);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font)">Cancel Order</button>'
-          : "";
-
-        var detailPanel = '<div id="'+expandId+'" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">'+
-          rows +
-          buildReviewBtns(o) +
-          cancelBtn +
-        '</div>';
-
-        return '<div class="past-order" data-uid="'+ uid +'" onclick="toggleOrderExpand(this.dataset.uid)" style="cursor:pointer;flex-direction:column;gap:0;padding:16px 18px;transition:.15s">'+
-          '<div style="display:flex;align-items:center;gap:13px">'+
-            '<div style="width:40px;height:40px;border-radius:10px;background:var(--blue-dim);display:flex;align-items:center;justify-content:center;flex-shrink:0">'+catIcon(cat)+'</div>'+
-            '<div style="flex:1;min-width:0">'+
-              '<div style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+name+more+'</div>'+
-              '<div style="font-size:12px;color:var(--muted);margin-top:1px">#'+uid.slice(0,8).toUpperCase()+' &middot; $'+(o.total||0).toFixed(2)+'</div>'+
-            '</div>'+
-            '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0">'+
-              '<span style="font-size:11px;font-weight:700;padding:3px 9px;border-radius:6px;background:'+statusBg+';color:'+statusColor+'">'+statusLabel+'</span>'+
-              '<svg id="order-chevron-'+uid+'" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="color:var(--dim);transition:transform .2s"><polyline points="6 9 12 15 18 9"/></svg>'+
-            '</div>'+
+        var t2   = getTool((o.items[0]||{}).id);
+        var cat  = t2 ? t2.cat : "All";
+        var name = (o.items[0]||{}).name||"Order";
+        var more = o.items.length>1 ? " +"+(o.items.length-1)+" more":"";
+        var time = o._d.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"});
+        return '<div class="past-order">'+
+          '<div style="width:44px;height:44px;border-radius:11px;background:linear-gradient(135deg,rgba(26,110,240,.15),rgba(26,110,240,.04));display:flex;align-items:center;justify-content:center;flex-shrink:0">'+catIcon(cat)+'</div>'+
+          '<div style="flex:1">'+
+            '<div style="font-weight:600;font-size:15px">'+name+more+'</div>'+
+            '<div style="font-size:12px;color:var(--muted)">#'+o._id.slice(0,8).toUpperCase()+' · '+time+' · $'+(o.total||0).toFixed(2)+'</div>'+
           '</div>'+
-          detailPanel+
+          '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">'+
+          (o.status === "cancelled"
+            ? '<div class="delivered-badge" style="background:rgba(239,68,68,.1);color:#ef4444;border-color:rgba(239,68,68,.2)">Cancelled</div>'
+            : o.status === "returned"
+            ? '<div class="delivered-badge" style="background:var(--surface2);color:var(--muted);border-color:var(--border)">Returned</div>'
+            : '<div class="delivered-badge">Delivered</div>')+
+          buildReviewBtns(o)+
+          '</div>'+
         '</div>';
       }).join("");
   }).join("");
 }
-
-window.toggleOrderExpand = function(uid) {
-  var panel = el("order-expand-" + uid);
-  var chevron = el("order-chevron-" + uid);
-  if (!panel) return;
-  var open = panel.style.display === "block";
-  panel.style.display = open ? "none" : "block";
-  if (chevron) chevron.style.transform = open ? "" : "rotate(180deg)";
-};
 
 function renderActiveOrderCard(idx) {
   var orders = window._activeOrders || [];
@@ -2355,7 +2243,7 @@ function renderAccount() {
   setText("stat-hours",   (userProfile.totalHours||0)+"h");
   setVal("addr-building", userProfile.building||"");
   setVal("addr-notes",    userProfile.dropNotes||"");
-  // Address panel state - runs every time renderAccount is called
+  // Address panel state — runs every time renderAccount is called
   if (userProfile.dropLat) {
     window._addrHouseLat = userProfile.houseLat || userProfile.dropLat;
     window._addrHouseLng = userProfile.houseLng || userProfile.dropLng;
@@ -2365,13 +2253,13 @@ function renderAccount() {
     el("addr-stage-1").style.display = "none";
     el("addr-stage-2").style.display = "none";
     el("addr-stage-3").style.display = "block";
-    // Apply saved UI state immediately - no setTimeout
+    // Apply saved UI state immediately — no setTimeout
     var _steps   = el("addr-steps");    if (_steps)   _steps.style.display   = "none";
     var _backBtn = el("addr-back-btn"); if (_backBtn) _backBtn.style.display  = "none";
     var _saveBtn = el("addr-save-btn");
     window._addrSavedMode = true;
     if (_saveBtn) { _saveBtn.textContent = "Update Delivery Address"; }
-    var _sub = el("addr-panel-sub"); if (_sub) _sub.textContent = "Saved - tap Update Delivery Address to change";
+    var _sub = el("addr-panel-sub"); if (_sub) _sub.textContent = "Saved — tap Update Delivery Address to change";
     // Init confirm map after delay (needs container visible)
     window._addrConfirmMap = null;
     var _cmEl = el("addr-confirm-map"); if (_cmEl) _cmEl.innerHTML = "";
@@ -2436,13 +2324,13 @@ function fbErrMsg(code) {
     "auth/invalid-email":         "Invalid email address",
     "auth/weak-password":         "Password must be at least 6 characters",
     "auth/too-many-requests":     "Too many attempts, try again later",
-    "auth/network-request-failed":"Network error - check connection"
+    "auth/network-request-failed":"Network error — check connection"
   };
   return m[code]||("Error: "+code);
 }
 
 // ── Firebase-dependent functions (set up in startApp) ─────────────────────────
-// Stubs - replaced once Firebase loads
+// Stubs — replaced once Firebase loads
 function saveCart() {}
 function placeOrder() { showToast("Loading..."); }
 window.doSignIn         = function(){ showToast("Loading..."); };
@@ -2469,7 +2357,7 @@ window.openStripeModal = function(items, dropLocation) {
   _stripeOrderItems   = items;
   _stripeDropLocation = dropLocation;
   var total = items.reduce(function(s,i){return s+calcCost(i,i.hours);},0);
-  el("stripe-amount-label").textContent = "$" + total.toFixed(2) + " - " + items.length + " item" + (items.length!==1?"s":"");
+  el("stripe-amount-label").textContent = "$" + total.toFixed(2) + " — " + items.length + " item" + (items.length!==1?"s":"");
   el("stripe-overlay").classList.remove("hidden");
   var btn = el("stripe-pay-btn"); if(btn) { btn.disabled=false; btn.textContent="Pay & Place Order"; }
   var err = el("stripe-error"); if(err) { err.style.display="none"; err.textContent=""; }
@@ -2546,7 +2434,7 @@ window.submitStripePayment = async function() {
       throw new Error("Payment status: " + pi.status);
     }
 
-    // Success - close modal then place order with snapshotted items
+    // Success — close modal then place order with snapshotted items
     el("stripe-overlay").classList.add("hidden");
     if (_stripeCard) { _stripeCard.unmount(); _stripeCard = null; }
     _stripeOrderItems = null; _stripeDropLocation = null;
@@ -2562,7 +2450,7 @@ window.submitStripePayment = async function() {
 };
 
 
-// Wire addr buttons once - never use hardcoded onclick for these
+// Wire addr buttons once — never use hardcoded onclick for these
 document.addEventListener("DOMContentLoaded", function() {
   var saveBtn = el("addr-save-btn");
   if (saveBtn) saveBtn.addEventListener("click", function() {
@@ -2579,7 +2467,6 @@ window.saveNotifications= function(){ showToast("Loading..."); };
 // ── Admin ─────────────────────────────────────────────────────────────────────
 var ADMIN_EMAILS = [];
 var isAdmin = false;
-var isPartner = false;
 var adminEditingId = null;
 
 async function loadAdminEmails() {
@@ -2610,7 +2497,7 @@ async function renderAdmin() {
     return;
   }
   if (!isAdmin) {
-    wrap.innerHTML = '<div class="admin-login-gate"><h2>Access Denied</h2><p>' + currentUser.email + ' is not authorized as an admin.</p><button class="btn-secondary" onclick="showPage(this.dataset.pg)" data-pg="home">Go Home</button></div>';
+    wrap.innerHTML = '<div class="admin-login-gate"><h2>Access Denied</h2><p>' + currentUser.email + ' is not authorized as an admin.</p><button class="btn-secondary" onclick="showPage(&quot;home&quot;)">Go Home</button></div>';
     return;
   }
 
@@ -2630,7 +2517,9 @@ async function renderAdmin() {
     '<div class="admin-tabs" style="margin-bottom:24px">' +
       '<button class="admin-tab active" data-panel="inventory" onclick="adminSwitchTab(this)">Inventory</button>' +
       '<button class="admin-tab" data-panel="orders" onclick="adminSwitchTab(this)">Orders</button>' +
-      '<button class="admin-tab" data-panel="partners" onclick="adminSwitchTab(this)" id="admin-tab-partners">Partners</button>' +
+      '<button class="admin-tab" data-panel="deliveries" onclick="adminSwitchTab(this)">API Deliveries'
+      + '<button class="admin-tab" data-panel="partners" onclick="adminSwitchTab(this)" id="admin-tab-partners">Partners</button> <span id="adlv-badge" style="display:none;background:#ef4444;color:#fff;font-size:9px;font-weight:800;padding:1px 5px;border-radius:10px;margin-left:2px"></span></button>' +
+      '<button class="admin-tab" data-panel="partners" onclick="adminSwitchTab(this)">Partners</button>' +
     '</div>' +
 
     '<div class="admin-panel active" id="admin-panel-inventory">' +
@@ -2641,12 +2530,15 @@ async function renderAdmin() {
     '<div class="admin-panel" id="admin-panel-orders">' +
       '<div id="admin-orders-content"><div style="color:var(--muted);font-size:14px;padding:20px">Loading orders...</div></div>' +
     '</div>' +
+    '<div class="admin-panel" id="admin-panel-deliveries">' +
+      '<div id="admin-deliveries-content"><div style="color:var(--muted);font-size:14px;padding:20px">Loading...</div></div>' +
+    '</div>' +
     '<div class="admin-panel" id="admin-panel-partners">' +
-      '<div id="admin-partners-content"><div style="color:var(--muted);font-size:14px;padding:20px">Loading partners...</div></div>' +
+      '<div id="admin-partners-content"><div style="color:var(--muted);font-size:14px;padding:20px">Loading...</div></div>' +
     '</div>';
 
   adminLoadOrders();
-  adminLoadPartnersPanel();
+  adminLoadDeliveries();
 }
 
 function adminSwitchTab(btn) {
@@ -2657,7 +2549,8 @@ function adminSwitchTab(btn) {
   var pg = el("admin-panel-" + panel);
   if (pg) pg.classList.add("active");
   if (panel === "orders") adminLoadOrders();
-  if (panel === "partners") adminLoadPartnersPanel();
+  if (panel === "deliveries") adminLoadDeliveries();
+  if (panel === "partners") if (panel === "partners") adminLoadPartners();
 }
 
 function adminInventoryTable() {
@@ -2720,7 +2613,7 @@ function adminInventoryTable() {
 function adminToolForm(tool, isEdit) {
   var t = tool || { id:"", name:"", cat:"Workshop", retail:"", pph:0, rating:4.5, desc:"", eta:"", img:"" };
   return '<div class="admin-form" id="' + (isEdit ? "admin-edit-form" : "admin-add-form") + '">' +
-    '<div class="admin-form-title">' + (isEdit ? "Edit Tool - " + t.name : "Add New Tool") + '</div>' +
+    '<div class="admin-form-title">' + (isEdit ? "Edit Tool — " + t.name : "Add New Tool") + '</div>' +
     '<div class="admin-form-grid">' +
       adminField("Name", "text", "af-name", t.name, true) +
       adminSelectField("Category", "af-cat", t.cat) +
@@ -2813,7 +2706,7 @@ window.adminSetAvail = async function(id, available) {
   if (!tool) return;
   var idx = TOOLS.findIndex(function(t){ return t.id === id; });
   tool.available = available;
-  // Just PATCH available in RTDB - never touch qty or rentedQty here
+  // Just PATCH available in RTDB — never touch qty or rentedQty here
   try {
     await fetch("https://droveia-default-rtdb.firebaseio.com/tools/" + idx + ".json?auth=NKLKSY1Cshm1pba0vuKK6RQOmjV2uOfeje7hzxkI", {
       method: "PATCH",
@@ -2844,7 +2737,7 @@ window.adminDeleteTool = function(id) {
 
 async function adminSyncToRTDB(preserveQtyIds) {
   var url = "https://droveia-default-rtdb.firebaseio.com/tools.json?auth=NKLKSY1Cshm1pba0vuKK6RQOmjV2uOfeje7hzxkI";
-  // preserveQtyIds: array of tool ids whose qty was just edited - don't overwrite from live
+  // preserveQtyIds: array of tool ids whose qty was just edited — don't overwrite from live
   var keepIds = preserveQtyIds || [];
   try {
     var cur = await fetch(url).then(function(r){ return r.json(); });
@@ -2989,7 +2882,6 @@ window.adminOrderAction = function(btn) {
 
         var update = { status: newStatus, updatedAt: fb.serverTimestamp() };
         if (newStatus === "delivered") update.deliveredAt = fb.serverTimestamp();
-        if (newStatus === "returned")  update.returnedAt  = fb.serverTimestamp();
 
         // Update allOrders (admin view)
         await fb.updateDoc(fb.doc(fb.db, "allOrders", orderId), update);
@@ -3124,7 +3016,7 @@ function startApp() {
       var orderRef = await fb.addDoc(oCol(currentUser.uid), {
         status: "in_flight",
         items:  items.map(function(i){
-          return {id:i.id,name:i.name,cat:i.cat,pph:i.pph,hours:i.hours,retail:i.retail,subtotal:parseFloat(calcCost(i,i.hours).toFixed(2))};
+          return {id:i.id,name:i.name,cat:i.cat,pph:i.pph,hours:i.hours,retail:i.retail};
         }),
         total:total, saved:saved, stripePaymentId:stripePaymentId||null,
         address:{building:userProfile&&userProfile.building||"—",dropLat:dropLocation?dropLocation[0]:null,dropLng:dropLocation?dropLocation[1]:null},
@@ -3148,7 +3040,7 @@ function startApp() {
       // Also write to top-level allOrders for admin dashboard
       var orderData = {
         status: "in_flight", items: items.map(function(i){
-          return {id:i.id,name:i.name,cat:i.cat,pph:i.pph,hours:i.hours,retail:i.retail,subtotal:parseFloat(calcCost(i,i.hours).toFixed(2))};
+          return {id:i.id,name:i.name,cat:i.cat,pph:i.pph,hours:i.hours,retail:i.retail};
         }),
         total:total, saved:saved,
         address:{building:userProfile&&userProfile.building||"—",dropLat:dropLocation?dropLocation[0]:null,dropLng:dropLocation?dropLocation[1]:null},
@@ -3266,7 +3158,7 @@ function startApp() {
     fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&q=" + encodeURIComponent(addr))
       .then(function(r){ return r.json(); })
       .then(function(results) {
-        if (!results || !results.length) { showToast("Address not found - try a more specific address"); return; }
+        if (!results || !results.length) { showToast("Address not found — try a more specific address"); return; }
         var lat = parseFloat(results[0].lat);
         var lng = parseFloat(results[0].lon);
         var bbox = results[0].boundingbox; // [minlat, maxlat, minlng, maxlng]
@@ -3274,10 +3166,10 @@ function startApp() {
         window._addrDropLng = lng;
         var wrap = el("addr-droppin-wrap");
         if (wrap) wrap.style.display = "block";
-        showToast("Found - pin your exact drop spot");
+        showToast("Found — pin your exact drop spot");
         setTimeout(function() { window.initAddrDropPin(lat, lng, bbox); }, 80);
       })
-      .catch(function() { showToast("Geocoding failed - check your connection"); });
+      .catch(function() { showToast("Geocoding failed — check your connection"); });
   };
 
   window.addrSetStep = function(n) {
@@ -3309,7 +3201,7 @@ function startApp() {
     var geocoder = new window.google.maps.Geocoder();
     geocoder.geocode({ address: addr }, function(results, status) {
       if (status !== "OK" || !results.length) {
-        showToast("Address not found - try including city and state");
+        showToast("Address not found — try including city and state");
         el("addr-stage-1").style.display = "block";
         el("addr-stage-2").style.display = "none";
         window.addrSetStep(1);
@@ -3320,15 +3212,15 @@ function startApp() {
       var lng  = loc.lng();
       var vp   = results[0].geometry.viewport;
 
-      window._addrHouseLat  = lat;  // geocoded house centre - never changes
+      window._addrHouseLat  = lat;  // geocoded house centre — never changes
       window._addrHouseLng  = lng;
-      window._addrDropLat   = lat;  // user's drop pin - starts at house
+      window._addrDropLat   = lat;  // user's drop pin — starts at house
       window._addrDropLng   = lng;
       window._addrFootprint = null;
       window._addrBbox      = null;
       window._addrViewport  = vp;
 
-      showToast("Found - pin your drop spot");
+      showToast("Found — pin your drop spot");
       setTimeout(function() { window.initAddrDropPin(lat, lng, vp); }, 80);
     });
   };
@@ -3406,7 +3298,7 @@ function startApp() {
         zIndex: 1, clickable: false
       });
 
-      // House icon - fixed at geocoded house centre
+      // House icon — fixed at geocoded house centre
       var hLat = window._addrHouseLat || window._addrDropLat;
       var hLng = window._addrHouseLng || window._addrDropLng;
       new window.google.maps.Marker({
@@ -3438,7 +3330,7 @@ function startApp() {
     var saveBtn = el("addr-save-btn");
     window._addrSavedMode = true;
     if (saveBtn) { saveBtn.textContent = "Update Delivery Address"; }
-    var sub = el("addr-panel-sub"); if (sub) sub.textContent = "Saved - tap Update Delivery Address to change";
+    var sub = el("addr-panel-sub"); if (sub) sub.textContent = "Saved — tap Update Delivery Address to change";
   };
 
   window.addrStartOver = function() {
@@ -3466,7 +3358,7 @@ function startApp() {
     el("addr-stage-3").style.display = "none";
     el("addr-stage-2").style.display = "block";
     window.addrSetStep(2);
-    // Google Maps has no .remove() - just null the reference so it reinits
+    // Google Maps has no .remove() — just null the reference so it reinits
     window._addrConfirmMap = null;
     var cmEl = el("addr-confirm-map");
     if (cmEl) cmEl.innerHTML = "";
@@ -3482,10 +3374,12 @@ function startApp() {
     lat = lat || (userProfile && userProfile.dropLat) || 35.7847;
     lng = lng || (userProfile && userProfile.dropLng) || -78.6821;
 
+    // House centre — use stored geocoded point, not the moveable drop pin
     var houseLat = window._addrHouseLat || lat;
     var houseLng = window._addrHouseLng || lng;
     var houseLLng = new window.google.maps.LatLng(houseLat, houseLng);
 
+    // Drop pin starts at last saved position (or house if new)
     window._addrDropLat = lat;
     window._addrDropLng = lng;
     var dropLatLng = new window.google.maps.LatLng(lat, lng);
@@ -3538,6 +3432,7 @@ function startApp() {
 
     drawPropertyBox(window._addrGMap);
 
+    // House marker — always fixed at geocoded centre
     window._addrHouseMarker = new window.google.maps.Marker({
       position: houseLLng,
       map: window._addrGMap,
@@ -3547,6 +3442,7 @@ function startApp() {
       clickable: false
     });
 
+    // Draggable red drop pin — starts at last saved drop position
     window._addrDropMarkerG = new window.google.maps.Marker({
       position: dropLatLng,
       map: window._addrGMap,
@@ -3574,916 +3470,6 @@ function startApp() {
       updateCoords(e.latLng.lat(), e.latLng.lng());
     });
   };;;
-
-
-
-
-  // ── PARTNER DASHBOARD ──
-  var PARTNER_EMAILS = [];
-  var isPartner = false;
-  var currentPartnerDoc = null;
-
-  window.loadPartnerEmails = async function() {
-    try {
-      var fb = window._fb;
-      var snap = await fb.getDocs(
-        fb.query(fb.collection(fb.db, "partners"), fb.where("status","==","active"))
-      );
-      PARTNER_EMAILS = snap.docs.map(function(d){ return d.data().email; });
-      // Also store the partner doc for the current user
-      snap.docs.forEach(function(d){
-        if (currentUser && d.data().email === currentUser.email) {
-          currentPartnerDoc = Object.assign({ _id: d.id }, d.data());
-        }
-      });
-    } catch(e) { console.warn("loadPartnerEmails", e); }
-  }
-
-  window.checkPartner = function() {
-    if (!currentUser) return false;
-    return PARTNER_EMAILS.includes(currentUser.email);
-  }
-
-  window.renderPartnerDashboard = async function() {
-    var wrap = el("admin-content");
-    if (!wrap) return;
-
-    await loadToolsFromRTDB();
-    await window.loadPartnerEmails();
-    window.isPartner = window.checkPartner ? window.checkPartner() : false; var isPartner = window.isPartner;
-
-    if (!currentUser) {
-      wrap.innerHTML = '<div class="admin-login-gate"><h2>Partner Access</h2><p>Sign in with your partner account to continue.</p><button class="btn-primary" onclick="showAuth()">Sign In</button></div>';
-      return;
-    }
-    if (!window.isPartner && !checkAdmin()) {
-      wrap.innerHTML = '<div class="admin-login-gate"><h2>Access Denied</h2><p>' + currentUser.email + ' is not a registered partner.</p><button class="btn-secondary" onclick="showPage(\'home\')">Go Home</button></div>';
-      return;
-    }
-
-    // If admin, show admin dashboard instead
-    if (checkAdmin()) { renderAdmin(); return; }
-
-    var p = currentPartnerDoc || {};
-    var partnerName = p.name || currentUser.email;
-
-    // Filter tools belonging to this partner
-    var myTools = TOOLS.filter(function(t){ return t.partnerEmail === currentUser.email; });
-
-    // Filter orders that contain partner tools
-    var myToolIds = myTools.map(function(t){ return t.id; });
-    var allPartnerOrders = [];
-    try {
-      var fb = window._fb;
-      var oSnap = await fb.getDocs(
-        fb.query(fb.collection(fb.db, "allOrders"), fb.orderBy("createdAt","desc"), fb.limit(100))
-      );
-      oSnap.docs.forEach(function(d){
-        var o = Object.assign({ _id: d.id }, d.data());
-        var hasMyItem = (o.items||[]).some(function(i){ return myToolIds.includes(i.id); });
-        if (hasMyItem) allPartnerOrders.push(o);
-      });
-    } catch(e) { console.warn("partner orders load failed", e); }
-
-    // Earnings
-    var totalEarnings = allPartnerOrders.reduce(function(sum, o) {
-      if (o.status === "cancelled") return sum;
-      var myShare = (o.items||[]).filter(function(i){ return myToolIds.includes(i.id); })
-        .reduce(function(s,i){ return s + (i.subtotal != null ? i.subtotal : calcCost(i, i.hours||1)); }, 0);
-      return sum + myShare * 0.9;
-    }, 0);
-    var activeRentals = allPartnerOrders.filter(function(o){ return o.status === "in_flight" || o.status === "delivered"; }).length;
-
-    wrap.innerHTML =
-      '<div class="admin-header">' +
-        '<div><div class="admin-title">Partner Dashboard</div><div class="admin-subtitle">' + partnerName + ' &middot; ' + currentUser.email + '</div></div>' +
-      '</div>' +
-      '<div class="admin-tabs" style="margin-bottom:24px">' +
-        '<button class="admin-tab active" data-ppanel="pinventory" onclick="partnerSwitchTab(this)">Inventory</button>' +
-        '<button class="admin-tab" data-ppanel="porders" onclick="partnerSwitchTab(this)">Orders</button>' +
-        '<button class="admin-tab" id="partner-tab-pending" data-ppanel="ppending" onclick="partnerSwitchTab(this)">Pending</button>' +
-      '</div>' +
-      '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:28px">' +
-        '<div class="admin-stat" style="flex:1"><div class="admin-stat-val" style="color:var(--blue)">' + myTools.length + '</div><div class="admin-stat-label">Your Listings</div></div>' +
-        '<div class="admin-stat" style="flex:1"><div class="admin-stat-val green">' + activeRentals + '</div><div class="admin-stat-label">Active Rentals</div></div>' +
-        '<div class="admin-stat" style="flex:1"><div class="admin-stat-val">' + allPartnerOrders.length + '</div><div class="admin-stat-label">Total Orders</div></div>' +
-        '<div class="admin-stat" style="flex:1"><div class="admin-stat-val" style="color:var(--green)">$' + totalEarnings.toFixed(2) + '</div><div class="admin-stat-label">Est. Earnings (90%)</div></div>' +
-      '</div>' +
-      '<div class="admin-panel active" id="partner-panel-pinventory">' +
-      // My inventory
-      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">' +
-        '<div style="font-size:16px;font-weight:800;letter-spacing:-.01em">Your Inventory</div>' +
-        '<button onclick="showPartnerAddInventory()" style="display:flex;align-items:center;gap:6px;padding:8px 14px;background:var(--blue);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font)">+ Add Item</button>' +
-      '</div>' +
-      // Add inventory form (hidden by default)
-      '<div id="partner-inventory-form-wrap" style="display:none;background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:24px;margin-bottom:20px">' +
-        '<div id="pi-form-title" style="font-weight:700;font-size:15px;margin-bottom:16px">Submit New Item for Approval</div>' +
-        '<input type="hidden" id="pi-edit-id" value="">' +
-        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">' +
-          '<div><label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Name *</label><input id="pi-name" class="form-input" placeholder="e.g. DJI Mini 4 Pro" style="width:100%;box-sizing:border-box"></div>' +
-          '<div><label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Category *</label><select id="pi-cat" class="form-input" style="width:100%;box-sizing:border-box"><option>Workshop</option><option>Crafts</option><option>Office</option><option>Electronics</option></select></div>' +
-          '<div><label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Retail Price ($) *</label><input id="pi-retail" class="form-input" type="number" placeholder="299" style="width:100%;box-sizing:border-box"></div>' +
-          '<div><label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Price/hr (0 = auto)</label><input id="pi-pph" class="form-input" type="number" placeholder="0" style="width:100%;box-sizing:border-box"></div>' +
-          '<div><label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">ETA *</label><input id="pi-eta" class="form-input" placeholder="e.g. 10 min" style="width:100%;box-sizing:border-box"></div>' +
-          '<div><label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Qty in Stock</label><input id="pi-qty" class="form-input" type="number" placeholder="1" style="width:100%;box-sizing:border-box"></div>' +
-        '</div>' +
-        '<div style="margin-bottom:12px"><label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Image URL</label><input id="pi-img" class="form-input" placeholder="https://..." style="width:100%;box-sizing:border-box"></div>' +
-        '<div style="margin-bottom:16px"><label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Description *</label><textarea id="pi-desc" class="form-input" rows="3" placeholder="Describe the item, condition, included accessories..." style="width:100%;box-sizing:border-box;resize:vertical"></textarea></div>' +
-        '<div style="display:flex;gap:10px">' +
-          '<button id="pi-submit-btn" onclick="submitPartnerInventory()" style="flex:1;padding:11px;background:var(--blue);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font)">Submit for Approval</button>' +
-          '<button onclick="showPartnerAddInventory()" style="padding:11px 16px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--font)">Cancel</button>' +
-        '</div>' +
-      '</div>' +
-      (myTools.length === 0
-        ? '<div style="background:var(--bg2);border:1px dashed var(--border);border-radius:14px;padding:32px;text-align:center;color:var(--muted);font-size:14px;margin-bottom:28px">No tools listed yet. Contact Droveia to add your inventory.</div>'
-        : '<div style="display:grid;gap:10px;margin-bottom:28px">' +
-            myTools.map(function(t){
-              return '<div class="admin-order-card" style="display:flex;align-items:center;gap:14px">' +
-                (t.img && t.img!=="x" ? '<img src="'+t.img+'" style="width:52px;height:52px;object-fit:contain;border-radius:8px;background:var(--bg3);flex-shrink:0">' : '<div style="width:52px;height:52px;border-radius:8px;background:var(--bg3);flex-shrink:0"></div>')+
-                '<div style="flex:1">' +
-                  '<div style="font-weight:700;font-size:15px">' + t.name + '</div>' +
-                  '<div style="font-size:12px;color:var(--muted);margin-top:2px">' + t.cat + ' &middot; $' + calcCost(t,1).toFixed(2) + '/hr</div>' +
-                '</div>' +
-                '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">' +
-                  (t.available !== false
-                    ? '<span style="background:rgba(22,163,74,.1);color:#15803d;font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px">In Stock</span>'
-                    : '<span style="background:rgba(239,68,68,.1);color:#ef4444;font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px">Rented Out</span>')+
-                  '<div style="font-size:11px;color:var(--muted)">' + (t.rentedQty||0) + '/' + (t.qty||1) + ' rented</div>' +
-                  '<div style="display:flex;align-items:center;gap:6px">' +
-                    '<button onclick="event.stopPropagation();partnerDecrQty(' + t.id + ')" style="width:24px;height:24px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center">−</button>' +
-                    '<span style="font-size:12px;font-weight:700;min-width:18px;text-align:center">' + (t.qty||1) + '</span>' +
-                    '<button onclick="event.stopPropagation();partnerIncrQty(' + t.id + ')" style="width:24px;height:24px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center">+</button>' +
-                  '</div>' +
-                  '<button data-tid="' + t.id + '" onclick="event.stopPropagation();partnerEditTool(this.dataset.tid)" style="padding:4px 10px;border-radius:7px;border:1px solid var(--border);background:var(--bg3);font-size:11px;font-weight:600;cursor:pointer;font-family:var(--font);color:var(--text2)">Edit</button>' +
-                '</div>' +
-              '</div>';
-            }).join("") +
-          '</div>'
-      ) +
-
-      '</div>' +
-      '<div class="admin-panel" id="partner-panel-porders">' +
-
-      '<div style="font-size:16px;font-weight:800;margin-bottom:14px;letter-spacing:-.01em">Recent Orders</div>' +
-      (allPartnerOrders.length === 0
-        ? '<div style="background:var(--bg2);border:1px dashed var(--border);border-radius:14px;padding:32px;text-align:center;color:var(--muted);font-size:14px">No orders yet.</div>'
-        : '<div style="display:grid;gap:10px">' +
-            allPartnerOrders.slice(0,20).map(function(o){
-              var statusColor = o.status==="cancelled" ? "#ef4444" : o.status==="returned" ? "var(--muted)" : o.status==="in_flight" ? "var(--blue)" : "var(--green)";
-              var statusLabel = o.status==="in_flight" ? "In Flight" : o.status==="delivered" ? "Delivered" : o.status==="returned" ? "Returned" : o.status==="cancelled" ? "Cancelled" : o.status;
-              var myItems = (o.items||[]).filter(function(i){ return myToolIds.includes(i.id); });
-              var myGross = myItems.reduce(function(s,i){ return s+(i.subtotal != null ? i.subtotal : calcCost(i, i.hours||1)); }, 0);
-              var myEarnings = myGross * 0.9;
-              var date = o.createdAt && o.createdAt.toDate ? o.createdAt.toDate().toLocaleString([],{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}) : "";
-              return '<div class="admin-order-card" style="display:flex;align-items:center;gap:14px">' +
-                '<div style="flex:1">' +
-                  '<div style="font-weight:700;font-size:14px">#' + o._id.slice(0,8).toUpperCase() + '</div>' +
-                  '<div style="font-size:12px;color:var(--muted);margin-top:2px">' + myItems.map(function(i){return i.name+(i.hours?" ("+i.hours+"h)":"");}).join(", ") + '</div>' +
-                  (date ? '<div style="font-size:11px;color:var(--dim);margin-top:2px">' + date + '</div>' : "") +
-                '</div>' +
-                '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">' +
-                  '<span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px;background:' + statusColor.replace("var(--","rgba(").replace(")",",0.1)") + ';color:' + statusColor + '">' + statusLabel + '</span>' +
-                  (myGross > 0 ? '<div style="font-size:13px;font-weight:800;color:var(--green)">+$' + myEarnings.toFixed(2) + '</div>' : '') +
-                  (myGross > 0 ? '<div style="font-size:10px;color:var(--dim)">of $' + myGross.toFixed(2) + ' gross</div>' : '') +
-                '</div>' +
-              '</div>';
-            }).join("") +
-          '</div>'
-      ) +
-      '</div>' +
-      '<div class="admin-panel" id="partner-panel-ppending">' +
-        '<div id="partner-pending-content"><div style="color:var(--muted);font-size:14px;padding:20px">Loading...</div></div>' +
-      '</div>';
-    partnerLoadPendingSubmissions();
-  }
-
-  window.partnerSwitchTab = function(btn) {
-    var panel = btn.getAttribute("data-ppanel");
-    qsa(".admin-tab").forEach(function(b){ b.classList.remove("active"); });
-    qsa("[id^='partner-panel-']").forEach(function(p){ p.classList.remove("active"); });
-    btn.classList.add("active");
-    var pg = el("partner-panel-" + panel);
-    if (pg) pg.classList.add("active");
-    if (panel === "ppending") partnerLoadPendingSubmissions();
-  };
-
-  window.partnerLoadPendingSubmissions = async function() {
-    var wrap = el("partner-pending-content");
-    if (!wrap) return;
-    wrap.innerHTML = '<div style="color:var(--muted);font-size:14px;padding:20px">Loading...</div>';
-    try {
-      var fb = window._fb;
-      var snap = await fb.getDocs(
-        fb.query(
-          fb.collection(fb.db, "pendingInventory"),
-          fb.where("partnerEmail", "==", currentUser.email)
-        )
-      );
-      // Update badge
-      var pendingCount = snap.docs.filter(function(d){ return d.data().status === "pending"; }).length;
-      var tabBtn = el("partner-tab-pending");
-      if (tabBtn) tabBtn.textContent = "Pending" + (pendingCount ? " (" + pendingCount + ")" : " ✓");
-
-      if (snap.empty) { wrap.innerHTML = '<div style="background:var(--bg2);border:1px dashed var(--border);border-radius:14px;padding:32px;text-align:center;color:var(--muted);font-size:14px">No submissions yet. Use \'+ Add Item\' to submit new inventory.</div>'; return; }
-      var statusStyles = {
-        pending:  { bg: "rgba(217,119,6,.1)",  color: "#b45309",  label: "⏳ Pending Review" },
-        approved: { bg: "rgba(22,163,74,.1)",  color: "#15803d",  label: "✅ Approved" },
-        rejected: { bg: "rgba(239,68,68,.08)", color: "#ef4444",  label: "❌ Rejected" }
-      };
-      wrap.innerHTML = '<div style="display:grid;gap:10px">' +
-        snap.docs.map(function(d) {
-          var item = d.data();
-          var s = statusStyles[item.status] || statusStyles.pending;
-          var date = item.createdAt && item.createdAt.toDate ? item.createdAt.toDate().toLocaleString([],{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}) : "";
-          return '<div class="admin-order-card">' +
-            '<div style="display:flex;align-items:flex-start;gap:12px">' +
-              (item.img && item.img !== "x" ? '<img src="' + item.img + '" style="width:52px;height:52px;object-fit:contain;border-radius:8px;background:var(--bg3);flex-shrink:0">' : '<div style="width:52px;height:52px;border-radius:8px;background:var(--bg3);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px">&#x1F4E6;</div>') +
-              '<div style="flex:1">' +
-                '<div style="font-weight:700;font-size:15px">' + item.name + '</div>' +
-                '<div style="font-size:12px;color:var(--muted);margin-top:2px">' + item.cat + ' · $' + (item.retail||0) + ' retail · Qty ' + (item.qty||1) + '</div>' +
-                (date ? '<div style="font-size:11px;color:var(--dim);margin-top:2px">Submitted ' + date + '</div>' : '') +
-                (item.status === "rejected" ? '<div style="font-size:12px;color:#ef4444;margin-top:6px">Rejected by admin. You may re-submit with changes.</div>' : '') +
-              '</div>' +
-              '<span style="font-size:11px;font-weight:700;padding:4px 10px;border-radius:7px;white-space:nowrap;background:' + s.bg + ';color:' + s.color + '">' + s.label + '</span>' +
-            '</div>' +
-          '</div>';
-        }).join("") +
-      '</div>';
-    } catch(e) { wrap.innerHTML = '<div style="color:#ef4444;font-size:14px;padding:20px">Error: ' + e.message + '</div>'; }
-  };
-
-
-  // ── PARTNER QTY EDIT ──
-  window.partnerIncrQty = async function(toolId) {
-    var tool = TOOLS.find(function(t){ return t.id === toolId; });
-    if (!tool || tool.partnerEmail !== currentUser.email) return;
-    tool.qty = (parseInt(tool.qty)||1) + 1;
-    await partnerSyncToolQty(tool);
-    renderPartnerDashboard();
-    showToast("Stock updated: " + tool.qty + " in stock");
-  };
-
-  window.partnerDecrQty = async function(toolId) {
-    var tool = TOOLS.find(function(t){ return t.id === toolId; });
-    if (!tool || tool.partnerEmail !== currentUser.email) return;
-    var minQty = parseInt(tool.rentedQty)||0;
-    if ((parseInt(tool.qty)||1) <= minQty + 1) { showToast("Can't go below rented quantity"); return; }
-    tool.qty = (parseInt(tool.qty)||1) - 1;
-    await partnerSyncToolQty(tool);
-    renderPartnerDashboard();
-    showToast("Stock updated: " + tool.qty + " in stock");
-  };
-
-  async function partnerSyncToolQty(tool) {
-    try {
-      var idx = TOOLS.findIndex(function(t){ return t.id === tool.id; });
-      if (idx < 0) return;
-      await fetch("https://droveia-default-rtdb.firebaseio.com/tools/" + idx + ".json?auth=NKLKSY1Cshm1pba0vuKK6RQOmjV2uOfeje7hzxkI", {
-        method: "PATCH",
-        headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({ qty: tool.qty, available: tool.qty > (parseInt(tool.rentedQty)||0) })
-      });
-    } catch(e) { showToast("Sync error: " + e.message); }
-  }
-
-  // ── PARTNER INVENTORY SUBMISSION ──
-  window.showPartnerAddInventory = function() {
-    var wrap = el("partner-inventory-form-wrap");
-    if (!wrap) return;
-    var isOpen = wrap.style.display !== "none";
-    if (isOpen) {
-      wrap.style.display = "none";
-    } else {
-      // Reset to add mode
-      var editId = el("pi-edit-id"); if (editId) editId.value = "";
-      var title = el("pi-form-title"); if (title) title.textContent = "Submit New Item for Approval";
-      var btn = el("pi-submit-btn"); if (btn) btn.textContent = "Submit for Approval";
-      ["pi-name","pi-retail","pi-pph","pi-eta","pi-qty","pi-img","pi-desc"].forEach(function(id){
-        var e2 = el(id); if (e2) e2.value = "";
-      });
-      var cat = el("pi-cat"); if (cat) cat.value = "Workshop";
-      wrap.style.display = "block";
-    }
-  };
-
-  window.partnerEditTool = function(toolId) {
-    var t = TOOLS.find(function(t){ return t.id === parseInt(toolId); });
-    if (!t) return;
-    var wrap = el("partner-inventory-form-wrap");
-    if (!wrap) return;
-    // Pre-fill form
-    var editId = el("pi-edit-id"); if (editId) editId.value = t.id;
-    var title = el("pi-form-title"); if (title) title.textContent = "Edit: " + t.name;
-    var btn = el("pi-submit-btn"); if (btn) btn.textContent = "Save Changes";
-    var set = function(id, val) { var e2 = el(id); if (e2) e2.value = val || ""; };
-    set("pi-name",   t.name);
-    set("pi-retail", t.retail);
-    set("pi-pph",    t.pph || 0);
-    set("pi-eta",    t.eta);
-    set("pi-qty",    t.qty || 1);
-    set("pi-img",    t.img && t.img !== "x" ? t.img : "");
-    set("pi-desc",   t.desc);
-    var cat = el("pi-cat"); if (cat) cat.value = t.cat || "Workshop";
-    wrap.style.display = "block";
-    wrap.scrollIntoView({ behavior: "smooth", block: "nearest" });
-  };
-
-  window.submitPartnerInventory = async function() {
-    var name   = (el("pi-name")   ||{}).value.trim();
-    var cat    = (el("pi-cat")    ||{}).value;
-    var retail = parseFloat((el("pi-retail")||{}).value) || 0;
-    var pph    = parseFloat((el("pi-pph")   ||{}).value) || 0;
-    var eta    = (el("pi-eta")    ||{}).value.trim();
-    var qty    = parseInt((el("pi-qty")     ||{}).value) || 1;
-    var img    = (el("pi-img")    ||{}).value.trim() || "x";
-    var desc   = (el("pi-desc")   ||{}).value.trim();
-    if (!name || !retail || !eta || !desc) { showToast("Fill in all required fields"); return; }
-    var editId = parseInt((el("pi-edit-id")||{}).value) || 0;
-    var btn = el("pi-submit-btn");
-    if (btn) { btn.disabled = true; btn.textContent = editId ? "Saving..." : "Submitting..."; }
-    try {
-      var fb = window._fb;
-      if (editId) {
-        // Edit mode — update RTDB directly (no re-approval needed)
-        var tools = TOOLS;
-        var idx = tools.findIndex(function(t){ return t.id === editId; });
-        if (idx < 0) { showToast("Tool not found"); return; }
-        var patch = { name: name, cat: cat, retail: retail, pph: pph, eta: eta, img: img, desc: desc };
-        await fetch(window.RTDB_URL.replace("/tools.json", "/tools/" + idx + ".json"), {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(patch)
-        });
-        // Update local TOOLS array
-        Object.assign(TOOLS[idx], patch);
-        showToast("Changes saved!");
-        renderTools();
-      } else {
-        // New item — submit for approval
-        await fb.addDoc(fb.collection(fb.db, "pendingInventory"), {
-          name, cat, retail, pph, eta, qty, img, desc,
-          partnerEmail: currentUser.email,
-          partnerName: currentPartnerDoc ? currentPartnerDoc.name : currentUser.email,
-          status: "pending",
-          createdAt: fb.serverTimestamp()
-        });
-        showToast("Submitted for admin approval!");
-      }
-      var wrap = el("partner-inventory-form-wrap");
-      if (wrap) wrap.style.display = "none";
-      var editIdEl = el("pi-edit-id"); if (editIdEl) editIdEl.value = "";
-      ["pi-name","pi-retail","pi-pph","pi-eta","pi-qty","pi-img","pi-desc"].forEach(function(id){
-        var el2 = el(id); if (el2) el2.value = "";
-      });
-      if (btn) { btn.disabled = false; btn.textContent = "Submit for Approval"; }
-      // Re-render partner dashboard to reflect changes
-      renderPartnerDashboard();
-    } catch(e) {
-      showToast("Error: " + e.message);
-      if (btn) { btn.disabled = false; btn.textContent = editId ? "Save Changes" : "Submit for Approval"; }
-    }
-  };
-
-  // ── ADMIN: LOAD & APPROVE/REJECT PENDING INVENTORY ──
-  window.adminLoadPendingInventory = async function() {
-    var wrap = el("admin-pending-content");
-    if (!wrap) return;
-    wrap.innerHTML = '<div style="color:var(--muted);font-size:14px;padding:20px">Loading...</div>';
-    try {
-      var fb = window._fb;
-      var snap = await fb.getDocs(
-        fb.collection(fb.db, "pendingInventory")
-      );
-      // Update tab badge
-      var pending = snap.docs.filter(function(d){ return d.data().status === "pending"; });
-      var tabBtn = el("admin-tab-pending");
-      if (tabBtn) tabBtn.textContent = "Pending Inventory" + (pending.length ? " ("+pending.length+")" : "");
-
-      if (snap.empty) {
-        wrap.innerHTML = '<div style="color:var(--muted);font-size:14px;padding:20px">No pending submissions.</div>';
-        return;
-      }
-      wrap.innerHTML = snap.docs.map(function(d) {
-        var item = d.data();
-        var isPending = item.status === "pending";
-        var date = item.createdAt && item.createdAt.toDate ? item.createdAt.toDate().toLocaleString([],{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}) : "";
-        return '<div class="admin-order-card" style="margin-bottom:12px">' +
-          '<div style="display:flex;align-items:flex-start;gap:14px">' +
-            (item.img && item.img !== "x" ? '<img src="' + item.img + '" style="width:60px;height:60px;object-fit:contain;border-radius:10px;background:var(--bg3);flex-shrink:0">' : '<div style="width:60px;height:60px;border-radius:10px;background:var(--bg3);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:24px">&#x1F4E6;</div>')+
-            '<div style="flex:1">' +
-              '<div style="font-weight:700;font-size:15px">' + item.name + '</div>' +
-              '<div style="font-size:12px;color:var(--muted);margin-top:3px">' + item.cat + ' &middot; $' + (item.retail||0) + ' retail &middot; $' + (item.pph||0).toFixed(2) + '/hr &middot; Qty: ' + (item.qty||1) + ' &middot; ETA: ' + item.eta + '</div>' +
-              '<div style="font-size:12px;color:var(--muted);margin-top:2px">From: <strong>' + (item.partnerName||item.partnerEmail) + '</strong> &middot; ' + date + '</div>' +
-              '<div style="font-size:13px;color:var(--text2);margin-top:6px;line-height:1.5">' + (item.desc||"") + '</div>' +
-            '</div>' +
-            '<div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;flex-shrink:0">' +
-              (isPending
-                ? '<button onclick="adminApprovePendingItem(\'' + d.id + '\')" style="padding:7px 14px;border-radius:9px;background:rgba(22,163,74,.12);color:#15803d;border:1px solid rgba(22,163,74,.25);font-size:12px;font-weight:700;cursor:pointer">Approve</button>' +
-                  '<button onclick="adminRejectPendingItem(\'' + d.id + '\')" style="padding:7px 14px;border-radius:9px;background:rgba(239,68,68,.08);color:#ef4444;border:1px solid rgba(239,68,68,.2);font-size:12px;font-weight:700;cursor:pointer">Reject</button>'
-                : '<span style="font-size:12px;font-weight:700;padding:5px 12px;border-radius:8px;background:' + (item.status==="approved"?"rgba(22,163,74,.1)":"rgba(239,68,68,.08)") + ';color:' + (item.status==="approved"?"#15803d":"#ef4444") + '">' + (item.status==="approved"?"Approved":"Rejected") + '</span>'
-              ) +
-            '</div>' +
-          '</div>' +
-        '</div>';
-      }).join("");
-    } catch(e) {
-      wrap.innerHTML = '<div style="color:#ef4444;font-size:14px;padding:20px">Error loading: ' + e.message + '</div>';
-    }
-  };
-
-  window.adminApprovePendingItem = async function(docId) {
-    showConfirm({
-      title: "Approve & Add to Inventory",
-      msg: "This will add the item to the live RTDB inventory immediately.",
-      okLabel: "Approve",
-      color: "green",
-      onOk: async function() {
-        try {
-          var fb = window._fb;
-          var snap = await fb.getDoc(fb.doc(fb.db, "pendingInventory", docId));
-          var item = snap.data();
-          if (!item) { showToast("Item not found"); return; }
-          // Add to RTDB tools array
-          await loadToolsFromRTDB();
-          var nextId = TOOLS.length ? Math.max.apply(null, TOOLS.map(function(t){ return t.id||0; })) + 1 : 1;
-          var tool = {
-            id: nextId,
-            name: item.name, cat: item.cat, retail: item.retail,
-            pph: item.pph||0, eta: item.eta, qty: item.qty||1,
-            img: item.img||"x", desc: item.desc, rating: 4.5,
-            available: true, rentedQty: 0,
-            partnerEmail: item.partnerEmail || null,
-            partnerName:  item.partnerName  || null
-          };
-          TOOLS.push(tool);
-          await adminSyncToRTDB();
-          // Mark as approved in Firestore
-          await fb.updateDoc(fb.doc(fb.db, "pendingInventory", docId), {
-            status: "approved", approvedAt: fb.serverTimestamp()
-          });
-          showToast("Approved and added to inventory!");
-          adminLoadPartnersPanel();
-        } catch(e) { showToast("Error: " + e.message); }
-      }
-    });
-  };
-
-  window.adminRejectPendingItem = async function(docId) {
-    showConfirm({
-      title: "Reject Submission",
-      msg: "This will mark the submission as rejected. The partner will not be notified automatically.",
-      okLabel: "Reject",
-      color: "red",
-      onOk: async function() {
-        try {
-          var fb = window._fb;
-          await fb.updateDoc(fb.doc(fb.db, "pendingInventory", docId), {
-            status: "rejected", rejectedAt: fb.serverTimestamp()
-          });
-          showToast("Submission rejected");
-          adminLoadPartnersPanel();
-        } catch(e) { showToast("Error: " + e.message); }
-      }
-    });
-  };
-
-
-  // ── ADMIN PARTNERS PANEL ──
-  window.adminLoadPartnersPanel = async function() {
-    var wrap = el("admin-partners-content");
-    if (!wrap) return;
-    wrap.innerHTML = '<div style="color:var(--muted);font-size:14px;padding:20px">Loading...</div>';
-    try {
-      var fb = window._fb;
-      var partnerSnap = await fb.getDocs(fb.collection(fb.db, "partners"));
-      var partners = partnerSnap.docs.map(function(d){ return Object.assign({_id:d.id}, d.data()); });
-
-      var pendingInvSnap = await fb.getDocs(fb.collection(fb.db, "pendingInventory"));
-      var allPendingInv = pendingInvSnap.docs.map(function(d){ return Object.assign({_id:d.id}, d.data()); });
-
-      var appSnap = await fb.getDocs(
-        fb.collection(fb.db, "partnerApplications")
-      );
-      var applications = appSnap.docs.map(function(d){ return Object.assign({_id:d.id}, d.data()); });
-      var pendingApps = applications.filter(function(a){ return a.status === "pending"; });
-
-      // Tab badge: pending applications + pending inventory
-      var pendingInvCount = allPendingInv.filter(function(p){ return p.status === "pending"; }).length;
-      var totalBadge = pendingApps.length + pendingInvCount;
-      var tabBtn = el("admin-tab-partners");
-      if (tabBtn) {
-        tabBtn.style.position = "relative";
-        tabBtn.innerHTML = "Partners" + (totalBadge > 0
-          ? '<span style="position:absolute;top:-6px;right:-6px;min-width:16px;height:16px;border-radius:8px;background:#ef4444;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;padding:0 4px;line-height:1">' + totalBadge + '</span>'
-          : "");
-      }
-
-      var html = "";
-
-      // ── Pending Applications ──
-      if (pendingApps.length > 0) {
-        html += '<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:12px">Applications (' + pendingApps.length + ')</div>';
-        html += '<div style="display:grid;gap:10px;margin-bottom:32px">';
-        html += pendingApps.map(function(a) {
-          var date = a.createdAt && a.createdAt.toDate ? a.createdAt.toDate().toLocaleString([],{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}) : "";
-          return '<div class="admin-order-card">' +
-            '<div style="display:flex;align-items:flex-start;gap:14px">' +
-              (a.logoUrl
-                ? '<img src="' + a.logoUrl + '" style="width:52px;height:52px;object-fit:contain;border-radius:10px;background:var(--bg3);border:1px solid var(--border);flex-shrink:0;padding:4px">'
-                : '<div style="width:52px;height:52px;border-radius:12px;background:var(--blue-dim);color:var(--blue);font-weight:800;font-size:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0">' + (a.name||"?")[0].toUpperCase() + '</div>'
-              ) +
-              '<div style="flex:1">' +
-                '<div style="font-weight:700;font-size:15px">' + (a.name||"—") + '</div>' +
-                '<div style="font-size:12px;color:var(--muted);margin-top:2px">' + (a.email||"") + '</div>' +
-                (a.inventory ? '<div style="font-size:12px;color:var(--text2);margin-top:4px"><strong>Inventory:</strong> ' + a.inventory + '</div>' : '') +
-                (a.notes ? '<div style="font-size:12px;color:var(--text2);margin-top:3px">' + a.notes + '</div>' : '') +
-                (date ? '<div style="font-size:11px;color:var(--dim);margin-top:4px">Applied ' + date + '</div>' : '') +
-              '</div>' +
-              '<div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;flex-shrink:0">' +
-                '<button data-aid="' + a._id + '" data-aname="' + (a.name||"").replace(/"/g,"") + '" data-aemail="' + (a.email||"") + '" data-alogo="' + (a.logoUrl||"") + '" onclick="adminApprovePartnerApp(this)" style="padding:7px 16px;border-radius:9px;background:rgba(22,163,74,.12);color:#15803d;border:1px solid rgba(22,163,74,.25);font-size:13px;font-weight:700;cursor:pointer">Approve</button>' +
-                '<button data-aid="' + a._id + '" onclick="adminRejectPartnerApp(this)" style="padding:7px 16px;border-radius:9px;background:rgba(239,68,68,.08);color:#ef4444;border:1px solid rgba(239,68,68,.2);font-size:13px;font-weight:700;cursor:pointer">Reject</button>' +
-              '</div>' +
-            '</div>' +
-          '</div>';
-        }).join("");
-        html += '</div>';
-      }
-
-      // ── Active Partners ──
-      if (partners.length > 0) {
-        html += '<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:12px">Active Partners (' + partners.length + ')</div>';
-        html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">';
-        html += partners.map(function(p) {
-          var myPendingInv = allPendingInv.filter(function(i){ return i.partnerEmail === p.email && i.status === "pending"; });
-          var myTools = TOOLS.filter(function(t){ return t.partnerEmail === p.email; });
-          var displayName = p.name || p.email;
-          return '<div data-email="' + p.email + '" style="position:relative;background:var(--bg2);border:1.5px solid var(--border);border-radius:14px;padding:20px 16px;cursor:pointer;transition:.15s;text-align:center" onmouseenter="this.style.borderColor=\'rgba(26,110,240,.35)\'" onmouseleave="this.style.borderColor=\'rgba(0,0,0,.08)\'" onclick="adminViewPartner(this.dataset.email)">' +
-            (myPendingInv.length > 0
-              ? '<div style="position:absolute;top:-7px;right:-7px;min-width:20px;height:20px;border-radius:10px;background:#ef4444;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;padding:0 5px;border:2px solid var(--bg)">' + myPendingInv.length + '</div>'
-              : ''
-            ) +
-            (p.logoUrl
-              ? '<img src="' + p.logoUrl + '" style="width:48px;height:48px;object-fit:contain;border-radius:10px;background:var(--bg3);margin:0 auto 10px;display:block">'
-              : '<div style="width:48px;height:48px;border-radius:14px;background:var(--blue-dim);color:var(--blue);font-weight:800;font-size:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px">' + displayName[0].toUpperCase() + '</div>'
-            ) +
-            '<div style="font-weight:700;font-size:14px;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + displayName + '</div>' +
-            '<div style="font-size:11px;color:var(--muted)">' + myTools.length + ' listing' + (myTools.length!==1?'s':'') + (myPendingInv.length?' · <span style="color:#ef4444;font-weight:700">' + myPendingInv.length + ' pending</span>':'') + '</div>' +
-          '</div>';
-        }).join("");
-        html += '</div>';
-      }
-
-      if (!partners.length && !pendingApps.length) {
-        html = '<div style="text-align:center;padding:60px 0;color:var(--muted);font-size:14px">No partners or applications yet.</div>';
-      }
-
-      wrap.innerHTML = html;
-    } catch(e) {
-      console.error("adminLoadPartnersPanel error:", e);
-      wrap.innerHTML = '<div style="color:#ef4444;font-size:14px;padding:20px">Error: ' + e.message + '</div>';
-    }
-  };
-
-  window.adminApprovePartnerApp = async function(btn) {
-    var docId = btn.dataset.aid;
-    var name  = btn.dataset.aname;
-    var email = btn.dataset.aemail;
-    var logo  = btn.dataset.alogo || null;
-    showConfirm({
-      title: "Approve " + name + "?",
-      msg: "This will create a partner account for " + email + ". They will be able to log in and submit inventory.",
-      okLabel: "Approve",
-      color: "green",
-      onOk: async function() {
-        try {
-          var fb = window._fb;
-          await fb.addDoc(fb.collection(fb.db, "partners"), {
-            name: name,
-            email: email,
-            logoUrl: logo || null,
-            status: "active",
-            createdAt: fb.serverTimestamp()
-          });
-          await fb.updateDoc(fb.doc(fb.db, "partnerApplications", docId), {
-            status: "approved",
-            approvedAt: fb.serverTimestamp()
-          });
-          showToast(name + " approved as partner!");
-          adminLoadPartnersPanel();
-        } catch(e) { showToast("Error: " + e.message); }
-      }
-    });
-  };
-
-  window.adminRejectPartnerApp = async function(btn) {
-    var docId = btn.dataset.aid;
-    showConfirm({
-      title: "Reject Application",
-      msg: "This will mark the application as rejected.",
-      okLabel: "Reject",
-      color: "red",
-      onOk: async function() {
-        try {
-          var fb = window._fb;
-          await fb.updateDoc(fb.doc(fb.db, "partnerApplications", docId), {
-            status: "rejected",
-            rejectedAt: fb.serverTimestamp()
-          });
-          showToast("Application rejected");
-          adminLoadPartnersPanel();
-        } catch(e) { showToast("Error: " + e.message); }
-      }
-    });
-  };
-
-  window.adminViewPartner = async function(email) {
-    var wrap = el("admin-partners-content");
-    if (!wrap) return;
-    wrap.innerHTML = '<div style="color:var(--muted);font-size:14px;padding:20px">Loading...</div>';
-    try {
-      var fb = window._fb;
-      // Load partner doc
-      var partnerSnap = await fb.getDocs(fb.query(fb.collection(fb.db, "partners"), fb.where("email","==",email)));
-      var p = partnerSnap.empty ? {email:email, name:email} : Object.assign({_id:partnerSnap.docs[0].id}, partnerSnap.docs[0].data());
-      // Load their pending submissions
-      var pendingSnap = await fb.getDocs(fb.query(fb.collection(fb.db, "pendingInventory"), fb.where("partnerEmail","==",email)));
-      var items = pendingSnap.docs.map(function(d){ return Object.assign({_id:d.id}, d.data()); });
-      items.sort(function(a,b){ return (b.createdAt&&b.createdAt.seconds||0)-(a.createdAt&&a.createdAt.seconds||0); });
-      var myTools = TOOLS.filter(function(t){ return t.partnerEmail === email; });
-
-      var pendingItems = items.filter(function(i){ return i.status === "pending"; });
-      var otherItems   = items.filter(function(i){ return i.status !== "pending"; });
-
-      wrap.innerHTML =
-        // Back button + header
-        '<div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">' +
-          '<button onclick="adminLoadPartnersPanel()" style="display:flex;align-items:center;gap:6px;padding:7px 12px;border-radius:9px;background:var(--bg3);border:1px solid var(--border);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);color:var(--text2)">' +
-            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg> Back' +
-          '</button>' +
-          '<div style="display:flex;align-items:center;gap:12px">' +
-            (p.logoUrl ? '<img src="' + p.logoUrl + '" style="height:40px;max-width:100px;object-fit:contain;border-radius:8px;background:var(--bg3);border:1px solid var(--border);padding:4px">' : '') +
-            '<div>' +
-              '<div style="font-size:18px;font-weight:800">' + (p.name||email) + '</div>' +
-              '<div style="font-size:12px;color:var(--muted)">' + email + ' &middot; ' + myTools.length + ' active listing' + (myTools.length!==1?'s':'') + '</div>' +
-            '</div>' +
-          '</div>' +
-        '</div>' +
-
-        // Pending requests
-        (pendingItems.length > 0
-          ? '<div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:10px">Pending Requests (' + pendingItems.length + ')</div>' +
-            '<div style="display:grid;gap:10px;margin-bottom:28px">' +
-              pendingItems.map(function(item) {
-                var date = item.createdAt && item.createdAt.toDate ? item.createdAt.toDate().toLocaleString([],{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}) : "";
-                return '<div class="admin-order-card">' +
-                  '<div style="display:flex;align-items:flex-start;gap:13px">' +
-                    (item.img && item.img !== "x" ? '<img src="' + item.img + '" style="width:56px;height:56px;object-fit:contain;border-radius:10px;background:var(--bg3);flex-shrink:0">' : '<div style="width:56px;height:56px;border-radius:10px;background:var(--bg3);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:22px">&#x1F4E6;</div>') +
-                    '<div style="flex:1">' +
-                      '<div style="font-weight:700;font-size:15px">' + item.name + '</div>' +
-                      '<div style="font-size:12px;color:var(--muted);margin-top:2px">' + item.cat + ' &middot; $' + (item.retail||0) + ' retail &middot; $' + (item.pph||0).toFixed(2) + '/hr &middot; Qty ' + (item.qty||1) + ' &middot; ETA ' + item.eta + '</div>' +
-                      (date ? '<div style="font-size:11px;color:var(--dim);margin-top:2px">Submitted ' + date + '</div>' : '') +
-                      '<div style="font-size:13px;color:var(--text2);margin-top:6px;line-height:1.5">' + (item.desc||"") + '</div>' +
-                    '</div>' +
-                    '<div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;flex-shrink:0">' +
-                      '<button data-did="' + item._id + '" onclick="adminApprovePendingItem(this.dataset.did)" style="padding:7px 16px;border-radius:9px;background:rgba(22,163,74,.12);color:#15803d;border:1px solid rgba(22,163,74,.25);font-size:13px;font-weight:700;cursor:pointer">Approve</button>' +
-                      '<button data-did="' + item._id + '" onclick="adminRejectPendingItem(this.dataset.did)" style="padding:7px 16px;border-radius:9px;background:rgba(239,68,68,.08);color:#ef4444;border:1px solid rgba(239,68,68,.2);font-size:13px;font-weight:700;cursor:pointer">Reject</button>' +
-                    '</div>' +
-                  '</div>' +
-                '</div>';
-              }).join("") +
-            '</div>'
-          : '<div style="background:var(--bg2);border:1px dashed var(--border);border-radius:14px;padding:24px;text-align:center;color:var(--muted);font-size:13px;margin-bottom:28px">No pending requests from this partner.</div>'
-        ) +
-
-        // Active listings
-        (myTools.length > 0
-          ? '<div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:10px">Active Listings (' + myTools.length + ')</div>' +
-            '<div style="display:grid;gap:8px;margin-bottom:28px">' +
-              myTools.map(function(t) {
-                var stock = (t.qty||1) - (t.rentedQty||0);
-                return '<div class="admin-order-card" style="display:flex;align-items:center;gap:13px">' +
-                  (t.img && t.img !== "x" ? '<img src="' + t.img + '" style="width:46px;height:46px;object-fit:contain;border-radius:8px;background:var(--bg3);flex-shrink:0">' : '<div style="width:46px;height:46px;border-radius:8px;background:var(--bg3);flex-shrink:0"></div>') +
-                  '<div style="flex:1">' +
-                    '<div style="font-weight:700;font-size:14px">' + t.name + '</div>' +
-                    '<div style="font-size:12px;color:var(--muted);margin-top:1px">' + t.cat + ' &middot; $' + calcCost(t,1).toFixed(2) + '/hr</div>' +
-                  '</div>' +
-                  '<div style="text-align:right">' +
-                    '<div style="font-size:12px;font-weight:700;color:' + (stock>0?'#15803d':'#ef4444') + '">' + (stock>0?stock+' in stock':'Out of stock') + '</div>' +
-                    '<div style="font-size:11px;color:var(--muted)">' + (t.rentedQty||0) + ' rented</div>' +
-                  '</div>' +
-                '</div>';
-              }).join("") +
-            '</div>'
-          : ""
-        ) +
-
-        // Past submissions (non-pending)
-        (otherItems.length > 0
-          ? '<div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:10px">Past Submissions</div>' +
-            '<div style="display:grid;gap:8px">' +
-              otherItems.map(function(item) {
-                var s = item.status === "approved" ? {bg:"rgba(22,163,74,.1)",color:"#15803d",label:"Approved"} : {bg:"rgba(239,68,68,.08)",color:"#ef4444",label:"Rejected"};
-                return '<div class="admin-order-card" style="display:flex;align-items:center;gap:12px">' +
-                  '<div style="flex:1">' +
-                    '<div style="font-weight:600;font-size:14px">' + item.name + '</div>' +
-                    '<div style="font-size:12px;color:var(--muted)">' + item.cat + ' &middot; Qty ' + (item.qty||1) + '</div>' +
-                  '</div>' +
-                  '<span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px;background:' + s.bg + ';color:' + s.color + '">' + s.label + '</span>' +
-                '</div>';
-              }).join("") +
-            '</div>'
-          : ""
-        );
-
-    } catch(e) {
-      wrap.innerHTML = '<div style="color:#ef4444;padding:20px">Error: ' + e.message + '</div>';
-    }
-  };
-
-  // ── PARTNERS ──
-  window.previewPartnerLogoUrl = function(url) {
-    var prev = el("pf-logo-preview");
-    var wrap = el("pf-logo-preview-wrap");
-    if (!url || !url.startsWith("http")) { if (wrap) wrap.style.display = "none"; return; }
-    if (prev) prev.src = url;
-    if (wrap) wrap.style.display = "block";
-  };
-
-  window.submitPartnerApp = async function() {
-    var name  = (el("pf-name")||{}).value.trim();
-    var email = (el("pf-email")||{}).value.trim();
-    var inv   = (el("pf-inventory")||{}).value.trim();
-    var notes = (el("pf-notes")||{}).value.trim();
-    if (!name || !email) { showToast("Please fill in name and email"); return; }
-    var btn = document.querySelector("#partner-form-wrap .btn-primary");
-    if (btn) { btn.disabled = true; btn.textContent = "Submitting..."; }
-    try {
-      var fb = window._fb;
-      var logoUrl = ((el("pf-logo-url")||{}).value||"").trim() || null;
-      await fb.addDoc(fb.collection(fb.db, "partnerApplications"), {
-        name, email, inventory: inv, notes,
-        logoUrl: logoUrl || null,
-        status: "pending",
-        createdAt: fb.serverTimestamp()
-      });
-      var wrap = el("partner-form-wrap");
-      var suc  = el("partner-form-success");
-      if (wrap) wrap.style.display = "none";
-      if (suc)  suc.style.display  = "block";
-      showToast("Application submitted!");
-    } catch(e) {
-      showToast("Error: " + e.message);
-      if (btn) { btn.disabled = false; btn.textContent = "Submit Application"; }
-    }
-  };
-
-  window.loadPartners = async function loadPartners() {
-    var listEl = el("partners-list");
-    if (!listEl) return;
-    try {
-      var fb = window._fb;
-      var snap = await fb.getDocs(
-        fb.query(fb.collection(fb.db, "partners"), fb.where("status", "==", "active"))
-      );
-      if (snap.empty) {
-        listEl.innerHTML = '<div style="text-align:center;padding:32px;color:var(--muted);font-size:13px;grid-column:1/-1">No partners yet. Be the first!</div>';
-        return;
-      }
-      listEl.innerHTML = snap.docs.map(function(d) {
-        var p = d.data();
-        var logoHtml = p.logoUrl
-          ? '<img src="' + p.logoUrl + '" style="width:48px;height:48px;object-fit:contain;border-radius:10px;background:var(--bg3);border:1px solid var(--border)">'
-          : '<div style="width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,rgba(26,110,240,.15),rgba(26,110,240,.04));display:flex;align-items:center;justify-content:center;font-size:22px">&#x1F3EA;</div>';
-        return '<div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:10px">'+
-          '<div style="display:flex;align-items:center;gap:12px">'+
-            logoHtml+
-            '<div>'+
-              '<div style="font-weight:700;font-size:15px">' + (p.name||"Partner") + '</div>'+
-              (p.category ? '<div style="font-size:11px;color:var(--muted);margin-top:1px">' + p.category + '</div>' : '')+
-            '</div>'+
-          '</div>'+
-          (p.description ? '<div style="font-size:12px;color:var(--text2);line-height:1.55">' + p.description + '</div>' : '')+
-          '<div style="display:inline-flex;align-items:center;gap:4px;background:rgba(22,163,74,.1);color:#15803d;font-size:10px;font-weight:700;padding:3px 8px;border-radius:5px;width:fit-content">&#x2713; Active Partner</div>'+
-        '</div>';
-      }).join("");
-    } catch(e) {
-      console.warn("Could not load partners:", e);
-      var listEl2 = el("partners-list");
-      if (listEl2) listEl2.innerHTML = '<div style="text-align:center;padding:32px;color:var(--muted);font-size:13px;grid-column:1/-1">Could not load partners.</div>';
-    }
-  }
-
-  // ── USER CANCEL ORDER ──
-  window.userCancelOrder = async function(orderId) {
-    showConfirm({
-      title: "Cancel Order",
-      msg: "Are you sure you want to cancel this order? The tools will be released back to stock.",
-      okLabel: "Yes, Cancel",
-      color: "red",
-      onOk: async function() {
-        var fb = window._fb;
-        try {
-          var orderSnap = await fb.getDoc(fb.doc(fb.db, "allOrders", orderId));
-          var orderData = orderSnap.data();
-          if (!orderData) { showToast("Order not found"); return; }
-          var update = { status: "cancelled", updatedAt: fb.serverTimestamp() };
-          await fb.updateDoc(fb.doc(fb.db, "allOrders", orderId), update);
-          if (orderData.userId && orderData.userOrderId) {
-            await fb.updateDoc(fb.doc(fb.db, "users", orderData.userId, "orders", orderData.userOrderId), update);
-          }
-          var items = orderData.items || [];
-          for (var i = 0; i < items.length; i++) {
-            if (items[i].id) await markToolAvailable(fb, items[i].id);
-          }
-          showToast("Order cancelled");
-        } catch(e) { showToast("Failed: " + e.message); }
-      }
-    });
-  };
-
-  // ── ONBOARDING ──
-  window.onboardNext = function(step) {
-    [1,2,3].forEach(function(n){
-      var s = el("onboard-step-"+n);
-      var d = el("odot-"+n);
-      if(s) s.style.display = n===step ? "block" : "none";
-      if(d) d.classList.toggle("active", n===step);
-    });
-  };
-  window.closeOnboarding = function() {
-    el("onboarding-overlay").classList.add("hidden");
-    try { localStorage.setItem("droveia_onboarded","1"); } catch(e){}
-  };
-  function maybeShowOnboarding() {
-    try { if (localStorage.getItem("droveia_onboarded")) return; } catch(e){}
-    setTimeout(function(){
-      var ov = el("onboarding-overlay");
-      if(ov) ov.classList.remove("hidden");
-    }, 800);
-  }
-  maybeShowOnboarding();
-
-  // ── WAITLIST ──
-  window._waitlistToolId = null;
-  window.openWaitlist = function(toolId) {
-    if (!currentUser) { showAuth(); return; }
-    window._waitlistToolId = toolId;
-    var t = getTool(toolId);
-    var nameEl = el("waitlist-tool-name");
-    if(nameEl) nameEl.textContent = t ? t.name : "this tool";
-    var sucEl = el("waitlist-success");
-    var btnEl = el("waitlist-submit-btn");
-    if(sucEl) sucEl.style.display = "none";
-    if(btnEl) { btnEl.style.display = "block"; btnEl.disabled = false; btnEl.textContent = "Notify Me When Available"; }
-    el("waitlist-overlay").classList.remove("hidden");
-  };
-  window.closeWaitlist = function(e) {
-    if (!e || e.target === el("waitlist-overlay")) el("waitlist-overlay").classList.add("hidden");
-  };
-  window.submitWaitlist = async function() {
-    if (!currentUser || !window._waitlistToolId) return;
-    var btn = el("waitlist-submit-btn");
-    if(btn) { btn.disabled = true; btn.textContent = "Saving..."; }
-    try {
-      var fb = window._fb;
-      await fb.setDoc(
-        fb.doc(fb.db, "waitlist", window._waitlistToolId + "_" + currentUser.uid),
-        { toolId: window._waitlistToolId, uid: currentUser.uid, email: currentUser.email, createdAt: fb.serverTimestamp() }
-      );
-      if(btn) btn.style.display = "none";
-      var suc = el("waitlist-success");
-      if(suc) suc.style.display = "block";
-      showToast("You're on the waitlist!");
-    } catch(e) {
-      showToast("Error joining waitlist");
-      if(btn) { btn.disabled = false; btn.textContent = "Notify Me When Available"; }
-    }
-  };
-
-  // ── RENT AGAIN ──
-  window.rentAgain = async function(orderId) {
-    var order = liveOrders.find(function(o){ return o._id === orderId; });
-    if (!order || !order.items) { showToast("Order not found"); return; }
-    var added = 0;
-    order.items.forEach(function(item) {
-      var t = getTool(item.id);
-      if (t && t.available !== false) {
-        // Add to cart if not already in it
-        if (!cart.find(function(c){ return c.id === item.id; })) {
-          cart.push({ id: item.id, hours: item.hours || 1 });
-          added++;
-        }
-      }
-    });
-    if (added > 0) {
-      updateBadge(); saveCart();
-      showToast("Added " + added + " item" + (added>1?"s":"") + " to cart");
-      navigate("cart");
-    } else {
-      showToast("All items already in cart or unavailable");
-    }
-  };
-
   window.saveNotifications = function() {
     saveProfile({ notifications:{
       delivery: !!(el("notif-delivery")||{}).checked,
@@ -4502,42 +3488,48 @@ function startApp() {
       if (btn) { btn.textContent=first; btn.onclick=function(){showPage("account");}; }
       var heroBtn = el("hero-signup-btn");
       if (heroBtn) heroBtn.style.display = "none";
+
+      // Check admin + partner status
       await loadAdminEmails();
-      await window.loadPartnerEmails();
-      window.isPartner = window.checkPartner ? window.checkPartner() : false;
-      var _isAdminUser = checkAdmin();
-      var _isPartnerUser = window.isPartner && !_isAdminUser;
-      var _showDash = _isAdminUser || window.isPartner;
-      // Hero button
-      var heroDashBtn = el('hero-dashboard-btn');
-      var heroDashLbl = el('hero-dashboard-btn-label');
-      if (heroDashBtn) heroDashBtn.style.display = _showDash ? '' : 'none';
-      if (heroDashLbl) heroDashLbl.textContent = _isPartnerUser ? 'Partner Dashboard' : 'Admin Dashboard';
-      // Dashboard card section
-      var dashSec = el('home-dashboard-section');
-      var dashLbl = el('home-dashboard-label');
-      var dashSub = el('home-dashboard-sub');
-      if (dashSec) dashSec.style.display = _showDash ? '' : 'none';
-      if (dashLbl) dashLbl.textContent = _isPartnerUser ? 'Partner Dashboard' : 'Admin Dashboard';
-      if (dashSub) dashSub.textContent = _isPartnerUser ? 'Manage your listings and track orders' : 'Manage inventory, orders and partners';
+      var _isAdm = checkAdmin();
+
+      // Check if partner
+      var _isPrt = false;
+      try {
+        var pSnap = await fb.getDocs(fb.query(fb.collection(fb.db,"partners"),fb.where("email","==",user.email)));
+        _isPrt = !pSnap.empty;
+      } catch(e) {}
+      window._isPartnerUser = _isPrt;
+
+      // Show/hide admin hero btn
+      var adminBtn = el("hero-admin-btn");
+      if (adminBtn) adminBtn.style.display = _isAdm ? "" : "none";
+
+      // Show/hide API nav link — only for partners and admins
+      var apiNav = el("nav-api");
+      if (apiNav) apiNav.style.display = (_isPrt || _isAdm) ? "" : "none";
+
       await loadProfile();
       await loadCart();
       subscribeOrders();
       subscribeHomeReviews(fb);
       if (el('page-admin') && el('page-admin').classList.contains('active')) renderAdmin();
+      if (el('page-api') && el('page-api').classList.contains('active')) renderPartnerApiPage();
       if (window._openAdminOnAuth) { window._openAdminOnAuth = false; showPage('admin'); }
     } else {
       if (ordersUnsub){ ordersUnsub(); ordersUnsub=null; }
       currentUser=null; userProfile=null; cart=[]; liveOrders=[];
+      window._isPartnerUser = false;
       updateBadge();
       var btn=el("nav-auth-btn");
       if(btn){ btn.textContent="Sign In"; btn.onclick=showAuth; }
       var heroBtn = el("hero-signup-btn");
       if (heroBtn) heroBtn.style.display = "";
-      var heroDashBtn = el('hero-dashboard-btn');
-      if (heroDashBtn) heroDashBtn.style.display = 'none';
-      var dashSec = el('home-dashboard-section');
-      if (dashSec) dashSec.style.display = 'none';
+      var adminBtn = el("hero-admin-btn");
+      if (adminBtn) adminBtn.style.display = "none";
+      // Hide API nav when signed out
+      var apiNav = el("nav-api");
+      if (apiNav) apiNav.style.display = "none";
     }
   });
 }
@@ -4566,37 +3558,7 @@ window.toggleTheme = function() {
 applyTheme(_theme);
 
 
-// ── Firebase Realtime DB - tool inventory ────────────────────────────────────
-window._partnerNameCache = {}; // email -> name
-
-async function resolvePartnerNames() {
-  var fb = window._fb;
-  if (!fb) return; // Firebase not ready yet, will retry after fbready
-  try {
-    var snap = await fb.getDocs(fb.collection(fb.db, "partners"));
-    snap.docs.forEach(function(d) {
-      var data = d.data();
-      if (data.email && data.name) window._partnerNameCache[data.email] = data.name;
-    });
-    var changed = false;
-    TOOLS.forEach(function(t) {
-      if (t.partnerEmail && window._partnerNameCache[t.partnerEmail]) {
-        t.partnerName = window._partnerNameCache[t.partnerEmail];
-        changed = true;
-      }
-    });
-    if (changed) {
-      renderTools();
-      if (window.renderPartnerSidebar) renderPartnerSidebar();
-    }
-  } catch(e) { console.warn("resolvePartnerNames failed", e); }
-}
-
-// Re-resolve after Firebase is ready (handles first load timing)
-document.addEventListener("fbready", function() {
-  if (TOOLS.length) resolvePartnerNames();
-}, {once: true});
-
+// ── Firebase Realtime DB — tool inventory ────────────────────────────────────
 var RTDB_URL = "https://droveia-default-rtdb.firebaseio.com/tools.json";
 
 async function loadToolsFromRTDB() {
@@ -4624,17 +3586,12 @@ async function loadToolsFromRTDB() {
         img:       t.img                 || "",
         qty:       parseInt(t.qty)       || 1,
         rentedQty: parseInt(t.rentedQty) || 0,
-        available: (parseInt(t.qty) || 1) > (parseInt(t.rentedQty) || 0),
-        partnerEmail: t.partnerEmail || null,
-        partnerName:  t.partnerName  || (t.partnerEmail ? (window._partnerNameCache && window._partnerNameCache[t.partnerEmail]) || t.partnerEmail : null)
+        available: (parseInt(t.qty) || 1) > (parseInt(t.rentedQty) || 0)
       };
     });
-    // Resolve any missing partnerNames from cache or Firestore
-    await resolvePartnerNames();
     renderCatIcons();
     renderFeatured();
     renderTools();
-    if (window.renderPartnerSidebar) renderPartnerSidebar();
     // Refresh admin inventory table if open
     var adminInv = el("admin-panel-inventory");
     if (adminInv && adminInv.classList.contains("active")) {
@@ -4790,7 +3747,7 @@ window.submitReview = async function() {
   try {
     var first = (userProfile && userProfile.firstName) || 
                 (currentUser.displayName || currentUser.email).split(/[\s@]/)[0];
-    // Save review to Firestore - coerce all to safe types
+    // Save review to Firestore — coerce all to safe types
     await fb.addDoc(fb.collection(fb.db, "reviews"), {
       toolId:    Number(_reviewToolId) || String(_reviewToolId || "unknown"),
       toolName:  String(_reviewToolName || "Tool"),
@@ -4855,7 +3812,7 @@ function renderHomeReviews(reviews) {
   var g = el("home-reviews");
   if (!g) return;
   if (!reviews.length) {
-    g.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted);font-size:14px">No reviews yet - be the first to rent and review!</div>';
+    g.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted);font-size:14px">No reviews yet — be the first to rent and review!</div>';
     return;
   }
   g.innerHTML = reviews.map(function(r) {
@@ -4878,10 +3835,458 @@ function renderHomeReviews(reviews) {
 
 
 
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ADMIN: DELIVERIES (API orders from partners — approve / reject)
+// ═══════════════════════════════════════════════════════════════════════════
+
+window.adminLoadDeliveries = async function() {
+  var wrap = el("admin-deliveries-content");
+  if (!wrap) return;
+  wrap.innerHTML = '<div style="color:var(--muted);font-size:14px;padding:20px">Loading API deliveries...</div>';
+  var fb = window._fb; if (!fb) return;
+  try {
+    var snap = await fb.getDocs(
+      fb.query(fb.collection(fb.db,"deliveries"), fb.orderBy("createdAt","desc"), fb.limit(100))
+    );
+    var all = snap.docs.map(function(d){ return Object.assign({_id:d.id}, d.data()); });
+    var pending = all.filter(function(d){ return d.status==="pending_approval"; }).length;
+    var badge = el("adlv-badge");
+    if (badge) { badge.style.display = pending?"inline":"none"; badge.textContent = pending; }
+
+    if (!all.length) {
+      wrap.innerHTML = '<div style="text-align:center;padding:60px 0;color:var(--muted);font-size:14px">No API deliveries yet.<br><span style="font-size:12px;display:block;margin-top:6px">When a partner calls POST /v1/deliveries, orders appear here.</span></div>';
+      return;
+    }
+
+    var SC = { pending_approval:"#d97706", approved:"var(--blue)", dispatching:"var(--blue)", dispatched:"var(--blue)", delivered:"var(--green)", failed:"#ef4444", rejected:"#6b7280" };
+
+    wrap.innerHTML =
+      '<div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap">' +
+        '<div style="font-size:15px;font-weight:700">API Deliveries</div>' +
+        '<span style="font-size:12px;color:var(--muted)">' + all.length + ' total · ' + pending + ' pending approval</span>' +
+      '</div>' +
+      '<div style="display:grid;gap:10px">' + all.map(function(d) {
+        var sc = SC[d.status]||"var(--muted)";
+        var date = d.createdAt&&d.createdAt.toDate ? d.createdAt.toDate().toLocaleString([],{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}) : "";
+        var items = (d.items||[]).map(function(i){return i.name+(i.qty>1?" x"+i.qty:"");}).join(", ")||"—";
+        var isPend = d.status==="pending_approval";
+        return '<div style="background:var(--bg2);border:1px solid '+(isPend?"rgba(217,119,6,.4)":"var(--border)")+';border-radius:14px;padding:18px 20px'+(isPend?';box-shadow:0 0 0 2px rgba(217,119,6,.08)':'')+'">' +
+          '<div style="display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap">' +
+            '<div style="flex:1;min-width:200px">' +
+              '<div style="font-weight:700;font-size:14px;margin-bottom:4px">' + (d.customerName||"—") + (d.customerPhone?' <span style="font-size:12px;color:var(--muted);font-weight:400">'+d.customerPhone+'</span>':'') + '</div>' +
+              '<div style="font-size:13px;color:var(--text2);margin-bottom:3px">📦 ' + items + '</div>' +
+              '<div style="font-size:12px;color:var(--muted)">📍 ' + (d.deliveryAddress||"—") + '</div>' +
+              (d.notes?'<div style="font-size:12px;color:var(--muted);margin-top:2px">📝 '+d.notes+'</div>':'') +
+              '<div style="font-size:11px;color:var(--dim);margin-top:8px">Partner: <strong>'+(d.partnerName||d.partnerEmail||"—")+'</strong> · Station: <strong>'+(d.stationId||"—")+'</strong>'+(date?' · '+date:'')+'</div>' +
+            '</div>' +
+            '<div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;flex-shrink:0">' +
+              '<span style="font-size:11px;font-weight:700;padding:4px 12px;border-radius:7px;white-space:nowrap;background:'+sc.replace("var(--","rgba(").replace(")",",0.1)")+';color:'+sc+'">'+(d.status||"").replace(/_/g," ")+'</span>' +
+              (isPend
+                ? '<button data-did="'+d._id+'" onclick="adminApproveDelivery(this.dataset.did)" style="padding:7px 16px;border-radius:9px;background:rgba(22,163,74,.12);color:#15803d;border:1px solid rgba(22,163,74,.25);font-size:13px;font-weight:700;cursor:pointer">✓ Approve</button>' +
+                  '<button data-did="'+d._id+'" onclick="adminRejectDelivery(this.dataset.did)" style="padding:7px 16px;border-radius:9px;background:rgba(239,68,68,.08);color:#ef4444;border:1px solid rgba(239,68,68,.2);font-size:13px;font-weight:700;cursor:pointer">✕ Reject</button>'
+                : '') +
+            '</div>' +
+          '</div>' +
+        '</div>';
+      }).join("") + '</div>';
+  } catch(e) {
+    wrap.innerHTML = '<div style="color:#ef4444;padding:20px">Error: '+e.message+'</div>';
+  }
+};
+
+window.adminApproveDelivery = async function(docId) {
+  showConfirm({ title:"Approve Delivery?", msg:"Flips status to 'approved'. The docking station Pi will dispatch the drone automatically.", okLabel:"Approve", color:"green",
+    onOk: async function() {
+      var fb = window._fb;
+      try {
+        await fb.updateDoc(fb.doc(fb.db,"deliveries",docId), { status:"approved", approvedAt:fb.serverTimestamp(), updatedAt:fb.serverTimestamp() });
+        showToast("✓ Approved — drone dispatching");
+        adminLoadDeliveries();
+      } catch(e) { showToast("Error: "+e.message); }
+    }
+  });
+};
+
+window.adminRejectDelivery = async function(docId) {
+  showConfirm({ title:"Reject Delivery?", msg:"Partner will see this status via the API.", okLabel:"Reject", color:"red",
+    onOk: async function() {
+      var fb = window._fb;
+      try {
+        await fb.updateDoc(fb.doc(fb.db,"deliveries",docId), { status:"rejected", rejectedAt:fb.serverTimestamp(), updatedAt:fb.serverTimestamp() });
+        showToast("Delivery rejected");
+        adminLoadDeliveries();
+      } catch(e) { showToast("Error: "+e.message); }
+    }
+  });
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ADMIN: PARTNERS panel
+// ═══════════════════════════════════════════════════════════════════════════
+
+window.adminLoadPartners = async function() {
+  var wrap = el("admin-partners-content");
+  if (!wrap) return;
+  wrap.innerHTML = '<div style="color:var(--muted);font-size:14px;padding:20px">Loading...</div>';
+  var fb = window._fb; if (!fb) return;
+  try {
+    var pSnap = await fb.getDocs(fb.collection(fb.db,"partners"));
+    var partners = pSnap.docs.map(function(d){ return Object.assign({_id:d.id}, d.data()); });
+
+    var appSnap = await fb.getDocs(fb.collection(fb.db,"partnerApplications"));
+    var pendingApps = appSnap.docs.map(function(d){ return Object.assign({_id:d.id}, d.data()); }).filter(function(a){ return a.status==="pending"; });
+
+    var html = "";
+
+    if (pendingApps.length) {
+      html += '<div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:12px">Applications ('+pendingApps.length+')</div>';
+      html += '<div style="display:grid;gap:10px;margin-bottom:28px">' + pendingApps.map(function(a) {
+        var date = a.createdAt&&a.createdAt.toDate?a.createdAt.toDate().toLocaleString([],{month:"short",day:"numeric"}): "";
+        return '<div class="admin-order-card"><div style="display:flex;align-items:flex-start;gap:14px">' +
+          (a.logoUrl?'<img src="'+a.logoUrl+'" style="width:48px;height:48px;object-fit:contain;border-radius:10px;background:var(--bg3);flex-shrink:0">':'<div style="width:48px;height:48px;border-radius:12px;background:var(--blue-dim);color:var(--blue);font-size:20px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+(a.name||"?")[0].toUpperCase()+'</div>') +
+          '<div style="flex:1"><div style="font-weight:700;font-size:15px">'+(a.name||"—")+'</div>' +
+          '<div style="font-size:12px;color:var(--muted)">'+(a.email||"")+'</div>' +
+          (a.inventory?'<div style="font-size:12px;color:var(--text2);margin-top:3px">'+a.inventory+'</div>':'') +
+          (date?'<div style="font-size:11px;color:var(--dim);margin-top:3px">Applied '+date+'</div>':'') +
+          '</div>' +
+          '<div style="display:flex;flex-direction:column;gap:8px">' +
+          '<button data-aid="'+a._id+'" data-aname="'+(a.name||"").replace(/"/g,"")+'" data-aemail="'+(a.email||"")+'" data-alogo="'+(a.logoUrl||"")+'" onclick="adminApprovePartnerApp(this)" style="padding:7px 16px;border-radius:9px;background:rgba(22,163,74,.12);color:#15803d;border:1px solid rgba(22,163,74,.25);font-size:13px;font-weight:700;cursor:pointer">Approve</button>' +
+          '<button data-aid="'+a._id+'" onclick="adminRejectPartnerApp(this)" style="padding:7px 16px;border-radius:9px;background:rgba(239,68,68,.08);color:#ef4444;border:1px solid rgba(239,68,68,.2);font-size:13px;font-weight:700;cursor:pointer">Reject</button>' +
+          '</div></div></div>';
+      }).join("") + '</div>';
+    }
+
+    if (partners.length) {
+      html += '<div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:12px">Active Partners ('+partners.length+')</div>';
+      html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">';
+      html += partners.map(function(p) {
+        var dn = p.name||p.email;
+        return '<div style="background:var(--bg2);border:1.5px solid var(--border);border-radius:14px;padding:20px 16px;text-align:center">' +
+          (p.logoUrl?'<img src="'+p.logoUrl+'" style="width:48px;height:48px;object-fit:contain;border-radius:10px;margin:0 auto 10px;display:block">':'<div style="width:48px;height:48px;border-radius:14px;background:var(--blue-dim);color:var(--blue);font-size:20px;font-weight:800;display:flex;align-items:center;justify-content:center;margin:0 auto 10px">'+dn[0].toUpperCase()+'</div>') +
+          '<div style="font-weight:700;font-size:14px;margin-bottom:2px">' + dn + '</div>' +
+          '<div style="font-size:11px;color:var(--muted)">' + (p.email||"") + '</div>' +
+        '</div>';
+      }).join("");
+      html += '</div>';
+    }
+
+    if (!partners.length && !pendingApps.length) {
+      html = '<div style="text-align:center;padding:60px 0;color:var(--muted);font-size:14px">No partners or applications yet.</div>';
+    }
+    wrap.innerHTML = html;
+  } catch(e) {
+    wrap.innerHTML = '<div style="color:#ef4444;padding:20px">Error: '+e.message+'</div>';
+  }
+};
+
+window.adminApprovePartnerApp = async function(btn) {
+  var docId=btn.dataset.aid, name=btn.dataset.aname, email=btn.dataset.aemail, logo=btn.dataset.alogo||null;
+  showConfirm({ title:"Approve "+name+"?", msg:"Creates a partner account for "+email+".", okLabel:"Approve", color:"green",
+    onOk: async function() {
+      var fb=window._fb;
+      try {
+        await fb.addDoc(fb.collection(fb.db,"partners"),{name,email,logoUrl:logo,status:"active",createdAt:fb.serverTimestamp()});
+        await fb.updateDoc(fb.doc(fb.db,"partnerApplications",docId),{status:"approved",approvedAt:fb.serverTimestamp()});
+        showToast(name+" approved!"); adminLoadPartners();
+      } catch(e){showToast("Error: "+e.message);}
+    }
+  });
+};
+
+window.adminRejectPartnerApp = async function(btn) {
+  showConfirm({ title:"Reject Application", msg:"Marks as rejected.", okLabel:"Reject", color:"red",
+    onOk: async function() {
+      try {
+        await window._fb.updateDoc(window._fb.doc(window._fb.db,"partnerApplications",btn.dataset.aid),{status:"rejected",rejectedAt:window._fb.serverTimestamp()});
+        showToast("Rejected"); adminLoadPartners();
+      } catch(e){showToast("Error: "+e.message);}
+    }
+  });
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PARTNER API PAGE  (shown at /api for partner users)
+// ═══════════════════════════════════════════════════════════════════════════
+
+window.renderPartnerApiPage = async function() {
+  var wrap = el("page-api");
+  if (!wrap) return;
+
+  if (!currentUser) {
+    wrap.innerHTML = '<div style="max-width:420px;margin:80px auto;text-align:center;padding:0 24px"><h2 style="font-size:22px;font-weight:800;margin-bottom:8px">Partner API</h2><p style="font-size:14px;color:var(--muted);margin-bottom:24px">Sign in with your partner account to manage API keys.</p><button class="btn-primary" onclick="showAuth()">Sign In</button></div>';
+    return;
+  }
+
+  wrap.innerHTML = '<div style="max-width:900px;margin:0 auto;padding:32px 24px"><div style="color:var(--muted);font-size:14px">Loading...</div></div>';
+
+  var fb = window._fb; if (!fb) return;
+
+  try {
+    // Check if partner
+    var pSnap = await fb.getDocs(fb.query(fb.collection(fb.db,"partners"),fb.where("email","==",currentUser.email)));
+    var isPartner = !pSnap.empty;
+    var isAdm = typeof checkAdmin === "function" && checkAdmin();
+
+    if (!isPartner && !isAdm) {
+      // Show application form instead
+      wrap.innerHTML = partnerApplyHTML();
+      return;
+    }
+
+    var partnerDoc = isPartner ? Object.assign({_id:pSnap.docs[0].id}, pSnap.docs[0].data()) : {name:"Admin",email:currentUser.email};
+
+    // Load API keys
+    var keysSnap = await fb.getDocs(fb.query(fb.collection(fb.db,"apiKeys"),fb.where("partnerEmail","==",currentUser.email)));
+    var apiKeys = keysSnap.docs.map(function(d){ return Object.assign({_docId:d.id},d.data()); });
+
+    // Load deliveries for this partner
+    var delivSnap;
+    try {
+      delivSnap = await fb.getDocs(fb.query(fb.collection(fb.db,"deliveries"),fb.where("partnerEmail","==",currentUser.email),fb.orderBy("createdAt","desc"),fb.limit(50)));
+    } catch(e) { delivSnap={docs:[]}; }
+    var deliveries = delivSnap.docs.map(function(d){return Object.assign({_id:d.id},d.data());});
+
+    var totalD = deliveries.length;
+    var pendingD = deliveries.filter(function(d){return d.status==="pending_approval";}).length;
+    var approvedD = deliveries.filter(function(d){return ["approved","dispatching","dispatched","delivered"].includes(d.status);}).length;
+
+    wrap.innerHTML =
+      '<div style="max-width:900px;margin:0 auto;padding:32px 24px">' +
+
+      // Header
+      '<div style="margin-bottom:28px"><div style="font-size:26px;font-weight:800;letter-spacing:-.02em">' + (partnerDoc.name||currentUser.email) + '</div>' +
+      '<div style="font-size:14px;color:var(--muted);margin-top:3px">Partner API Dashboard · ' + currentUser.email + '</div></div>' +
+
+      // Stats
+      '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:28px">' +
+        '<div class="admin-stat"><div class="admin-stat-val">' + apiKeys.filter(function(k){return k.active;}).length + '</div><div class="admin-stat-label">Active Keys</div></div>' +
+        '<div class="admin-stat"><div class="admin-stat-val">' + totalD + '</div><div class="admin-stat-label">Total Orders</div></div>' +
+        '<div class="admin-stat"><div class="admin-stat-val amber">' + pendingD + '</div><div class="admin-stat-label">Awaiting Approval</div></div>' +
+        '<div class="admin-stat"><div class="admin-stat-val green">' + approvedD + '</div><div class="admin-stat-label">Dispatched</div></div>' +
+      '</div>' +
+
+      // Tabs
+      '<div class="admin-tabs" style="margin-bottom:24px">' +
+        '<button class="admin-tab active" data-pp="pkeys" onclick="partnerApiTab(this)">API Keys</button>' +
+        '<button class="admin-tab" data-pp="pusage" onclick="partnerApiTab(this)">Order History</button>' +
+        '<button class="admin-tab" data-pp="pdocs" onclick="partnerApiTab(this)">Docs</button>' +
+      '</div>' +
+
+      // Keys panel
+      '<div class="admin-panel active" id="pp-pkeys">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">' +
+          '<div style="font-size:15px;font-weight:700">Your API Keys</div>' +
+          '<button onclick="partnerGenerateKey()" class="admin-add-btn">+ Generate New Key</button>' +
+        '</div>' +
+        '<div id="papi-keys-list">' + renderApiKeysList(apiKeys) + '</div>' +
+      '</div>' +
+
+      // Usage panel
+      '<div class="admin-panel" id="pp-pusage">' +
+        '<div style="font-size:15px;font-weight:700;margin-bottom:16px">Order History <span style="font-size:12px;color:var(--muted);font-weight:400">via API</span></div>' +
+        (deliveries.length===0
+          ? '<div style="background:var(--bg2);border:1px dashed var(--border);border-radius:14px;padding:40px;text-align:center;color:var(--muted);font-size:14px">No orders yet.<br><span style="font-size:12px;margin-top:6px;display:block">When your site calls POST /v1/deliveries they appear here.</span></div>'
+          : '<div style="display:grid;gap:8px">' + deliveries.map(function(d) {
+              var SC2={pending_approval:"#d97706",approved:"var(--blue)",dispatched:"var(--blue)",delivered:"var(--green)",failed:"#ef4444",rejected:"#6b7280"};
+              var sc=SC2[d.status]||"var(--muted)";
+              var date=d.createdAt&&d.createdAt.toDate?d.createdAt.toDate().toLocaleString([],{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}):"";
+              var items=(d.items||[]).map(function(i){return i.name;}).join(", ")||"—";
+              return '<div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px">' +
+                '<div style="flex:1;min-width:0">' +
+                  '<div style="font-weight:600;font-size:14px">'+(d.customerName||"—")+'</div>' +
+                  '<div style="font-size:12px;color:var(--muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+items+'</div>' +
+                  '<div style="font-size:11px;color:var(--dim);margin-top:2px">#'+d._id.slice(0,10).toUpperCase()+(date?' · '+date:'')+'</div>' +
+                '</div>' +
+                '<span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px;white-space:nowrap;background:'+sc.replace("var(--","rgba(").replace(")",",0.1)")+';color:'+sc+'">'+(d.status||"").replace(/_/g," ")+'</span>' +
+              '</div>';
+            }).join("") + '</div>'
+        ) +
+      '</div>' +
+
+      // Docs panel
+      '<div class="admin-panel" id="pp-pdocs">' + renderApiDocs() + '</div>' +
+
+      '</div>';
+
+  } catch(e) {
+    wrap.innerHTML = '<div style="max-width:900px;margin:0 auto;padding:32px 24px;color:#ef4444">Error: '+e.message+'</div>';
+  }
+};
+
+function renderApiKeysList(keys) {
+  if (!keys.length) {
+    return '<div style="background:var(--bg2);border:1px dashed var(--border);border-radius:14px;padding:40px;text-align:center;color:var(--muted);font-size:14px">No API keys yet.<br><button onclick="partnerGenerateKey()" style="margin-top:14px;padding:9px 20px;background:var(--blue);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font)">Generate your first key</button></div>';
+  }
+  return '<div style="display:grid;gap:10px">' + keys.map(function(k) {
+    var maskedKey = k.key ? (k.key.slice(0,8) + "••••••••••••••••••••••••••••" + k.key.slice(-4)) : "••••••••";
+    return '<div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px 20px">' +
+      '<div style="display:flex;align-items:flex-start;gap:12px">' +
+        '<div style="flex:1;min-width:0">' +
+          '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">' +
+            '<span style="font-size:13px;font-weight:700">'+(k.label||"API Key")+'</span>' +
+            (k.active
+              ? '<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:5px;background:rgba(22,163,74,.1);color:#15803d">Active</span>'
+              : '<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:5px;background:rgba(239,68,68,.1);color:#ef4444">Revoked</span>') +
+          '</div>' +
+          '<div style="display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 14px">' +
+            '<code id="kv-'+k._docId+'" style="flex:1;font-size:12px;font-family:monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted)">'+maskedKey+'</code>' +
+            '<button onclick="revealKey(\''+k._docId+'\',\''+k.key+'\')" style="background:none;border:none;cursor:pointer;color:var(--blue);font-size:12px;font-weight:600;font-family:var(--font);flex-shrink:0">Show</button>' +
+            '<button onclick="copyApiKey(\''+k.key+'\')" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:12px;font-weight:600;font-family:var(--font);flex-shrink:0">Copy</button>' +
+          '</div>' +
+          '<div style="font-size:11px;color:var(--dim);margin-top:8px">Station: <strong>'+(k.stationId||"—")+'</strong>'+(k.createdAt&&k.createdAt.toDate?' · '+k.createdAt.toDate().toLocaleDateString():'')+'</div>' +
+        '</div>' +
+        (k.active?'<button data-kid="'+k._docId+'" onclick="revokeApiKey(this.dataset.kid)" style="padding:7px 14px;border-radius:9px;background:rgba(239,68,68,.08);color:#ef4444;border:1px solid rgba(239,68,68,.2);font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font);flex-shrink:0;margin-top:2px">Revoke</button>':'')+
+      '</div>' +
+    '</div>';
+  }).join("") + '</div>';
+}
+
+function renderApiDocs() {
+  return '<div style="max-width:680px">' +
+    '<div style="margin-bottom:20px"><div style="font-size:14px;font-weight:700;margin-bottom:6px">Base URL</div>' +
+    '<code style="display:block;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13px;color:var(--blue)">http://localhost:3001</code></div>' +
+
+    apiDocCard("POST","/v1/deliveries","Place a delivery order",
+      '{\n  "customerName": "John Smith",\n  "customerPhone": "555-0192",\n  "deliveryAddress": "123 Main St, Plano TX 75024",\n  "items": [{ "name": "DeWalt Drill", "qty": 1 }],\n  "notes": "Leave at front door"\n}',
+      '{\n  "deliveryId": "abc123xyz",\n  "status": "pending_approval",\n  "message": "Awaiting Droveia approval"\n}') +
+
+    apiDocCard("GET","/v1/deliveries/:id","Check order status",null,
+      '{\n  "deliveryId": "abc123xyz",\n  "status": "dispatched",\n  "customerName": "John Smith"\n}') +
+
+    apiDocCard("GET","/v1/deliveries","List your last 50 orders",null,
+      '{\n  "deliveries": [{ "deliveryId": "...", "status": "delivered" }]\n}') +
+
+    '<div style="background:var(--blue-dim);border:1px solid var(--blue-mid);border-radius:12px;padding:16px 18px;margin-top:16px">' +
+      '<div style="font-size:13px;font-weight:700;color:var(--blue);margin-bottom:6px">Authentication</div>' +
+      '<div style="font-size:13px;color:var(--text2);margin-bottom:8px">Include your API key as a header on every request:</div>' +
+      '<code style="display:block;background:var(--bg2);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--blue)">x-api-key: drv_your_key_here</code>' +
+    '</div>' +
+
+    '<div style="background:var(--amber-dim,rgba(217,119,6,.08));border:1px solid rgba(217,119,6,.2);border-radius:12px;padding:16px 18px;margin-top:10px">' +
+      '<div style="font-size:13px;font-weight:700;color:var(--amber,#d97706);margin-bottom:4px">Status flow</div>' +
+      '<div style="font-size:13px;color:var(--text2);line-height:1.7">pending_approval → approved → dispatching → dispatched → delivered<br><span style="font-size:12px;color:var(--muted)">Every order needs Droveia approval before the drone dispatches.</span></div>' +
+    '</div>' +
+  '</div>';
+}
+
+function apiDocCard(method, path, desc, body, resp) {
+  var mc = method==="GET"?"#15803d":method==="POST"?"#1d4ed8":"#b91c1c";
+  return '<div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:12px">' +
+    '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">' +
+      '<span style="font-size:11px;font-weight:800;padding:3px 9px;border-radius:5px;background:'+mc+'20;color:'+mc+';font-family:monospace">'+method+'</span>' +
+      '<code style="font-size:13px;font-weight:600;color:var(--text)">'+path+'</code>' +
+    '</div>' +
+    '<div style="font-size:13px;color:var(--muted);margin-bottom:10px">'+desc+'</div>' +
+    (body?'<div style="font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Request body</div><pre style="background:var(--bg3);border-radius:8px;padding:12px;font-size:12px;overflow-x:auto;margin:0 0 10px;color:var(--text2)">'+body+'</pre>':'') +
+    '<div style="font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Response</div>' +
+    '<pre style="background:var(--bg3);border-radius:8px;padding:12px;font-size:12px;overflow-x:auto;margin:0;color:var(--text2)">'+resp+'</pre>' +
+  '</div>';
+}
+
+function partnerApplyHTML() {
+  return '<div style="max-width:640px;margin:60px auto;padding:0 24px">' +
+    '<div style="text-align:center;margin-bottom:32px">' +
+      '<div style="font-size:40px;margin-bottom:12px">🚁</div>' +
+      '<h2 style="font-size:26px;font-weight:800;letter-spacing:-.02em;margin-bottom:8px">Become a Droveia Partner</h2>' +
+      '<p style="font-size:15px;color:var(--muted);line-height:1.6">List your inventory, get drone delivery, earn 90% of every rental.</p>' +
+    '</div>' +
+    '<div style="background:var(--bg2);border:1px solid var(--border);border-radius:18px;padding:32px">' +
+      '<div id="partner-apply-form">' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">' +
+          '<div><label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px">Business Name</label><input id="pa-name" class="form-input" placeholder="TexTool Rentals" style="width:100%;box-sizing:border-box"></div>' +
+          '<div><label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px">Contact Email</label><input id="pa-email" class="form-input" value="'+(currentUser?currentUser.email:"")+'" style="width:100%;box-sizing:border-box"></div>' +
+        '</div>' +
+        '<div style="margin-bottom:14px"><label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px">What do you rent/sell?</label><input id="pa-inv" class="form-input" placeholder="Power tools, cameras, AV equipment..." style="width:100%;box-sizing:border-box"></div>' +
+        '<div style="margin-bottom:20px"><label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px">Notes</label><textarea id="pa-notes" class="form-input" rows="3" placeholder="Location, inventory size, questions..." style="width:100%;box-sizing:border-box;resize:vertical"></textarea></div>' +
+        '<button onclick="submitPartnerApply()" class="btn-primary" style="width:100%">Submit Application</button>' +
+      '</div>' +
+      '<div id="partner-apply-success" style="display:none;text-align:center;padding:24px 0">' +
+        '<div style="font-size:40px;margin-bottom:12px">🤝</div>' +
+        '<div style="font-weight:800;font-size:18px;margin-bottom:8px">Application received!</div>' +
+        '<div style="font-size:14px;color:var(--muted)">We\'ll reach out within 48 hours.</div>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+window.submitPartnerApply = async function() {
+  var name = (el("pa-name")||{}).value.trim();
+  var email = (el("pa-email")||{}).value.trim();
+  var inv = (el("pa-inv")||{}).value.trim();
+  var notes = (el("pa-notes")||{}).value.trim();
+  if (!name||!email) { showToast("Fill in name and email"); return; }
+  var fb=window._fb;
+  try {
+    await fb.addDoc(fb.collection(fb.db,"partnerApplications"),{name,email,inventory:inv,notes,status:"pending",createdAt:fb.serverTimestamp()});
+    el("partner-apply-form").style.display="none";
+    el("partner-apply-success").style.display="block";
+    showToast("Application submitted!");
+  } catch(e){showToast("Error: "+e.message);}
+};
+
+window.partnerApiTab = function(btn) {
+  var panel = btn.getAttribute("data-pp");
+  document.querySelectorAll(".admin-tab").forEach(function(b){ b.classList.remove("active"); });
+  document.querySelectorAll("[id^='pp-']").forEach(function(p){ p.classList.remove("active"); });
+  btn.classList.add("active");
+  var pg = el("pp-"+panel); if (pg) pg.classList.add("active");
+};
+
+window.revealKey = function(docId, key) {
+  var span = el("kv-"+docId); if (!span) return;
+  if (span.dataset.r==="1") {
+    span.textContent = key.slice(0,8)+"••••••••••••••••••••••••••••"+key.slice(-4);
+    span.style.color="var(--muted)"; span.dataset.r="0";
+  } else {
+    span.textContent = key; span.style.color="var(--blue)"; span.dataset.r="1";
+  }
+};
+
+window.copyApiKey = function(key) {
+  if (navigator.clipboard) navigator.clipboard.writeText(key).catch(function(){});
+  showToast("✓ API key copied!");
+};
+
+window.revokeApiKey = async function(docId) {
+  showConfirm({ title:"Revoke API Key?", msg:"Any website using this key stops working immediately.", okLabel:"Revoke", color:"red",
+    onOk: async function() {
+      var fb=window._fb;
+      try {
+        await fb.updateDoc(fb.doc(fb.db,"apiKeys",docId),{active:false,revokedAt:fb.serverTimestamp()});
+        showToast("Key revoked"); renderPartnerApiPage();
+      } catch(e){showToast("Error: "+e.message);}
+    }
+  });
+};
+
+window.partnerGenerateKey = async function() {
+  var label = prompt("Label for this key:", "Production website");
+  if (label===null) return;
+  if (!label.trim()) label="API Key";
+  var fb=window._fb; if (!fb) return;
+  try {
+    var arr=new Uint8Array(32); crypto.getRandomValues(arr);
+    var key="drv_"+Array.from(arr).map(function(b){return b.toString(16).padStart(2,"0");}).join("").slice(0,40);
+    var pSnap=await fb.getDocs(fb.query(fb.collection(fb.db,"partners"),fb.where("email","==",currentUser.email)));
+    var pd=pSnap.empty?{}:pSnap.docs[0].data();
+    await fb.setDoc(fb.doc(fb.db,"apiKeys",key),{
+      key, label:label.trim(),
+      partnerEmail:currentUser.email,
+      partnerName:pd.name||currentUser.email,
+      stationId:pd.stationId||("station-"+currentUser.email.split("@")[0]),
+      active:true,
+      createdAt:fb.serverTimestamp()
+    });
+    showToast("✓ API key generated!"); renderPartnerApiPage();
+  } catch(e){showToast("Error: "+e.message);}
+};
+
+
 // ── Boot ──────────────────────────────────────────────────────────────────────
 renderCatIcons();
 
-// Load live inventory from Firebase Realtime DB - renders tools once loaded
+// Load live inventory from Firebase Realtime DB — renders tools once loaded
 loadToolsFromRTDB();
 // Auto-refresh inventory every 60 seconds
 setInterval(loadToolsFromRTDB, 60000);
@@ -4892,7 +4297,7 @@ if (window._fbReady) {
   document.addEventListener("fbready", startApp, {once:true});
 }
 
-// Hash routing - open admin page if #admin in URL
+// Hash routing — open admin page if #admin in URL
 if (sessionStorage.getItem("openAdmin") === "1") {
   sessionStorage.removeItem("openAdmin");
   window._openAdminOnAuth = true;
@@ -4976,7 +4381,10 @@ if (_savedPage && _savedPage !== "admin") {
   </div>
 </div>
 
-
+  <button class="theme-fab" id="theme-toggle" onclick="toggleTheme()" title="Toggle dark/light mode">
+    <svg id="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+    <svg id="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+  </button>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 
 
@@ -5016,146 +4424,12 @@ if (_savedPage && _savedPage !== "admin") {
     </button>
     <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:10px">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-      <span style="font-size:11px;color:var(--muted)">Secured by Stripe - test mode</span>
+      <span style="font-size:11px;color:var(--muted)">Secured by Stripe — test mode</span>
     </div>
   </div>
 </div>
 
-<!-- ── ONBOARDING OVERLAY ── -->
-<div id="onboarding-overlay" class="modal-overlay hidden" style="z-index:5000;align-items:center;justify-content:center">
-  <div style="background:#fff;border-radius:20px;padding:36px 32px;max-width:420px;width:100%;position:relative;box-shadow:0 24px 80px rgba(0,0,0,.18)">
-    <div id="onboard-steps">
-      <div class="onboard-step" id="onboard-step-1">
-        <div style="font-size:48px;margin-bottom:16px">&#x1F681;</div>
-        <h2 style="font-size:22px;font-weight:800;letter-spacing:-.02em;margin-bottom:10px">Welcome to Droveia</h2>
-        <p style="font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:24px">Rent professional drones and tools delivered by drone directly to your campus location, in minutes.</p>
-        <button class="btn-primary" style="width:100%" onclick="onboardNext(2)">Get Started &rarr;</button>
-      </div>
-      <div class="onboard-step" id="onboard-step-2" style="display:none">
-        <div style="font-size:48px;margin-bottom:16px">&#x1F4CD;</div>
-        <h2 style="font-size:22px;font-weight:800;letter-spacing:-.02em;margin-bottom:10px">Set Your Drop Zone</h2>
-        <p style="font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:24px">Pin exactly where you want the drone to land &mdash; your backyard, rooftop, or open space. Set it once in your account settings.</p>
-        <button class="btn-primary" style="width:100%" onclick="onboardNext(3)">Next &rarr;</button>
-        <button style="width:100%;margin-top:10px;background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer" onclick="onboardNext(3)">Skip</button>
-      </div>
-      <div class="onboard-step" id="onboard-step-3" style="display:none">
-        <div style="font-size:48px;margin-bottom:16px">&#x26A1;</div>
-        <h2 style="font-size:22px;font-weight:800;letter-spacing:-.02em;margin-bottom:10px">Rent in 60 Seconds</h2>
-        <p style="font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:24px">Browse tools, pick your rental duration, checkout &mdash; your gear arrives by drone. Return it the same way when done.</p>
-        <button class="btn-primary" style="width:100%" onclick="closeOnboarding()">Start Browsing &#x1F389;</button>
-      </div>
-    </div>
-    <div style="display:flex;justify-content:center;gap:6px;margin-top:20px">
-      <div class="onboard-dot active" id="odot-1"></div>
-      <div class="onboard-dot" id="odot-2"></div>
-      <div class="onboard-dot" id="odot-3"></div>
-    </div>
-  </div>
-</div>
-
-<!-- WAITLIST OVERLAY -->
-<div id="waitlist-overlay" class="modal-overlay hidden" onclick="closeWaitlist(event)" style="z-index:5000">
-  <div style="background:#fff;border-radius:20px;padding:32px;max-width:380px;width:100%;position:relative;box-shadow:0 24px 80px rgba(0,0,0,.18)" onclick="event.stopPropagation()">
-    <button class="modal-close" onclick="el('waitlist-overlay').classList.add('hidden')" style="position:absolute;top:16px;right:16px">&#x2715;</button>
-    <div style="font-size:40px;margin-bottom:12px">&#x1F514;</div>
-    <h2 style="font-size:20px;font-weight:800;letter-spacing:-.02em;margin-bottom:8px">Join the Waitlist</h2>
-    <p style="font-size:13px;color:var(--text2);margin-bottom:20px;line-height:1.5">We'll notify you the moment <strong id="waitlist-tool-name"></strong> becomes available again.</p>
-    <button class="btn-primary" style="width:100%" onclick="submitWaitlist()" id="waitlist-submit-btn">Notify Me When Available</button>
-    <p id="waitlist-success" style="display:none;text-align:center;color:var(--green);font-size:14px;font-weight:600;margin-top:12px">&#x2713; You're on the list!</p>
-  </div>
-</div>
-
-<style>
-.onboard-dot{width:8px;height:8px;border-radius:50%;background:var(--border);transition:.2s}
-.onboard-dot.active{background:var(--blue);width:20px;border-radius:4px}
-</style>
-
-<!-- PARTNERS PAGE -->
-<div class="page" id="page-partners" style="min-height:calc(100vh - var(--nav-h));padding-bottom:80px">
-  <div style="background:linear-gradient(135deg,#0a0a0a 0%,#1a1a2e 100%);padding:60px 0 50px;text-align:center;color:#fff">
-    <div class="container">
-      <div style="display:inline-flex;align-items:center;gap:7px;background:rgba(26,110,240,.2);border:1px solid rgba(26,110,240,.35);border-radius:20px;padding:6px 14px;font-size:12px;font-weight:600;color:#7eb8ff;margin-bottom:18px;letter-spacing:.04em">BECOME A PARTNER</div>
-      <h1 style="font-size:clamp(32px,4vw,52px);font-weight:800;letter-spacing:-.03em;margin-bottom:16px">Grow your store with<br><span style="background:linear-gradient(135deg,#1a6ef0,#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">drone delivery</span></h1>
-      <p style="font-size:16px;color:rgba(255,255,255,.6);max-width:520px;margin:0 auto 32px;line-height:1.7">List your inventory on Droveia and reach students across campus. We handle the fleet, you handle the gear.</p>
-      <div style="display:flex;justify-content:center;gap:24px;flex-wrap:wrap;margin-bottom:40px">
-        <div style="text-align:center"><div style="font-size:28px;font-weight:800;color:#fff">90%</div><div style="font-size:12px;color:rgba(255,255,255,.45);margin-top:2px">Revenue share</div></div>
-        <div style="width:1px;background:rgba(255,255,255,.1)"></div>
-        <div style="text-align:center"><div style="font-size:28px;font-weight:800;color:#fff">$0</div><div style="font-size:12px;color:rgba(255,255,255,.45);margin-top:2px">Upfront cost</div></div>
-        <div style="width:1px;background:rgba(255,255,255,.1)"></div>
-        <div style="text-align:center"><div style="font-size:28px;font-weight:800;color:#fff">24h</div><div style="font-size:12px;color:rgba(255,255,255,.45);margin-top:2px">Onboarding time</div></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="container" style="max-width:900px;margin:0 auto;padding:48px 24px 0">
-    <!-- How it works -->
-    <h2 style="font-size:20px;font-weight:800;letter-spacing:-.02em;margin-bottom:20px">How it works</h2>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:48px">
-      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:22px 18px">
-        <div style="font-size:28px;margin-bottom:10px">&#x1F4E6;</div>
-        <div style="font-weight:700;font-size:15px;margin-bottom:6px">List Your Inventory</div>
-        <div style="font-size:13px;color:var(--muted);line-height:1.6">Submit your tools and equipment. We review and approve listings within 24 hours.</div>
-      </div>
-      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:22px 18px">
-        <div style="font-size:28px;margin-bottom:10px">&#x1F681;</div>
-        <div style="font-weight:700;font-size:15px;margin-bottom:6px">We Handle Delivery</div>
-        <div style="font-size:13px;color:var(--muted);line-height:1.6">Our drone fleet picks up from your location and delivers directly to students on campus.</div>
-      </div>
-      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:22px 18px">
-        <div style="font-size:28px;margin-bottom:10px">&#x1F4B0;</div>
-        <div style="font-weight:700;font-size:15px;margin-bottom:6px">Earn Per Rental</div>
-        <div style="font-size:13px;color:var(--muted);line-height:1.6">You earn 90% of every rental. Payouts processed weekly directly to your account.</div>
-      </div>
-    </div>
-
-    <!-- Application form -->
-    <div style="background:#fff;border:1px solid var(--border);border-radius:18px;padding:32px;box-shadow:0 4px 24px rgba(0,0,0,.06)">
-      <h2 style="font-size:20px;font-weight:800;letter-spacing:-.02em;margin-bottom:6px">Apply to Partner</h2>
-      <p style="font-size:14px;color:var(--muted);margin-bottom:24px">Fill out the form and we'll be in touch within 48 hours.</p>
-      <div id="partner-form-wrap">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
-          <div>
-            <label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px">Business / Store Name</label>
-            <input id="pf-name" class="form-input" placeholder="e.g. Campus Tech Lab" style="width:100%;box-sizing:border-box">
-          </div>
-          <div>
-            <label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px">Contact Email</label>
-            <input id="pf-email" class="form-input" type="email" placeholder="you@store.com" style="width:100%;box-sizing:border-box">
-          </div>
-        </div>
-        <div style="margin-bottom:14px">
-          <label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px">What do you sell / rent?</label>
-          <input id="pf-inventory" class="form-input" placeholder="e.g. Drones, cameras, AV equipment, power tools..." style="width:100%;box-sizing:border-box">
-        </div>
-        <div style="margin-bottom:20px">
-          <label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px">Anything else you want us to know?</label>
-          <textarea id="pf-notes" class="form-input" rows="3" placeholder="Location, estimated inventory size, questions..." style="width:100%;box-sizing:border-box;resize:vertical"></textarea>
-        </div>
-        <div style="margin-bottom:20px">
-          <label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px">Company Logo URL <span style="font-weight:400">(optional)</span></label>
-          <input id="pf-logo-url" class="form-input" type="url" placeholder="https://yoursite.com/logo.png" style="width:100%;box-sizing:border-box" oninput="previewPartnerLogoUrl(this.value)">
-          <div id="pf-logo-preview-wrap" style="display:none;margin-top:10px;padding:10px;background:var(--bg3);border-radius:10px;border:1px solid var(--border);text-align:center">
-            <img id="pf-logo-preview" style="height:48px;max-width:160px;object-fit:contain;border-radius:6px" onerror="this.closest('#pf-logo-preview-wrap').style.display='none'">
-          </div>
-        </div>
-        <button class="btn-primary" style="width:100%" onclick="submitPartnerApp()">Submit Application</button>
-      </div>
-      <div id="partner-form-success" style="display:none;text-align:center;padding:24px 0">
-        <div style="font-size:40px;margin-bottom:12px">&#x1F91D;</div>
-        <div style="font-weight:800;font-size:18px;margin-bottom:8px">Application received!</div>
-        <div style="font-size:14px;color:var(--muted)">We'll reach out to the email you provided within 48 hours.</div>
-      </div>
-    </div>
-
-    <!-- Active partners section -->
-    <div style="margin-top:40px">
-      <h2 style="font-size:20px;font-weight:800;letter-spacing:-.02em;margin-bottom:16px">Current Partners</h2>
-      <div id="partners-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px">
-        <div style="text-align:center;padding:32px;color:var(--muted);font-size:13px;grid-column:1/-1">Loading partners...</div>
-      </div>
-    </div>
-  </div>
-</div>
+<div class="page" id="page-api" style="min-height:calc(100vh - var(--nav-h))"></div>
 
 </body>
 </html>

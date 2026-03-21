@@ -389,6 +389,45 @@ async function notifyChannel(client, channelId, payload) {
   }
 }
 
+// ── Notify channel ────────────────────────────────────────────────────────────
+
+async function addAdmin(interaction) {
+  await interaction.deferReply();
+  const id    = interaction.options.getInteger("id");
+  const tools = await getTools();
+  const idx   = tools.findIndex(t => t.id === id);
+
+  if (idx === -1) {
+    return interaction.editReply({ embeds: [
+      new EmbedBuilder().setColor(RED).setDescription(`No tool found with ID #${id}`)
+    ]});
+  }
+
+  const removed = tools.splice(idx, 1)[0];
+  await saveTools(tools);
+
+  await interaction.editReply({ embeds: [
+    new EmbedBuilder()
+      .setColor(RED)
+      .setTitle("Add Admin")
+      .setDescription(`**${removed.name}** has been removed from inventory.`)
+      .addFields({ name: "ID", value: `#${id}`, inline: true })
+      .setFooter({ text: `Removed by ${interaction.user.tag}` })
+      .setTimestamp()
+  ]});
+
+  await notifyChannel(interaction.client, process.env.INVENTORY_CHANNEL_ID, {
+    embeds: [
+      new EmbedBuilder()
+        .setColor(RED)
+        .setTitle("Tool Removed")
+        .setDescription(`**${removed.name}** (#${id}) removed by ${interaction.user.tag}`)
+        .setTimestamp()
+    ]
+  });
+}
+
+
 // ── Bot ready ─────────────────────────────────────────────────────────────────
 client.once("ready", async () => {
   console.log(`Droveia Bot online as ${client.user.tag}`);
@@ -398,6 +437,11 @@ client.once("ready", async () => {
 // ── Interaction handler ───────────────────────────────────────────────────────
 client.on("interactionCreate", async interaction => {
   if (!interaction.isChatInputCommand()) return;
+  if (!interaction.user.id == 1477674502660821143 || !interaction.user == 918558841929613333) {
+    const msg = { content: "You are not an admin!", ephemeral: true };
+    interaction.replied ? interaction.followUp(msg) : interaction.reply(msg);
+    retun;
+  }
   console.log(`/${interaction.commandName} by ${interaction.user.tag}`);
 
   try {

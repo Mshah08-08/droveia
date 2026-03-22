@@ -4146,65 +4146,73 @@ window.renderPartnerApiPage = async function() {
 };
 
 function renderApiKeysList(keys) {
-  // Only show the first active key (partners get 1 key)
   var activeKey = keys.find(function(k){ return k.active; }) || keys[0] || null;
 
   if (!activeKey) {
-    return '<div style="background:var(--bg2);border:2px dashed var(--border);border-radius:16px;padding:48px 32px;text-align:center">' +
-      '<div style="font-size:32px;margin-bottom:12px">🔑</div>' +
-      '<div style="font-weight:700;font-size:16px;margin-bottom:6px">No API key yet</div>' +
-      '<div style="font-size:13px;color:var(--muted);margin-bottom:20px">Generate your key to start accepting orders via API.</div>' +
-      '<button onclick="partnerGenerateKey()" style="padding:12px 28px;background:var(--blue);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font)">Generate API Key</button>' +
-    '</div>';
+    return [
+      '<div style="background:var(--bg2);border:2px dashed var(--border);border-radius:16px;padding:48px 32px;text-align:center">',
+        '<div style="font-size:32px;margin-bottom:12px">&#x1F511;</div>',
+        '<div style="font-weight:700;font-size:16px;margin-bottom:6px">No API key yet</div>',
+        '<div style="font-size:13px;color:var(--muted);margin-bottom:20px">Generate your key to start accepting orders via the API.</div>',
+        '<button onclick="partnerGenerateKey()" style="padding:12px 28px;background:var(--blue);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font)">Generate API Key</button>',
+      '</div>'
+    ].join('');
   }
 
   var k = activeKey;
-  var created = k.createdAt && k.createdAt.toDate ? k.createdAt.toDate().toLocaleDateString([],{month:"short",day:"numeric",year:"numeric"}) : "";
+  var created = k.createdAt && k.createdAt.toDate
+    ? k.createdAt.toDate().toLocaleDateString([],{month:'short',day:'numeric',year:'numeric'})
+    : '';
+  var masked = 'drv_' + Array(37).join('•');
+  var usageSnippet = k.key ? (k.key.slice(0,12) + '••••') : '';
+  var docId = k._docId || '';
 
-  return '<div style="background:var(--bg2);border:1.5px solid var(--border);border-radius:16px;overflow:hidden">' +
+  return [
+    '<div style="background:var(--bg2);border:1.5px solid var(--border);border-radius:16px;overflow:hidden">',
 
-    // Header bar
-    '<div style="padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px">' +
-      '<div style="display:flex;align-items:center;gap:10px">' +
-        '<div style="width:36px;height:36px;border-radius:10px;background:var(--blue-dim);display:flex;align-items:center;justify-content:center">' +
-          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.778 7.778 5.5 5.5 0 017.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>' +
-        '</div>' +
-        '<div>' +
-          '<div style="font-weight:700;font-size:14px">Production Key</div>' +
-          (created ? '<div style="font-size:11px;color:var(--muted)">Generated ' + created + '</div>' : '') +
-        '</div>' +
-      '</div>' +
-      '<span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px;background:rgba(22,163,74,.1);color:#15803d">● Active</span>' +
-    '</div>' +
+      // Header
+      '<div style="padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px">',
+        '<div style="display:flex;align-items:center;gap:10px">',
+          '<div style="width:36px;height:36px;border-radius:10px;background:var(--blue-dim);display:flex;align-items:center;justify-content:center">',
+            '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.778 7.778 5.5 5.5 0 017.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>',
+          '</div>',
+          '<div>',
+            '<div style="font-weight:700;font-size:14px">Production Key</div>',
+            created ? '<div style="font-size:11px;color:var(--muted)">Generated ' + created + '</div>' : '',
+          '</div>',
+        '</div>',
+        '<span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px;background:rgba(22,163,74,.1);color:#15803d">&#x25CF; Active</span>',
+      '</div>',
 
-    // Key display
-    '<div style="padding:20px 22px;border-bottom:1px solid var(--border)">' +
-      '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:8px">API Key</div>' +
-      '<div style="display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px 14px">' +
-        '<code id="pkey-display" style="flex:1;font-size:13px;font-family:monospace;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">drv_••••••••••••••••••••••••••••••••••••••••</code>' +
-        '<button onclick="partnerRevealKey('' + k.key + '')" id="pkey-reveal-btn" style="background:none;border:none;cursor:pointer;font-size:12px;font-weight:600;color:var(--blue);font-family:var(--font);white-space:nowrap;padding:0">Show</button>' +
-        '<div style="width:1px;height:16px;background:var(--border)"></div>' +
-        '<button onclick="partnerCopyKey('' + k.key + '')" style="background:none;border:none;cursor:pointer;font-size:12px;font-weight:600;color:var(--muted);font-family:var(--font);white-space:nowrap;padding:0;display:flex;align-items:center;gap:4px">' +
-          '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>' +
-          'Copy' +
-        '</button>' +
-      '</div>' +
-    '</div>' +
+      // Key row
+      '<div style="padding:20px 22px;border-bottom:1px solid var(--border)">',
+        '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:8px">API Key</div>',
+        '<div style="display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px 14px">',
+          '<code id="pkey-display" data-key="' + k.key + '" style="flex:1;font-size:13px;font-family:monospace;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + masked + '</code>',
+          '<button id="pkey-reveal-btn" onclick="partnerRevealKey()" style="background:none;border:none;cursor:pointer;font-size:12px;font-weight:600;color:var(--blue);font-family:var(--font);white-space:nowrap;padding:0 4px">Show</button>',
+          '<div style="width:1px;height:16px;background:var(--border)"></div>',
+          '<button onclick="partnerCopyKey()" style="background:none;border:none;cursor:pointer;font-size:12px;font-weight:600;color:var(--muted);font-family:var(--font);white-space:nowrap;padding:0 4px;display:flex;align-items:center;gap:4px">',
+            '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>',
+            'Copy',
+          '</button>',
+        '</div>',
+      '</div>',
 
-    // Usage info
-    '<div style="padding:16px 22px;border-bottom:1px solid var(--border);background:var(--surface)">' +
-      '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:6px">Usage</div>' +
-      '<code style="font-size:12px;color:var(--text2);font-family:monospace">x-api-key: ' + k.key.slice(0,16) + '••••</code>' +
-      '<div style="font-size:11px;color:var(--muted);margin-top:4px">Pass this header on every request to POST /v1/deliveries</div>' +
-    '</div>' +
+      // Usage hint
+      '<div style="padding:14px 22px;border-bottom:1px solid var(--border);background:var(--surface)">',
+        '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:5px">How to use</div>',
+        '<code style="font-size:12px;color:var(--text2);font-family:monospace">x-api-key: ' + usageSnippet + '</code>',
+        '<div style="font-size:11px;color:var(--muted);margin-top:3px">Add this header to every POST /v1/deliveries request</div>',
+      '</div>',
 
-    // Regenerate action
-    '<div style="padding:16px 22px;display:flex;align-items:center;justify-content:space-between;gap:12px">' +
-      '<div style="font-size:12px;color:var(--muted)">Need a new key? Regenerating will immediately invalidate the current one.</div>' +
-      '<button onclick="partnerRegenerateKey('' + k._docId + '')" style="padding:8px 16px;border-radius:9px;background:none;color:#ef4444;border:1px solid rgba(239,68,68,.25);font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font);white-space:nowrap;flex-shrink:0">Regenerate</button>' +
-    '</div>' +
+      // Regenerate
+      '<div style="padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:12px">',
+        '<div style="font-size:12px;color:var(--muted)">Regenerating immediately invalidates the current key.</div>',
+        '<button data-docid="' + docId + '" onclick="partnerRegenerateKey(this.dataset.docid)" style="padding:8px 16px;border-radius:9px;background:none;color:#ef4444;border:1px solid rgba(239,68,68,.25);font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font);white-space:nowrap;flex-shrink:0">Regenerate</button>',
+      '</div>',
 
-  '</div>';
+    '</div>'
+  ].join('');
 }
 window.partnerGenerateKey = async function() {
   var fb = window._fb; if (!fb || !currentUser) return;
@@ -4253,12 +4261,14 @@ async function _generateNewKey() {
   renderPartnerApiPage();
 }
 
-window.partnerRevealKey = function(key) {
+window.partnerRevealKey = function() {
   var display = document.getElementById("pkey-display");
   var btn = document.getElementById("pkey-reveal-btn");
   if (!display) return;
+  var key = display.dataset.key || "";
+  var masked = "drv_" + Array(37).join("•");
   if (display.dataset.revealed === "1") {
-    display.textContent = "drv_••••••••••••••••••••••••••••••••••••••••";
+    display.textContent = masked;
     display.style.color = "var(--muted)";
     display.dataset.revealed = "0";
     if (btn) btn.textContent = "Show";
@@ -4267,10 +4277,9 @@ window.partnerRevealKey = function(key) {
     display.style.color = "var(--blue)";
     display.dataset.revealed = "1";
     if (btn) btn.textContent = "Hide";
-    // Auto-hide after 30s
     setTimeout(function() {
       if (display && display.dataset.revealed === "1") {
-        display.textContent = "drv_••••••••••••••••••••••••••••••••••••••••";
+        display.textContent = masked;
         display.style.color = "var(--muted)";
         display.dataset.revealed = "0";
         if (btn) btn.textContent = "Show";
@@ -4279,7 +4288,10 @@ window.partnerRevealKey = function(key) {
   }
 };
 
-window.partnerCopyKey = function(key) {
+window.partnerCopyKey = function() {
+  var display = document.getElementById("pkey-display");
+  if (!display) return;
+  var key = display.dataset.key || "";
   if (navigator.clipboard) navigator.clipboard.writeText(key).catch(function(){});
   showToast("✓ API key copied!");
 };

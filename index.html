@@ -2510,12 +2510,6 @@ async function renderAdmin() {
   wrap.innerHTML =
     '<div class="admin-header">' +
       '<div><div class="admin-title">Admin Dashboard</div><div class="admin-subtitle">Droveia inventory &amp; order management</div></div>' +
-      '<div style="display:flex;gap:10px;flex-wrap:wrap">' +
-        '<button class="admin-add-btn" id="admin-header-add-btn" onclick="adminHeaderAdd()">' +
-          '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>' +
-          '<span id="admin-header-add-label">Add Tool</span>' +
-        '</button>' +
-      '</div>' +
     '</div>' +
 
 
@@ -2528,6 +2522,12 @@ async function renderAdmin() {
     '</div>' +
 
     '<div class="admin-panel active" id="admin-panel-inventory">' +
+      '<div style="display:flex;justify-content:flex-end;margin-bottom:16px">' +
+        '<button class="admin-add-btn" onclick="adminShowAddForm()">' +
+          '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>' +
+          'Add Tool' +
+        '</button>' +
+      '</div>' +
       '<div id="admin-add-form-wrap"></div>' +
       '<div id="admin-edit-form-wrap"></div>' +
       adminInventoryTable() +
@@ -2539,6 +2539,12 @@ async function renderAdmin() {
       '<div id="admin-deliveries-content"><div style="color:var(--muted);font-size:14px;padding:20px">Loading...</div></div>' +
     '</div>' +
     '<div class="admin-panel" id="admin-panel-partners">' +
+      '<div style="display:flex;justify-content:flex-end;margin-bottom:16px">' +
+        '<button class="admin-add-btn" onclick="adminShowAddPartnerForm()">' +
+          '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>' +
+          'Add Partner' +
+        '</button>' +
+      '</div>' +
       '<div id="admin-partners-content"><div style="color:var(--muted);font-size:14px;padding:20px">Loading...</div></div>' +
     '</div>';
 
@@ -2557,8 +2563,6 @@ function adminSwitchTab(btn) {
   if (panel === "deliveries") adminLoadDeliveries();
   if (panel === "partners") if (panel === "partners") adminLoadPartners();
   // Update header add button label
-  var addLabel = el("admin-header-add-label");
-  if (addLabel) addLabel.textContent = panel === "partners" ? "Add Partner" : "Add Tool";
 }
 
 function adminInventoryTable() {
@@ -2750,16 +2754,6 @@ window.adminSaveNewPartner = async function() {
   }
 };
 
-window.adminHeaderAdd = function() {
-  // Figure out which tab is active
-  var activeTab = document.querySelector(".admin-tab.active");
-  var panel = activeTab ? activeTab.getAttribute("data-panel") : "inventory";
-  if (panel === "partners") {
-    adminShowAddPartnerForm();
-  } else {
-    adminShowAddForm();
-  }
-};
 
 window.adminShowAddForm = function() {
   var wrap = el("admin-add-form-wrap");

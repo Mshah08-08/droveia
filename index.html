@@ -3519,7 +3519,7 @@ function startApp() {
       var apiNav = el("nav-api");
       if (apiNav) {
         apiNav.style.display = (_isPrt || _isAdm) ? "" : "none";
-        apiNav.textContent = _isPrt && !_isAdm ? "Dashboard" : "Dashboard";
+        apiNav.textContent = "Partner";
       }
       var mApiNav = el("mnav-api");
       if (mApiNav) mApiNav.style.display = (_isPrt || _isAdm) ? "" : "none";
@@ -3550,7 +3550,6 @@ function startApp() {
       var apiNav = el("nav-api");
       if (apiNav) apiNav.style.display = "none";
       var mApiNav = el("mnav-api"); if (mApiNav) mApiNav.style.display = "none";
-      var _dashSec = el("home-dashboard-section"); if (_dashSec) _dashSec.style.display = "none";
     }
   });
 }

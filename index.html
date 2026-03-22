@@ -4072,29 +4072,35 @@ window.renderPartnerApiPage = async function() {
   var fb = window._fb; if (!fb) return;
 
   try {
-    // Check if partner
-    var pSnap = await fb.getDocs(fb.query(fb.collection(fb.db,"partners"),fb.where("email","==",currentUser.email)));
-    var isPartner = !pSnap.empty;
+    // Use cached partner status from auth — avoids re-querying partners collection
     var isAdm = typeof checkAdmin === "function" && checkAdmin();
+    var isPartner = window._isPartnerUser || false;
 
     if (!isPartner && !isAdm) {
-      // Show application form instead
       wrap.innerHTML = partnerApplyHTML();
       return;
     }
 
-    var partnerDoc = isPartner ? Object.assign({_id:pSnap.docs[0].id}, pSnap.docs[0].data()) : {name:"Admin",email:currentUser.email};
+    // Load partner doc (for name/stationId)
+    var partnerDoc = {name: currentUser.displayName || currentUser.email, email: currentUser.email};
+    try {
+      var pSnap = await fb.getDocs(fb.query(fb.collection(fb.db,"partners"),fb.where("email","==",currentUser.email)));
+      if (!pSnap.empty) partnerDoc = Object.assign({_id:pSnap.docs[0].id}, pSnap.docs[0].data());
+    } catch(e) { console.warn("partners read:", e.message); }
 
-    // Load API keys
-    var keysSnap = await fb.getDocs(fb.query(fb.collection(fb.db,"apiKeys"),fb.where("partnerEmail","==",currentUser.email)));
-    var apiKeys = keysSnap.docs.map(function(d){ return Object.assign({_docId:d.id},d.data()); });
+    // Load API keys — each partner can read their own keys
+    var apiKeys = [];
+    try {
+      var keysSnap = await fb.getDocs(fb.query(fb.collection(fb.db,"apiKeys"),fb.where("partnerEmail","==",currentUser.email)));
+      apiKeys = keysSnap.docs.map(function(d){ return Object.assign({_docId:d.id},d.data()); });
+    } catch(e) { console.warn("apiKeys read:", e.message); }
 
     // Load deliveries for this partner
-    var delivSnap;
+    var deliveries = [];
     try {
-      delivSnap = await fb.getDocs(fb.query(fb.collection(fb.db,"deliveries"),fb.where("partnerEmail","==",currentUser.email),fb.orderBy("createdAt","desc"),fb.limit(50)));
-    } catch(e) { delivSnap={docs:[]}; }
-    var deliveries = delivSnap.docs.map(function(d){return Object.assign({_id:d.id},d.data());});
+      var delivSnap = await fb.getDocs(fb.query(fb.collection(fb.db,"deliveries"),fb.where("partnerEmail","==",currentUser.email),fb.orderBy("createdAt","desc"),fb.limit(50)));
+      deliveries = delivSnap.docs.map(function(d){return Object.assign({_id:d.id},d.data());});
+    } catch(e) { console.warn("deliveries read:", e.message); }
 
     var totalD = deliveries.length;
     var pendingD = deliveries.filter(function(d){return d.status==="pending_approval";}).length;
@@ -4140,8 +4146,17 @@ window.renderPartnerApiPage = async function() {
 
       '</div>';
 
-  } catch(e) {
-    wrap.innerHTML = '<div style="max-width:900px;margin:0 auto;padding:32px 24px;color:#ef4444">Error: '+e.message+'</div>';
+    } catch(e) {
+    console.error("renderPartnerApiPage:", e);
+    wrap.innerHTML = [
+      '<div style="max-width:900px;margin:0 auto;padding:32px 24px">',
+        '<div style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:14px;padding:24px;text-align:center">',
+          '<div style="font-size:16px;font-weight:700;color:#ef4444;margin-bottom:6px">Something went wrong</div>',
+          '<div style="font-size:13px;color:var(--muted);margin-bottom:16px">' + e.message + '</div>',
+          '<button onclick="renderPartnerApiPage()" style="padding:9px 20px;background:var(--blue);color:#fff;border:none;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font)">Try Again</button>',
+        '</div>',
+      '</div>'
+    ].join('');
   }
 };
 

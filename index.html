@@ -2509,11 +2509,11 @@ async function renderAdmin() {
 
   wrap.innerHTML =
     '<div class="admin-header">' +
-      '<div><div class="admin-title">Admin Dashboard</div><div class="admin-subtitle">Droveia inventory & order management</div></div>' +
+      '<div><div class="admin-title">Admin Dashboard</div><div class="admin-subtitle">Droveia inventory &amp; order management</div></div>' +
       '<div style="display:flex;gap:10px;flex-wrap:wrap">' +
-        '<button class="admin-add-btn" onclick="adminShowAddForm()">' +
+        '<button class="admin-add-btn" id="admin-header-add-btn" onclick="adminHeaderAdd()">' +
           '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>' +
-          'Add Tool' +
+          '<span id="admin-header-add-label">Add Tool</span>' +
         '</button>' +
       '</div>' +
     '</div>' +
@@ -2556,6 +2556,9 @@ function adminSwitchTab(btn) {
   if (panel === "orders") adminLoadOrders();
   if (panel === "deliveries") adminLoadDeliveries();
   if (panel === "partners") if (panel === "partners") adminLoadPartners();
+  // Update header add button label
+  var addLabel = el("admin-header-add-label");
+  if (addLabel) addLabel.textContent = panel === "partners" ? "Add Partner" : "Add Tool";
 }
 
 function adminInventoryTable() {
@@ -2664,6 +2667,99 @@ function adminGetFormVals() {
     desc:   (el("af-desc")   || {}).value || "",
   };
 }
+
+window.adminShowAddPartnerForm = function() {
+  // Insert inline form at top of partners panel
+  var wrap = el("admin-partners-content");
+  if (!wrap) return;
+
+  // Toggle if already open
+  if (el("admin-add-partner-form")) {
+    el("admin-add-partner-form").remove();
+    return;
+  }
+
+  var form = document.createElement("div");
+  form.id = "admin-add-partner-form";
+  form.style.cssText = "background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:24px;margin-bottom:20px";
+  form.innerHTML = [
+    '<div style="font-size:15px;font-weight:700;margin-bottom:18px">Add Partner</div>',
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">',
+      '<div>',
+        '<label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:5px">Business Name *</label>',
+        '<input id="apf-name" class="form-input" placeholder="e.g. ABC Tool Rental" style="width:100%;box-sizing:border-box">',
+      '</div>',
+      '<div>',
+        '<label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:5px">Partner Email *</label>',
+        '<input id="apf-email" class="form-input" type="email" placeholder="partner@company.com" style="width:100%;box-sizing:border-box">',
+      '</div>',
+    '</div>',
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">',
+      '<div>',
+        '<label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:5px">Station ID</label>',
+        '<input id="apf-station" class="form-input" placeholder="e.g. station-dallas-01" style="width:100%;box-sizing:border-box">',
+      '</div>',
+      '<div>',
+        '<label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:5px">Logo URL (optional)</label>',
+        '<input id="apf-logo" class="form-input" placeholder="https://..." style="width:100%;box-sizing:border-box">',
+      '</div>',
+    '</div>',
+    '<div style="display:flex;gap:10px">',
+      '<button onclick="adminSaveNewPartner()" class="admin-save-btn">Add Partner</button>',
+      '<button onclick="el(\'admin-add-partner-form\').remove()" class="admin-cancel-btn">Cancel</button>',
+    '</div>'
+  ].join('');
+
+  wrap.insertBefore(form, wrap.firstChild);
+  el("apf-name").focus();
+};
+
+window.adminSaveNewPartner = async function() {
+  var name    = (el("apf-name")    || {}).value.trim();
+  var email   = (el("apf-email")   || {}).value.trim();
+  var station = (el("apf-station") || {}).value.trim();
+  var logo    = (el("apf-logo")    || {}).value.trim();
+
+  if (!name || !email) { showToast("Name and email are required"); return; }
+
+  var fb = window._fb; if (!fb) return;
+  var btn = document.querySelector("#admin-add-partner-form .admin-save-btn");
+  if (btn) { btn.disabled = true; btn.textContent = "Adding..."; }
+
+  try {
+    // Check if partner already exists
+    var existing = await fb.getDocs(fb.query(fb.collection(fb.db, "partners"), fb.where("email", "==", email)));
+    if (!existing.empty) { showToast("A partner with that email already exists"); if (btn) { btn.disabled = false; btn.textContent = "Add Partner"; } return; }
+
+    await fb.addDoc(fb.collection(fb.db, "partners"), {
+      name:      name,
+      email:     email,
+      stationId: station || ("station-" + email.split("@")[0]),
+      logoUrl:   logo || null,
+      status:    "active",
+      createdAt: fb.serverTimestamp()
+    });
+
+    var form = el("admin-add-partner-form");
+    if (form) form.remove();
+    showToast("✓ Partner added — " + name + " can now sign in and use the Partner dashboard");
+    adminLoadPartners();
+  } catch(e) {
+    showToast("Error: " + e.message);
+    if (btn) { btn.disabled = false; btn.textContent = "Add Partner"; }
+  }
+};
+
+window.adminHeaderAdd = function() {
+  // Figure out which tab is active
+  var activeTab = document.querySelector(".admin-tab.active");
+  var panel = activeTab ? activeTab.getAttribute("data-panel") : "inventory";
+  if (panel === "partners") {
+    adminShowAddPartnerForm();
+  } else {
+    adminShowAddForm();
+  }
+};
 
 window.adminShowAddForm = function() {
   var wrap = el("admin-add-form-wrap");

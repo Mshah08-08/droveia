@@ -1540,7 +1540,14 @@ function showPage(id) {
   sessionStorage.setItem("currentPage", id);
   qsa(".nav-link").forEach(function(l){ l.classList.remove("active"); });
   var nl = el("nav-"+id); if(nl) nl.classList.add("active");
-  if (id === "admin") { renderAdmin(); }
+  if (id === "admin") {
+    var _isAdm2 = typeof checkAdmin === "function" && checkAdmin();
+    var _isPrt2 = window._isPartnerUser || false;
+    if (!currentUser) { showAuth(); return; }
+    if (_isPrt2 && !_isAdm2) { renderPartnerApiPage(); return; }
+    renderAdmin();
+    return;
+  }
   if (id === "api") {
     // Only partners and admins can see this page
     var _adm = typeof checkAdmin === "function" && checkAdmin();
@@ -2533,9 +2540,8 @@ async function renderAdmin() {
     '<div class="admin-tabs" style="margin-bottom:24px">' +
       '<button class="admin-tab active" data-panel="inventory" onclick="adminSwitchTab(this)">Inventory</button>' +
       '<button class="admin-tab" data-panel="orders" onclick="adminSwitchTab(this)">Orders</button>' +
-      '<button class="admin-tab" data-panel="deliveries" onclick="adminSwitchTab(this)">API Deliveries'
-      + '<button class="admin-tab" data-panel="partners" onclick="adminSwitchTab(this)" id="admin-tab-partners">Partners</button> <span id="adlv-badge" style="display:none;background:#ef4444;color:#fff;font-size:9px;font-weight:800;padding:1px 5px;border-radius:10px;margin-left:2px"></span></button>' +
-      '<button class="admin-tab" data-panel="partners" onclick="adminSwitchTab(this)">Partners</button>' +
+      '<button class="admin-tab" data-panel="deliveries" onclick="adminSwitchTab(this)">API Deliveries <span id="adlv-badge" style="display:none;background:#ef4444;color:#fff;font-size:9px;font-weight:800;padding:1px 5px;border-radius:10px;margin-left:2px"></span></button>' +
+      '<button class="admin-tab" data-panel="partners" onclick="adminSwitchTab(this)" id="admin-tab-partners">Partners</button>' +
     '</div>' +
 
     '<div class="admin-panel active" id="admin-panel-inventory">' +
@@ -3919,7 +3925,8 @@ window.adminLoadDeliveries = async function() {
             '<div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;flex-shrink:0">' +
               '<span style="font-size:11px;font-weight:700;padding:4px 12px;border-radius:7px;white-space:nowrap;background:'+sc.replace("var(--","rgba(").replace(")",",0.1)")+';color:'+sc+'">'+(d.status||"").replace(/_/g," ")+'</span>' +
               (isPend
-                ? '<button data-did="'+d._id+'" onclick="adminApproveDelivery(this.dataset.did)" style="padding:7px 16px;border-radius:9px;background:rgba(22,163,74,.12);color:#15803d;border:1px solid rgba(22,163,74,.25);font-size:13px;font-weight:700;cursor:pointer">✓ Approve</button>' +
+                ? '<div style="font-size:11px;color:#d97706;font-weight:600;margin-top:6px">⏳ Waiting for partner to confirm package is in station</div>' +
+                  '<button data-did="'+d._id+'" onclick="adminForceApprove(this)" style="margin-top:6px;padding:5px 12px;border-radius:7px;background:var(--surface2);color:var(--muted);border:1px solid var(--border);font-size:11px;font-weight:600;cursor:pointer;font-family:var(--font)">Force approve</button>' +
                   '<button data-did="'+d._id+'" onclick="adminRejectDelivery(this.dataset.did)" style="padding:7px 16px;border-radius:9px;background:rgba(239,68,68,.08);color:#ef4444;border:1px solid rgba(239,68,68,.2);font-size:13px;font-weight:700;cursor:pointer">✕ Reject</button>'
                 : '') +
             '</div>' +
@@ -4046,8 +4053,14 @@ window.adminRejectPartnerApp = async function(btn) {
 // ═══════════════════════════════════════════════════════════════════════════
 
 window.renderPartnerApiPage = async function() {
+  // Make sure page-api is the active page (not page-admin)
+  document.querySelectorAll(".page").forEach(function(p){ p.classList.remove("active"); });
   var wrap = el("page-api");
   if (!wrap) return;
+  wrap.classList.add("active");
+  // Highlight nav
+  document.querySelectorAll(".nav-link").forEach(function(l){ l.classList.remove("active"); });
+  var nl = document.getElementById("nav-api"); if (nl) nl.classList.add("active");
 
   if (!currentUser) {
     wrap.innerHTML = '<div style="max-width:420px;margin:80px auto;text-align:center;padding:0 24px"><h2 style="font-size:22px;font-weight:800;margin-bottom:8px">Partner API</h2><p style="font-size:14px;color:var(--muted);margin-bottom:24px">Sign in with your partner account to manage API keys.</p><button class="btn-primary" onclick="showAuth()">Sign In</button></div>';
@@ -4104,8 +4117,8 @@ window.renderPartnerApiPage = async function() {
 
       // Tabs
       '<div class="admin-tabs" style="margin-bottom:24px">' +
-        '<button class="admin-tab active" data-pp="pkeys" onclick="partnerApiTab(this)">API Keys</button>' +
-        '<button class="admin-tab" data-pp="pusage" onclick="partnerApiTab(this)">Order History</button>' +
+        '<button class="admin-tab active" data-pp="pkeys" onclick="partnerApiTab(this)">API Key</button>' +
+        '<button class="admin-tab" data-pp="pusage" onclick="partnerApiTab(this)">Orders <span id="pp-pending-badge" style="display:none;background:#ef4444;color:#fff;font-size:9px;font-weight:800;padding:1px 6px;border-radius:10px;margin-left:3px"></span></button>' +
         '<button class="admin-tab" data-pp="pdocs" onclick="partnerApiTab(this)">Docs</button>' +
       '</div>' +
 
@@ -4120,27 +4133,9 @@ window.renderPartnerApiPage = async function() {
 
       // Usage panel
       '<div class="admin-panel" id="pp-pusage">' +
-        '<div style="font-size:15px;font-weight:700;margin-bottom:16px">Order History <span style="font-size:12px;color:var(--muted);font-weight:400">via API</span></div>' +
-        (deliveries.length===0
-          ? '<div style="background:var(--bg2);border:1px dashed var(--border);border-radius:14px;padding:40px;text-align:center;color:var(--muted);font-size:14px">No orders yet.<br><span style="font-size:12px;margin-top:6px;display:block">When your site calls POST /v1/deliveries they appear here.</span></div>'
-          : '<div style="display:grid;gap:8px">' + deliveries.map(function(d) {
-              var SC2={pending_approval:"#d97706",approved:"var(--blue)",dispatched:"var(--blue)",delivered:"var(--green)",failed:"#ef4444",rejected:"#6b7280"};
-              var sc=SC2[d.status]||"var(--muted)";
-              var date=d.createdAt&&d.createdAt.toDate?d.createdAt.toDate().toLocaleString([],{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}):"";
-              var items=(d.items||[]).map(function(i){return i.name;}).join(", ")||"—";
-              return '<div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px">' +
-                '<div style="flex:1;min-width:0">' +
-                  '<div style="font-weight:600;font-size:14px">'+(d.customerName||"—")+'</div>' +
-                  '<div style="font-size:12px;color:var(--muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+items+'</div>' +
-                  '<div style="font-size:11px;color:var(--dim);margin-top:2px">#'+d._id.slice(0,10).toUpperCase()+(date?' · '+date:'')+'</div>' +
-                '</div>' +
-                '<span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px;white-space:nowrap;background:'+sc.replace("var(--","rgba(").replace(")",",0.1)")+';color:'+sc+'">'+(d.status||"").replace(/_/g," ")+'</span>' +
-              '</div>';
-            }).join("") + '</div>'
-        ) +
+        renderPartnerOrders(deliveries) +
       '</div>' +
 
-      // Docs panel
       '<div class="admin-panel" id="pp-pdocs">' + renderApiDocs() + '</div>' +
 
       '</div>';
@@ -4151,174 +4146,257 @@ window.renderPartnerApiPage = async function() {
 };
 
 function renderApiKeysList(keys) {
-  if (!keys.length) {
-    return '<div style="background:var(--bg2);border:1px dashed var(--border);border-radius:14px;padding:40px;text-align:center;color:var(--muted);font-size:14px">No API keys yet.<br><button onclick="partnerGenerateKey()" style="margin-top:14px;padding:9px 20px;background:var(--blue);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font)">Generate your first key</button></div>';
-  }
-  return '<div style="display:grid;gap:10px">' + keys.map(function(k) {
-    var maskedKey = k.key ? (k.key.slice(0,8) + "••••••••••••••••••••••••••••" + k.key.slice(-4)) : "••••••••";
-    return '<div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px 20px">' +
-      '<div style="display:flex;align-items:flex-start;gap:12px">' +
-        '<div style="flex:1;min-width:0">' +
-          '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">' +
-            '<span style="font-size:13px;font-weight:700">'+(k.label||"API Key")+'</span>' +
-            (k.active
-              ? '<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:5px;background:rgba(22,163,74,.1);color:#15803d">Active</span>'
-              : '<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:5px;background:rgba(239,68,68,.1);color:#ef4444">Revoked</span>') +
-          '</div>' +
-          '<div style="display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 14px">' +
-            '<code id="kv-'+k._docId+'" style="flex:1;font-size:12px;font-family:monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted)">'+maskedKey+'</code>' +
-            '<button onclick="revealKey(\''+k._docId+'\',\''+k.key+'\')" style="background:none;border:none;cursor:pointer;color:var(--blue);font-size:12px;font-weight:600;font-family:var(--font);flex-shrink:0">Show</button>' +
-            '<button onclick="copyApiKey(\''+k.key+'\')" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:12px;font-weight:600;font-family:var(--font);flex-shrink:0">Copy</button>' +
-          '</div>' +
-          '<div style="font-size:11px;color:var(--dim);margin-top:8px">Station: <strong>'+(k.stationId||"—")+'</strong>'+(k.createdAt&&k.createdAt.toDate?' · '+k.createdAt.toDate().toLocaleDateString():'')+'</div>' +
-        '</div>' +
-        (k.active?'<button data-kid="'+k._docId+'" onclick="revokeApiKey(this.dataset.kid)" style="padding:7px 14px;border-radius:9px;background:rgba(239,68,68,.08);color:#ef4444;border:1px solid rgba(239,68,68,.2);font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font);flex-shrink:0;margin-top:2px">Revoke</button>':'')+
-      '</div>' +
+  // Only show the first active key (partners get 1 key)
+  var activeKey = keys.find(function(k){ return k.active; }) || keys[0] || null;
+
+  if (!activeKey) {
+    return '<div style="background:var(--bg2);border:2px dashed var(--border);border-radius:16px;padding:48px 32px;text-align:center">' +
+      '<div style="font-size:32px;margin-bottom:12px">🔑</div>' +
+      '<div style="font-weight:700;font-size:16px;margin-bottom:6px">No API key yet</div>' +
+      '<div style="font-size:13px;color:var(--muted);margin-bottom:20px">Generate your key to start accepting orders via API.</div>' +
+      '<button onclick="partnerGenerateKey()" style="padding:12px 28px;background:var(--blue);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font)">Generate API Key</button>' +
     '</div>';
-  }).join("") + '</div>';
-}
-
-function renderApiDocs() {
-  return '<div style="max-width:680px">' +
-    '<div style="margin-bottom:20px"><div style="font-size:14px;font-weight:700;margin-bottom:6px">Base URL</div>' +
-    '<code style="display:block;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13px;color:var(--blue)">http://localhost:3001</code></div>' +
-
-    apiDocCard("POST","/v1/deliveries","Place a delivery order",
-      '{\n  "customerName": "John Smith",\n  "customerPhone": "555-0192",\n  "deliveryAddress": "123 Main St, Plano TX 75024",\n  "items": [{ "name": "DeWalt Drill", "qty": 1 }],\n  "notes": "Leave at front door"\n}',
-      '{\n  "deliveryId": "abc123xyz",\n  "status": "pending_approval",\n  "message": "Awaiting Droveia approval"\n}') +
-
-    apiDocCard("GET","/v1/deliveries/:id","Check order status",null,
-      '{\n  "deliveryId": "abc123xyz",\n  "status": "dispatched",\n  "customerName": "John Smith"\n}') +
-
-    apiDocCard("GET","/v1/deliveries","List your last 50 orders",null,
-      '{\n  "deliveries": [{ "deliveryId": "...", "status": "delivered" }]\n}') +
-
-    '<div style="background:var(--blue-dim);border:1px solid var(--blue-mid);border-radius:12px;padding:16px 18px;margin-top:16px">' +
-      '<div style="font-size:13px;font-weight:700;color:var(--blue);margin-bottom:6px">Authentication</div>' +
-      '<div style="font-size:13px;color:var(--text2);margin-bottom:8px">Include your API key as a header on every request:</div>' +
-      '<code style="display:block;background:var(--bg2);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--blue)">x-api-key: drv_your_key_here</code>' +
-    '</div>' +
-
-    '<div style="background:var(--amber-dim,rgba(217,119,6,.08));border:1px solid rgba(217,119,6,.2);border-radius:12px;padding:16px 18px;margin-top:10px">' +
-      '<div style="font-size:13px;font-weight:700;color:var(--amber,#d97706);margin-bottom:4px">Status flow</div>' +
-      '<div style="font-size:13px;color:var(--text2);line-height:1.7">pending_approval → approved → dispatching → dispatched → delivered<br><span style="font-size:12px;color:var(--muted)">Every order needs Droveia approval before the drone dispatches.</span></div>' +
-    '</div>' +
-  '</div>';
-}
-
-function apiDocCard(method, path, desc, body, resp) {
-  var mc = method==="GET"?"#15803d":method==="POST"?"#1d4ed8":"#b91c1c";
-  return '<div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:12px">' +
-    '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">' +
-      '<span style="font-size:11px;font-weight:800;padding:3px 9px;border-radius:5px;background:'+mc+'20;color:'+mc+';font-family:monospace">'+method+'</span>' +
-      '<code style="font-size:13px;font-weight:600;color:var(--text)">'+path+'</code>' +
-    '</div>' +
-    '<div style="font-size:13px;color:var(--muted);margin-bottom:10px">'+desc+'</div>' +
-    (body?'<div style="font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Request body</div><pre style="background:var(--bg3);border-radius:8px;padding:12px;font-size:12px;overflow-x:auto;margin:0 0 10px;color:var(--text2)">'+body+'</pre>':'') +
-    '<div style="font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Response</div>' +
-    '<pre style="background:var(--bg3);border-radius:8px;padding:12px;font-size:12px;overflow-x:auto;margin:0;color:var(--text2)">'+resp+'</pre>' +
-  '</div>';
-}
-
-function partnerApplyHTML() {
-  return '<div style="max-width:640px;margin:60px auto;padding:0 24px">' +
-    '<div style="text-align:center;margin-bottom:32px">' +
-      '<div style="font-size:40px;margin-bottom:12px">🚁</div>' +
-      '<h2 style="font-size:26px;font-weight:800;letter-spacing:-.02em;margin-bottom:8px">Become a Droveia Partner</h2>' +
-      '<p style="font-size:15px;color:var(--muted);line-height:1.6">List your inventory, get drone delivery, earn 90% of every rental.</p>' +
-    '</div>' +
-    '<div style="background:var(--bg2);border:1px solid var(--border);border-radius:18px;padding:32px">' +
-      '<div id="partner-apply-form">' +
-        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">' +
-          '<div><label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px">Business Name</label><input id="pa-name" class="form-input" placeholder="TexTool Rentals" style="width:100%;box-sizing:border-box"></div>' +
-          '<div><label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px">Contact Email</label><input id="pa-email" class="form-input" value="'+(currentUser?currentUser.email:"")+'" style="width:100%;box-sizing:border-box"></div>' +
-        '</div>' +
-        '<div style="margin-bottom:14px"><label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px">What do you rent/sell?</label><input id="pa-inv" class="form-input" placeholder="Power tools, cameras, AV equipment..." style="width:100%;box-sizing:border-box"></div>' +
-        '<div style="margin-bottom:20px"><label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px">Notes</label><textarea id="pa-notes" class="form-input" rows="3" placeholder="Location, inventory size, questions..." style="width:100%;box-sizing:border-box;resize:vertical"></textarea></div>' +
-        '<button onclick="submitPartnerApply()" class="btn-primary" style="width:100%">Submit Application</button>' +
-      '</div>' +
-      '<div id="partner-apply-success" style="display:none;text-align:center;padding:24px 0">' +
-        '<div style="font-size:40px;margin-bottom:12px">🤝</div>' +
-        '<div style="font-weight:800;font-size:18px;margin-bottom:8px">Application received!</div>' +
-        '<div style="font-size:14px;color:var(--muted)">We\'ll reach out within 48 hours.</div>' +
-      '</div>' +
-    '</div>' +
-  '</div>';
-}
-
-window.submitPartnerApply = async function() {
-  var name = (el("pa-name")||{}).value.trim();
-  var email = (el("pa-email")||{}).value.trim();
-  var inv = (el("pa-inv")||{}).value.trim();
-  var notes = (el("pa-notes")||{}).value.trim();
-  if (!name||!email) { showToast("Fill in name and email"); return; }
-  var fb=window._fb;
-  try {
-    await fb.addDoc(fb.collection(fb.db,"partnerApplications"),{name,email,inventory:inv,notes,status:"pending",createdAt:fb.serverTimestamp()});
-    el("partner-apply-form").style.display="none";
-    el("partner-apply-success").style.display="block";
-    showToast("Application submitted!");
-  } catch(e){showToast("Error: "+e.message);}
-};
-
-window.partnerApiTab = function(btn) {
-  var panel = btn.getAttribute("data-pp");
-  document.querySelectorAll(".admin-tab").forEach(function(b){ b.classList.remove("active"); });
-  document.querySelectorAll("[id^='pp-']").forEach(function(p){ p.classList.remove("active"); });
-  btn.classList.add("active");
-  var pg = el("pp-"+panel); if (pg) pg.classList.add("active");
-};
-
-window.revealKey = function(docId, key) {
-  var span = el("kv-"+docId); if (!span) return;
-  if (span.dataset.r==="1") {
-    span.textContent = key.slice(0,8)+"••••••••••••••••••••••••••••"+key.slice(-4);
-    span.style.color="var(--muted)"; span.dataset.r="0";
-  } else {
-    span.textContent = key; span.style.color="var(--blue)"; span.dataset.r="1";
   }
+
+  var k = activeKey;
+  var created = k.createdAt && k.createdAt.toDate ? k.createdAt.toDate().toLocaleDateString([],{month:"short",day:"numeric",year:"numeric"}) : "";
+
+  return '<div style="background:var(--bg2);border:1.5px solid var(--border);border-radius:16px;overflow:hidden">' +
+
+    // Header bar
+    '<div style="padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px">' +
+      '<div style="display:flex;align-items:center;gap:10px">' +
+        '<div style="width:36px;height:36px;border-radius:10px;background:var(--blue-dim);display:flex;align-items:center;justify-content:center">' +
+          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.778 7.778 5.5 5.5 0 017.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>' +
+        '</div>' +
+        '<div>' +
+          '<div style="font-weight:700;font-size:14px">Production Key</div>' +
+          (created ? '<div style="font-size:11px;color:var(--muted)">Generated ' + created + '</div>' : '') +
+        '</div>' +
+      '</div>' +
+      '<span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px;background:rgba(22,163,74,.1);color:#15803d">● Active</span>' +
+    '</div>' +
+
+    // Key display
+    '<div style="padding:20px 22px;border-bottom:1px solid var(--border)">' +
+      '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:8px">API Key</div>' +
+      '<div style="display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px 14px">' +
+        '<code id="pkey-display" style="flex:1;font-size:13px;font-family:monospace;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">drv_••••••••••••••••••••••••••••••••••••••••</code>' +
+        '<button onclick="partnerRevealKey('' + k.key + '')" id="pkey-reveal-btn" style="background:none;border:none;cursor:pointer;font-size:12px;font-weight:600;color:var(--blue);font-family:var(--font);white-space:nowrap;padding:0">Show</button>' +
+        '<div style="width:1px;height:16px;background:var(--border)"></div>' +
+        '<button onclick="partnerCopyKey('' + k.key + '')" style="background:none;border:none;cursor:pointer;font-size:12px;font-weight:600;color:var(--muted);font-family:var(--font);white-space:nowrap;padding:0;display:flex;align-items:center;gap:4px">' +
+          '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>' +
+          'Copy' +
+        '</button>' +
+      '</div>' +
+    '</div>' +
+
+    // Usage info
+    '<div style="padding:16px 22px;border-bottom:1px solid var(--border);background:var(--surface)">' +
+      '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:6px">Usage</div>' +
+      '<code style="font-size:12px;color:var(--text2);font-family:monospace">x-api-key: ' + k.key.slice(0,16) + '••••</code>' +
+      '<div style="font-size:11px;color:var(--muted);margin-top:4px">Pass this header on every request to POST /v1/deliveries</div>' +
+    '</div>' +
+
+    // Regenerate action
+    '<div style="padding:16px 22px;display:flex;align-items:center;justify-content:space-between;gap:12px">' +
+      '<div style="font-size:12px;color:var(--muted)">Need a new key? Regenerating will immediately invalidate the current one.</div>' +
+      '<button onclick="partnerRegenerateKey('' + k._docId + '')" style="padding:8px 16px;border-radius:9px;background:none;color:#ef4444;border:1px solid rgba(239,68,68,.25);font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font);white-space:nowrap;flex-shrink:0">Regenerate</button>' +
+    '</div>' +
+
+  '</div>';
+}
+window.partnerGenerateKey = async function() {
+  var fb = window._fb; if (!fb || !currentUser) return;
+  try {
+    // Check no key exists yet
+    var existing = await fb.getDocs(fb.query(fb.collection(fb.db,"apiKeys"),fb.where("partnerEmail","==",currentUser.email),fb.where("active","==",true)));
+    if (!existing.empty) { showToast("You already have an active key — use Regenerate to replace it"); return; }
+    await _generateNewKey();
+  } catch(e) { showToast("Error: " + e.message); }
 };
 
-window.copyApiKey = function(key) {
-  if (navigator.clipboard) navigator.clipboard.writeText(key).catch(function(){});
-  showToast("✓ API key copied!");
-};
-
-window.revokeApiKey = async function(docId) {
-  showConfirm({ title:"Revoke API Key?", msg:"Any website using this key stops working immediately.", okLabel:"Revoke", color:"red",
+window.partnerRegenerateKey = async function(oldDocId) {
+  showConfirm({
+    title: "Regenerate API Key?",
+    msg: "Your current key will stop working immediately. Any live integrations using it will break until you update them.",
+    okLabel: "Regenerate",
+    color: "amber",
     onOk: async function() {
-      var fb=window._fb;
+      var fb = window._fb; if (!fb) return;
       try {
-        await fb.updateDoc(fb.doc(fb.db,"apiKeys",docId),{active:false,revokedAt:fb.serverTimestamp()});
-        showToast("Key revoked"); renderPartnerApiPage();
-      } catch(e){showToast("Error: "+e.message);}
+        // Delete old key
+        await fb.deleteDoc(fb.doc(fb.db, "apiKeys", oldDocId));
+        // Generate new
+        await _generateNewKey();
+        showToast("✓ New key generated — update your website");
+      } catch(e) { showToast("Error: " + e.message); }
     }
   });
 };
 
-window.partnerGenerateKey = async function() {
-  var label = prompt("Label for this key:", "Production website");
-  if (label===null) return;
-  if (!label.trim()) label="API Key";
-  var fb=window._fb; if (!fb) return;
-  try {
-    var arr=new Uint8Array(32); crypto.getRandomValues(arr);
-    var key="drv_"+Array.from(arr).map(function(b){return b.toString(16).padStart(2,"0");}).join("").slice(0,40);
-    var pSnap=await fb.getDocs(fb.query(fb.collection(fb.db,"partners"),fb.where("email","==",currentUser.email)));
-    var pd=pSnap.empty?{}:pSnap.docs[0].data();
-    await fb.setDoc(fb.doc(fb.db,"apiKeys",key),{
-      key, label:label.trim(),
-      partnerEmail:currentUser.email,
-      partnerName:pd.name||currentUser.email,
-      stationId:pd.stationId||("station-"+currentUser.email.split("@")[0]),
-      active:true,
-      createdAt:fb.serverTimestamp()
-    });
-    showToast("✓ API key generated!"); renderPartnerApiPage();
-  } catch(e){showToast("Error: "+e.message);}
+async function _generateNewKey() {
+  var fb = window._fb;
+  var arr = new Uint8Array(32); crypto.getRandomValues(arr);
+  var key = "drv_" + Array.from(arr).map(function(b){ return b.toString(16).padStart(2,"0"); }).join("").slice(0,40);
+  var pSnap = await fb.getDocs(fb.query(fb.collection(fb.db,"partners"),fb.where("email","==",currentUser.email)));
+  var pd = pSnap.empty ? {} : pSnap.docs[0].data();
+  await fb.setDoc(fb.doc(fb.db, "apiKeys", key), {
+    key: key,
+    label: "Production",
+    partnerEmail: currentUser.email,
+    partnerName: pd.name || currentUser.email,
+    stationId: pd.stationId || ("station-" + currentUser.email.split("@")[0]),
+    active: true,
+    createdAt: fb.serverTimestamp()
+  });
+  renderPartnerApiPage();
+}
+
+window.partnerRevealKey = function(key) {
+  var display = document.getElementById("pkey-display");
+  var btn = document.getElementById("pkey-reveal-btn");
+  if (!display) return;
+  if (display.dataset.revealed === "1") {
+    display.textContent = "drv_••••••••••••••••••••••••••••••••••••••••";
+    display.style.color = "var(--muted)";
+    display.dataset.revealed = "0";
+    if (btn) btn.textContent = "Show";
+  } else {
+    display.textContent = key;
+    display.style.color = "var(--blue)";
+    display.dataset.revealed = "1";
+    if (btn) btn.textContent = "Hide";
+    // Auto-hide after 30s
+    setTimeout(function() {
+      if (display && display.dataset.revealed === "1") {
+        display.textContent = "drv_••••••••••••••••••••••••••••••••••••••••";
+        display.style.color = "var(--muted)";
+        display.dataset.revealed = "0";
+        if (btn) btn.textContent = "Show";
+      }
+    }, 30000);
+  }
+};
+
+window.partnerCopyKey = function(key) {
+  if (navigator.clipboard) navigator.clipboard.writeText(key).catch(function(){});
+  showToast("✓ API key copied!");
 };
 
 
+
+// ── PARTNER ORDERS PANEL ─────────────────────────────────────────────────────
+function renderPartnerOrders(deliveries) {
+  if (!deliveries.length) {
+    return '<div style="background:var(--bg2);border:1px dashed var(--border);border-radius:14px;padding:40px;text-align:center;color:var(--muted);font-size:14px">No orders yet.<br><span style="font-size:12px;margin-top:6px;display:block">Orders from your website appear here when placed via the API.</span></div>';
+  }
+
+  // Update pending badge
+  var pending = deliveries.filter(function(d){ return d.status === "pending_approval"; });
+  var badge = document.getElementById("pp-pending-badge");
+  if (badge) { badge.style.display = pending.length ? "inline" : "none"; badge.textContent = pending.length; }
+
+  // Sort: pending first, then by date
+  var sorted = deliveries.slice().sort(function(a,b){
+    if (a.status==="pending_approval" && b.status!=="pending_approval") return -1;
+    if (b.status==="pending_approval" && a.status!=="pending_approval") return 1;
+    return 0;
+  });
+
+  var statusColors = {
+    pending_approval: "#d97706",
+    approved:         "var(--blue)",
+    dispatching:      "var(--blue)",
+    dispatched:       "var(--blue)",
+    delivered:        "var(--green)",
+    failed:           "#ef4444",
+    rejected:         "#6b7280"
+  };
+  var statusLabels = {
+    pending_approval: "Awaiting pickup",
+    approved:         "Loading drone",
+    dispatching:      "Dispatching",
+    dispatched:       "In flight",
+    delivered:        "Delivered",
+    failed:           "Failed",
+    rejected:         "Rejected"
+  };
+
+  return '<div style="display:grid;gap:10px">' + sorted.map(function(d) {
+    var sc    = statusColors[d.status] || "var(--muted)";
+    var slbl  = statusLabels[d.status] || (d.status||"").replace(/_/g," ");
+    var date  = d.createdAt && d.createdAt.toDate ? d.createdAt.toDate().toLocaleString([],{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}) : "";
+    var items = (d.items||[]).map(function(i){ return i.name + (i.qty>1?" x"+i.qty:""); }).join(", ") || "—";
+    var isPending = d.status === "pending_approval";
+    var borderStyle = isPending ? "border:1.5px solid rgba(217,119,6,.4);box-shadow:0 0 0 3px rgba(217,119,6,.08)" : "border:1px solid var(--border)";
+
+    return '<div style="background:var(--bg2);' + borderStyle + ';border-radius:14px;padding:18px 20px">' +
+
+      // Top row: customer + status badge
+      '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px">' +
+        '<div style="flex:1;min-width:0">' +
+          '<div style="font-weight:700;font-size:15px">' + (d.customerName||"—") + '</div>' +
+          (d.customerPhone ? '<div style="font-size:12px;color:var(--muted);margin-top:1px">' + d.customerPhone + '</div>' : '') +
+        '</div>' +
+        '<span style="font-size:11px;font-weight:700;padding:4px 11px;border-radius:6px;white-space:nowrap;flex-shrink:0;background:' + sc.replace("var(--","rgba(").replace(")",",0.12)") + ';color:' + sc + '">' + slbl + '</span>' +
+      '</div>' +
+
+      // Items + address
+      '<div style="font-size:13px;color:var(--text2);margin-bottom:4px">📦 ' + items + '</div>' +
+      '<div style="font-size:12px;color:var(--muted);margin-bottom:8px">📍 ' + (d.deliveryAddress||"—") + '</div>' +
+      (d.notes ? '<div style="font-size:12px;color:var(--muted);margin-bottom:8px">📝 ' + d.notes + '</div>' : '') +
+      '<div style="font-size:11px;color:var(--dim)">#' + d._id.slice(0,10).toUpperCase() + (date ? ' · ' + date : '') + '</div>' +
+
+      // Mark Ready button — only shown when pending
+      (isPending
+        ? '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">' +
+            '<div style="font-size:12px;color:var(--muted);margin-bottom:10px">Confirm the package is loaded in the docking station and ready for pickup.</div>' +
+            '<button data-did="' + d._id + '" onclick="partnerMarkReady(this)" style="width:100%;padding:12px;border-radius:10px;background:var(--blue);color:#fff;border:none;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font);display:flex;align-items:center;justify-content:center;gap:8px">' +
+              '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>' +
+              'Package is in docking station — Ready' +
+            '</button>' +
+          '</div>'
+        : '') +
+
+    '</div>';
+  }).join("") + '</div>';
+}
+
+// Partner marks order as ready — sets status to "approved" so Pi dispatches
+window.partnerMarkReady = async function(btn) {
+  var docId = btn.dataset.did;
+  btn.disabled = true;
+  btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" style="animation:spin .6s linear infinite"><path d="M21 12a9 9 0 11-9-9"/></svg> Confirming...';
+  var fb = window._fb;
+  try {
+    await fb.updateDoc(fb.doc(fb.db, "deliveries", docId), {
+      status:     "approved",
+      approvedAt: fb.serverTimestamp(),
+      updatedAt:  fb.serverTimestamp()
+    });
+    showToast("✓ Order approved — drone will dispatch automatically");
+    // Re-render the partner page to reflect new status
+    renderPartnerApiPage();
+  } catch(e) {
+    showToast("Error: " + e.message);
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg> Package is in docking station — Ready';
+  }
+};
+
+
+window.adminForceApprove = async function(btn) {
+  var docId = btn.dataset.did;
+  var fb = window._fb;
+  try {
+    await fb.updateDoc(fb.doc(fb.db, "deliveries", docId), {
+      status: "approved", approvedAt: fb.serverTimestamp(), updatedAt: fb.serverTimestamp()
+    });
+    showToast("Force approved — Pi will dispatch");
+    adminLoadDeliveries();
+  } catch(e) { showToast("Error: " + e.message); }
+};
 // ── Boot ──────────────────────────────────────────────────────────────────────
 renderCatIcons();
 

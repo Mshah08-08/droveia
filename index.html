@@ -997,7 +997,7 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
           </button>
           <button class="btn-secondary" id="hero-admin-btn" onclick="showPage(window._isPartnerUser && !checkAdmin() ? 'api' : 'admin')" style="display:none">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-            <span id="hero-admin-btn-label">Dashboard</span>
+            <span id="hero-admin-btn-label">Partner Dashboard</span>
           </button>
           <button class="btn-secondary" id="hero-signup-btn" onclick="switchAuth('signup');showAuth()">
             Create Free Account
@@ -3513,9 +3513,7 @@ function startApp() {
       var adminBtn = el("hero-admin-btn");
       if (adminBtn) adminBtn.style.display = (_isAdm || _isPrt) ? "" : "none";
 
-      // Update hero admin btn label
-      var adminBtnLabel = adminBtn ? adminBtn.querySelector('span') : null;
-      if (adminBtnLabel) adminBtnLabel.textContent = _isPrt && !_isAdm ? "Partner Dashboard" : "Admin Dashboard";
+
 
       // Show/hide API nav link — only for partners and admins
       var apiNav = el("nav-api");

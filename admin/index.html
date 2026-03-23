@@ -4543,7 +4543,7 @@ window.admTab = function(tab, btn) {
 window.renderAdmTab = async function(tab) {
   var wrap = document.getElementById('adm-content');
   if (!wrap) return;
-  if (!window.currentUser || !window.isAdmin) {
+  if (!window.currentUser || !isAdmin) {
     wrap.innerHTML = '<div style="text-align:center;padding:80px"><p style="color:#9ca3af;margin-bottom:16px">Sign in with an admin account.</p><button class="adm-btn" onclick="showAuth()">Sign In</button></div>';
     return;
   }

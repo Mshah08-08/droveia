@@ -4754,7 +4754,7 @@ window.bizShowPartnerSidebar = function() {
   var sb = document.getElementById('biz-sidebar-el');
   if (!sb) return;
   sb.innerHTML = [
-    '<div class="biz-nav-item active" id="bnav-overview" onclick="bizTab(\'overview\',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Overview</div>',
+    '<div class="biz-nav-item" id="bnav-overview" onclick="bizTab(\'overview\',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Overview</div>',
     '<div class="biz-nav-item" id="bnav-orders" onclick="bizTab(\'orders\',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Orders<span id="bnav-orders-badge" style="display:none;background:#ef4444;color:#fff;font-size:10px;font-weight:800;padding:1px 6px;border-radius:10px;margin-left:auto"></span></div>',
     '<div class="biz-nav-item" id="bnav-inventory" onclick="bizTab(\'inventory\',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>My Inventory</div>',
     '<div class="biz-nav-item" id="bnav-apikey" onclick="bizTab(\'apikey\',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.778 7.778 5.5 5.5 0 017.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>API Key</div>',
@@ -4790,7 +4790,13 @@ window.renderBizTab=async function(tab){
     return;
   }
   // Partner confirmed — show full sidebar
-  if(window.bizShowPartnerSidebar) bizShowPartnerSidebar();
+  if(window.bizShowPartnerSidebar) {
+    bizShowPartnerSidebar();
+    // Set correct active tab
+    var _activeBtn = document.getElementById('bnav-'+tab);
+    document.querySelectorAll('.biz-nav-item').forEach(function(b){b.classList.remove('active');});
+    if(_activeBtn) _activeBtn.classList.add('active');
+  }
   document.body.classList.remove('landing-mode'); wrap.innerHTML='<div style="text-align:center;padding:60px;color:#9ca3af">Loading...</div>';
   if(tab==='overview')await renderBizOverview(wrap);
   else if(tab==='orders')await renderBizOrders(wrap);

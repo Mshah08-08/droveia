@@ -2568,6 +2568,8 @@ function fmtDate(d) {
 function renderAccount() {
   if (!currentUser) { showAuth(); return; }
   if (!userProfile) return;
+  // Guard: don't run on pages that don't have account elements
+  if (!document.getElementById('page-account')) return;
   var full = ((userProfile.firstName||"")+" "+(userProfile.lastName||"")).trim()||"Student";
   setText("prof-name",    full);
   setText("prof-email",   userProfile.email||"");
@@ -3306,7 +3308,7 @@ function startApp() {
       var snap = await fb.getDoc(cRef(currentUser.uid));
       if (snap.exists() && snap.data().items) {
         cart = snap.data().items; updateBadge();
-        if (el("page-cart").classList.contains("active")) renderCart();
+        if (el("page-cart") && el("page-cart").classList.contains("active")) renderCart();
       }
     } catch(e){ console.error("loadCart",e); }
   }
@@ -4000,7 +4002,7 @@ window.showConfirm = function(opts) {
   if (msg)     msg.textContent   = opts.msg   || "";
   if (okBtn) { okBtn.textContent = opts.okLabel || "Confirm"; okBtn.className = "confirm-ok " + color; }
   _confirmCallback = opts.onOk || null;
-  el("confirm-modal").classList.remove("hidden");
+  var _cm = el("confirm-modal"); if(_cm) _cm.classList.remove("hidden");
 };
 
 window.closeConfirm = function() {

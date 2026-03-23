@@ -4575,8 +4575,12 @@ window.bizTab=function(tab,btn){
 window.renderBizTab=async function(tab){
   var wrap=document.getElementById('biz-page-content');
   if(!wrap)return;
-  if(!window.currentUser||!window._isPartnerUser){
-    wrap.innerHTML='<div style="text-align:center;padding:80px"><p style="color:#9ca3af;margin-bottom:16px">Sign in with your partner account.</p><button class="biz-btn-primary" onclick="showAuth()">Sign In</button></div>';
+  if(!window.currentUser){
+    wrap.innerHTML=renderPartnerLanding('signin');
+    return;
+  }
+  if(!window._isPartnerUser){
+    wrap.innerHTML=renderPartnerLanding('apply');
     return;
   }
   wrap.innerHTML='<div style="text-align:center;padding:60px;color:#9ca3af">Loading...</div>';

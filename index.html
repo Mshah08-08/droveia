@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
+<script>try{localStorage.removeItem("droveiaTheme");}catch(e){}document.documentElement.setAttribute("data-theme","light");</script>
   <link rel="icon" type="image/png" href="1.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Droveia</title>
@@ -14,12 +15,12 @@
   --blue-dim:rgba(26,110,240,0.08);
   --blue-mid:rgba(26,110,240,0.18);
   --blue-hover:#1560d8;
-  --bg:#f5f7ff;
-  --bg2:#ffffff;
-  --bg3:#eef1fb;
-  --surface:rgba(26,110,240,0.04);
-  --surface2:rgba(26,110,240,0.07);
-  --surface3:rgba(26,110,240,0.11);
+  --bg:#fff;
+  --bg2:#fff;
+  --bg3:#fff;
+  --surface:#fff;
+  --surface2:#fff;
+  --surface3:#fff;
   --border:rgba(0,0,0,0.07);
   --border2:rgba(0,0,0,0.11);
   --text:#0d0f1a;
@@ -44,125 +45,52 @@
 }
 
 /* ── Dark theme override ─────────────────────────────────────────────────── */
-[data-theme="dark"] {
-  --bg:#09080f;
-  --toast-bg:#ffffff;
-  --toast-border:rgba(0,0,0,.12);
-  --toast-text:#0d0f1a;
-  --bg2:#0e0d18;
-  --bg3:#13121f;
-  --surface:rgba(255,255,255,0.04);
-  --surface2:rgba(255,255,255,0.07);
-  --surface3:rgba(255,255,255,0.10);
-  --border:rgba(255,255,255,0.07);
-  --border2:rgba(255,255,255,0.12);
-  --text:#f0f3ff;
-  --text2:#c8cde8;
-  --muted:#7a7a9a;
-  --dim:#3a3a50;
-  --blue-dim:rgba(26,110,240,0.12);
-  --blue-mid:rgba(26,110,240,0.25);
-  --green:#22c55e;
-  --green-dim:rgba(34,197,94,0.12);
-  --green-mid:rgba(34,197,94,0.2);
-}
-[data-theme="dark"] body { background:var(--bg); }
-[data-theme="dark"] nav {
-  background:rgba(9,8,15,.88) !important;
-  box-shadow:none !important;
-}
-[data-theme="dark"] .nav-wordmark { color:#fff !important; }
-[data-theme="dark"] .nav-link { color:var(--muted) !important; }
-[data-theme="dark"] .nav-cat-btn { color:var(--muted) !important; }
-[data-theme="dark"] .nav-search-inner {
-  background:rgba(255,255,255,.06) !important;
-  border-color:rgba(255,255,255,.1) !important;
-}
-[data-theme="dark"] .hero {
-  background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(26,110,240,.18),transparent) !important;
-}
-[data-theme="dark"] .hero-badge {
-  background:rgba(26,110,240,.12) !important;
-  border-color:rgba(26,110,240,.25) !important;
-  color:#93c5fd !important;
-}
-[data-theme="dark"] .tool-card { background:var(--bg2) !important; }
-[data-theme="dark"] .tool-card-img {background:var(--bg2) !important}
-[data-theme="dark"] .tool-card:hover {
-  box-shadow:0 12px 36px rgba(0,0,0,.5) !important;
-  border-color:rgba(26,110,240,.3) !important;
-}
-[data-theme="dark"] .auth-box,
-[data-theme="dark"] .modal-box {
-  background:linear-gradient(145deg,rgba(20,19,30,.98),rgba(14,13,24,.98)) !important;
-  border-color:var(--border2) !important;
-  box-shadow:0 40px 100px rgba(0,0,0,.6) !important;
-}
-[data-theme="dark"] .auth-overlay,
-[data-theme="dark"] .modal-overlay {
-  background:rgba(0,0,0,.7) !important;
-}
-[data-theme="dark"] .droppin-box,
-[data-theme="dark"] .droppin-header,
-[data-theme="dark"] .droppin-footer,
-[data-theme="dark"] #order-confirm-body {
-  background:linear-gradient(145deg,rgba(20,19,30,.98),rgba(14,13,24,.98)) !important;
-  border-color:rgba(255,255,255,0.08) !important;
-}
-[data-theme="dark"] .droppin-box {
-  box-shadow:0 40px 100px rgba(0,0,0,.6) !important;
-}
-[data-theme="dark"] .auth-tabs {
-  background:var(--surface) !important;
-}
-[data-theme="dark"] .auth-tab.active {
-  background:var(--surface3) !important;
-  box-shadow:0 2px 8px rgba(0,0,0,.3) !important;
-}
-[data-theme="dark"] .form-input {
-  background:var(--surface) !important;
-  border-color:var(--border2) !important;
-}
-[data-theme="dark"] .google-btn {
-  background:var(--surface2) !important;
-  border-color:var(--border2) !important;
-}
-[data-theme="dark"] .google-btn:hover { background:var(--surface3) !important; }
-[data-theme="dark"] .browse-sort { background:var(--surface) !important; }
-[data-theme="dark"] .order-summary,
-[data-theme="dark"] .stat-card,
-[data-theme="dark"] .account-panel,
-[data-theme="dark"] .trust-item,
-[data-theme="dark"] .cat-card,
-[data-theme="dark"] .browse-sidebar { background:var(--bg2) !important; }
-[data-theme="dark"] .sidebar-cat-item.active { background:var(--blue-dim) !important; color:var(--blue) !important; border-color:var(--blue-mid) !important; }
-[data-theme="dark"] .sidebar-filter-item.active { background:var(--blue-dim) !important; color:var(--blue) !important; }
-[data-theme="dark"] .account-profile { background:var(--bg2) !important; }
-[data-theme="dark"] .address-pill { background:var(--blue-dim) !important; border-color:var(--blue-mid) !important; }
-[data-theme="dark"] .modal-summary { background:var(--surface) !important; border-color:var(--border) !important; }
-[data-theme="dark"] .dur-preset { background:var(--surface) !important; border-color:var(--border) !important; }
-[data-theme="dark"] .dur-preset:hover { background:var(--surface2) !important; }
-[data-theme="dark"] .step-btn { background:var(--surface2) !important; }
-[data-theme="dark"] .step-btn:hover { background:var(--surface3) !important; }
-[data-theme="dark"] .promo-banner {
-  background:linear-gradient(90deg,rgba(26,110,240,.2),rgba(26,110,240,.08),rgba(26,110,240,.2)) !important;
-  border-color:rgba(26,110,240,.2) !important;
-}
-[data-theme="dark"] .promo-banner,
-[data-theme="dark"] .promo-banner span { color:#93c5fd !important; -webkit-text-fill-color:#93c5fd !important; }
-[data-theme="dark"] .hero-sub { color:var(--text2) !important; }
-[data-theme="dark"] .stat-val { color:var(--text) !important; }
-[data-theme="dark"] .nav-secondary { background:rgba(14,13,24,0.95) !important; }
-[data-theme="dark"] .verified-pill { background:var(--blue-dim) !important; border-color:var(--blue-mid) !important; color:#93c5fd !important; }
-[data-theme="dark"] .orders-hero { background:linear-gradient(135deg,rgba(26,110,240,.12),rgba(26,110,240,.04)) !important; }
-[data-theme="dark"] .order-progress { background:rgba(255,255,255,.08) !important; }
-[data-theme="dark"] .past-order { background:var(--bg2) !important; }
-[data-theme="dark"] .slider { background:var(--dim) !important; }
-[data-theme="dark"] input:checked + .slider { background:var(--blue) !important; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /* Dark theme SVGs */
-[data-theme="dark"] .drone-svg { stroke:#1a6ef0; }
-[data-theme="dark"] .drone-ring { border-color:rgba(26,110,240,.3) !important; }
+
+
 
 html{scroll-behavior:smooth}
 html.theme-transitioning,
@@ -175,7 +103,7 @@ html.theme-transitioning *{
     fill .35s ease,
     stroke .35s ease !important;
 }
-body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:clip;padding-top:var(--nav-h);-webkit-font-smoothing:antialiased}
+body{font-family:var(--font);background:#fff !important;color:var(--text);min-height:100vh;overflow-x:clip;padding-top:var(--nav-h);-webkit-font-smoothing:antialiased}
 ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--dim);border-radius:4px}
 a{text-decoration:none;color:inherit}
 button{font-family:var(--font);cursor:pointer;border:none;background:none}
@@ -567,7 +495,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:var(--nav-h);backgro
 .payment-card.selected{border-color:var(--blue);background:var(--blue-dim)}
 select:hover{border-color:var(--blue)}
 select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
-[data-theme="dark"] select{background:var(--bg2);color:var(--text);border-color:var(--border2);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237a7a9a' stroke-width='2.5' stroke-linecap='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
+
 .payment-logo{width:40px;height:26px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .add-payment{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px dashed var(--dim);border-radius:12px;padding:14px 16px;cursor:pointer;width:100%;font-size:13px;color:var(--muted);transition:.18s;font-family:var(--font)}
 .add-payment:hover{border-color:var(--blue);color:var(--blue)}
@@ -745,8 +673,8 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
 /* Tool card review count */
 .tool-review-count{font-size:11px;color:var(--muted);margin-left:4px}
 
-[data-theme="dark"] .review-card{background:var(--bg2)}
-[data-theme="dark"] .review-textarea{background:var(--bg3);border-color:var(--border2);color:var(--text)}
+
+
 
 /* ── Admin Page ──────────────────────────────────────────────────────────── */
 #page-admin{background:var(--bg)}
@@ -819,9 +747,7 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
 .admin-add-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:var(--blue);color:#fff;border:none;border-radius:10px;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:.15s}
 .admin-add-btn:hover{background:var(--blue-hover,#1558cc)}
 
-[data-theme="dark"] .admin-field input,
-[data-theme="dark"] .admin-field select,
-[data-theme="dark"] .admin-field textarea{background:var(--bg3);color:var(--text)}
+
 
 /* ── Confirm Modal ───────────────────────────────────────────────────────── */
 .confirm-modal{position:fixed;inset:0;background:rgba(15,20,60,.55);backdrop-filter:blur(8px);z-index:9000;display:flex;align-items:center;justify-content:center;padding:16px}
@@ -919,7 +845,7 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
 
 
 /* ── Persistent sidebar layout for inner pages ─── */
-.dd-sidebar { width:220px;flex-shrink:0;border-right:1px solid #e8e8e8;padding:8px 0;background:#fff;height:calc(100vh - 60px);overflow:hidden }
+.dd-sidebar { width:220px;flex-shrink:0;border-right:1px solid #e8e8e8;padding:8px 0;background:#ffffff !important;height:calc(100vh - 60px);overflow:hidden;box-sizing:border-box }
 .dd-page-layout { display:flex;height:calc(100vh - 60px);background:#fff;overflow:hidden }
 .dd-page-main { flex:1;min-width:0;overflow-y:auto;height:100% }
 .dd-page-main { flex:1;min-width:0;overflow-y:auto;height:100% }
@@ -950,7 +876,7 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
 #page-cart.active { padding-top:60px; }
 
 /* ── DoorDash layout ─────────────────────────────────── */
-body { background:#fff; padding-top:60px; overflow:hidden; }
+body { background:#fff !important; padding-top:60px; overflow:hidden; }
 html.page-fixed, html.page-fixed body { overflow:hidden; }
 
 html, body { height:100%; }
@@ -961,7 +887,7 @@ html, body { height:100%; }
 .ddnav-item { display:flex;align-items:center;gap:14px;padding:11px 20px;font-size:15px;font-weight:400;color:#191919;cursor:pointer;transition:.1s;font-family:var(--font);line-height:1.3;border-radius:0 }
 .ddnav-item svg { flex-shrink:0;color:#191919;stroke-width:1.5 }
 .ddnav-item:hover { background:#f8f8f8 }
-.ddnav-item.active { color:#1a6ef0;font-weight:700;background:rgba(26,110,240,.06) }
+.ddnav-item.active { color:#1a6ef0;font-weight:700;background:#eff6ff }
 .ddnav-item.active svg { color:#1a6ef0 }
 
 /* Category chips */
@@ -1006,7 +932,7 @@ html, body { height:100%; }
 
 <div class="toast" id="toast"></div>
 
-<body>
+
 
 <div class="glow-blob glow-1"></div>
 <div class="glow-blob glow-2"></div>
@@ -1184,7 +1110,7 @@ html, body { height:100%; }
   </aside>
 
   <!-- Main -->
-  <main id="home-main" style="flex:1;min-width:0;padding:0;overflow-y:auto;height:100%;min-height:0">
+  <main id="home-main" style="flex:1;min-width:0;padding:0;overflow-y:auto;height:100%;min-height:0;background:#f7f8fa">
     <div style="padding:24px 28px" id="home-top">
 
       <h1 id="home-welcome" style="font-size:22px;font-weight:800;color:#111;font-family:var(--font);margin:0 0 18px;letter-spacing:-.02em">Welcome to Droveia</h1>
@@ -1240,7 +1166,7 @@ html, body { height:100%; }
   
     <aside class="dd-sidebar" id="cat-sidebar"><!-- filled by JS --></aside>
 
-  <main style="flex:1;min-width:0;padding:28px 32px;overflow-y:auto;height:100%">
+  <main style="flex:1;min-width:0;padding:28px 32px;overflow-y:auto;height:100%;background:#f7f8fa">
 
     <h1 id="cat-heading" style="font-size:24px;font-weight:800;color:#111;font-family:var(--font);letter-spacing:-.02em;margin:0 0 6px"></h1>
     <div id="cat-item-count" style="font-size:13px;color:#9ca3af;margin-bottom:20px"></div>
@@ -1305,7 +1231,7 @@ html, body { height:100%; }
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Admin Console
     </div>
   </aside>
-  <main style="flex:1;min-width:0;padding:28px 32px;overflow-y:auto;height:100%">
+  <main style="flex:1;min-width:0;padding:28px 32px;overflow-y:auto;height:100%;background:#f7f8fa">
 
     <!-- Header + search filter -->
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
@@ -1372,7 +1298,7 @@ html, body { height:100%; }
   </aside>
 
   <!-- Main -->
-  <main style="flex:1;min-width:0;padding:28px 32px;overflow-y:auto;height:100%">
+  <main style="flex:1;min-width:0;padding:28px 32px;overflow-y:auto;height:100%;background:#f7f8fa">
 
     <!-- Header -->
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;gap:12px;flex-wrap:wrap">
@@ -1471,7 +1397,7 @@ html, body { height:100%; }
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Admin Console
     </div>
   </aside>
-  <main class="dd-page-main">
+  <main class="dd-page-main" style="background:#f7f8fa">
   <div class="orders-layout">
     <h2 style="font-size:22px;font-weight:800;margin-bottom:20px;letter-spacing:-.02em">My Orders</h2>
     <div id="active-order-section" style="display:none">
@@ -1558,7 +1484,7 @@ html, body { height:100%; }
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Admin Console
     </div>
   </aside>
-  <main class="dd-page-main">
+  <main class="dd-page-main" style="background:#f7f8fa">
   <div class="account-layout">
     <div class="account-sidebar">
       <div class="account-profile">
@@ -3882,8 +3808,9 @@ function applyTheme(t, animate) {
 window.toggleTheme = function() {
   applyTheme(_theme === "dark" ? "light" : "dark", true);
 };
-// Apply saved theme immediately
-applyTheme(_theme);
+// Always force light theme - clear stored preference and apply light
+try { localStorage.removeItem('droveiaTheme'); } catch(e){}
+applyTheme('light');
 
 
 // ── Firebase Realtime DB — tool inventory ────────────────────────────────────

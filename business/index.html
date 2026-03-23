@@ -1018,15 +1018,10 @@ body.landing-mode .biz-sidebar { justify-content:flex-end; padding-bottom:16px; 
   </div>
 </header>
 <div class="biz-layout">
-  <aside class="biz-sidebar">
-    
-    <div class="biz-nav-item active" id="bnav-overview" onclick="bizTab('overview',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Overview</div>
-    <div class="biz-nav-item" id="bnav-orders" data-hidenp="1" onclick="bizTab('orders',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Orders<span id="bnav-orders-badge" style="display:none;background:#ef4444;color:#fff;font-size:9px;font-weight:800;padding:1px 6px;border-radius:10px;margin-left:auto"></span></div>
-    <div class="biz-nav-item" id="bnav-inventory" data-hidenp="1" onclick="bizTab('inventory',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>Inventory</div>
-    <div class="biz-nav-item" id="bnav-apikey" data-hidenp="1" onclick="bizTab('apikey',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.778 7.778 5.5 5.5 0 017.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>API Key</div>
-    <div class="biz-nav-item" id="bnav-docs" data-hidenp="1" onclick="bizTab('docs',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>API Docs</div>
-    <div style="height:1px;background:#f0f0f0;margin:8px 0"></div>
-    <div class="biz-nav-item biz-nav-keep" onclick="window.location.href='https://droveia.com'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>Visit Store</div>
+  <aside class="biz-sidebar" id="biz-sidebar-el">
+    <div class="biz-nav-item" id="bnav-visit" onclick="window.location.href='https://droveia.com'">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 014-10z"/></svg>Visit Store
+    </div>
   </aside>
   <div class="biz-main">
     <div class="biz-topbar" style="display:none">
@@ -3834,6 +3829,7 @@ function startApp() {
       updateBadge();
       var btn=el("nav-auth-btn");
       if(btn){ btn.textContent="Sign In"; btn.onclick=showAuth; }
+      if (window.renderBizTab) renderBizTab('overview');
       var heroBtn = el("hero-signup-btn");
       if (heroBtn) heroBtn.style.display = "";
       var adminBtn = el("hero-admin-btn");
@@ -4666,16 +4662,16 @@ window.renderPartnerLanding = function(mode) {
     + '<div style="background:linear-gradient(135deg,#0f172a 0%,#1e3a8a 60%,#1a6ef0 100%);padding:60px 40px;text-align:center;position:relative;overflow:hidden">'
     + '<div style="position:relative">'
     + '<div style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:11px;font-weight:700;padding:6px 14px;border-radius:20px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:24px;backdrop-filter:blur(8px)">🚁 Partner Program</div>'
-    + '<h1 style="font-size:38px;font-weight:900;color:#fff;letter-spacing:-.04em;line-height:1.1;margin-bottom:16px">Deliver anything.<br><span style="color:#60a5fa">In under 7 minutes.</span></h1>'
+    + '<h1 style="font-size:38px;font-weight:900;color:#fff;letter-spacing:-.04em;line-height:1.1;margin-bottom:16px">Deliver anything.<br><span style="color:#60a5fa">In under 30 minutes.</span></h1>'
     + '<p style="color:rgba(255,255,255,.75);font-size:16px;line-height:1.7;max-width:500px;margin:0 auto 32px">List your tools and products on Droveia. We handle the drone delivery — you just pack the order and earn.</p>'
     + '<a href="mailto:partners@droveia.com" style="display:inline-block;background:#fff;color:#1a6ef0;font-size:15px;font-weight:800;padding:14px 36px;border-radius:10px;text-decoration:none;box-shadow:0 4px 20px rgba(0,0,0,.2)">Apply to Partner →</a>'
     + '</div></div>'
 
     // Stats
     + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-bottom:1px solid #f0f0f0">'
-    + '<div style="padding:28px 20px;text-align:center;border-right:1px solid #f0f0f0"><div style="font-size:32px;font-weight:900;color:#111;letter-spacing:-.03em">~7<span style="font-size:18px">min</span></div><div style="font-size:12px;color:#9ca3af;margin-top:4px">Avg delivery time</div></div>'
-    + '<div style="padding:28px 20px;text-align:center;border-right:1px solid #f0f0f0"><div style="font-size:32px;font-weight:900;color:#111;letter-spacing:-.03em">90<span style="font-size:18px">%</span></div><div style="font-size:12px;color:#9ca3af;margin-top:4px">Revenue goes to you</div></div>'
-    + '<div style="padding:28px 20px;text-align:center"><div style="font-size:32px;font-weight:900;color:#111;letter-spacing:-.03em">$0</div><div style="font-size:12px;color:#9ca3af;margin-top:4px">Setup cost</div></div>'
+    + '<div style="padding:28px 20px;text-align:center;border-right:1px solid #f0f0f0"><div style="font-size:32px;font-weight:900;color:#111;letter-spacing:-.03em">&lt;30<span style="font-size:18px">min</span></div><div style="font-size:12px;color:#9ca3af;margin-top:4px">Avg delivery time</div></div>'
+    + '<div style="padding:28px 20px;text-align:center;border-right:1px solid #f0f0f0"><div style="font-size:32px;font-weight:900;color:#111;letter-spacing:-.03em">98<span style="font-size:18px">%</span></div><div style="font-size:12px;color:#9ca3af;margin-top:4px">Revenue goes to you</div></div>'
+    + '<div style="padding:28px 20px;text-align:center"><div style="font-size:28px;font-weight:900;color:#111;letter-spacing:-.03em">$2k</div><div style="font-size:12px;color:#9ca3af;margin-top:4px">Setup cost</div></div>'
     + '</div>'
 
     // How it works
@@ -4744,7 +4740,8 @@ window.renderBizTab=async function(tab){
   var wrap=document.getElementById('biz-page-content');
   if(!wrap)return;
   if(!window.currentUser){
-    document.body.classList.add('landing-mode'); wrap.innerHTML=renderPartnerLanding('signin');
+    if(window.bizShowLandingSidebar) bizShowLandingSidebar();
+    wrap.innerHTML=renderPartnerLanding('apply');
     return;
   }
   if(!window._isPartnerUser){
@@ -4878,9 +4875,9 @@ function initBusinessPage() {
     }
   }); } }
 }
-// Show loading/landing immediately
+// Show landing immediately - don't wait for auth
 var _bizInitWrap = document.getElementById('biz-page-content');
-if (_bizInitWrap) _bizInitWrap.innerHTML = '<div style="text-align:center;padding:60px;color:#9ca3af"><div style="font-size:32px;margin-bottom:12px">🚁</div><div style="font-size:14px">Loading...</div></div>';
+setTimeout(function(){ var w=document.getElementById('biz-page-content'); if(w && window.renderPartnerLanding) w.innerHTML=renderPartnerLanding('apply'); },0);
 if (window._fbReady) { initBusinessPage(); }
 else { document.addEventListener('fbready', initBusinessPage, {once:true}); }
 </script>

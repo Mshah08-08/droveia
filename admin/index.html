@@ -893,6 +893,8 @@ body{background:#f6f8ff;font-family:'Sora',sans-serif;padding-top:0!important;ma
 .adm-table td{padding:12px 14px;font-size:13px;color:#111;border-bottom:1px solid #f8f8f8;vertical-align:middle}
 .adm-table tr:last-child td{border-bottom:none}
 .adm-table tr:hover td{background:#fafafa}
+.ps-card{background:#fff;border:1px solid #e8e8e8;border-radius:10px;overflow:hidden;transition:.15s}
+.ps-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.08);transform:translateY(-1px)}
 @media(max-width:768px){.adm-sidebar{display:none}.adm-main{margin-left:0}.adm-content{padding:16px}}
 
 </style>
@@ -4575,13 +4577,8 @@ window.renderAdmInventory = async function(wrap) {
     }).join(''),
     '</tbody></table></div>',
     '</div>',
-    // Pending inventory from partners
-    '<div class="adm-card" style="margin-top:16px">',
-    '<div class="adm-card-header"><div class="adm-card-title">Pending Partner Submissions</div></div>',
-    '<div class="adm-card-body" id="adm-pending-inv">Loading...</div>',
-    '</div>',
+
   ].join('');
-  loadAdmPendingInventory();
 };
 
 window.admTogglePartnerItems = function(el) { var next = el.nextElementSibling; if(next) next.style.display = next.style.display==='none' ? 'block' : 'none'; };
@@ -4770,84 +4767,122 @@ window.adminForceApprove = async function(idOrEl) {
 window.renderAdmPartnerStock = async function(wrap) {
   var fb = window._fb;
   try {
-    // Load partners + their inventory
-    var [pSnap, iSnap] = await Promise.all([
+    var [pSnap, pendSnap] = await Promise.all([
       fb.getDocs(fb.collection(fb.db,'partners')),
-      fb.getDocs(fb.query(fb.collection(fb.db,'pendingInventory'),fb.where('status','==','approved')))
+      fb.getDocs(fb.query(fb.collection(fb.db,'pendingInventory'), fb.where('status','==','pending')))
     ]);
-    var partners = pSnap.docs.map(function(d){return Object.assign({_id:d.id},d.data());});
-    var inventory = iSnap.docs.map(function(d){return Object.assign({_id:d.id},d.data());});
-
-    // Also include RTDB tools that have partnerEmail
+    var partners  = pSnap.docs.map(function(d){return Object.assign({_id:d.id},d.data());});
+    var pending   = pendSnap.docs.map(function(d){return Object.assign({_id:d.id},d.data());});
     var partnerTools = TOOLS.filter(function(t){return t.partnerEmail;});
 
+    // Map pending by partner email
+    var pendingByPartner = {};
+    pending.forEach(function(item){
+      var key = item.partnerEmail||'unknown';
+      if(!pendingByPartner[key]) pendingByPartner[key]=[];
+      pendingByPartner[key].push(item);
+    });
+
     if (!partners.length) {
-      wrap.innerHTML = '<div class="adm-card"><div class="adm-card-body" style="text-align:center;padding:40px;color:#9ca3af">No partners yet. Add partners in the Partners tab.</div></div>';
+      wrap.innerHTML = '<div class="adm-card"><div class="adm-card-body" style="text-align:center;padding:40px;color:#9ca3af">No partners yet.</div></div>';
       return;
     }
 
-    var html = partners.map(function(p) {
-      var pTools = partnerTools.filter(function(t){return t.partnerEmail===p.email;});
-      var pInv   = inventory.filter(function(i){return i.partnerEmail===p.email;});
-      var allItems = pTools.concat(pInv.filter(function(i){
-        return !pTools.some(function(t){return t.name===i.name;});
-      }));
+    // Partner grid cards
+    var gridCards = partners.map(function(p) {
+      var pTools   = partnerTools.filter(function(t){return t.partnerEmail===p.email;});
+      var pPending = pendingByPartner[p.email]||[];
+      var hasPending = pPending.length > 0;
+      var initials = p.name.split(' ').map(function(w){return w[0];}).slice(0,2).join('').toUpperCase();
 
-      var itemCards = allItems.length ? allItems.map(function(item) {
-        var isRtdb = item.id !== undefined;
-        var avail  = item.available !== false;
-        var img    = item.img && item.img!=='x' ? item.img : (item.imgUrl||null);
-        return '<div style="background:#fff;border:1px solid #e8e8e8;border-radius:10px;overflow:hidden;position:relative">'
-          +'<div style="height:100px;background:#f8f9fa;display:flex;align-items:center;justify-content:center;overflow:hidden">'
-          +(img?'<img src="'+img+'" style="width:100%;height:100%;object-fit:contain;padding:8px">':'<div style="font-size:28px">🔧</div>')
-          +'</div>'
-          +'<div style="padding:10px">'
-          +'<div style="font-size:13px;font-weight:700;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+item.name+'</div>'
-          +'<div style="font-size:11px;color:#9ca3af;margin:2px 0 6px">'
-          +'<span class="adm-badge adm-badge-blue" style="font-size:10px">'+item.cat+'</span>'
-          +' · '+(isRtdb?'$'+calcCost(item,1).toFixed(2)+'/hr':'$'+(item.pph||0).toFixed(2)+'/hr')
-          +'</div>'
-          +'<div style="display:flex;align-items:center;justify-content:space-between">'
-          +(isRtdb
-            ? '<span class="adm-badge '+(avail?'adm-badge-green':'adm-badge-red')+'">'+(avail?'Live':'Rented')+'</span>'
-              +'<button class="adm-btn-danger" onclick="admRemovePartnerTool('+item.id+')" style="font-size:10px;padding:3px 8px">Remove</button>'
-            : '<span class="adm-badge adm-badge-amber">Approved</span>'
-          )
-          +'</div>'
-          +'</div></div>';
-      }).join('') : '<div style="grid-column:1/-1;color:#9ca3af;font-size:13px;padding:8px 0">No items yet.</div>';
-
-      return '<div class="adm-card" style="margin-bottom:20px">'
-        +'<div class="adm-card-header">'
-        +'<div style="display:flex;align-items:center;gap:10px">'
-        +'<div style="width:36px;height:36px;border-radius:8px;background:#1a6ef0;color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800">'+p.name[0].toUpperCase()+'</div>'
-        +'<div><div class="adm-card-title">'+p.name+'</div><div style="font-size:11px;color:#9ca3af">'+p.email+'</div></div>'
+      return '<div class="ps-card" onclick="admOpenPartner(this.dataset.pid,this.dataset.email)" data-pid="'+p._id+'" data-email="'+p.email+'" style="cursor:pointer;position:relative">'
+        +(hasPending?'<div style="position:absolute;top:8px;right:8px;background:#ef4444;color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:10px;z-index:2">'+pPending.length+' pending</div>':'')
+        +'<div style="height:80px;background:linear-gradient(135deg,#eff6ff,#dbeafe);display:flex;align-items:center;justify-content:center">'
+        +(p.logoUrl?'<img src="'+p.logoUrl+'" style="max-width:80%;max-height:64px;object-fit:contain">':'<div style="width:52px;height:52px;border-radius:12px;background:#1a6ef0;color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800">'+initials+'</div>')
         +'</div>'
-        +'<span class="adm-badge adm-badge-blue">'+allItems.length+' items</span>'
-        +'</div>'
-        +'<div style="padding:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px">'
-        + itemCards
+        +'<div style="padding:12px">'
+        +'<div style="font-size:13px;font-weight:700;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+p.name+'</div>'
+        +'<div style="font-size:11px;color:#9ca3af;margin-top:2px">'+pTools.length+' live items'+(hasPending?' · <span style="color:#d97706;font-weight:600">'+pPending.length+' pending</span>':'')+'</div>'
         +'</div>'
         +'</div>';
     }).join('');
-    wrap.innerHTML = html;
+
+    wrap.innerHTML = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:24px" id="ps-grid">'
+      + gridCards + '</div>'
+      + '<div id="ps-detail" style="display:none"></div>';
+
   } catch(e) { wrap.innerHTML = '<div style="color:#ef4444;padding:20px">Error: '+e.message+'</div>'; }
+};
+
+window.admClosePartnerDetail = function() { var d=document.getElementById("ps-detail"); if(d)d.style.display="none"; };
+window.admOpenPartner = async function(partnerId, email) {
+  var fb = window._fb;
+  var detail = document.getElementById('ps-detail');
+  if (!detail) return;
+  detail.style.display = 'block';
+  detail.innerHTML = '<div style="color:#9ca3af;padding:20px;font-size:13px">Loading partner stock...</div>';
+
+  // Scroll to detail
+  detail.scrollIntoView({behavior:'smooth',block:'start'});
+
+  var pTools   = TOOLS.filter(function(t){return t.partnerEmail===email;});
+  var pendSnap = await fb.getDocs(fb.query(fb.collection(fb.db,'pendingInventory'),fb.where('partnerEmail','==',email)));
+  var pending  = pendSnap.docs.map(function(d){return Object.assign({_id:d.id},d.data());});
+  var pSnap    = await fb.getDocs(fb.query(fb.collection(fb.db,'partners'),fb.where('email','==',email)));
+  var partner  = pSnap.empty ? {name:email} : pSnap.docs[0].data();
+
+  var liveHtml = pTools.length ? pTools.map(function(t){
+    var avail = t.available!==false;
+    var img   = t.img&&t.img!=='x'?t.img:null;
+    return '<div class="ps-card">'
+      +'<div style="height:80px;background:#f8f9fa;display:flex;align-items:center;justify-content:center">'+(img?'<img src="'+img+'" style="max-width:90%;max-height:72px;object-fit:contain">':'<div style="font-size:28px">🔧</div>')+'</div>'
+      +'<div style="padding:10px">'
+      +'<div style="font-size:12px;font-weight:700;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+t.name+'</div>'
+      +'<div style="font-size:10px;color:#9ca3af;margin:2px 0"><span class="adm-badge adm-badge-blue" style="font-size:9px">'+t.cat+'</span> $'+calcCost(t,1).toFixed(2)+'/hr</div>'
+      +'<div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px">'
+      +'<span class="adm-badge '+(avail?'adm-badge-green':'adm-badge-red')+'" style="font-size:9px">'+(avail?'Live':'Rented')+'</span>'
+      +'<button class="adm-btn-danger" onclick="admRemovePartnerTool('+t.id+')" style="font-size:9px;padding:3px 7px">Remove</button>'
+      +'</div></div></div>';
+  }).join('') : '<div style="color:#9ca3af;font-size:13px;padding:8px">No live items.</div>';
+
+  var pendHtml = pending.filter(function(i){return i.status==='pending';}).map(function(item){
+    return '<div class="ps-card" id="pend-row-'+item._id+'">'
+      +'<div style="height:80px;background:#fff8eb;display:flex;align-items:center;justify-content:center">'+(item.imgUrl?'<img src="'+item.imgUrl+'" style="max-width:90%;max-height:72px;object-fit:contain">':'<div style="font-size:28px">📦</div>')+'</div>'
+      +'<div style="padding:10px">'
+      +'<div style="font-size:12px;font-weight:700;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+item.name+'</div>'
+      +'<div style="font-size:10px;color:#9ca3af;margin:2px 0"><span class="adm-badge adm-badge-amber" style="font-size:9px">pending</span> $'+(item.pph||0).toFixed(2)+'/hr</div>'
+      +'<div style="display:flex;gap:4px;margin-top:6px">'
+      +'<button class="adm-btn-green" onclick="admApproveInventory(this)" data-id="'+item._id+'" data-item="'+encodeURIComponent(JSON.stringify(item))+'" style="font-size:9px;padding:3px 8px;flex:1">✓</button>'
+      +'<button class="adm-btn-danger" onclick="admRejectInventory(this.dataset.id)" data-id="'+item._id+'" style="font-size:9px;padding:3px 8px;flex:1">✕</button>'
+      +'</div></div></div>';
+  }).join('') || '<div style="color:#9ca3af;font-size:13px;padding:8px">No pending items.</div>';
+
+  detail.innerHTML = '<div class="adm-card">'
+    +'<div class="adm-card-header">'
+    +'<div style="display:flex;align-items:center;gap:10px">'
+    +'<button class="adm-btn-ghost" onclick="admClosePartnerDetail()" style="padding:5px 10px;font-size:12px">← Back</button>'
+    +'<div class="adm-card-title">'+partner.name+'</div>'
+    +'</div></div>'
+    +'<div style="padding:16px">'
+    +'<div style="font-size:12px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Live Inventory</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:20px">'+liveHtml+'</div>'
+    +'<div style="font-size:12px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Pending Approval</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px">'+pendHtml+'</div>'
+    +'</div></div>';
 };
 
 window.admRemovePartnerTool = async function(toolId) {
   if (!confirm('Remove this tool from the live catalog?')) return;
   var idx = TOOLS.findIndex(function(t){return t.id===toolId;});
-  if (idx < 0) return;
-  TOOLS.splice(idx, 1);
+  if (idx<0) return;
+  TOOLS.splice(idx,1);
   try {
-    await fetch('https://droveia-default-rtdb.firebaseio.com/tools.json',{
-      method:'PUT', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify(TOOLS)
-    });
+    await fetch('https://droveia-default-rtdb.firebaseio.com/tools.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(TOOLS)});
     showToast('Tool removed');
-    admTab('partnerstock', document.getElementById('adm-nav-partnerstock'));
-  } catch(e) { showToast('Error: '+e.message); }
+    admTab('partnerstock',document.getElementById('adm-nav-partnerstock'));
+  } catch(e){showToast('Error: '+e.message);}
 };
+
 
 window.renderAdmPartners = async function(wrap) {
   var fb = window._fb;

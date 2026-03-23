@@ -1170,7 +1170,7 @@ html, body { height:100%; }
 
 
 <!-- ═══ BROWSE ALL PAGE ═══ -->
-<div class="page" id="page-browse-all" style="display:none">
+<div class="page" id="page-browse-all">
 <div style="display:flex;height:calc(100vh - 60px);background:#fff;overflow:hidden">
 
   <!-- Sidebar -->
@@ -3506,8 +3506,8 @@ function startApp() {
       window._addrConfirmMap.fitBounds(confirmBounds, { top: 40, right: 40, bottom: 40, left: 40 });
       // Clamp zoom so we don't zoom out too far if pins are same spot
       window.google.maps.event.addListenerOnce(window._addrConfirmMap, 'idle', function() {
-        if (window._addrConfirmMap.getZoom() > 20) window._addrConfirmMap.setZoom(20);
-        if (window._addrConfirmMap.getZoom() < 17) window._addrConfirmMap.setZoom(17);
+        if (window._addrConfirmMap?.getZoom() > 20) window._addrConfirmMap.setZoom(20);
+        if (window._addrConfirmMap?.getZoom() < 17) window._addrConfirmMap.setZoom(17);
       });
       new window.google.maps.Rectangle({
         bounds: tightBounds, map: window._addrConfirmMap,
@@ -3731,6 +3731,9 @@ function startApp() {
       if (adminBtn) adminBtn.style.display = "none";
     }
   });
+  // Update nav address
+  var _al = document.getElementById('nav-address-label');
+  if (_al && userProfile) _al.textContent = userProfile.address || userProfile.building || 'Set address';
 }
 
 
@@ -4065,130 +4068,6 @@ if (_savedPage && _savedPage !== "admin") {
   showPage(_savedPage);
 }
 
-
-</script>
-
-
-
-<!-- Mobile bottom nav -->
-<div class="mobile-nav" id="mobile-nav">
-  <button class="mobile-nav-item active" id="mnav-home" onclick="showPage('home');updateMobileNav('home')">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-    Home
-  </button>
-  <button class="mobile-nav-item" id="mnav-browse" onclick="showPage('browse');updateMobileNav('browse')">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-    Browse
-  </button>
-  <button class="mobile-nav-item" id="mnav-cart" onclick="showPage('cart');updateMobileNav('cart')">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
-    Cart
-  </button>
-  <button class="mobile-nav-item" id="mnav-orders" onclick="showPage('orders');updateMobileNav('orders')">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-    Orders
-  </button>
-  <button class="mobile-nav-item" id="mnav-account" onclick="showPage('account');updateMobileNav('account')">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-    Account
-  </button>
-</div>
-
-
-<!-- ══ ADMIN PAGE ══════════════════════════════════════════════════════════ -->
-<div class="page" id="page-admin">
-  <div class="admin-wrap" id="admin-content">
-    <!-- Login gate shown by default, replaced by JS -->
-    <div class="admin-login-gate" id="admin-gate">
-      <h2>Admin Access</h2>
-      <p>Sign in with an authorized admin account to continue.</p>
-      <button class="btn-primary" onclick="showAuth()">Sign In</button>
-    </div>
-  </div>
-</div>
-
-
-<!-- Confirm Modal -->
-<div class="confirm-modal hidden" id="confirm-modal">
-  <div class="confirm-box">
-    <div class="confirm-box-icon" id="confirm-icon"></div>
-    <div class="confirm-box-title" id="confirm-title">Are you sure?</div>
-    <div class="confirm-box-msg" id="confirm-msg"></div>
-    <div class="confirm-box-actions">
-      <button class="confirm-cancel-btn" onclick="closeConfirm()">Cancel</button>
-      <button class="confirm-ok" id="confirm-ok-btn" onclick="confirmOk()">Confirm</button>
-    </div>
-  </div>
-</div>
-<!-- Review Modal -->
-<div class="review-modal hidden" id="review-modal">
-  <div class="review-box">
-    <button class="review-close" onclick="closeReviewModal()">✕</button>
-    <div class="review-box-title" id="review-modal-title">Review Tool</div>
-    <div class="review-box-sub" id="review-modal-sub">Share your experience</div>
-    <div class="star-picker" id="star-picker">
-      <span class="star-pick" onclick="setReviewStar(1)">★</span>
-      <span class="star-pick" onclick="setReviewStar(2)">★</span>
-      <span class="star-pick" onclick="setReviewStar(3)">★</span>
-      <span class="star-pick" onclick="setReviewStar(4)">★</span>
-      <span class="star-pick" onclick="setReviewStar(5)">★</span>
-    </div>
-    <textarea class="review-textarea" id="review-text" placeholder="What did you think? Was it easy to use, in good condition..."></textarea>
-    <button class="review-submit-btn" onclick="submitReview()">Submit Review</button>
-  </div>
-</div>
-
-  <button class="theme-fab" id="theme-toggle" onclick="toggleTheme()" title="Toggle dark/light mode">
-    <svg id="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
-    <svg id="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-  </button>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-
-
-<!-- Order confirm modal -->
-<div id="order-confirm-overlay" class="modal-overlay hidden" onclick="closeOrderConfirm(event)" style="z-index:4500">
-  <div class="modal-box" style="max-width:480px;padding:0;overflow:hidden;background:#fff" onclick="event.stopPropagation()">
-    <div style="padding:20px 24px 16px;border-bottom:1px solid #e2e8f0;background:#fff">
-      <div style="font-size:17px;font-weight:800;letter-spacing:-.02em;color:#0f0f1a">Confirm Order</div>
-      <div style="font-size:12px;color:#6b7280;margin-top:3px">Review your delivery details before placing.</div>
-    </div>
-    <div id="order-confirm-body" style="padding:16px 24px;background:#fff"></div>
-    <div style="padding:14px 24px;border-top:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;gap:12px;background:#fff">
-      <button onclick="closeOrderConfirm()" style="background:transparent;color:#6b7280;border:1px solid #e2e8f0;border-radius:10px;padding:10px 18px;font-size:14px;cursor:pointer;font-family:inherit">Cancel</button>
-      <button onclick="submitOrderConfirm()" style="background:#1a6ef0;color:#fff;border:none;border-radius:10px;padding:10px 24px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">Place Order</button>
-    </div>
-  </div>
-</div>
-
-
-<!-- Stripe Payment Modal -->
-<div id="stripe-overlay" class="modal-overlay hidden" style="z-index:2000">
-  <div class="modal-box" style="max-width:420px;width:100%">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
-      <div>
-        <div style="font-size:17px;font-weight:800">Payment</div>
-        <div id="stripe-amount-label" style="font-size:13px;color:var(--muted);margin-top:2px"></div>
-      </div>
-      <button onclick="closeStripeModal()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:20px;padding:4px">&#x2715;</button>
-    </div>
-    <!-- Stripe card element -->
-    <div id="stripe-card-wrap" style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px 12px;margin-bottom:16px">
-      <div id="stripe-card-element"></div>
-    </div>
-    <div id="stripe-error" style="color:#e53e3e;font-size:12px;margin-bottom:12px;display:none"></div>
-    <button id="stripe-pay-btn" onclick="submitStripePayment()" class="checkout-btn" style="margin:0">
-      Pay &amp; Place Order
-    </button>
-    <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:10px">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-      <span style="font-size:11px;color:var(--muted)">Secured by Stripe — test mode</span>
-    </div>
-  </div>
-</div>
-
-
-<script>
-
 var _baCat = 'All', _baSearch = '';
 
 window.baFilterCat = function(cat) {
@@ -4364,9 +4243,124 @@ window.homeSeeAllCat = function(cat) {
     renderBrowseAllGrid();
   }, 50);
 };
-
-
 </script>
+
+
+
+<!-- Mobile bottom nav -->
+<div class="mobile-nav" id="mobile-nav">
+  <button class="mobile-nav-item active" id="mnav-home" onclick="showPage('home');updateMobileNav('home')">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    Home
+  </button>
+  <button class="mobile-nav-item" id="mnav-browse" onclick="showPage('browse');updateMobileNav('browse')">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+    Browse
+  </button>
+  <button class="mobile-nav-item" id="mnav-cart" onclick="showPage('cart');updateMobileNav('cart')">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+    Cart
+  </button>
+  <button class="mobile-nav-item" id="mnav-orders" onclick="showPage('orders');updateMobileNav('orders')">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    Orders
+  </button>
+  <button class="mobile-nav-item" id="mnav-account" onclick="showPage('account');updateMobileNav('account')">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    Account
+  </button>
+</div>
+
+
+<!-- ══ ADMIN PAGE ══════════════════════════════════════════════════════════ -->
+<div class="page" id="page-admin">
+  <div class="admin-wrap" id="admin-content">
+    <!-- Login gate shown by default, replaced by JS -->
+    <div class="admin-login-gate" id="admin-gate">
+      <h2>Admin Access</h2>
+      <p>Sign in with an authorized admin account to continue.</p>
+      <button class="btn-primary" onclick="showAuth()">Sign In</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Confirm Modal -->
+<div class="confirm-modal hidden" id="confirm-modal">
+  <div class="confirm-box">
+    <div class="confirm-box-icon" id="confirm-icon"></div>
+    <div class="confirm-box-title" id="confirm-title">Are you sure?</div>
+    <div class="confirm-box-msg" id="confirm-msg"></div>
+    <div class="confirm-box-actions">
+      <button class="confirm-cancel-btn" onclick="closeConfirm()">Cancel</button>
+      <button class="confirm-ok" id="confirm-ok-btn" onclick="confirmOk()">Confirm</button>
+    </div>
+  </div>
+</div>
+<!-- Review Modal -->
+<div class="review-modal hidden" id="review-modal">
+  <div class="review-box">
+    <button class="review-close" onclick="closeReviewModal()">✕</button>
+    <div class="review-box-title" id="review-modal-title">Review Tool</div>
+    <div class="review-box-sub" id="review-modal-sub">Share your experience</div>
+    <div class="star-picker" id="star-picker">
+      <span class="star-pick" onclick="setReviewStar(1)">★</span>
+      <span class="star-pick" onclick="setReviewStar(2)">★</span>
+      <span class="star-pick" onclick="setReviewStar(3)">★</span>
+      <span class="star-pick" onclick="setReviewStar(4)">★</span>
+      <span class="star-pick" onclick="setReviewStar(5)">★</span>
+    </div>
+    <textarea class="review-textarea" id="review-text" placeholder="What did you think? Was it easy to use, in good condition..."></textarea>
+    <button class="review-submit-btn" onclick="submitReview()">Submit Review</button>
+  </div>
+</div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+
+
+<!-- Order confirm modal -->
+<div id="order-confirm-overlay" class="modal-overlay hidden" onclick="closeOrderConfirm(event)" style="z-index:4500">
+  <div class="modal-box" style="max-width:480px;padding:0;overflow:hidden;background:#fff" onclick="event.stopPropagation()">
+    <div style="padding:20px 24px 16px;border-bottom:1px solid #e2e8f0;background:#fff">
+      <div style="font-size:17px;font-weight:800;letter-spacing:-.02em;color:#0f0f1a">Confirm Order</div>
+      <div style="font-size:12px;color:#6b7280;margin-top:3px">Review your delivery details before placing.</div>
+    </div>
+    <div id="order-confirm-body" style="padding:16px 24px;background:#fff"></div>
+    <div style="padding:14px 24px;border-top:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;gap:12px;background:#fff">
+      <button onclick="closeOrderConfirm()" style="background:transparent;color:#6b7280;border:1px solid #e2e8f0;border-radius:10px;padding:10px 18px;font-size:14px;cursor:pointer;font-family:inherit">Cancel</button>
+      <button onclick="submitOrderConfirm()" style="background:#1a6ef0;color:#fff;border:none;border-radius:10px;padding:10px 24px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">Place Order</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Stripe Payment Modal -->
+<div id="stripe-overlay" class="modal-overlay hidden" style="z-index:2000">
+  <div class="modal-box" style="max-width:420px;width:100%">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+      <div>
+        <div style="font-size:17px;font-weight:800">Payment</div>
+        <div id="stripe-amount-label" style="font-size:13px;color:var(--muted);margin-top:2px"></div>
+      </div>
+      <button onclick="closeStripeModal()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:20px;padding:4px">&#x2715;</button>
+    </div>
+    <!-- Stripe card element -->
+    <div id="stripe-card-wrap" style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px 12px;margin-bottom:16px">
+      <div id="stripe-card-element"></div>
+    </div>
+    <div id="stripe-error" style="color:#e53e3e;font-size:12px;margin-bottom:12px;display:none"></div>
+    <button id="stripe-pay-btn" onclick="submitStripePayment()" class="checkout-btn" style="margin:0">
+      Pay &amp; Place Order
+    </button>
+    <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:10px">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+      <span style="font-size:11px;color:var(--muted)">Secured by Stripe — test mode</span>
+    </div>
+  </div>
+</div>
+
+
+
 
 </body>
 </html>

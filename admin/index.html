@@ -4547,26 +4547,32 @@ window.renderAdmTab = async function(tab) {
 
 // ── INVENTORY ────────────────────────────────────────────────────────────────
 window.renderAdmInventory = async function(wrap) {
-  wrap.innerHTML = [
+  var droTools = TOOLS.filter(function(t){ return !t.partnerEmail; });
+  var html = [
     '<div class="adm-card">',
-    '<div class="adm-card-header"><div class="adm-card-title">Tools ('+TOOLS.length+')</div>',
+    '<div class="adm-card-header">',
+    '<div class="adm-card-title">Droveia Stock ('+droTools.length+')</div>',
+    '<div style="display:flex;gap:8px;align-items:center">',
+    '<div style="display:flex;align-items:center;gap:6px;background:#f8f9fa;border:1.5px solid #e8e8e8;border-radius:8px;padding:7px 12px">',
+    '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>',
+    '<input id="adm-inv-search" type="text" placeholder="Search stock..." oninput="admFilterInventory()" style="border:none;outline:none;background:transparent;font-size:13px;color:#111;font-family:var(--font);width:160px">',
+    '</div>',
     '<button class="adm-btn adm-btn-sm" onclick="adminShowAddTool()">+ Add Tool</button>',
+    '</div>',
     '</div>',
     '<div id="admin-add-form-wrap"></div>',
     '<div id="admin-edit-form-wrap"></div>',
-    '<div style="overflow-x:auto"><table class="adm-table">',
-    '<thead><tr><th></th><th>Name</th><th>Category</th><th>Partner</th><th>Price/hr</th><th>Qty / Rented</th><th>Status</th><th>Actions</th></tr></thead>',
-    '<tbody>',
-    TOOLS.map(function(t){
-      var avail = t.available !== false;
-      var imgHtml = (t.img && t.img !== 'x')
-        ? '<img src="'+t.img+'" style="width:36px;height:36px;border-radius:6px;object-fit:contain;background:#f8f8f8">'
-        : '<div style="width:36px;height:36px;border-radius:6px;background:#f0f4ff;display:flex;align-items:center;justify-content:center;font-size:16px">🔧</div>';
+    '<div style="overflow-x:auto"><table class="adm-table" id="adm-inv-table"><thead><tr>',
+    '<th></th><th>Name</th><th>Category</th><th>Price/hr</th><th>Qty / Rented</th><th>Status</th><th>Actions</th>',
+    '</tr></thead>',
+    '<tbody id="adm-inv-body">',
+    droTools.map(function(t){
+      var avail=t.available!==false;
+      var img=t.img&&t.img!=='x'?'<img src="'+t.img+'" style="width:36px;height:36px;border-radius:6px;object-fit:contain;background:#f8f8f8">':'<div style="width:36px;height:36px;border-radius:6px;background:#f0f4ff;display:flex;align-items:center;justify-content:center;font-size:16px">🔧</div>';
       return '<tr>'
-        +'<td>'+imgHtml+'</td>'
+        +'<td>'+img+'</td>'
         +'<td><div style="font-weight:600;font-size:13px">'+t.name+'</div><div style="font-size:11px;color:#9ca3af">ID: '+t.id+'</div></td>'
         +'<td><span class="adm-badge adm-badge-blue" style="font-size:10px">'+t.cat+'</span></td>'
-        +'<td style="font-size:11px;color:#9ca3af">'+(t.partnerName||'Droveia')+'</td>'
         +'<td style="font-weight:600">$'+calcCost(t,1).toFixed(2)+'<span style="font-size:10px;color:#9ca3af">/hr</span></td>'
         +'<td><span style="font-weight:600">'+t.qty+'</span><span style="color:#9ca3af"> / '+(t.rentedQty||0)+'</span></td>'
         +'<td><span class="adm-badge '+(avail?'adm-badge-green':'adm-badge-red')+'">'+(avail?'Available':'Rented')+'</span></td>'
@@ -4577,11 +4583,33 @@ window.renderAdmInventory = async function(wrap) {
     }).join(''),
     '</tbody></table></div>',
     '</div>',
-
   ].join('');
+  wrap.innerHTML = html;
 };
 
-window.admTogglePartnerItems = function(el) { var next = el.nextElementSibling; if(next) next.style.display = next.style.display==='none' ? 'block' : 'none'; };
+window.admFilterInventory = function() {
+  var q = (document.getElementById('adm-inv-search')||{value:''}).value.toLowerCase();
+  var droTools = TOOLS.filter(function(t){ return !t.partnerEmail; });
+  var filtered = q ? droTools.filter(function(t){ return t.name.toLowerCase().indexOf(q)>=0 || t.cat.toLowerCase().indexOf(q)>=0; }) : droTools;
+  var body = document.getElementById('adm-inv-body');
+  if (!body) return;
+  body.innerHTML = filtered.map(function(t){
+    var avail=t.available!==false;
+    var img=t.img&&t.img!=='x'?'<img src="'+t.img+'" style="width:36px;height:36px;border-radius:6px;object-fit:contain;background:#f8f8f8">':'<div style="width:36px;height:36px;border-radius:6px;background:#f0f4ff;display:flex;align-items:center;justify-content:center;font-size:16px">🔧</div>';
+    return '<tr>'
+      +'<td>'+img+'</td>'
+      +'<td><div style="font-weight:600;font-size:13px">'+t.name+'</div><div style="font-size:11px;color:#9ca3af">ID: '+t.id+'</div></td>'
+      +'<td><span class="adm-badge adm-badge-blue" style="font-size:10px">'+t.cat+'</span></td>'
+      +'<td style="font-weight:600">$'+calcCost(t,1).toFixed(2)+'<span style="font-size:10px;color:#9ca3af">/hr</span></td>'
+      +'<td><span style="font-weight:600">'+t.qty+'</span><span style="color:#9ca3af"> / '+(t.rentedQty||0)+'</span></td>'
+      +'<td><span class="adm-badge '+(avail?'adm-badge-green':'adm-badge-red')+'">'+(avail?'Available':'Rented')+'</span></td>'
+      +'<td><div style="display:flex;gap:6px">'
+      +'<button class="adm-btn-ghost" onclick="adminEditTool('+t.id+')" style="font-size:11px;padding:5px 10px">Edit</button>'
+      +'<button class="adm-btn-danger" onclick="adminDeleteTool('+t.id+')" style="font-size:11px;padding:5px 10px">Del</button>'
+      +'</div></td></tr>';
+  }).join('');
+};
+
 window.loadAdmPendingInventory = async function() {
   var wrap = document.getElementById('adm-pending-inv');
   if (!wrap) return;
@@ -4775,12 +4803,11 @@ window.renderAdmPartnerStock = async function(wrap) {
     var pending   = pendSnap.docs.map(function(d){return Object.assign({_id:d.id},d.data());});
     var partnerTools = TOOLS.filter(function(t){return t.partnerEmail;});
 
-    // Map pending by partner email
     var pendingByPartner = {};
     pending.forEach(function(item){
-      var key = item.partnerEmail||'unknown';
-      if(!pendingByPartner[key]) pendingByPartner[key]=[];
-      pendingByPartner[key].push(item);
+      var k=item.partnerEmail||'unknown';
+      if(!pendingByPartner[k])pendingByPartner[k]=[];
+      pendingByPartner[k].push(item);
     });
 
     if (!partners.length) {
@@ -4788,89 +4815,80 @@ window.renderAdmPartnerStock = async function(wrap) {
       return;
     }
 
-    // Partner grid cards
     var gridCards = partners.map(function(p) {
       var pTools   = partnerTools.filter(function(t){return t.partnerEmail===p.email;});
       var pPending = pendingByPartner[p.email]||[];
-      var hasPending = pPending.length > 0;
       var initials = p.name.split(' ').map(function(w){return w[0];}).slice(0,2).join('').toUpperCase();
-
       return '<div class="ps-card" onclick="admOpenPartner(this.dataset.pid,this.dataset.email)" data-pid="'+p._id+'" data-email="'+p.email+'" style="cursor:pointer;position:relative">'
-        +(hasPending?'<div style="position:absolute;top:8px;right:8px;background:#ef4444;color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:10px;z-index:2">'+pPending.length+' pending</div>':'')
-        +'<div style="height:80px;background:linear-gradient(135deg,#eff6ff,#dbeafe);display:flex;align-items:center;justify-content:center">'
-        +(p.logoUrl?'<img src="'+p.logoUrl+'" style="max-width:80%;max-height:64px;object-fit:contain">':'<div style="width:52px;height:52px;border-radius:12px;background:#1a6ef0;color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800">'+initials+'</div>')
+        +(pPending.length?'<div style="position:absolute;top:10px;right:10px;background:#ef4444;color:#fff;font-size:10px;font-weight:800;padding:2px 8px;border-radius:10px;z-index:2">'+pPending.length+' pending</div>':'')
+        +'<div style="height:110px;background:linear-gradient(135deg,#eff6ff,#dbeafe);display:flex;align-items:center;justify-content:center">'
+        +(p.logoUrl?'<img src="'+p.logoUrl+'" style="max-width:80%;max-height:90px;object-fit:contain">':'<div style="width:64px;height:64px;border-radius:14px;background:#1a6ef0;color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800">'+initials+'</div>')
         +'</div>'
-        +'<div style="padding:12px">'
-        +'<div style="font-size:13px;font-weight:700;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+p.name+'</div>'
-        +'<div style="font-size:11px;color:#9ca3af;margin-top:2px">'+pTools.length+' live items'+(hasPending?' · <span style="color:#d97706;font-weight:600">'+pPending.length+' pending</span>':'')+'</div>'
+        +'<div style="padding:14px">'
+        +'<div style="font-size:14px;font-weight:700;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px">'+p.name+'</div>'
+        +'<div style="font-size:11px;color:#9ca3af">'+pTools.length+' live'+(pPending.length?' · <span style="color:#d97706;font-weight:600">'+pPending.length+' pending</span>':'')+'</div>'
+        +'<div style="margin-top:10px;padding-top:10px;border-top:1px solid #f0f0f0;font-size:11px;color:#6b7280">'+p.email+'</div>'
         +'</div>'
         +'</div>';
     }).join('');
 
-    wrap.innerHTML = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:24px" id="ps-grid">'
-      + gridCards + '</div>'
-      + '<div id="ps-detail" style="display:none"></div>';
-
+    wrap.innerHTML = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px">' + gridCards + '</div>';
   } catch(e) { wrap.innerHTML = '<div style="color:#ef4444;padding:20px">Error: '+e.message+'</div>'; }
 };
 
-window.admClosePartnerDetail = function() { var d=document.getElementById("ps-detail"); if(d)d.style.display="none"; };
 window.admOpenPartner = async function(partnerId, email) {
+  var wrap = document.getElementById('adm-content');
+  if (!wrap) return;
+  wrap.innerHTML = '<div style="text-align:center;padding:40px;color:#9ca3af">Loading...</div>';
   var fb = window._fb;
-  var detail = document.getElementById('ps-detail');
-  if (!detail) return;
-  detail.style.display = 'block';
-  detail.innerHTML = '<div style="color:#9ca3af;padding:20px;font-size:13px">Loading partner stock...</div>';
-
-  // Scroll to detail
-  detail.scrollIntoView({behavior:'smooth',block:'start'});
-
   var pTools   = TOOLS.filter(function(t){return t.partnerEmail===email;});
   var pendSnap = await fb.getDocs(fb.query(fb.collection(fb.db,'pendingInventory'),fb.where('partnerEmail','==',email)));
-  var pending  = pendSnap.docs.map(function(d){return Object.assign({_id:d.id},d.data());});
+  var pending  = pendSnap.docs.map(function(d){return Object.assign({_id:d.id},d.data());}).filter(function(i){return i.status==='pending';});
   var pSnap    = await fb.getDocs(fb.query(fb.collection(fb.db,'partners'),fb.where('email','==',email)));
   var partner  = pSnap.empty ? {name:email} : pSnap.docs[0].data();
 
   var liveHtml = pTools.length ? pTools.map(function(t){
-    var avail = t.available!==false;
-    var img   = t.img&&t.img!=='x'?t.img:null;
+    var avail=t.available!==false;
+    var img=t.img&&t.img!=='x'?t.img:null;
     return '<div class="ps-card">'
-      +'<div style="height:80px;background:#f8f9fa;display:flex;align-items:center;justify-content:center">'+(img?'<img src="'+img+'" style="max-width:90%;max-height:72px;object-fit:contain">':'<div style="font-size:28px">🔧</div>')+'</div>'
-      +'<div style="padding:10px">'
-      +'<div style="font-size:12px;font-weight:700;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+t.name+'</div>'
-      +'<div style="font-size:10px;color:#9ca3af;margin:2px 0"><span class="adm-badge adm-badge-blue" style="font-size:9px">'+t.cat+'</span> $'+calcCost(t,1).toFixed(2)+'/hr</div>'
-      +'<div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px">'
-      +'<span class="adm-badge '+(avail?'adm-badge-green':'adm-badge-red')+'" style="font-size:9px">'+(avail?'Live':'Rented')+'</span>'
-      +'<button class="adm-btn-danger" onclick="admRemovePartnerTool('+t.id+')" style="font-size:9px;padding:3px 7px">Remove</button>'
+      +'<div style="height:100px;background:#f8f9fa;display:flex;align-items:center;justify-content:center">'+(img?'<img src="'+img+'" style="max-width:90%;max-height:88px;object-fit:contain">':'<div style="font-size:32px">🔧</div>')+'</div>'
+      +'<div style="padding:12px">'
+      +'<div style="font-size:13px;font-weight:700;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px">'+t.name+'</div>'
+      +'<div style="font-size:11px;color:#9ca3af;margin-bottom:8px"><span class="adm-badge adm-badge-blue" style="font-size:10px">'+t.cat+'</span> · $'+calcCost(t,1).toFixed(2)+'/hr</div>'
+      +'<div style="display:flex;align-items:center;justify-content:space-between">'
+      +'<span class="adm-badge '+(avail?'adm-badge-green':'adm-badge-red')+'">'+(avail?'Live':'Rented')+'</span>'
+      +'<button class="adm-btn-danger" onclick="admRemovePartnerTool('+t.id+')" style="font-size:10px;padding:3px 8px">Remove</button>'
       +'</div></div></div>';
-  }).join('') : '<div style="color:#9ca3af;font-size:13px;padding:8px">No live items.</div>';
+  }).join('') : '<div style="color:#9ca3af;font-size:13px;padding:4px 0;grid-column:1/-1">No live items yet.</div>';
 
-  var pendHtml = pending.filter(function(i){return i.status==='pending';}).map(function(item){
-    return '<div class="ps-card" id="pend-row-'+item._id+'">'
-      +'<div style="height:80px;background:#fff8eb;display:flex;align-items:center;justify-content:center">'+(item.imgUrl?'<img src="'+item.imgUrl+'" style="max-width:90%;max-height:72px;object-fit:contain">':'<div style="font-size:28px">📦</div>')+'</div>'
-      +'<div style="padding:10px">'
-      +'<div style="font-size:12px;font-weight:700;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+item.name+'</div>'
-      +'<div style="font-size:10px;color:#9ca3af;margin:2px 0"><span class="adm-badge adm-badge-amber" style="font-size:9px">pending</span> $'+(item.pph||0).toFixed(2)+'/hr</div>'
-      +'<div style="display:flex;gap:4px;margin-top:6px">'
-      +'<button class="adm-btn-green" onclick="admApproveInventory(this)" data-id="'+item._id+'" data-item="'+encodeURIComponent(JSON.stringify(item))+'" style="font-size:9px;padding:3px 8px;flex:1">✓</button>'
-      +'<button class="adm-btn-danger" onclick="admRejectInventory(this.dataset.id)" data-id="'+item._id+'" style="font-size:9px;padding:3px 8px;flex:1">✕</button>'
+  var pendHtml = pending.length ? pending.map(function(item){
+    return '<div class="ps-card" id="pend-row-'+item._id+'" style="border:1.5px solid #fde68a">'
+      +'<div style="height:100px;background:#fffbeb;display:flex;align-items:center;justify-content:center">'+(item.imgUrl?'<img src="'+item.imgUrl+'" style="max-width:90%;max-height:88px;object-fit:contain">':'<div style="font-size:32px">📦</div>')+'</div>'
+      +'<div style="padding:12px">'
+      +'<div style="font-size:13px;font-weight:700;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px">'+item.name+'</div>'
+      +'<div style="font-size:11px;color:#9ca3af;margin-bottom:8px"><span class="adm-badge adm-badge-amber" style="font-size:10px">'+item.cat+'</span> · $'+(item.pph||0).toFixed(2)+'/hr · qty '+item.qty+'</div>'
+      +(item.desc?'<div style="font-size:11px;color:#6b7280;margin-bottom:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+item.desc+'</div>':'')
+      +'<div style="display:flex;gap:6px">'
+      +'<button class="adm-btn-green" onclick="admApproveInventory(this)" data-id="'+item._id+'" data-item="'+encodeURIComponent(JSON.stringify(item))+'" style="flex:1;font-size:11px;padding:6px">✓ Approve</button>'
+      +'<button class="adm-btn-danger" onclick="admRejectInventory(this.dataset.id)" data-id="'+item._id+'" style="flex:1;font-size:11px;padding:6px">✕ Reject</button>'
       +'</div></div></div>';
-  }).join('') || '<div style="color:#9ca3af;font-size:13px;padding:8px">No pending items.</div>';
+  }).join('') : '<div style="color:#9ca3af;font-size:13px;padding:4px 0;grid-column:1/-1">No pending submissions.</div>';
 
-  detail.innerHTML = '<div class="adm-card">'
-    +'<div class="adm-card-header">'
-    +'<div style="display:flex;align-items:center;gap:10px">'
-    +'<button class="adm-btn-ghost" onclick="admClosePartnerDetail()" style="padding:5px 10px;font-size:12px">← Back</button>'
-    +'<div class="adm-card-title">'+partner.name+'</div>'
-    +'</div></div>'
-    +'<div style="padding:16px">'
-    +'<div style="font-size:12px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Live Inventory</div>'
-    +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:20px">'+liveHtml+'</div>'
-    +'<div style="font-size:12px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Pending Approval</div>'
-    +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px">'+pendHtml+'</div>'
-    +'</div></div>';
+  wrap.innerHTML = '<div style="margin-bottom:16px;display:flex;align-items:center;gap:12px">'
+    +'<button class="adm-btn-ghost" onclick="admGoPartnerStock()" style="padding:7px 14px;font-size:13px">← All Partners</button>'
+    +'<div style="font-size:18px;font-weight:800;color:#111;letter-spacing:-.02em">'+partner.name+'</div>'
+    +'</div>'
+    +'<div class="adm-card" style="margin-bottom:16px">'
+    +'<div class="adm-card-header"><div class="adm-card-title">Live Inventory ('+pTools.length+')</div></div>'
+    +'<div style="padding:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px">'+liveHtml+'</div>'
+    +'</div>'
+    +'<div class="adm-card">'
+    +'<div class="adm-card-header"><div class="adm-card-title">Pending Submissions ('+pending.length+')</div></div>'
+    +'<div style="padding:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px">'+pendHtml+'</div>'
+    +'</div>';
 };
 
+window.admGoPartnerStock = function() { admTab("partnerstock", document.getElementById("adm-nav-partnerstock")); };
 window.admRemovePartnerTool = async function(toolId) {
   if (!confirm('Remove this tool from the live catalog?')) return;
   var idx = TOOLS.findIndex(function(t){return t.id===toolId;});
@@ -4879,9 +4897,9 @@ window.admRemovePartnerTool = async function(toolId) {
   try {
     await fetch('https://droveia-default-rtdb.firebaseio.com/tools.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(TOOLS)});
     showToast('Tool removed');
-    admTab('partnerstock',document.getElementById('adm-nav-partnerstock'));
   } catch(e){showToast('Error: '+e.message);}
 };
+
 
 
 window.renderAdmPartners = async function(wrap) {

@@ -1032,6 +1032,9 @@ body{background:#f6f8ff;font-family:'Sora',sans-serif;padding-top:0!important;ma
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>API Deliveries
       <span id="adm-nav-deliveries-badge" style="display:none;background:#ef4444;color:#fff;font-size:9px;font-weight:800;padding:1px 6px;border-radius:10px;margin-left:auto"></span>
     </div>
+    <div class="adm-nav-item" id="adm-nav-partnerstock" onclick="admTab('partnerstock',this)">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>Partner Stock
+    </div>
     <div class="adm-nav-item" id="adm-nav-partners" onclick="admTab('partners',this)">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>Partners
     </div>
@@ -4518,7 +4521,7 @@ window.admTab = function(tab, btn) {
   _admTab = tab;
   document.querySelectorAll('.adm-nav-item').forEach(function(b){b.classList.remove('active');});
   if(btn) btn.classList.add('active');
-  var titles = {inventory:'Droveia Stock', orders:'Orders', deliveries:'API Deliveries', partners:'Partners'};
+  var titles = {inventory:'Droveia Stock', orders:'Orders', deliveries:'API Deliveries', partners:'Partners', partnerstock:'Partner Stock'};
   var titleEl = document.getElementById('adm-page-title');
   if(titleEl) titleEl.textContent = titles[tab] || tab;
   renderAdmTab(tab);
@@ -4536,6 +4539,7 @@ window.renderAdmTab = async function(tab) {
   else if (tab === 'orders')  await renderAdmOrders(wrap);
   else if (tab === 'deliveries') await renderAdmDeliveries(wrap);
   else if (tab === 'partners') await renderAdmPartners(wrap);
+  else if (tab === 'partnerstock') await renderAdmPartnerStock(wrap);
   
 };
 
@@ -4675,29 +4679,35 @@ window.renderAdmOrders = async function(wrap) {
     var snap = await fb.getDocs(fb.query(fb.collection(fb.db,'allOrders'),fb.limit(100)));
     var orders = snap.docs.map(function(d){return Object.assign({_id:d.id},d.data());});
     orders.sort(function(a,b){
-      var ta = a.createdAt&&a.createdAt.toMillis?a.createdAt.toMillis():0;
-      var tb = b.createdAt&&b.createdAt.toMillis?b.createdAt.toMillis():0;
+      var ta=a.createdAt&&a.createdAt.toMillis?a.createdAt.toMillis():0;
+      var tb=b.createdAt&&b.createdAt.toMillis?b.createdAt.toMillis():0;
       return tb-ta;
     });
-    var statusColors = {in_flight:'blue',delivered:'green',cancelled:'red',pending:'amber'};
-    wrap.innerHTML = '<div class="adm-card"><div class="adm-card-header"><div class="adm-card-title">All Orders ('+orders.length+')</div></div>'
-      +'<div style="overflow-x:auto"><table class="adm-table"><thead><tr><th>User</th><th>Items</th><th>Total</th><th>Address</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead><tbody>'
-      + (orders.length ? orders.map(function(o){
-        var sc = statusColors[o.status]||'gray';
-        var date = o.createdAt&&o.createdAt.toDate?o.createdAt.toDate().toLocaleDateString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}):'';
-        var items = (o.items||[]).map(function(i){return i.name;}).join(', ');
-        return '<tr>'
-          +'<td style="font-size:12px">'+o.userEmail+'</td>'
-          +'<td style="font-size:12px;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+items+'</td>'
-          +'<td><strong>$'+(o.total||0).toFixed(2)+'</strong></td>'
-          +'<td style="font-size:12px">'+(o.address&&o.address.building||'—')+'</td>'
-          +'<td><span class="adm-badge adm-badge-'+sc+'">'+o.status+'</span></td>'
-          +'<td style="font-size:11px;color:#9ca3af">'+date+'</td>'
-          +'<td style="display:flex;gap:4px"><button class="adm-btn-ghost" style="font-size:11px;padding:4px 8px" onclick="admSetOrderStatus(this.dataset.id,\'delivered\')" data-id="'+o._id+'">✓ Delivered</button><button class="adm-btn-danger" style="font-size:11px;padding:4px 8px" onclick="admSetOrderStatus(this.dataset.id,\'cancelled\')" data-id="'+o._id+'">Cancel</button></td>'
-          +'<td style="display:flex;gap:4px"><button class="adm-btn-ghost" style="font-size:11px;padding:4px 8px" onclick="admSetOrderStatus(this.dataset.id,\'delivered\')" data-id="'+o._id+'">✓ Delivered</button><button class="adm-btn-danger" style="font-size:11px;padding:4px 8px" onclick="admSetOrderStatus(this.dataset.id,\'cancelled\')" data-id="'+o._id+'">Cancel</button></td>'
-          +'</td></tr>';
-      }).join('') : '<tr><td colspan="7" style="text-align:center;padding:32px;color:#9ca3af">No orders yet.</td></tr>')
-      +'</tbody></table></div></div>';
+    var statusColors={in_flight:'blue',delivered:'green',cancelled:'red',pending:'amber',returned:'gray'};
+    var rows = orders.length ? orders.map(function(o){
+      var sc  = statusColors[o.status]||'gray';
+      var date = o.createdAt&&o.createdAt.toDate ? o.createdAt.toDate().toLocaleDateString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
+      var items = (o.items||[]).map(function(i){return i.name;}).join(', ');
+      var addr  = o.address&&o.address.building || '—';
+      return '<tr>'
+        +'<td style="font-size:12px">'+o.userEmail+'</td>'
+        +'<td style="font-size:12px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+items+'</td>'
+        +'<td><strong>$'+(o.total||0).toFixed(2)+'</strong></td>'
+        +'<td style="font-size:12px">'+addr+'</td>'
+        +'<td><span class="adm-badge adm-badge-'+sc+'">'+o.status+'</span></td>'
+        +'<td style="font-size:11px;color:#9ca3af">'+date+'</td>'
+        +'<td><div style="display:flex;gap:6px">'
+        +'<button class="adm-btn-ghost" style="font-size:11px;padding:5px 10px" onclick="admSetOrderStatus(this.dataset.id,this.dataset.st)" data-id="'+o._id+'" data-st="delivered">✓ Delivered</button>'
+        +'<button class="adm-btn-danger" style="font-size:11px;padding:5px 10px" onclick="admSetOrderStatus(this.dataset.id,this.dataset.st)" data-id="'+o._id+'" data-st="cancelled">Cancel</button>'
+        +'</div></td>'
+        +'</tr>';
+    }).join('') : '<tr><td colspan="7" style="text-align:center;padding:32px;color:#9ca3af">No orders yet.</td></tr>';
+
+    wrap.innerHTML = '<div class="adm-card">'
+      +'<div class="adm-card-header"><div class="adm-card-title">All Orders ('+orders.length+')</div></div>'
+      +'<div style="overflow-x:auto"><table class="adm-table"><thead><tr>'
+      +'<th>User</th><th>Items</th><th>Total</th><th>Address</th><th>Status</th><th>Date</th><th>Actions</th>'
+      +'</tr></thead><tbody>'+rows+'</tbody></table></div></div>';
   } catch(e) { wrap.innerHTML = '<div style="color:#ef4444;padding:20px">Error: '+e.message+'</div>'; }
 };
 
@@ -4756,6 +4766,89 @@ window.adminForceApprove = async function(idOrEl) {
 };
 
 // ── PARTNERS ─────────────────────────────────────────────────────────────────
+
+window.renderAdmPartnerStock = async function(wrap) {
+  var fb = window._fb;
+  try {
+    // Load partners + their inventory
+    var [pSnap, iSnap] = await Promise.all([
+      fb.getDocs(fb.collection(fb.db,'partners')),
+      fb.getDocs(fb.query(fb.collection(fb.db,'pendingInventory'),fb.where('status','==','approved')))
+    ]);
+    var partners = pSnap.docs.map(function(d){return Object.assign({_id:d.id},d.data());});
+    var inventory = iSnap.docs.map(function(d){return Object.assign({_id:d.id},d.data());});
+
+    // Also include RTDB tools that have partnerEmail
+    var partnerTools = TOOLS.filter(function(t){return t.partnerEmail;});
+
+    if (!partners.length) {
+      wrap.innerHTML = '<div class="adm-card"><div class="adm-card-body" style="text-align:center;padding:40px;color:#9ca3af">No partners yet. Add partners in the Partners tab.</div></div>';
+      return;
+    }
+
+    var html = partners.map(function(p) {
+      var pTools = partnerTools.filter(function(t){return t.partnerEmail===p.email;});
+      var pInv   = inventory.filter(function(i){return i.partnerEmail===p.email;});
+      var allItems = pTools.concat(pInv.filter(function(i){
+        return !pTools.some(function(t){return t.name===i.name;});
+      }));
+
+      var itemCards = allItems.length ? allItems.map(function(item) {
+        var isRtdb = item.id !== undefined;
+        var avail  = item.available !== false;
+        var img    = item.img && item.img!=='x' ? item.img : (item.imgUrl||null);
+        return '<div style="background:#fff;border:1px solid #e8e8e8;border-radius:10px;overflow:hidden;position:relative">'
+          +'<div style="height:100px;background:#f8f9fa;display:flex;align-items:center;justify-content:center;overflow:hidden">'
+          +(img?'<img src="'+img+'" style="width:100%;height:100%;object-fit:contain;padding:8px">':'<div style="font-size:28px">🔧</div>')
+          +'</div>'
+          +'<div style="padding:10px">'
+          +'<div style="font-size:13px;font-weight:700;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+item.name+'</div>'
+          +'<div style="font-size:11px;color:#9ca3af;margin:2px 0 6px">'
+          +'<span class="adm-badge adm-badge-blue" style="font-size:10px">'+item.cat+'</span>'
+          +' · '+(isRtdb?'$'+calcCost(item,1).toFixed(2)+'/hr':'$'+(item.pph||0).toFixed(2)+'/hr')
+          +'</div>'
+          +'<div style="display:flex;align-items:center;justify-content:space-between">'
+          +(isRtdb
+            ? '<span class="adm-badge '+(avail?'adm-badge-green':'adm-badge-red')+'">'+(avail?'Live':'Rented')+'</span>'
+              +'<button class="adm-btn-danger" onclick="admRemovePartnerTool('+item.id+')" style="font-size:10px;padding:3px 8px">Remove</button>'
+            : '<span class="adm-badge adm-badge-amber">Approved</span>'
+          )
+          +'</div>'
+          +'</div></div>';
+      }).join('') : '<div style="grid-column:1/-1;color:#9ca3af;font-size:13px;padding:8px 0">No items yet.</div>';
+
+      return '<div class="adm-card" style="margin-bottom:20px">'
+        +'<div class="adm-card-header">'
+        +'<div style="display:flex;align-items:center;gap:10px">'
+        +'<div style="width:36px;height:36px;border-radius:8px;background:#1a6ef0;color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800">'+p.name[0].toUpperCase()+'</div>'
+        +'<div><div class="adm-card-title">'+p.name+'</div><div style="font-size:11px;color:#9ca3af">'+p.email+'</div></div>'
+        +'</div>'
+        +'<span class="adm-badge adm-badge-blue">'+allItems.length+' items</span>'
+        +'</div>'
+        +'<div style="padding:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px">'
+        + itemCards
+        +'</div>'
+        +'</div>';
+    }).join('');
+    wrap.innerHTML = html;
+  } catch(e) { wrap.innerHTML = '<div style="color:#ef4444;padding:20px">Error: '+e.message+'</div>'; }
+};
+
+window.admRemovePartnerTool = async function(toolId) {
+  if (!confirm('Remove this tool from the live catalog?')) return;
+  var idx = TOOLS.findIndex(function(t){return t.id===toolId;});
+  if (idx < 0) return;
+  TOOLS.splice(idx, 1);
+  try {
+    await fetch('https://droveia-default-rtdb.firebaseio.com/tools.json',{
+      method:'PUT', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(TOOLS)
+    });
+    showToast('Tool removed');
+    admTab('partnerstock', document.getElementById('adm-nav-partnerstock'));
+  } catch(e) { showToast('Error: '+e.message); }
+};
+
 window.renderAdmPartners = async function(wrap) {
   var fb = window._fb;
   try {

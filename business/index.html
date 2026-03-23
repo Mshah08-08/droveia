@@ -2,12 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-  <link rel="icon" type="image/png" href="1.png">
+<link rel="icon" type="image/png" href="../1.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Droveia — Partner Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
 <style>
+
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --blue:#1a6ef0;
@@ -849,19 +850,82 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
 .order-act-btn:hover{border-color:var(--blue);color:var(--blue)}
 .order-act-btn.green:hover{border-color:var(--green);color:var(--green)}
 .order-act-btn.red:hover{border-color:#ef4444;color:#ef4444}
+
+/* ── Business dashboard ── */
+body{background:#f6f8ff;font-family:'Sora',sans-serif;padding-top:0!important;margin:0}
+.biz-layout{display:flex;min-height:100vh}
+.biz-sidebar{width:220px;flex-shrink:0;background:#fff;border-right:1px solid #ebebeb;padding:8px 0;position:fixed;top:60px;left:0;height:calc(100vh - 60px);overflow-y:auto;z-index:100}
+.biz-main{flex:1;margin-left:220px;padding-top:60px}
+.biz-topbar{background:#fff;border-bottom:1px solid #ebebeb;padding:0 28px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.biz-content{padding:20px 28px}
+.biz-nav-item{display:flex;align-items:center;gap:12px;padding:11px 20px;font-size:14px;font-weight:400;color:#4b5563;cursor:pointer;transition:.12s;font-family:var(--font)}
+.biz-nav-item svg{flex-shrink:0;opacity:.7}
+.biz-nav-item:hover{background:#f8f8f8;color:#111}
+.biz-nav-item.active{color:#1a6ef0;font-weight:700;background:#eff6ff}
+.biz-nav-item.active svg{opacity:1;color:#1a6ef0}
+.biz-stat-card{background:#fff;border:1px solid #ebebeb;border-radius:12px;padding:20px;flex:1;min-width:120px}
+.biz-stat-val{font-size:28px;font-weight:800;color:#111;letter-spacing:-.02em}
+.biz-stat-label{font-size:12px;color:#9ca3af;margin-top:3px}
+.biz-card{background:#fff;border:1px solid #ebebeb;border-radius:12px;overflow:hidden;margin-bottom:16px}
+.biz-card-header{padding:16px 20px;border-bottom:1px solid #ebebeb;display:flex;align-items:center;justify-content:space-between}
+.biz-card-title{font-size:15px;font-weight:700;color:#111}
+.biz-card-body{padding:20px}
+.biz-btn-primary{background:#1a6ef0;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);transition:.15s;display:inline-flex;align-items:center;gap:7px}
+.biz-btn-primary:hover{background:#1560d8}
+.biz-btn-secondary{background:#fff;color:#111;border:1.5px solid #e8e8e8;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);transition:.15s;display:inline-flex;align-items:center;gap:7px}
+.biz-btn-secondary:hover{border-color:#1a6ef0;color:#1a6ef0}
+.biz-btn-danger{background:none;color:#ef4444;border:1.5px solid rgba(239,68,68,.25);border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font)}
+.biz-input{width:100%;background:#f8f9fa;border:1.5px solid #e8e8e8;border-radius:8px;padding:11px 14px;font-size:14px;color:#111;font-family:var(--font);outline:none;transition:.15s;box-sizing:border-box}
+.biz-input:focus{border-color:#1a6ef0;background:#fff;box-shadow:0 0 0 3px rgba(26,110,240,.1)}
+.biz-badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700}
+.biz-badge-green{background:rgba(22,163,74,.1);color:#15803d}
+.biz-badge-amber{background:rgba(217,119,6,.1);color:#d97706}
+.biz-badge-red{background:rgba(239,68,68,.1);color:#ef4444}
+.biz-badge-blue{background:rgba(26,110,240,.1);color:#1a6ef0}
+.stock-row{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid #f0f0f0}
+.stock-row:last-child{border-bottom:none}
+@media(max-width:768px){.biz-sidebar{display:none}.biz-main{margin-left:0}.biz-content{padding:16px}}
+
 </style>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDcuU4-XXzzEU8O84rs3W7cWgVStNicBTo&callback=Function.prototype" async defer></script>
-<script src="https://js.stripe.com/v3/"></script>
 </head>
 <body>
-
-<div class="glow-blob glow-1"></div>
-<div class="glow-blob glow-2"></div>
-<div class="noise-overlay"></div>
 <div class="toast" id="toast"></div>
 
-<!-- ── Auth Modal ─────────────────────────────────────────────── -->
+<!-- Splash screen -->
+<div id="biz-splash" style="position:fixed;inset:0;background:#fff;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px">
+  <div id="splash-logo-wrap" style="display:flex;align-items:center;gap:14px;opacity:0;transform:translateY(20px);transition:opacity .5s ease,transform .5s ease">
+    <img src="../1.png" style="width:52px;height:52px;border-radius:14px;box-shadow:0 8px 32px rgba(26,110,240,.25)">
+    <div>
+      <div style="font-size:32px;font-weight:800;color:#1a6ef0;letter-spacing:-.03em;line-height:1">Droveia</div>
+      <div style="font-size:12px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:.12em;margin-top:3px">Partner Portal</div>
+    </div>
+  </div>
+  <div id="splash-bar-wrap" style="width:180px;height:3px;background:#f0f0f0;border-radius:4px;overflow:hidden;opacity:0;transition:opacity .3s ease .4s">
+    <div id="splash-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#1a6ef0,#3b82f6);border-radius:4px;transition:width .8s ease .5s"></div>
+  </div>
+</div>
+
+<script>
+(function() {
+  setTimeout(function() {
+    var logo = document.getElementById('splash-logo-wrap');
+    var bar  = document.getElementById('splash-bar-wrap');
+    var fill = document.getElementById('splash-bar');
+    if (logo) { logo.style.opacity = '1'; logo.style.transform = 'translateY(0)'; }
+    if (bar)  bar.style.opacity = '1';
+    if (fill) fill.style.width = '100%';
+    setTimeout(function() {
+      var splash = document.getElementById('biz-splash');
+      if (splash) {
+        splash.style.transition = 'opacity .4s ease';
+        splash.style.opacity = '0';
+        setTimeout(function() { splash.style.display = 'none'; }, 400);
+      }
+    }, 1400);
+  }, 80);
+})();
+</script>
+
 <div class="auth-overlay hidden" id="auth-overlay" onclick="if(event.target===this)this.classList.add('hidden')">
   <div class="auth-box">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
@@ -935,42 +999,50 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
     </div>
   </div>
 </div>
-
-
-
-<nav>
-  <div class="nav-logo" onclick="window.location.href='https://droveia.com'">
-    <div class="nav-logo-mark">
-      <img src="1.png" style="width:40px;height:auto;display:block;border-radius:0"/>
+<header style="position:fixed;top:0;left:0;right:0;height:60px;background:#fff;border-bottom:1px solid #ebebeb;z-index:300;display:flex;align-items:center;padding:0;gap:0">
+  <!-- Logo section — exactly 220px, aligns with sidebar -->
+  <div style="width:220px;flex-shrink:0;height:60px;display:flex;align-items:center;gap:10px;padding:0 20px;border-right:1px solid #ebebeb;box-sizing:border-box">
+    <img src="../1.png" style="width:28px;height:28px;border-radius:6px;object-fit:contain;flex-shrink:0">
+    <div>
+      <div style="font-size:15px;font-weight:800;color:#1a6ef0;letter-spacing:-.02em;line-height:1.2">Droveia</div>
+      <div style="font-size:9px;color:#9ca3af;font-weight:600;text-transform:uppercase;letter-spacing:.08em">Partner Portal</div>
     </div>
-    <span class="nav-wordmark">Droveia</span>
-    <span style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:5px;background:var(--blue-dim);color:var(--blue);margin-left:4px">Partner</span>
   </div>
-  <div style="flex:1"></div>
-  <div class="nav-right">
-    <button class="nav-auth-btn" id="nav-auth-btn" onclick="showAuth()">Sign In</button>
+  <!-- Right section -->
+  <div style="flex:1;display:flex;align-items:center;padding:0 24px;gap:12px">
+    <div id="biz-page-title-top" style="font-size:16px;font-weight:700;color:#111;letter-spacing:-.01em">Overview</div>
+    <div style="flex:1"></div>
+    <div id="biz-partner-name" style="font-size:13px;font-weight:600;color:#6b7280"></div>
+    <button class="biz-btn-primary" id="nav-auth-btn" onclick="showAuth()" style="padding:7px 16px;font-size:13px">Sign In</button>
   </div>
-</nav>
-
-<!-- Partner Dashboard Page -->
-<div class="page active" id="page-api" style="min-height:calc(100vh - var(--nav-h))"></div>
-
-<!-- Confirm Modal -->
-<!-- Confirm Modal -->
-<div class="confirm-modal hidden" id="confirm-modal">
-  <div class="confirm-box">
-    <div class="confirm-box-icon" id="confirm-icon"></div>
-    <div class="confirm-box-title" id="confirm-title">Are you sure?</div>
-    <div class="confirm-box-msg" id="confirm-msg"></div>
-    <div class="confirm-box-actions">
-      <button class="confirm-cancel-btn" onclick="closeConfirm()">Cancel</button>
-      <button class="confirm-ok" id="confirm-ok-btn" onclick="confirmOk()">Confirm</button>
+</header>
+<div class="biz-layout">
+  <aside class="biz-sidebar">
+    
+    <div class="biz-nav-item active" id="bnav-overview" onclick="bizTab('overview',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Overview</div>
+    <div class="biz-nav-item" id="bnav-orders" onclick="bizTab('orders',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Orders<span id="bnav-orders-badge" style="display:none;background:#ef4444;color:#fff;font-size:9px;font-weight:800;padding:1px 6px;border-radius:10px;margin-left:auto"></span></div>
+    <div class="biz-nav-item" id="bnav-inventory" onclick="bizTab('inventory',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>Inventory</div>
+    <div class="biz-nav-item" id="bnav-apikey" onclick="bizTab('apikey',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.778 7.778 5.5 5.5 0 017.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>API Key</div>
+    <div class="biz-nav-item" id="bnav-docs" onclick="bizTab('docs',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>API Docs</div>
+    <div style="height:1px;background:#f0f0f0;margin:8px 0"></div>
+    <div class="biz-nav-item" onclick="window.location.href='https://droveia.com'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>Visit Store</div>
+  </aside>
+  <div class="biz-main">
+    <div class="biz-topbar" style="display:none">
+      <div id="biz-page-title" style="font-size:17px;font-weight:800;color:#111;letter-spacing:-.02em">Overview</div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div id="biz-partner-name" style="font-size:13px;font-weight:600;color:#6b7280"></div>
+        <button class="nav-auth-btn biz-btn-primary" id="nav-auth-btn" onclick="showAuth()" style="padding:8px 16px;font-size:13px">Sign In</button>
+      </div>
+    </div>
+    <div class="biz-content" id="biz-page-content">
+      <div style="text-align:center;padding:60px;color:#9ca3af">Loading...</div>
     </div>
   </div>
 </div>
 
-
 <script type="module">
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword,
   signInWithEmailAndPassword, signOut, updateProfile,
@@ -999,9 +1071,10 @@ window._fb = {
 };
 window._fbReady = true;
 document.dispatchEvent(new Event("fbready"));
-</script>
 
+</script>
 <script>
+
 
 
 // =============================================================================
@@ -4430,115 +4503,207 @@ if (_savedPage && _savedPage !== "admin") {
 }
 
 
+
+window.partnerSubmitStock = async function() {
+  var name  = (document.getElementById('inv-name')||{value:''}).value.trim();
+  var cat   = (document.getElementById('inv-cat')||{value:''}).value;
+  var desc  = (document.getElementById('inv-desc')||{value:''}).value.trim();
+  var qty   = parseInt((document.getElementById('inv-qty')||{value:'1'}).value)||1;
+  var price = parseFloat((document.getElementById('inv-price')||{value:'0'}).value)||0;
+  var img   = (document.getElementById('inv-img')||{value:''}).value.trim();
+  if (!name||!cat){showToast('Name and category required');return;}
+  var fb=window._fb;if(!fb||!window.currentUser)return;
+  var btn=document.getElementById('inv-submit-btn');
+  if(btn){btn.disabled=true;btn.textContent='Submitting...';}
+  try{
+    var pSnap=await fb.getDocs(fb.query(fb.collection(fb.db,'partners'),fb.where('email','==',currentUser.email)));
+    var pData=pSnap.empty?{}:pSnap.docs[0].data();
+    await fb.addDoc(fb.collection(fb.db,'pendingInventory'),{
+      name,cat,desc,qty,pph:price,imgUrl:img||null,status:'pending',
+      partnerEmail:currentUser.email,partnerName:pData.name||currentUser.email,
+      submittedAt:fb.serverTimestamp()
+    });
+    showToast('Item submitted for review');
+    ['inv-name','inv-desc','inv-img','inv-price'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
+    var qEl=document.getElementById('inv-qty');if(qEl)qEl.value='1';
+    loadPartnerStock();
+  }catch(e){showToast('Error: '+e.message);}
+  finally{if(btn){btn.disabled=false;btn.textContent='Submit for Review';}}
+};
+
+window.loadPartnerStock = async function() {
+  var wrap=document.getElementById('partner-stock-list');
+  if(!wrap||!window._fb||!window.currentUser)return;
+  wrap.innerHTML='<div style="color:#9ca3af;padding:20px 0;font-size:14px">Loading...</div>';
+  try{
+    var fb=window._fb;
+    var snap=await fb.getDocs(fb.query(fb.collection(fb.db,'pendingInventory'),fb.where('partnerEmail','==',currentUser.email),fb.orderBy('submittedAt','desc')));
+    var items=snap.docs.map(function(d){return Object.assign({_id:d.id},d.data());});
+    if(!items.length){wrap.innerHTML='<div style="color:#9ca3af;padding:20px 0;font-size:14px;text-align:center">No items submitted yet.</div>';return;}
+    var sc={pending:'amber',approved:'green',rejected:'red'};
+    wrap.innerHTML=items.map(function(item){
+      var date=item.submittedAt&&item.submittedAt.toDate?item.submittedAt.toDate().toLocaleDateString([],{month:'short',day:'numeric'}):'';
+      return '<div class="stock-row">'
+        +(item.imgUrl?'<img src="'+item.imgUrl+'" style="width:44px;height:44px;border-radius:8px;object-fit:cover;flex-shrink:0">'
+          :'<div style="width:44px;height:44px;border-radius:8px;background:#f0f4ff;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:18px">📦</div>')
+        +'<div style="flex:1;min-width:0">'
+        +'<div style="font-size:14px;font-weight:600;color:#111">'+item.name+'</div>'
+        +'<div style="font-size:11px;color:#9ca3af;margin-top:2px">'+item.cat+(item.qty>1?' · '+item.qty+' units':'')+(date?' · '+date:'')+'</div>'
+        +'</div>'
+        +'<span class="biz-badge biz-badge-'+(sc[item.status]||'blue')+'">'+(item.status||'pending')+'</span>'
+        +'</div>';
+    }).join('');
+  }catch(e){wrap.innerHTML='<div style="color:#ef4444;padding:20px 0;font-size:13px">Error loading stock</div>';}
+};
+
+var _bizCurrentTab='overview';
+
+window.bizGoOrders=function(){ bizTab("orders",document.getElementById("bnav-orders")); };
+window.bizTab=function(tab,btn){
+  _bizCurrentTab=tab;
+  document.querySelectorAll('.biz-nav-item').forEach(function(b){b.classList.remove('active');});
+  if(btn)btn.classList.add('active');
+  var titles={overview:'Overview',orders:'Orders',inventory:'Inventory',apikey:'API Key',docs:'API Docs'};
+  var titleEl=document.getElementById('biz-page-title');
+  if(titleEl)titleEl.textContent=titles[tab]||tab;
+  var t2=document.getElementById('biz-page-title-top'); if(t2)t2.textContent=titles[tab]||tab;
+  renderBizTab(tab);
+};
+
+window.renderBizTab=async function(tab){
+  var wrap=document.getElementById('biz-page-content');
+  if(!wrap)return;
+  if(!window.currentUser||!window._isPartnerUser){
+    wrap.innerHTML='<div style="text-align:center;padding:80px"><p style="color:#9ca3af;margin-bottom:16px">Sign in with your partner account.</p><button class="biz-btn-primary" onclick="showAuth()">Sign In</button></div>';
+    return;
+  }
+  wrap.innerHTML='<div style="text-align:center;padding:60px;color:#9ca3af">Loading...</div>';
+  if(tab==='overview')await renderBizOverview(wrap);
+  else if(tab==='orders')await renderBizOrders(wrap);
+  else if(tab==='inventory')renderBizInventory(wrap);
+  else if(tab==='apikey')await renderBizApiKey(wrap);
+  else if(tab==='docs')renderBizDocs(wrap);
+};
+
+window.renderBizOverview=async function(wrap){
+  var fb=window._fb;
+  var deliveries=[],apiKeys=[];
+  try{var dSnap=await fb.getDocs(fb.query(fb.collection(fb.db,'deliveries'),fb.where('partnerEmail','==',currentUser.email),fb.orderBy('createdAt','desc'),fb.limit(5)));deliveries=dSnap.docs.map(function(d){return Object.assign({_id:d.id},d.data());});}catch(e){}
+  try{var kSnap=await fb.getDocs(fb.query(fb.collection(fb.db,'apiKeys'),fb.where('partnerEmail','==',currentUser.email)));apiKeys=kSnap.docs.map(function(d){return Object.assign({_docId:d.id},d.data());});}catch(e){}
+  var pending=deliveries.filter(function(d){return d.status==='pending_approval';}).length;
+  var badge=document.getElementById('bnav-orders-badge');
+  if(badge){badge.style.display=pending?'inline':'none';badge.textContent=pending;}
+  wrap.innerHTML=[
+    '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:24px">',
+    '<div class="biz-stat-card"><div class="biz-stat-val" style="color:#1a6ef0">'+deliveries.length+'</div><div class="biz-stat-label">Total Orders</div></div>',
+    '<div class="biz-stat-card"><div class="biz-stat-val" style="color:#d97706">'+pending+'</div><div class="biz-stat-label">Awaiting Pickup</div></div>',
+    '<div class="biz-stat-card"><div class="biz-stat-val" style="color:#15803d">'+apiKeys.filter(function(k){return k.active;}).length+'</div><div class="biz-stat-label">Active Keys</div></div>',
+    '</div>',
+    '<div class="biz-card">',
+    '<div class="biz-card-header"><div class="biz-card-title">Recent Orders</div>',
+    '<button class="biz-btn-secondary" style="font-size:12px;padding:6px 12px" onclick="bizGoOrders()">View All</button>',
+    '</div><div class="biz-card-body">',
+    deliveries.length?deliveries.map(function(d){
+      var sc={pending_approval:'amber',approved:'blue',dispatched:'blue',delivered:'green',failed:'red'}[d.status]||'blue';
+      var date=d.createdAt&&d.createdAt.toDate?d.createdAt.toDate().toLocaleDateString([],{month:'short',day:'numeric'}):'';
+      return '<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f0f0f0">'
+        +'<div style="flex:1"><div style="font-size:14px;font-weight:600;color:#111">'+(d.customerName||'—')+'</div>'
+        +'<div style="font-size:11px;color:#9ca3af">'+((d.items||[]).map(function(i){return i.name;}).join(', ')||'—')+(date?' · '+date:'')+'</div></div>'
+        +'<span class="biz-badge biz-badge-'+sc+'">'+(d.status||'').replace(/_/g,' ')+'</span></div>';
+    }).join(''):'<div style="text-align:center;padding:32px;color:#9ca3af;font-size:13px">No orders yet.</div>',
+    '</div></div>',
+  ].join('');
+};
+
+window.renderBizOrders=async function(wrap){
+  wrap.innerHTML='<div style="color:#9ca3af;padding:20px">Loading...</div>';
+  try{
+    var fb=window._fb;
+    var dSnap=await fb.getDocs(fb.query(fb.collection(fb.db,'deliveries'),fb.where('partnerEmail','==',currentUser.email),fb.orderBy('createdAt','desc'),fb.limit(50)));
+    var deliveries=dSnap.docs.map(function(d){return Object.assign({_id:d.id},d.data());});
+    var pending=deliveries.filter(function(d){return d.status==='pending_approval';}).length;
+    var badge=document.getElementById('bnav-orders-badge');
+    if(badge){badge.style.display=pending?'inline':'none';badge.textContent=pending;}
+    wrap.innerHTML='<div class="biz-card"><div class="biz-card-body">'+renderPartnerOrders(deliveries)+'</div></div>';
+  }catch(e){wrap.innerHTML='<div style="color:#ef4444;padding:20px">Error: '+e.message+'</div>';}
+};
+
+window.renderBizInventory=function(wrap){
+  wrap.innerHTML=[
+    '<div class="biz-card" style="margin-bottom:20px">',
+    '<div class="biz-card-header"><div class="biz-card-title">Submit New Item</div></div>',
+    '<div class="biz-card-body">',
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">',
+    '<div><label style="display:block;font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Item Name *</label><input class="biz-input" id="inv-name" placeholder="e.g. DeWalt Drill"></div>',
+    '<div><label style="display:block;font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Category *</label><select class="biz-input" id="inv-cat"><option value="">Select...</option><option value="Workshop">Workshop</option><option value="Electronics">Electronics</option><option value="Crafts">Crafts</option><option value="Office">Office</option></select></div>',
+    '</div>',
+    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px">',
+    '<div><label style="display:block;font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Qty</label><input class="biz-input" id="inv-qty" type="number" min="1" value="1"></div>',
+    '<div><label style="display:block;font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Price/hr ($)</label><input class="biz-input" id="inv-price" type="number" min="0" step="0.01" placeholder="0.00"></div>',
+    '<div><label style="display:block;font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Image URL</label><input class="biz-input" id="inv-img" placeholder="https://..."></div>',
+    '</div>',
+    '<div style="margin-bottom:16px"><label style="display:block;font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Description</label>',
+    '<textarea class="biz-input" id="inv-desc" rows="2" placeholder="Brief description..." style="resize:vertical"></textarea></div>',
+    '<button class="biz-btn-primary" id="inv-submit-btn" onclick="partnerSubmitStock()">',
+    '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+    'Submit for Review</button>',
+    '</div></div>',
+    '<div class="biz-card">',
+    '<div class="biz-card-header"><div class="biz-card-title">My Submitted Items</div></div>',
+    '<div class="biz-card-body" id="partner-stock-list"><div style="color:#9ca3af;font-size:13px">Loading...</div></div>',
+    '</div>',
+  ].join('');
+  loadPartnerStock();
+};
+
+window.renderBizApiKey=async function(wrap){
+  var fb=window._fb;var apiKeys=[];
+  try{var kSnap=await fb.getDocs(fb.query(fb.collection(fb.db,'apiKeys'),fb.where('partnerEmail','==',currentUser.email)));apiKeys=kSnap.docs.map(function(d){return Object.assign({_docId:d.id},d.data());});}catch(e){}
+  wrap.innerHTML=[
+    '<div class="biz-card">',
+    '<div class="biz-card-header"><div class="biz-card-title">API Keys</div>',
+    '<button class="biz-btn-primary" style="font-size:12px;padding:8px 14px" onclick="partnerGenerateKey()">',
+    '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New Key</button>',
+    '</div><div class="biz-card-body">',
+    apiKeys.length?renderApiKeysList(apiKeys):'<div style="text-align:center;padding:32px;color:#9ca3af;font-size:13px">No API keys yet.<br><br><button class="biz-btn-primary" onclick="partnerGenerateKey()">Generate your first key</button></div>',
+    '</div></div>',
+  ].join('');
+};
+
+window.renderBizDocs=function(wrap){
+  wrap.innerHTML='<div class="biz-card"><div class="biz-card-body">'+renderApiDocs()+'</div></div>';
+};
+
 </script>
-
-
-
-<!-- Mobile bottom nav -->
-<div class="mobile-nav" id="mobile-nav">
-  <button class="mobile-nav-item active" id="mnav-home" onclick="showPage('home');updateMobileNav('home')">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-    Home
-  </button>
-  <button class="mobile-nav-item" id="mnav-browse" onclick="showPage('browse');updateMobileNav('browse')">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-    Browse
-  </button>
-  <button class="mobile-nav-item" id="mnav-cart" onclick="showPage('cart');updateMobileNav('cart')">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
-    Cart
-  </button>
-  <button class="mobile-nav-item" id="mnav-orders" onclick="showPage('orders');updateMobileNav('orders')">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-    Orders
-  </button>
-  <button class="mobile-nav-item" id="mnav-account" onclick="showPage('account');updateMobileNav('account')">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-    Account
-  </button>
-  <button class="mobile-nav-item" id="mnav-api" onclick="showPage('api');updateMobileNav('api')" style="display:none">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-    API
-  </button>
-</div>
-
-
-<!-- ══ ADMIN PAGE ══════════════════════════════════════════════════════════ -->
-<div class="page" id="page-admin">
-  <div class="admin-wrap" id="admin-content">
-    <!-- Login gate shown by default, replaced by JS -->
-    <div class="admin-login-gate" id="admin-gate">
-      <h2>Admin Access</h2>
-      <p>Sign in with an authorized admin account to continue.</p>
-      <button class="btn-primary" onclick="showAuth()">Sign In</button>
-    </div>
-  </div>
-</div>
-
-
-<!-- Confirm Modal -->
-<div class="confirm-modal hidden" id="confirm-modal">
-  <div class="confirm-box">
-    <div class="confirm-box-icon" id="confirm-icon"></div>
-    <div class="confirm-box-title" id="confirm-title">Are you sure?</div>
-    <div class="confirm-box-msg" id="confirm-msg"></div>
-    <div class="confirm-box-actions">
-      <button class="confirm-cancel-btn" onclick="closeConfirm()">Cancel</button>
-      <button class="confirm-ok" id="confirm-ok-btn" onclick="confirmOk()">Confirm</button>
-    </div>
-  </div>
-</div>
-<!-- Review Modal -->
-<div class="review-modal hidden" id="review-modal">
-  <div class="review-box">
-    <button class="review-close" onclick="closeReviewModal()">✕</button>
-    <div class="review-box-title" id="review-modal-title">Review Tool</div>
-    <div class="review-box-sub" id="review-modal-sub">Share your experience</div>
-    <div class="star-picker" id="star-picker">
-      <span class="star-pick" onclick="setReviewStar(1)">★</span>
-      <span class="star-pick" onclick="setReviewStar(2)">★</span>
-      <span class="star-pick" onclick="setReviewStar(3)">★</span>
-      <span class="star-pick" onclick="setReviewStar(4)">★</span>
-      <span class="star-pick" onclick="setReviewStar(5)">★</span>
-    </div>
-    <textarea class="review-textarea" id="review-text" placeholder="What did you think? Was it easy to use, in good condition..."></textarea>
-    <button class="review-submit-btn" onclick="submitReview()">Submit Review</button>
-  </div>
-</div>
-
-  <button class="theme-fab" id="theme-toggle" onclick="toggleTheme()" title="Toggle dark/light mode">
-    <svg id="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
-    <svg id="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-  </button>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-
 <script>
-// Auto-render partner dashboard when Firebase is ready
+// Init
 function initBusinessPage() {
   var fb = window._fb;
   fb.onAuthStateChanged(fb.auth, async function(user) {
     if (user) {
       var btn = document.getElementById('nav-auth-btn');
-      if (btn) { btn.textContent = (user.displayName||user.email).split(/[\s@]/)[0]; btn.onclick = function(){ doSignOut(); }; }
-      // Check partner status
-      var _isAdm = typeof checkAdmin === 'function' && checkAdmin();
+      if (btn) { btn.textContent = (user.displayName||user.email).split(/[\s@]/)[0]; btn.onclick = function(){ doSignOut(); window.location.reload(); }; }
+      var nameEl = document.getElementById('biz-partner-name');
+      if (nameEl) nameEl.textContent = user.displayName || user.email;
+      await loadAdminEmails();
+      var _isAdm = checkAdmin();
+      window._isPartnerUser = false;
       try {
         var pSnap = await fb.getDocs(fb.query(fb.collection(fb.db,'partners'),fb.where('email','==',user.email)));
         window._isPartnerUser = !pSnap.empty;
-      } catch(e) { window._isPartnerUser = false; }
-      renderPartnerApiPage();
+      } catch(e) {}
+      if (_isAdm) { window._isPartnerUser = true; } // admins can preview
+      renderBizTab('overview');
     } else {
       window._isPartnerUser = false;
       var btn = document.getElementById('nav-auth-btn');
       if (btn) { btn.textContent = 'Sign In'; btn.onclick = showAuth; }
-      renderPartnerApiPage(); // shows sign-in gate
+      renderBizTab('overview');
     }
   });
 }
-
 if (window._fbReady) { initBusinessPage(); }
 else { document.addEventListener('fbready', initBusinessPage, {once:true}); }
 </script>
-
 </body>
 </html>

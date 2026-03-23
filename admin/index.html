@@ -1023,7 +1023,7 @@ body{background:#f6f8ff;font-family:'Sora',sans-serif;padding-top:0!important;ma
 <div class="adm-layout">
   <aside class="adm-sidebar">
     <div class="adm-nav-item active" id="adm-nav-inventory" onclick="admTab('inventory',this)">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>Inventory
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>Droveia Stock
     </div>
     <div class="adm-nav-item" id="adm-nav-orders" onclick="admTab('orders',this)">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Orders
@@ -1034,9 +1034,6 @@ body{background:#f6f8ff;font-family:'Sora',sans-serif;padding-top:0!important;ma
     </div>
     <div class="adm-nav-item" id="adm-nav-partners" onclick="admTab('partners',this)">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>Partners
-    </div>
-    <div class="adm-nav-item" id="adm-nav-applications" onclick="admTab('applications',this)">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>Applications
     </div>
 
     <div style="height:1px;background:#f0f0f0;margin:8px 0"></div>
@@ -4521,7 +4518,7 @@ window.admTab = function(tab, btn) {
   _admTab = tab;
   document.querySelectorAll('.adm-nav-item').forEach(function(b){b.classList.remove('active');});
   if(btn) btn.classList.add('active');
-  var titles = {inventory:'Inventory', orders:'Orders', deliveries:'API Deliveries', partners:'Partners', applications:'Applications'};
+  var titles = {inventory:'Droveia Stock', orders:'Orders', deliveries:'API Deliveries', partners:'Partners'};
   var titleEl = document.getElementById('adm-page-title');
   if(titleEl) titleEl.textContent = titles[tab] || tab;
   renderAdmTab(tab);
@@ -4539,7 +4536,7 @@ window.renderAdmTab = async function(tab) {
   else if (tab === 'orders')  await renderAdmOrders(wrap);
   else if (tab === 'deliveries') await renderAdmDeliveries(wrap);
   else if (tab === 'partners') await renderAdmPartners(wrap);
-  else if (tab === 'applications') await renderAdmApplications(wrap);
+  
 };
 
 // ── INVENTORY ────────────────────────────────────────────────────────────────
@@ -4552,21 +4549,25 @@ window.renderAdmInventory = async function(wrap) {
     '<div id="admin-add-form-wrap"></div>',
     '<div id="admin-edit-form-wrap"></div>',
     '<div style="overflow-x:auto"><table class="adm-table">',
-    '<thead><tr><th>Name</th><th>Category</th><th>Price/hr</th><th>Qty</th><th>Rented</th><th>Status</th><th>Actions</th></tr></thead>',
+    '<thead><tr><th></th><th>Name</th><th>Category</th><th>Partner</th><th>Price/hr</th><th>Qty / Rented</th><th>Status</th><th>Actions</th></tr></thead>',
     '<tbody>',
     TOOLS.map(function(t){
       var avail = t.available !== false;
+      var imgHtml = (t.img && t.img !== 'x')
+        ? '<img src="'+t.img+'" style="width:36px;height:36px;border-radius:6px;object-fit:contain;background:#f8f8f8">'
+        : '<div style="width:36px;height:36px;border-radius:6px;background:#f0f4ff;display:flex;align-items:center;justify-content:center;font-size:16px">🔧</div>';
       return '<tr>'
-        +'<td><strong>'+t.name+'</strong></td>'
-        +'<td>'+t.cat+'</td>'
-        +'<td>$'+calcCost(t,1).toFixed(2)+'/hr</td>'
-        +'<td>'+t.qty+'</td>'
-        +'<td>'+(t.rentedQty||0)+'</td>'
+        +'<td>'+imgHtml+'</td>'
+        +'<td><div style="font-weight:600;font-size:13px">'+t.name+'</div><div style="font-size:11px;color:#9ca3af">ID: '+t.id+'</div></td>'
+        +'<td><span class="adm-badge adm-badge-blue" style="font-size:10px">'+t.cat+'</span></td>'
+        +'<td style="font-size:11px;color:#9ca3af">'+(t.partnerName||'Droveia')+'</td>'
+        +'<td style="font-weight:600">$'+calcCost(t,1).toFixed(2)+'<span style="font-size:10px;color:#9ca3af">/hr</span></td>'
+        +'<td><span style="font-weight:600">'+t.qty+'</span><span style="color:#9ca3af"> / '+(t.rentedQty||0)+'</span></td>'
         +'<td><span class="adm-badge '+(avail?'adm-badge-green':'adm-badge-red')+'">'+(avail?'Available':'Rented')+'</span></td>'
-        +'<td style="display:flex;gap:6px">'
-        +'<button class="adm-btn-ghost" onclick="adminEditTool('+t.id+')">Edit</button>'
-        +'<button class="adm-btn-danger" onclick="adminDeleteTool('+t.id+')">Delete</button>'
-        +'</td></tr>';
+        +'<td><div style="display:flex;gap:6px">'
+        +'<button class="adm-btn-ghost" onclick="adminEditTool('+t.id+')" style="font-size:11px;padding:5px 10px">Edit</button>'
+        +'<button class="adm-btn-danger" onclick="adminDeleteTool('+t.id+')" style="font-size:11px;padding:5px 10px">Del</button>'
+        +'</div></td></tr>';
     }).join(''),
     '</tbody></table></div>',
     '</div>',
@@ -4579,6 +4580,7 @@ window.renderAdmInventory = async function(wrap) {
   loadAdmPendingInventory();
 };
 
+window.admTogglePartnerItems = function(el) { var next = el.nextElementSibling; if(next) next.style.display = next.style.display==='none' ? 'block' : 'none'; };
 window.loadAdmPendingInventory = async function() {
   var wrap = document.getElementById('adm-pending-inv');
   if (!wrap) return;
@@ -4586,22 +4588,47 @@ window.loadAdmPendingInventory = async function() {
   try {
     var snap = await fb.getDocs(fb.query(fb.collection(fb.db,'pendingInventory'), fb.where('status','==','pending')));
     var items = snap.docs.map(function(d){return Object.assign({_id:d.id},d.data());});
-    if (!items.length) { wrap.innerHTML = '<div style="color:#9ca3af;text-align:center;padding:20px;font-size:13px">No pending submissions.</div>'; return; }
-    wrap.innerHTML = '<table class="adm-table"><thead><tr><th>Item</th><th>Category</th><th>Partner</th><th>Qty</th><th>Price/hr</th><th>Actions</th></tr></thead><tbody>'
-      + items.map(function(item){
-        return '<tr>'
-          +'<td><strong>'+item.name+'</strong>'+(item.desc?'<br><span style="font-size:11px;color:#9ca3af">'+item.desc+'</span>':'')+'</td>'
-          +'<td>'+item.cat+'</td>'
-          +'<td style="font-size:12px">'+item.partnerName+'<br><span style="color:#9ca3af">'+item.partnerEmail+'</span></td>'
-          +'<td>'+item.qty+'</td>'
-          +'<td>$'+(item.pph||0).toFixed(2)+'</td>'
-          +'<td style="display:flex;gap:6px">'
-          +'<button class="adm-btn-green" onclick="admApproveInventory(this)" data-id="'+item._id+'" data-item=\''+encodeURIComponent(JSON.stringify(item))+'\' style="font-size:11px;padding:5px 10px">✓ Approve</button>'
-          +'<button class="adm-btn-danger" onclick="admRejectInventory(\"'+item._id+'\")" style="font-size:11px;padding:5px 10px">✕ Reject</button>'
-          +'</td></tr>';
-      }).join('')
-      + '</tbody></table>';
-  } catch(e) { wrap.innerHTML = '<div style="color:#ef4444;font-size:13px">Error: '+e.message+'</div>'; }
+    if (!items.length) {
+      wrap.innerHTML = '<div style="color:#9ca3af;text-align:center;padding:20px;font-size:13px">No pending submissions.</div>';
+      return;
+    }
+    // Group by partner
+    var byPartner = {};
+    items.forEach(function(item) {
+      var key = item.partnerEmail || 'unknown';
+      if (!byPartner[key]) byPartner[key] = { name: item.partnerName||item.partnerEmail||'Unknown', items: [] };
+      byPartner[key].items.push(item);
+    });
+    wrap.innerHTML = Object.keys(byPartner).map(function(email) {
+      var partner = byPartner[email];
+      var count = partner.items.length;
+      var itemsHtml = partner.items.map(function(item) {
+        return '<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid #f0f0f0" id="pend-row-'+item._id+'">'
+          + (item.imgUrl ? '<img src="'+item.imgUrl+'" style="width:40px;height:40px;border-radius:8px;object-fit:cover;flex-shrink:0">'
+            : '<div style="width:40px;height:40px;border-radius:8px;background:#f0f4ff;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📦</div>')
+          + '<div style="flex:1;min-width:0">'
+          + '<div style="font-size:13px;font-weight:600;color:#111">'+item.name+'</div>'
+          + '<div style="font-size:11px;color:#9ca3af;margin-top:2px">'
+          + '<span class="adm-badge adm-badge-blue" style="font-size:10px;margin-right:6px">'+item.cat+'</span>'
+          + 'Qty: '+item.qty+' · $'+(item.pph||0).toFixed(2)+'/hr'
+          + (item.desc ? ' · '+item.desc : '')
+          + '</div></div>'
+          + '<div style="display:flex;gap:6px;flex-shrink:0">'
+          + '<button class="adm-btn-green" onclick="admApproveInventory(this)" data-id="'+item._id+'" data-item="'+encodeURIComponent(JSON.stringify(item))+'" style="font-size:11px;padding:6px 12px">✓ Approve</button>'
+          + '<button class="adm-btn-danger" onclick="admRejectInventory(this.dataset.id)" data-id="'+item._id+'" style="font-size:11px;padding:6px 12px">✕ Reject</button>'
+          + '</div></div>';
+      }).join('');
+      return '<div style="border:1px solid #e8e8e8;border-radius:10px;overflow:hidden;margin-bottom:12px">'
+        + '<div style="display:flex;align-items:center;gap:10px;padding:14px 16px;background:#fff;cursor:pointer" onclick="admTogglePartnerItems(this)">'
+        + '<div style="width:36px;height:36px;border-radius:8px;background:#1a6ef0;color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;flex-shrink:0">'+partner.name[0].toUpperCase()+'</div>'
+        + '<div style="flex:1"><div style="font-size:14px;font-weight:700;color:#111">'+partner.name+'</div><div style="font-size:11px;color:#9ca3af">'+email+'</div></div>'
+        + '<span class="adm-badge adm-badge-amber">'+count+' pending</span>'
+        + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" style="margin-left:8px"><polyline points="6 9 12 15 18 9"/></svg>'
+        + '</div>'
+        + '<div style="display:none;padding:0 16px 4px">' + itemsHtml + '</div>'
+        + '</div>';
+    }).join('');
+  } catch(e) { wrap.innerHTML = '<div style="color:#ef4444;font-size:13px;padding:16px">Error: '+e.message+'</div>'; }
 };
 
 window.admApproveInventory = async function(btn) {
@@ -4635,8 +4662,9 @@ window.admRejectInventory = async function(docId) {
   var fb = window._fb;
   try {
     await fb.updateDoc(fb.doc(fb.db,'pendingInventory',docId), {status:'rejected'});
+    var row = document.getElementById('pend-row-'+docId);
+    if (row) { row.style.opacity='0'; row.style.transition='opacity .3s'; setTimeout(function(){ row.remove(); }, 300); }
     showToast('Item rejected');
-    loadAdmPendingInventory();
   } catch(e) { showToast('Error: '+e.message); }
 };
 
@@ -4665,7 +4693,6 @@ window.renderAdmOrders = async function(wrap) {
           +'<td style="font-size:12px">'+(o.address&&o.address.building||'—')+'</td>'
           +'<td><span class="adm-badge adm-badge-'+sc+'">'+o.status+'</span></td>'
           +'<td style="font-size:11px;color:#9ca3af">'+date+'</td>'
-          +'<td style="display:flex;gap:4px">'
           +'<td style="display:flex;gap:4px"><button class="adm-btn-ghost" style="font-size:11px;padding:4px 8px" onclick="admSetOrderStatus(this.dataset.id,\'delivered\')" data-id="'+o._id+'">✓ Delivered</button><button class="adm-btn-danger" style="font-size:11px;padding:4px 8px" onclick="admSetOrderStatus(this.dataset.id,\'cancelled\')" data-id="'+o._id+'">Cancel</button></td>'
           +'<td style="display:flex;gap:4px"><button class="adm-btn-ghost" style="font-size:11px;padding:4px 8px" onclick="admSetOrderStatus(this.dataset.id,\'delivered\')" data-id="'+o._id+'">✓ Delivered</button><button class="adm-btn-danger" style="font-size:11px;padding:4px 8px" onclick="admSetOrderStatus(this.dataset.id,\'cancelled\')" data-id="'+o._id+'">Cancel</button></td>'
           +'</td></tr>';

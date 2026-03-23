@@ -919,7 +919,7 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
 
 
 /* ── Persistent sidebar layout for inner pages ─── */
-.dd-sidebar { width:220px;flex-shrink:0;border-right:1px solid #e8e8e8;padding:8px 0;background:#fff;height:calc(100vh - 60px);position:sticky;top:0;overflow-y:auto;overscroll-behavior:contain }
+.dd-sidebar { width:220px;flex-shrink:0;border-right:1px solid #e8e8e8;padding:8px 0;background:#fff;height:calc(100vh - 60px);overflow-y:auto;overscroll-behavior:contain;flex-shrink:0 }
 .dd-page-layout { display:flex;height:calc(100vh - 60px);background:#fff;overflow:hidden }
 .dd-page-main { flex:1;min-width:0;overflow-y:auto;height:100% }
 .dd-page-main { flex:1;min-width:0;overflow-y:auto;height:100% }
@@ -950,7 +950,8 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
 #page-cart.active { padding-top:60px; }
 
 /* ── DoorDash layout ─────────────────────────────────── */
-body { background:#fff; padding-top:60px; }
+body { background:#fff; padding-top:60px; overflow:hidden; }
+html.page-fixed, html.page-fixed body { overflow:hidden; }
 
 html, body { height:100%; }
 #page-home { height:100vh; overflow:hidden; }
@@ -1840,7 +1841,13 @@ window.showToast = showToast;
 // ── Navigation ────────────────────────────────────────────────────────────────
 function showPage(id) {
   // Allow scrolling on non-home pages
-  // Overflow handled by app-content-area, not body
+  // Lock scroll for fixed-height pages
+  var _fixedPages = ['home','category','browse-all'];
+  if (_fixedPages.indexOf(id) >= 0) {
+    document.documentElement.classList.add('page-fixed');
+  } else {
+    document.documentElement.classList.remove('page-fixed');
+  }
   qsa(".page").forEach(function(p){ p.classList.remove("active"); });
   var pg = el("page-"+id); if(pg) pg.classList.add("active");
   if (id === 'browse-all' && window.onShowBrowseAll) onShowBrowseAll();

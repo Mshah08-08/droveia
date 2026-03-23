@@ -205,7 +205,6 @@ img{max-width:100%}
 .glow-blob{position:fixed;border-radius:50%;filter:blur(130px);pointer-events:none;z-index:0;animation:blobMove 18s ease-in-out infinite}
 .glow-1{width:600px;height:600px;background:radial-gradient(circle,rgba(26,110,240,.10),transparent 70%);top:-100px;left:-100px}
 .glow-2{width:500px;height:500px;background:radial-gradient(circle,rgba(26,110,240,.06),transparent 70%);bottom:0;right:-80px;animation-delay:-9s}
-.noise-overlay{position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.025;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
 
 /* ── Toast ─────────────────────────────────── */
 .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(8px);background:var(--toast-bg);backdrop-filter:blur(20px);border:1px solid var(--toast-border);border-radius:40px;padding:11px 20px;font-size:13px;font-weight:500;color:var(--toast-text);white-space:nowrap;z-index:10000;pointer-events:none;opacity:0;transition:opacity .25s,transform .25s}
@@ -414,7 +413,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:var(--nav-h);backgro
 .browse-main{}
 .browse-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
 .result-count{font-size:14px;color:var(--muted)}
-.sort-select{background:var(--bg2);border:1.5px solid var(--border2);border-radius:8px;padding:8px 32px 8px 12px;font-size:13px;color:var(--text);outline:none;cursor:pointer;font-family:var(--font);appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2.5' stroke-linecap='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;transition:border-color .15s,box-shadow .15s}
 .search-bar{display:flex;align-items:center;background:var(--surface);border:1px solid var(--border2);border-radius:11px;overflow:hidden;margin-bottom:20px;transition:.2s}
 .search-bar:focus-within{border-color:var(--blue)}
 .search-bar svg{margin-left:14px;flex-shrink:0;color:var(--dim)}
@@ -568,7 +566,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:var(--nav-h);backgro
 .payment-card.selected{border-color:var(--blue);background:var(--blue-dim)}
 select:hover{border-color:var(--blue)}
 select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
-[data-theme="dark"] select{background:var(--bg2);color:var(--text);border-color:var(--border2);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237a7a9a' stroke-width='2.5' stroke-linecap='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
 .payment-logo{width:40px;height:26px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .add-payment{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px dashed var(--dim);border-radius:12px;padding:14px 16px;cursor:pointer;width:100%;font-size:13px;color:var(--muted);transition:.18s;font-family:var(--font)}
 .add-payment:hover{border-color:var(--blue);color:var(--blue)}
@@ -886,6 +883,10 @@ body{background:#f6f8ff;font-family:'Sora',sans-serif;padding-top:0!important;ma
 .stock-row:last-child{border-bottom:none}
 @media(max-width:768px){.biz-sidebar{display:none}.biz-main{margin-left:0}.biz-content{padding:16px}}
 
+
+/* Non-partner landing: hide sidebar nav, show only visit store */
+body.landing-mode .biz-nav-item:not(.biz-nav-keep) { display:none !important }
+body.landing-mode .biz-sidebar { justify-content:flex-end; padding-bottom:16px; }
 </style>
 </head>
 <body>
@@ -1020,12 +1021,12 @@ body{background:#f6f8ff;font-family:'Sora',sans-serif;padding-top:0!important;ma
   <aside class="biz-sidebar">
     
     <div class="biz-nav-item active" id="bnav-overview" onclick="bizTab('overview',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Overview</div>
-    <div class="biz-nav-item" id="bnav-orders" onclick="bizTab('orders',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Orders<span id="bnav-orders-badge" style="display:none;background:#ef4444;color:#fff;font-size:9px;font-weight:800;padding:1px 6px;border-radius:10px;margin-left:auto"></span></div>
-    <div class="biz-nav-item" id="bnav-inventory" onclick="bizTab('inventory',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>Inventory</div>
-    <div class="biz-nav-item" id="bnav-apikey" onclick="bizTab('apikey',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.778 7.778 5.5 5.5 0 017.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>API Key</div>
-    <div class="biz-nav-item" id="bnav-docs" onclick="bizTab('docs',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>API Docs</div>
+    <div class="biz-nav-item" id="bnav-orders" data-hidenp="1" onclick="bizTab('orders',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Orders<span id="bnav-orders-badge" style="display:none;background:#ef4444;color:#fff;font-size:9px;font-weight:800;padding:1px 6px;border-radius:10px;margin-left:auto"></span></div>
+    <div class="biz-nav-item" id="bnav-inventory" data-hidenp="1" onclick="bizTab('inventory',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>Inventory</div>
+    <div class="biz-nav-item" id="bnav-apikey" data-hidenp="1" onclick="bizTab('apikey',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.778 7.778 5.5 5.5 0 017.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>API Key</div>
+    <div class="biz-nav-item" id="bnav-docs" data-hidenp="1" onclick="bizTab('docs',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>API Docs</div>
     <div style="height:1px;background:#f0f0f0;margin:8px 0"></div>
-    <div class="biz-nav-item" onclick="window.location.href='https://droveia.com'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>Visit Store</div>
+    <div class="biz-nav-item biz-nav-keep" onclick="window.location.href='https://droveia.com'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>Visit Store</div>
   </aside>
   <div class="biz-main">
     <div class="biz-topbar" style="display:none">
@@ -4554,6 +4555,7 @@ window.partnerEditStock = async function(docId) {
   if (!row) return;
 
   // Replace row with inline edit form
+  row.style.display = 'block';
   row.innerHTML = '<div style="display:flex;flex-direction:column;gap:10px;padding:12px 0;width:100%">'
     +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
     +'<div><label style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Name</label>'
@@ -4586,9 +4588,33 @@ window.partnerSaveStock = async function(docId) {
   var img  = (document.getElementById('edit-img-'+docId)||{value:''}).value.trim();
   if (!name) { showToast('Name required'); return; }
   try {
+    // Update Firestore pendingInventory doc
     await fb.updateDoc(fb.doc(fb.db,'pendingInventory',docId), {
       name, cat, qty, pph, imgUrl: img||null
     });
+    // Also update in RTDB if it's live (approved)
+    var snap = await fb.getDoc(fb.doc(fb.db,'pendingInventory',docId));
+    if (snap.exists() && snap.data().status === 'approved') {
+      try {
+        var rtdbResp = await fetch('https://droveia-default-rtdb.firebaseio.com/tools.json');
+        var tools = await rtdbResp.json();
+        var arr = tools ? (Array.isArray(tools) ? tools : Object.values(tools)) : [];
+        var updated = false;
+        arr = arr.map(function(t) {
+          if (t && t.partnerEmail === currentUser.email && t.name === snap.data().name) {
+            updated = true;
+            return Object.assign({}, t, {name, cat, qty, pph, img: img||t.img||'x'});
+          }
+          return t;
+        });
+        if (updated) {
+          await fetch('https://droveia-default-rtdb.firebaseio.com/tools.json', {
+            method:'PUT', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify(arr)
+          });
+        }
+      } catch(e2) { console.warn('RTDB update skipped:', e2); }
+    }
     showToast('✓ Item updated');
     loadPartnerStock();
   } catch(e) { showToast('Error: '+e.message); }
@@ -4626,32 +4652,79 @@ window.loadPartnerStock = async function() {
 
 window.renderPartnerLanding = function(mode) {
   if (mode === 'signin') {
-    return '<div style="text-align:center;padding:60px 40px;max-width:480px;margin:0 auto">'
-      + '<div style="font-size:48px;margin-bottom:20px">🚁</div>'
-      + '<h2 style="font-size:24px;font-weight:800;color:#111;margin-bottom:10px">Droveia Partner Portal</h2>'
-      + '<p style="color:#6b7280;font-size:15px;margin-bottom:28px;line-height:1.6">Sign in with your partner account to manage your inventory, orders, and API keys.</p>'
-      + '<button class="biz-btn-primary" onclick="showAuth()" style="font-size:15px;padding:12px 32px">Sign In</button>'
+    return '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;padding:40px 24px">'
+      + '<div style="width:72px;height:72px;border-radius:20px;background:linear-gradient(135deg,#1a6ef0,#3b82f6);display:flex;align-items:center;justify-content:center;font-size:32px;margin-bottom:24px;box-shadow:0 8px 24px rgba(26,110,240,.3)">🚁</div>'
+      + '<h2 style="font-size:26px;font-weight:800;color:#111;margin-bottom:10px;letter-spacing:-.03em">Partner Portal</h2>'
+      + '<p style="color:#6b7280;font-size:15px;margin-bottom:32px;max-width:380px;line-height:1.6">Sign in with your partner account to manage inventory, track orders, and access your API.</p>'
+      + '<button onclick="showAuth()" style="background:#1a6ef0;color:#fff;border:none;border-radius:10px;padding:14px 36px;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--font);box-shadow:0 4px 14px rgba(26,110,240,.4)">Sign In</button>'
       + '</div>';
   }
-  return '<div style="max-width:700px;margin:0 auto;padding:40px 20px">'
-    + '<div style="text-align:center;margin-bottom:40px">'
-    + '<div style="display:inline-block;background:#eff6ff;color:#1a6ef0;font-size:12px;font-weight:700;padding:6px 14px;border-radius:20px;margin-bottom:20px">Partner Program</div>'
-    + '<h1 style="font-size:30px;font-weight:800;color:#111;margin-bottom:14px">Reach customers in under 7 minutes</h1>'
-    + '<p style="color:#6b7280;font-size:15px;line-height:1.7">List your tools on Droveia and we\'ll deliver them by drone. Zero infrastructure needed.</p>'
+
+  return '<div style="padding:0;overflow-y:auto">'
+
+    // Hero
+    + '<div style="background:linear-gradient(135deg,#0f172a 0%,#1e3a8a 60%,#1a6ef0 100%);padding:60px 40px;text-align:center;position:relative;overflow:hidden">'
+    + '<div style="position:relative">'
+    + '<div style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:11px;font-weight:700;padding:6px 14px;border-radius:20px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:24px;backdrop-filter:blur(8px)">🚁 Partner Program</div>'
+    + '<h1 style="font-size:38px;font-weight:900;color:#fff;letter-spacing:-.04em;line-height:1.1;margin-bottom:16px">Deliver anything.<br><span style="color:#60a5fa">In under 7 minutes.</span></h1>'
+    + '<p style="color:rgba(255,255,255,.75);font-size:16px;line-height:1.7;max-width:500px;margin:0 auto 32px">List your tools and products on Droveia. We handle the drone delivery — you just pack the order and earn.</p>'
+    + '<a href="mailto:partners@droveia.com" style="display:inline-block;background:#fff;color:#1a6ef0;font-size:15px;font-weight:800;padding:14px 36px;border-radius:10px;text-decoration:none;box-shadow:0 4px 20px rgba(0,0,0,.2)">Apply to Partner →</a>'
+    + '</div></div>'
+
+    // Stats
+    + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-bottom:1px solid #f0f0f0">'
+    + '<div style="padding:28px 20px;text-align:center;border-right:1px solid #f0f0f0"><div style="font-size:32px;font-weight:900;color:#111;letter-spacing:-.03em">~7<span style="font-size:18px">min</span></div><div style="font-size:12px;color:#9ca3af;margin-top:4px">Avg delivery time</div></div>'
+    + '<div style="padding:28px 20px;text-align:center;border-right:1px solid #f0f0f0"><div style="font-size:32px;font-weight:900;color:#111;letter-spacing:-.03em">90<span style="font-size:18px">%</span></div><div style="font-size:12px;color:#9ca3af;margin-top:4px">Revenue goes to you</div></div>'
+    + '<div style="padding:28px 20px;text-align:center"><div style="font-size:32px;font-weight:900;color:#111;letter-spacing:-.03em">$0</div><div style="font-size:12px;color:#9ca3af;margin-top:4px">Setup cost</div></div>'
     + '</div>'
-    + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:40px">'
-    + '<div style="background:#fff;border:1px solid #e8e8e8;border-radius:12px;padding:18px;text-align:center"><div style="font-size:24px;font-weight:800;color:#1a6ef0">~7 min</div><div style="font-size:11px;color:#9ca3af;margin-top:3px">Delivery</div></div>'
-    + '<div style="background:#fff;border:1px solid #e8e8e8;border-radius:12px;padding:18px;text-align:center"><div style="font-size:24px;font-weight:800;color:#1a6ef0">90%</div><div style="font-size:11px;color:#9ca3af;margin-top:3px">Revenue share</div></div>'
-    + '<div style="background:#fff;border:1px solid #e8e8e8;border-radius:12px;padding:18px;text-align:center"><div style="font-size:24px;font-weight:800;color:#1a6ef0">Free</div><div style="font-size:11px;color:#9ca3af;margin-top:3px">To join</div></div>'
+
+    // How it works
+    + '<div style="padding:40px 32px">'
+    + '<div style="font-size:11px;font-weight:800;color:#9ca3af;text-transform:uppercase;letter-spacing:.1em;margin-bottom:24px">How it works</div>'
+    + '<div style="display:flex;flex-direction:column;gap:0">'
+    + _bizStep('1','Submit your inventory','List your tools, equipment, or products. Our team reviews and approves within 24 hours.','#eff6ff','#1a6ef0')
+    + _bizStep('2','We install your station','Droveia installs a drone docking station at your location at zero cost to you.','#f0fdf4','#16a34a')
+    + _bizStep('3','Orders fly out automatically','When a customer orders, your station dispatches the drone. You load it, we fly it.','#fff7ed','#d97706')
+    + _bizStep('4','Get paid weekly','Keep 90% of every rental. Track orders, revenue, and analytics in real time.','#fdf4ff','#9333ea')
+    + '</div></div>'
+
+    // What you get
+    + '<div style="padding:0 32px 40px">'
+    + '<div style="font-size:11px;font-weight:800;color:#9ca3af;text-transform:uppercase;letter-spacing:.1em;margin-bottom:20px">What you get</div>'
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'
+    + _bizFeature("📦","Full dashboard","Manage inventory, view orders, and track revenue all in one place.")
+    + _bizFeature("🔑","API access","Integrate Droveia deliveries directly into your existing systems.")
+    + _bizFeature("📍","Real-time tracking","Customers track their drone delivery live on a map.")
+    + _bizFeature("💰","Weekly payouts","Automatic transfers every Monday. No chasing invoices.")
+    + '</div></div>'
+
+    // CTA
+    + '<div style="margin:0 32px 40px;background:linear-gradient(120deg,#1a6ef0,#3b82f6);border-radius:16px;padding:36px;text-align:center">'
+    + '<div style="font-size:22px;font-weight:900;color:#fff;margin-bottom:8px;letter-spacing:-.02em">Ready to join?</div>'
+    + '<div style="font-size:14px;color:rgba(255,255,255,.8);margin-bottom:24px">We onboard new partners every week. Get in touch and we&rsquo;ll have you live within days.</div>'
+    + '<a href="mailto:partners@droveia.com" style="display:inline-block;background:#fff;color:#1a6ef0;font-size:14px;font-weight:800;padding:12px 32px;border-radius:10px;text-decoration:none;margin-right:12px">Email Us</a>'
+    + '<button onclick="showAuth()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;font-size:14px;font-weight:700;padding:12px 24px;border-radius:10px;cursor:pointer;font-family:var(--font)">Already a partner?</button>'
     + '</div>'
-    + '<div style="background:linear-gradient(120deg,#1a6ef0,#3b82f6);border-radius:16px;padding:28px;text-align:center;margin-bottom:20px">'
-    + '<div style="font-size:18px;font-weight:800;color:#fff;margin-bottom:8px">Ready to get started?</div>'
-    + '<div style="font-size:13px;color:rgba(255,255,255,.8);margin-bottom:20px">Contact us and we\'ll set up your station within a week.</div>'
-    + '<a href="mailto:partners@droveia.com" style="display:inline-block;background:#fff;color:#1a6ef0;font-size:13px;font-weight:700;padding:10px 24px;border-radius:8px;text-decoration:none">partners@droveia.com</a>'
-    + '</div>'
-    + '<div style="text-align:center"><p style="font-size:13px;color:#9ca3af">Already a partner? <button onclick="showAuth()" style="background:none;border:none;color:#1a6ef0;font-weight:600;cursor:pointer;font-size:13px">Sign in here</button></p></div>'
+
     + '</div>';
 };
+
+function _bizStep(num, title, desc, bg, color) {
+  return '<div style="display:flex;gap:16px;padding:20px 0;border-bottom:1px solid #f8f8f8">'
+    + '<div style="width:40px;height:40px;border-radius:12px;background:'+bg+';color:'+color+';display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;flex-shrink:0">'+num+'</div>'
+    + '<div><div style="font-size:14px;font-weight:700;color:#111;margin-bottom:4px">'+title+'</div>'
+    + '<div style="font-size:13px;color:#6b7280;line-height:1.5">'+desc+'</div></div>'
+    + '</div>';
+}
+function _bizFeature(icon, title, desc) {
+  return '<div style="background:#f8f9fa;border-radius:12px;padding:18px">'
+    + '<div style="font-size:22px;margin-bottom:8px">'+icon+'</div>'
+    + '<div style="font-size:13px;font-weight:700;color:#111;margin-bottom:4px">'+title+'</div>'
+    + '<div style="font-size:12px;color:#6b7280;line-height:1.5">'+desc+'</div>'
+    + '</div>';
+}
+
+
 
 var _bizCurrentTab='overview';
 
@@ -4671,14 +4744,14 @@ window.renderBizTab=async function(tab){
   var wrap=document.getElementById('biz-page-content');
   if(!wrap)return;
   if(!window.currentUser){
-    wrap.innerHTML=renderPartnerLanding('signin');
+    document.body.classList.add('landing-mode'); wrap.innerHTML=renderPartnerLanding('signin');
     return;
   }
   if(!window._isPartnerUser){
-    wrap.innerHTML=renderPartnerLanding('apply');
+    document.body.classList.add('landing-mode'); wrap.innerHTML=renderPartnerLanding('apply');
     return;
   }
-  wrap.innerHTML='<div style="text-align:center;padding:60px;color:#9ca3af">Loading...</div>';
+  document.body.classList.remove('landing-mode'); wrap.innerHTML='<div style="text-align:center;padding:60px;color:#9ca3af">Loading...</div>';
   if(tab==='overview')await renderBizOverview(wrap);
   else if(tab==='orders')await renderBizOrders(wrap);
   else if(tab==='inventory')renderBizInventory(wrap);

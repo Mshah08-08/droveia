@@ -1897,17 +1897,18 @@ window.goSearch = function() {
   var inp = el("nav-search-input"); if(!inp) return;
   var v = (inp.value||'').trim();
   if (!v) return;
-  // Show results on browse-all page
+  _baSearch = v;
+  _baCat = 'All';
   showPage('browse-all');
   setTimeout(function(){
-    var grid = el('browse-all-grid');
-    if (!grid) return;
-    var results = TOOLS.filter(function(t){ return t.name.toLowerCase().indexOf(v.toLowerCase()) >= 0; });
-    if (!results.length) { grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#9ca3af">No results for "'+v+'"</div>'; return; }
-    grid.innerHTML = results.map(function(t){ return makeToolCard(t, false); }).join('');
-    // Update heading
+    // Set the search input on browse-all page too
+    var baInp = el('ba-search');
+    if (baInp) baInp.value = v;
+    // Reset chips to All
+    document.querySelectorAll('#ba-chips .ddchip').forEach(function(b,i){ b.classList.toggle('active',i===0); });
     var h = el('browse-all-heading');
-    if (h) h.textContent = results.length + ' results for "' + v + '"';
+    if (h) h.textContent = 'Search results';
+    renderBrowseAllGrid();
   }, 80);
 };
 
@@ -3733,6 +3734,8 @@ async function loadToolsFromRTDB() {
     renderCatIcons();
     renderFeatured();
     renderTools();
+    if (window.homeRenderSections) homeRenderSections();
+    if (window.renderBrowseAllGrid) renderBrowseAllGrid();
     // Refresh admin inventory table if open
     var adminInv = el("admin-panel-inventory");
     if (adminInv && adminInv.classList.contains("active")) {
@@ -3980,7 +3983,7 @@ function renderHomeReviews(reviews) {
 renderCatIcons();
 
 // Load live inventory from Firebase Realtime DB — renders tools once loaded
-loadToolsFromRTDB();
+loadToolsFromRTDB().then(function(){ if(window.homeRenderSections) homeRenderSections(); });
 // Auto-refresh inventory every 60 seconds
 setInterval(loadToolsFromRTDB, 60000);
 
@@ -4178,7 +4181,7 @@ window.homeRenderSections = function() {
     html += '<div class="home-section" id="home-sec-'+cat.toLowerCase()+'">';
     html += '<div class="home-section-hd">';
     html += '<span class="home-section-title">'+cat+'</span>';
-    html += '<button class="home-section-seeall" onclick="homeSeeAllCat()">See all</button>';
+    html += '<button class="home-section-seeall" data-cat="'+cat+'" onclick="homeSeeAllCat(this.dataset.cat)">See all</button>';
     html += '</div>';
     html += '<div class="home-section-row">';
     html += tools.slice(0,10).map(function(t){ return makeToolCard(t, true); }).join('');
@@ -4227,9 +4230,19 @@ window.homeClearPartnerFilter = function() {
   var w = document.getElementById('home-welcome');
   if (w) w.textContent = 'Welcome to Droveia';
 };
-window.homeSeeAllCat = function() {
+window.homeSeeAllCat = function(cat) {
   homeSetSidebarActive('sbnav-browse');
+  if (cat) { _baCat = cat; }
   showPage('browse-all');
+  setTimeout(function() {
+    // highlight correct chip
+    document.querySelectorAll('#ba-chips .ddchip').forEach(function(b){
+      b.classList.toggle('active', cat ? b.textContent.indexOf(cat) >= 0 : b.textContent.trim() === 'All');
+    });
+    var h = document.getElementById('browse-all-heading');
+    if (h) h.textContent = cat || 'Browse';
+    renderBrowseAllGrid();
+  }, 50);
 };
 
 

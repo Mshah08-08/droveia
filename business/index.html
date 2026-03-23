@@ -4542,6 +4542,58 @@ window.partnerSubmitStock = async function() {
   finally{if(btn){btn.disabled=false;btn.textContent='Submit for Review';}}
 };
 
+
+window.partnerEditStock = async function(docId) {
+  if (typeof docId !== "string") docId = docId.dataset ? docId.dataset.id : String(docId);
+  var fb = window._fb; if(!fb||!window.currentUser) return;
+  var snap = await fb.getDoc(fb.doc(fb.db,'pendingInventory',docId));
+  if (!snap.exists()) return;
+  var item = Object.assign({_id:docId}, snap.data());
+
+  var row = document.getElementById('srow-'+docId);
+  if (!row) return;
+
+  // Replace row with inline edit form
+  row.innerHTML = '<div style="display:flex;flex-direction:column;gap:10px;padding:12px 0;width:100%">'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
+    +'<div><label style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Name</label>'
+    +'<input class="biz-input" id="edit-name-'+docId+'" value="'+item.name+'"></div>'
+    +'<div><label style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Category</label>'
+    +'<select class="biz-input" id="edit-cat-'+docId+'"><option value="Workshop"'+(item.cat==='Workshop'?' selected':'')+'>Workshop</option><option value="Electronics"'+(item.cat==='Electronics'?' selected':'')+'>Electronics</option><option value="Crafts"'+(item.cat==='Crafts'?' selected':'')+'>Crafts</option><option value="Office"'+(item.cat==='Office'?' selected':'')+'>Office</option></select></div>'
+    +'</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">'
+    +'<div><label style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Qty</label>'
+    +'<input class="biz-input" id="edit-qty-'+docId+'" type="number" min="1" value="'+(item.qty||1)+'"></div>'
+    +'<div><label style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Price/hr ($)</label>'
+    +'<input class="biz-input" id="edit-pph-'+docId+'" type="number" min="0" step="0.01" value="'+(item.pph||0)+'"></div>'
+    +'<div><label style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Image URL</label>'
+    +'<input class="biz-input" id="edit-img-'+docId+'" value="'+(item.imgUrl||'')+'"></div>'
+    +'</div>'
+    +'<div style="display:flex;gap:8px">'
+    +'<button class="biz-btn-primary" onclick="partnerSaveStock(this.dataset.id)" data-id="'+docId+'" style="font-size:12px;padding:8px 16px">Save</button>'
+    +'<button class="biz-btn-secondary" onclick="loadPartnerStock()" style="font-size:12px;padding:8px 16px">Cancel</button>'
+    +'</div>'
+    +'</div>';
+};
+
+window.partnerSaveStock = async function(docId) {
+  if (typeof docId !== "string") docId = docId.dataset ? docId.dataset.id : String(docId);
+  var fb = window._fb; if(!fb||!window.currentUser) return;
+  var name = (document.getElementById('edit-name-'+docId)||{value:''}).value.trim();
+  var cat  = (document.getElementById('edit-cat-'+docId)||{value:''}).value;
+  var qty  = parseInt((document.getElementById('edit-qty-'+docId)||{value:'1'}).value)||1;
+  var pph  = parseFloat((document.getElementById('edit-pph-'+docId)||{value:'0'}).value)||0;
+  var img  = (document.getElementById('edit-img-'+docId)||{value:''}).value.trim();
+  if (!name) { showToast('Name required'); return; }
+  try {
+    await fb.updateDoc(fb.doc(fb.db,'pendingInventory',docId), {
+      name, cat, qty, pph, imgUrl: img||null
+    });
+    showToast('✓ Item updated');
+    loadPartnerStock();
+  } catch(e) { showToast('Error: '+e.message); }
+};
+
 window.loadPartnerStock = async function() {
   var wrap=document.getElementById('partner-stock-list');
   if(!wrap||!window._fb||!window.currentUser)return;
@@ -4554,14 +4606,18 @@ window.loadPartnerStock = async function() {
     var sc={pending:'amber',approved:'green',rejected:'red'};
     wrap.innerHTML=items.map(function(item){
       var date=item.submittedAt&&item.submittedAt.toDate?item.submittedAt.toDate().toLocaleDateString([],{month:'short',day:'numeric'}):'';
-      return '<div class="stock-row">'
+      var canEdit = item.status === 'approved';
+      return '<div class="stock-row" id="srow-'+item._id+'">'
         +(item.imgUrl?'<img src="'+item.imgUrl+'" style="width:44px;height:44px;border-radius:8px;object-fit:cover;flex-shrink:0">'
           :'<div style="width:44px;height:44px;border-radius:8px;background:#f0f4ff;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:18px">📦</div>')
         +'<div style="flex:1;min-width:0">'
         +'<div style="font-size:14px;font-weight:600;color:#111">'+item.name+'</div>'
-        +'<div style="font-size:11px;color:#9ca3af;margin-top:2px">'+item.cat+(item.qty>1?' · '+item.qty+' units':'')+(date?' · '+date:'')+'</div>'
+        +'<div style="font-size:11px;color:#9ca3af;margin-top:2px">'+item.cat+(item.qty>1?' · '+item.qty+' units':'')+(item.pph?' · $'+item.pph+'/hr':'')+(date?' · '+date:'')+'</div>'
         +'</div>'
+        +'<div style="display:flex;align-items:center;gap:8px">'
         +'<span class="biz-badge biz-badge-'+(sc[item.status]||'blue')+'">'+(item.status||'pending')+'</span>'
+        +(canEdit?'<button class="biz-btn-secondary" onclick="partnerEditStock(this.dataset.id)" data-id="'+item._id+'" style="font-size:11px;padding:5px 10px">Edit</button>':'')
+        +'</div>'
         +'</div>';
     }).join('');
   }catch(e){wrap.innerHTML='<div style="color:#ef4444;padding:20px 0;font-size:13px">Error loading stock</div>';}
@@ -4694,7 +4750,7 @@ window.renderBizInventory=function(wrap){
     'Submit for Review</button>',
     '</div></div>',
     '<div class="biz-card">',
-    '<div class="biz-card-header"><div class="biz-card-title">My Submitted Items</div></div>',
+    '<div class="biz-card-header"><div class="biz-card-title">My Inventory</div></div>',
     '<div class="biz-card-body" id="partner-stock-list"><div style="color:#9ca3af;font-size:13px">Loading...</div></div>',
     '</div>',
   ].join('');

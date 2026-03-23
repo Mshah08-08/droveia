@@ -884,6 +884,22 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
 .ddtool-sm-add { width:26px;height:26px;border-radius:50%;background:#1a6ef0;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s;flex-shrink:0 }
 .ddtool-sm-add:hover { background:#1560d8 }
 
+/* ── Page transitions ─── */
+.page { animation: none }
+.page.active { animation: fadeIn .18s ease }
+@keyframes fadeIn { from { opacity:0;transform:translateY(6px) } to { opacity:1;transform:none } }
+
+/* ── Tool card hover glow ─── */
+.ddtool:hover { box-shadow:0 4px 24px rgba(26,110,240,.12);border-color:#c4d0f0 }
+.ddtool-sm:hover { box-shadow:0 4px 20px rgba(26,110,240,.1);border-color:#c4d0f0 }
+
+/* ── Add button pulse ─── */
+.ddtool-add:active, .ddtool-sm-add:active { transform:scale(.88) }
+
+/* ── Sidebar smooth ─── */
+.ddnav-item { transition:background .12s,color .12s }
+
+
 /* ── Persistent sidebar layout for inner pages ─── */
 .dd-sidebar { width:220px;flex-shrink:0;border-right:1px solid #e8e8e8;padding:16px 0;background:#fff;height:calc(100vh - 60px);position:sticky;top:0;overflow-y:auto }
 .dd-page-layout { display:flex;height:calc(100vh - 60px);background:#fff;overflow:hidden }
@@ -1078,14 +1094,14 @@ html, body { height:100%; }
     <div class="ddnav-item" id="sbnav-office" onclick="homeSetSidebarActive('sbnav-office');homeSectionScroll('home-sec-office')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Office
     </div>
-    <div class="ddnav-item" id="sbnav-browse" onclick="homeSetSidebarActive('sbnav-browse');showPage('browse-all')">
+    <div class="ddnav-item" id="sbnav-browse" onclick="showPage('browse-all')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>Browse All
     </div>
     <div style="height:1px;background:#f0f0f0;margin:8px 0"></div>
-    <div class="ddnav-item" onclick="showPage('orders')">
+    <div class="ddnav-item" id="sbnav-orders" onclick="showPage('orders')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Orders
     </div>
-    <div class="ddnav-item" onclick="showPage('account')">
+    <div class="ddnav-item" id="sbnav-account" onclick="showPage('account')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Account
     </div>
     <div style="height:1px;background:#f0f0f0;margin:8px 0"></div>
@@ -1114,24 +1130,9 @@ html, body { height:100%; }
         </div>
       </div>
 
-      <!-- Partners row -->
-      <div id="home-partners-section" style="margin-bottom:32px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-          <span style="font-size:18px;font-weight:800;color:#111;font-family:var(--font)">Local Partners</span>
-          <button onclick="showPage('browse-all')" style="font-size:13px;color:#1a6ef0;background:none;border:none;cursor:pointer;font-family:var(--font);font-weight:600">See All</button>
-        </div>
-        <div id="home-partners-row" style="display:flex;gap:12px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px">
-          <style>#home-partners-row::-webkit-scrollbar{display:none}</style>
-          <div style="color:#9ca3af;font-size:13px">Loading...</div>
-        </div>
-      </div>
-
-      <!-- Category sections - each renders as horizontal scroll row -->
-      <div id="home-sections"></div>
-
       <!-- How it works -->
-      <div style="margin-bottom:48px;margin-top:8px">
-        <div style="font-size:18px;font-weight:800;color:#111;font-family:var(--font);margin-bottom:16px">How it works</div>
+      <div style="margin-bottom:32px">
+        <div style="font-size:18px;font-weight:800;color:#111;font-family:var(--font);margin-bottom:14px">How it works</div>
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
           <div style="background:#f8f8f8;border-radius:10px;padding:16px 14px"><div style="font-size:24px;margin-bottom:8px">🔍</div><div style="font-size:13px;font-weight:700;color:#111;margin-bottom:3px">Browse</div><div style="font-size:11px;color:#6b7280;line-height:1.5">Pick a tool, set duration</div></div>
           <div style="background:#f8f8f8;border-radius:10px;padding:16px 14px"><div style="font-size:24px;margin-bottom:8px">🚁</div><div style="font-size:13px;font-weight:700;color:#111;margin-bottom:3px">Dispatched</div><div style="font-size:11px;color:#6b7280;line-height:1.5">Drone flies from local hub</div></div>
@@ -1139,6 +1140,9 @@ html, body { height:100%; }
           <div style="background:#f8f8f8;border-radius:10px;padding:16px 14px"><div style="font-size:24px;margin-bottom:8px">♻️</div><div style="font-size:13px;font-weight:700;color:#111;margin-bottom:3px">Free return</div><div style="font-size:11px;color:#6b7280;line-height:1.5">Drone picks it back up</div></div>
         </div>
       </div>
+
+      <!-- Category sections -->
+      <div id="home-sections"></div>
 
     </div>
   </main>
@@ -1160,75 +1164,68 @@ html, body { height:100%; }
 <div class="page" id="page-browse-all" style="display:none">
 <div style="display:flex;height:calc(100vh - 60px);background:#fff;overflow:hidden">
 
-  <!-- Same sidebar -->
-  <aside style="width:200px;flex-shrink:0;border-right:1px solid #e8e8e8;padding:16px 0;position:sticky;top:0;height:100%;overflow-y:auto;background:#fff">
+  <!-- Sidebar -->
+  <aside class="dd-sidebar" style="width:220px">
     <div class="ddnav-item" onclick="showPage('home')">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home
     </div>
-    <div class="ddnav-item" onclick="showPage('home');setTimeout(function(){homeSectionScroll('home-sec-workshop')},100)">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>Workshop
+    <div class="ddnav-item" onclick="baFilterCat('Workshop')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>Workshop
     </div>
-    <div class="ddnav-item" onclick="showPage('home');setTimeout(function(){homeSectionScroll('home-sec-electronics')},100)">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Electronics
+    <div class="ddnav-item" onclick="baFilterCat('Electronics')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Electronics
     </div>
-    <div class="ddnav-item" onclick="showPage('home');setTimeout(function(){homeSectionScroll('home-sec-crafts')},100)">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>Crafts
+    <div class="ddnav-item" onclick="baFilterCat('Crafts')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>Crafts
     </div>
-    <div class="ddnav-item" onclick="showPage('home');setTimeout(function(){homeSectionScroll('home-sec-office')},100)">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Office
+    <div class="ddnav-item" onclick="baFilterCat('Office')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Office
     </div>
-    <div style="height:1px;background:#f0f0f0;margin:8px 0"></div>
     <div class="ddnav-item active">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>Browse All
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>Browse All
     </div>
     <div style="height:1px;background:#f0f0f0;margin:8px 0"></div>
     <div class="ddnav-item" onclick="showPage('orders')">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Orders
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Orders
     </div>
     <div class="ddnav-item" onclick="showPage('account')">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Account
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Account
+    </div>
+    <div style="height:1px;background:#f0f0f0;margin:8px 0"></div>
+    <div class="ddnav-item" onclick="window.open('https://business.droveia.com')" style="color:#1a6ef0">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>For Businesses
     </div>
   </aside>
 
-  <!-- Browse All content -->
+  <!-- Main -->
   <main style="flex:1;min-width:0;padding:28px 32px;overflow-y:auto;height:100%">
-    <h1 style="font-size:22px;font-weight:800;color:#111;font-family:var(--font);margin:0 0 24px;letter-spacing:-.02em">Browse</h1>
 
-    <!-- Category cards grid -->
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px;margin-bottom:36px">
-      <div class="bcat-card" onclick="showPage('home');setTimeout(function(){homeSectionScroll('home-top')},80)">
-        <div class="bcat-icon" style="background:#fff3e0">🔧</div>
-        <div class="bcat-name">All Tools</div>
-      </div>
-      <div class="bcat-card" onclick="showPage('home');setTimeout(function(){homeSectionScroll('home-sec-workshop')},80)">
-        <div class="bcat-icon" style="background:#e8f5e9">🛠️</div>
-        <div class="bcat-name">Workshop</div>
-      </div>
-      <div class="bcat-card" onclick="showPage('home');setTimeout(function(){homeSectionScroll('home-sec-electronics')},80)">
-        <div class="bcat-icon" style="background:#e3f2fd">⚡</div>
-        <div class="bcat-name">Electronics</div>
-      </div>
-      <div class="bcat-card" onclick="showPage('home');setTimeout(function(){homeSectionScroll('home-sec-crafts')},80)">
-        <div class="bcat-icon" style="background:#fce4ec">🎨</div>
-        <div class="bcat-name">Crafts</div>
-      </div>
-      <div class="bcat-card" onclick="showPage('home');setTimeout(function(){homeSectionScroll('home-sec-office')},80)">
-        <div class="bcat-icon" style="background:#f3e5f5">🖥️</div>
-        <div class="bcat-name">Office</div>
-      </div>
-      <div class="bcat-card" onclick="showPage('browse')">
-        <div class="bcat-icon" style="background:#e0f2f1">📦</div>
-        <div class="bcat-name">All Items</div>
+    <!-- Header + search filter -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+      <h1 id="browse-all-heading" style="font-size:22px;font-weight:800;color:#111;font-family:var(--font);letter-spacing:-.02em;margin:0">Browse</h1>
+      <div style="display:flex;align-items:center;gap:8px;background:#f4f4f4;border-radius:8px;padding:8px 14px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input id="ba-search" type="text" placeholder="Search tools..." oninput="baSearch(this.value)" style="border:none;outline:none;background:transparent;font-size:14px;color:#111;font-family:var(--font);width:180px"/>
       </div>
     </div>
 
-    <!-- All tools grid -->
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-      <span id="browse-all-heading" style="font-size:18px;font-weight:800;color:#111;font-family:var(--font)">All Available Tools</span>
+    <!-- Category chips -->
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px" id="ba-chips">
+      <button class="ddchip active" onclick="baChip(this,'All')">All</button>
+      <button class="ddchip" onclick="baChip(this,'Workshop')">🛠 Workshop</button>
+      <button class="ddchip" onclick="baChip(this,'Electronics')">⚡ Electronics</button>
+      <button class="ddchip" onclick="baChip(this,'Crafts')">🎨 Crafts</button>
+      <button class="ddchip" onclick="baChip(this,'Office')">🖥 Office</button>
     </div>
-    <div id="browse-all-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:40px">
-      <div style="grid-column:1/-1;text-align:center;padding:40px;color:#9ca3af">Loading...</div>
+
+    <!-- Tool count -->
+    <div id="ba-count" style="font-size:13px;color:#6b7280;margin-bottom:16px"></div>
+
+    <!-- Grid -->
+    <div id="browse-all-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;padding-bottom:40px">
+      <div style="grid-column:1/-1;text-align:center;padding:60px;color:#9ca3af">Loading...</div>
     </div>
+
   </main>
 </div>
 </div>
@@ -1323,10 +1320,10 @@ html, body { height:100%; }
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>Browse All
     </div>
     <div style="height:1px;background:#f0f0f0;margin:8px 0"></div>
-    <div class="ddnav-item ddnav-item active" onclick="showPage('orders')">
+    <div class="ddnav-item ddnav-item active" id="sbnav-orders" onclick="showPage('orders')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Orders
     </div>
-    <div class="ddnav-item ddnav-item" onclick="showPage('account')">
+    <div class="ddnav-item ddnav-item" id="sbnav-account" onclick="showPage('account')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Account
     </div>
     <div style="height:1px;background:#f0f0f0;margin:8px 0"></div>
@@ -1395,10 +1392,10 @@ html, body { height:100%; }
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>Browse All
     </div>
     <div style="height:1px;background:#f0f0f0;margin:8px 0"></div>
-    <div class="ddnav-item ddnav-item" onclick="showPage('orders')">
+    <div class="ddnav-item ddnav-item" id="sbnav-orders" onclick="showPage('orders')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Orders
     </div>
-    <div class="ddnav-item ddnav-item active" onclick="showPage('account')">
+    <div class="ddnav-item ddnav-item active" id="sbnav-account" onclick="showPage('account')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Account
     </div>
     <div style="height:1px;background:#f0f0f0;margin:8px 0"></div>
@@ -1685,12 +1682,19 @@ window.showToast = showToast;
 // ── Navigation ────────────────────────────────────────────────────────────────
 function showPage(id) {
   // Allow scrolling on non-home pages
-  document.body.style.overflow = id === 'home' ? 'hidden' : '';
-  document.documentElement.style.overflow = id === 'home' ? 'hidden' : '';
+  var _lockScroll = ['home','browse-all'].indexOf(id) >= 0;
+  document.body.style.overflow = _lockScroll ? 'hidden' : '';
+  document.documentElement.style.overflow = _lockScroll ? 'hidden' : '';
   qsa(".page").forEach(function(p){ p.classList.remove("active"); });
   var pg = el("page-"+id); if(pg) pg.classList.add("active");
+  if (id === 'browse-all' && window.onShowBrowseAll) onShowBrowseAll();
   if (window.location.hash) history.replaceState(null, "", window.location.pathname);
   sessionStorage.setItem("currentPage", id);
+  // Update sidebar active states
+  document.querySelectorAll('.ddnav-item').forEach(function(el){ el.classList.remove('active'); });
+  var sidebarMap = {home:'sbnav-home',browse:'sbnav-browse',orders:'sbnav-orders',account:'sbnav-account','browse-all':'sbnav-browse'};
+  var sbId = sidebarMap[id];
+  if (sbId) { var sb = document.getElementById(sbId); if(sb) sb.classList.add('active'); }
   qsa(".nav-link").forEach(function(l){ l.classList.remove("active"); });
   var nl = el("nav-"+id); if(nl) nl.classList.add("active");
   if (id === "admin") { renderAdmin(); }
@@ -3653,6 +3657,9 @@ function startApp() {
       subscribeOrders();
       subscribeHomeReviews(fb);
       if (el('page-admin') && el('page-admin').classList.contains('active')) renderAdmin();
+      // Update welcome heading
+      var _wEl = document.getElementById('home-welcome');
+      if (_wEl && user.displayName) _wEl.textContent = 'Welcome, ' + user.displayName.split(' ')[0];
       if (window._openAdminOnAuth) { window._openAdminOnAuth = false; showPage('admin'); }
     } else {
       if (ordersUnsub){ ordersUnsub(); ordersUnsub=null; }
@@ -4225,42 +4232,7 @@ window.homeSeeAllCat = function() {
   showPage('browse-all');
 };
 
-window.renderBrowseAllGrid = function() {
-  var grid = document.getElementById('browse-all-grid');
-  if (!grid || !TOOLS.length) return;
-  grid.innerHTML = TOOLS.map(function(t){ return makeToolCard(t, false); }).join('');
-};
 
-var _homeInitDone = false;
-function homeInit() {
-  if (_homeInitDone) return; _homeInitDone = true;
-  homeRenderSections();
-  if (window._fb) homeRenderPartners();
-  renderBrowseAllGrid();
-  var addr = document.getElementById('nav-address-label');
-  if (addr && window.userProfile && userProfile.building) addr.textContent = userProfile.building;
-  var welcome = document.getElementById('home-welcome');
-  if (welcome && window.currentUser) {
-    var name = (currentUser.displayName||currentUser.email).split(/[\s@]/)[0];
-    welcome.textContent = 'Welcome back, ' + name;
-  }
-}
-document.addEventListener('fbready', function(){ setTimeout(homeInit, 600); }, {once:true});
-setTimeout(function(){ if(window.TOOLS&&TOOLS.length) homeInit(); }, 2000);
-
-// override showPage to handle browse-all and fix overflow
-var _origShowPage = showPage;
-window.showPage = function(id) {
-  document.body.style.overflow = (id === 'home' || id === 'browse-all') ? 'hidden' : '';
-  document.documentElement.style.overflow = (id === 'home' || id === 'browse-all') ? 'hidden' : '';
-  _origShowPage(id);
-  if (id === 'browse-all') {
-    renderBrowseAllGrid();
-    // Make browse-all page use same flex layout
-    var pg = document.getElementById('page-browse-all');
-    if (pg) pg.style.height = 'calc(100vh - 60px)';
-  }
-};
 </script>
 
 </body>

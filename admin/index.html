@@ -2460,8 +2460,8 @@ window.adminDeleteTool = function(id) {
     onOk: async function() {
       TOOLS = TOOLS.filter(function(t){ return t.id !== id; });
       await adminSyncToRTDB();
-      showToast("Tool deleted");
-      renderAdmin();
+      showToast('Tool deleted');
+      admTab('inventory', document.getElementById('adm-nav-inventory'));
     }
   });
 };
@@ -3990,28 +3990,36 @@ window.closeConfirm = function() {
   var m = document.getElementById('confirm-modal'); if(m) m.style.display="none";
 };
 window.showConfirm = function(opts) {
-  // opts: { title, msg, okLabel, color, onOk }
-  var icon    = el("confirm-icon");
-  var title   = el("confirm-title");
-  var msg     = el("confirm-msg");
-  var okBtn   = el("confirm-ok-btn");
-  var color   = opts.color || "blue";
-  var icons   = { red: "✕", amber: "!", green: "✓", blue: "?" };
-  if (icon)  { icon.className = "confirm-box-icon " + color; icon.textContent = icons[color] || "?"; }
-  if (title)   title.textContent = opts.title || "Are you sure?";
-  if (msg)     msg.textContent   = opts.msg   || "";
-  if (okBtn) { okBtn.textContent = opts.okLabel || "Confirm"; var btnColors = {red:"#ef4444",amber:"#d97706",green:"#16a34a",blue:"#1a6ef0"}; okBtn.style.background = btnColors[color]||"#1a6ef0"; okBtn.style.color="#fff"; }
+  var icon  = document.getElementById('confirm-icon');
+  var title = document.getElementById('confirm-title');
+  var msg   = document.getElementById('confirm-msg');
+  var okBtn = document.getElementById('confirm-ok-btn');
+  var color = opts.color || 'blue';
+  var icons = { red:'✕', amber:'!', green:'✓', blue:'?' };
+  if (icon)  { icon.className = 'confirm-box-icon ' + color; icon.textContent = icons[color] || '?'; }
+  if (title) { title.textContent = opts.title || 'Are you sure?'; }
+  if (msg)   { msg.textContent   = opts.msg   || ''; }
+  if (okBtn) {
+    okBtn.textContent = opts.okLabel || 'Confirm';
+    var btnColors = {red:'#ef4444',amber:'#d97706',green:'#16a34a',blue:'#1a6ef0'};
+    okBtn.style.background = btnColors[color]||'#1a6ef0';
+    okBtn.style.color='#fff';
+    okBtn.className = 'confirm-ok ' + color;
+  }
   _confirmCallback = opts.onOk || null;
-  var _cm = document.getElementById("confirm-modal"); if(_cm){ _cm.style.display="flex"; }
+  window._confirmCallback = _confirmCallback;
+  var cm = document.getElementById('confirm-modal');
+  if (cm) { cm.classList.remove('hidden'); cm.style.display='flex'; }
 };
 
 window.closeConfirm = function() {
-  el("confirm-modal").classList.add("hidden");
-  _confirmCallback = null;
+  var cm = document.getElementById('confirm-modal');
+  if (cm) { cm.classList.add('hidden'); cm.style.display='none'; }
+  _confirmCallback = null; window._confirmCallback = null;
 };
 
 window.confirmOk = function() {
-  el("confirm-modal").classList.add("hidden");
+  closeConfirm();
   if (_confirmCallback) { _confirmCallback(); _confirmCallback = null; }
 };
 
@@ -5071,7 +5079,7 @@ else { document.addEventListener('fbready', initAdminPage, {once:true}); }
 </script>
 
 <!-- Confirm Modal -->
-<div id="confirm-modal" style="position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:2000;display:none;align-items:center;justify-content:center">
+<div class="hidden" id="confirm-modal" style="position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:2000;display:none;align-items:center;justify-content:center">
   <div style="background:#fff;border-radius:14px;padding:28px;max-width:380px;width:90%">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
       <div id="confirm-icon" style="width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;flex-shrink:0"></div>

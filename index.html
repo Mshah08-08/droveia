@@ -1423,10 +1423,8 @@ html, body { height:100%; }
 
 <!-- ═══ CART ═══ -->
 <div class="page" id="page-cart">
-  <div style="max-width:1280px;margin:0 auto;padding:32px 24px 0">
-    <h2 style="font-size:22px;font-weight:800;margin-bottom:20px;letter-spacing:-.02em">Your Cart</h2>
-  </div>
-  <div class="cart-layout">
+  <div class="cart-layout" style="padding-top:32px">
+    <div style="grid-column:1/-1;margin-bottom:8px"><h2 style="font-size:22px;font-weight:800;letter-spacing:-.02em">Your Cart</h2></div>
     <div>
       <div id="cart-items-container"></div>
     </div>
@@ -3831,6 +3829,11 @@ function startApp() {
       isAdmin = checkAdmin();
       var _admLink = document.getElementById('sbnav-admin-link');
       if (_admLink) _admLink.style.display = isAdmin ? 'flex' : 'none';
+      // Also show admin links in other page sidebars
+      ['adm-link-orders','adm-link-account'].forEach(function(id){
+        var el2 = document.getElementById(id);
+        if (el2) el2.style.display = isAdmin ? 'flex' : 'none';
+      });
       if (window._openAdminOnAuth) { window._openAdminOnAuth = false; showPage('admin'); }
       // Update nav address from profile
       var _navAddr = document.getElementById('nav-address-label');
@@ -3844,6 +3847,7 @@ function startApp() {
       var heroBtn = el("hero-signup-btn");
       if (heroBtn) heroBtn.style.display = "";
       var _aLink=document.getElementById('sbnav-admin-link');if(_aLink)_aLink.style.display='none';
+      ['adm-link-orders','adm-link-account'].forEach(function(id){var e=document.getElementById(id);if(e)e.style.display='none';});
       var adminBtn = el("hero-admin-btn");
       if (adminBtn) adminBtn.style.display = "none";
     }
@@ -3992,28 +3996,30 @@ async function markToolAvailable(fb, toolId) {
 var _confirmCallback = null;
 
 window.showConfirm = function(opts) {
-  // opts: { title, msg, okLabel, color, onOk }
-  var icon    = el("confirm-icon");
-  var title   = el("confirm-title");
-  var msg     = el("confirm-msg");
-  var okBtn   = el("confirm-ok-btn");
-  var color   = opts.color || "blue";
-  var icons   = { red: "✕", amber: "!", green: "✓", blue: "?" };
-  if (icon)  { icon.className = "confirm-box-icon " + color; icon.textContent = icons[color] || "?"; }
-  if (title)   title.textContent = opts.title || "Are you sure?";
-  if (msg)     msg.textContent   = opts.msg   || "";
-  if (okBtn) { okBtn.textContent = opts.okLabel || "Confirm"; okBtn.className = "confirm-ok " + color; }
+  var icon  = el('confirm-icon');
+  var title = el('confirm-title');
+  var msg   = el('confirm-msg');
+  var okBtn = el('confirm-ok-btn');
+  var color = opts.color || 'blue';
+  var icons = { red:'✕', amber:'!', green:'✓', blue:'?' };
+  if (icon)  { icon.className = 'confirm-box-icon ' + color; icon.textContent = icons[color] || '?'; }
+  if (title) { title.textContent = opts.title || 'Are you sure?'; }
+  if (msg)   { msg.textContent   = opts.msg   || ''; }
+  if (okBtn) { okBtn.textContent = opts.okLabel || 'Confirm'; okBtn.className = 'confirm-ok ' + color; }
   _confirmCallback = opts.onOk || null;
-  var _cm = el("confirm-modal"); if(_cm) { _cm.classList.remove("hidden"); }
+  window._confirmCallback = _confirmCallback;
+  var _cm = el('confirm-modal');
+  if (_cm) { _cm.classList.remove('hidden'); }
 };
 
 window.closeConfirm = function() {
-  el("confirm-modal").classList.add("hidden");
+  var _cm = el('confirm-modal'); if (_cm) _cm.classList.add('hidden');
   _confirmCallback = null;
+  window._confirmCallback = null;
 };
 
 window.confirmOk = function() {
-  el("confirm-modal").classList.add("hidden");
+  var _cm = el('confirm-modal'); if (_cm) _cm.classList.add('hidden');
   if (_confirmCallback) { _confirmCallback(); _confirmCallback = null; }
 };
 

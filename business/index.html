@@ -3977,28 +3977,36 @@ async function markToolAvailable(fb, toolId) {
 var _confirmCallback = null;
 
 window.showConfirm = function(opts) {
-  // opts: { title, msg, okLabel, color, onOk }
-  var icon    = el("confirm-icon");
-  var title   = el("confirm-title");
-  var msg     = el("confirm-msg");
-  var okBtn   = el("confirm-ok-btn");
-  var color   = opts.color || "blue";
-  var icons   = { red: "✕", amber: "!", green: "✓", blue: "?" };
-  if (icon)  { icon.className = "confirm-box-icon " + color; icon.textContent = icons[color] || "?"; }
-  if (title)   title.textContent = opts.title || "Are you sure?";
-  if (msg)     msg.textContent   = opts.msg   || "";
-  if (okBtn) { okBtn.textContent = opts.okLabel || "Confirm"; okBtn.className = "confirm-ok " + color; }
+  var icon  = document.getElementById('confirm-icon');
+  var title = document.getElementById('confirm-title');
+  var msg   = document.getElementById('confirm-msg');
+  var okBtn = document.getElementById('confirm-ok-btn');
+  var color = opts.color || 'blue';
+  var icons = { red:'✕', amber:'!', green:'✓', blue:'?' };
+  if (icon)  { icon.className = 'confirm-box-icon ' + color; icon.textContent = icons[color] || '?'; }
+  if (title) { title.textContent = opts.title || 'Are you sure?'; }
+  if (msg)   { msg.textContent   = opts.msg   || ''; }
+  if (okBtn) {
+    okBtn.textContent = opts.okLabel || 'Confirm';
+    var btnColors = {red:'#ef4444',amber:'#d97706',green:'#16a34a',blue:'#1a6ef0'};
+    okBtn.style.background = btnColors[color]||'#1a6ef0';
+    okBtn.style.color='#fff';
+    okBtn.className = 'confirm-ok ' + color;
+  }
   _confirmCallback = opts.onOk || null;
-  el("confirm-modal").classList.remove("hidden");
+  window._confirmCallback = _confirmCallback;
+  var cm = document.getElementById('confirm-modal');
+  if (cm) { cm.classList.remove('hidden'); cm.style.display='flex'; }
 };
 
 window.closeConfirm = function() {
-  el("confirm-modal").classList.add("hidden");
-  _confirmCallback = null;
+  var cm = document.getElementById('confirm-modal');
+  if (cm) { cm.classList.add('hidden'); cm.style.display='none'; }
+  _confirmCallback = null; window._confirmCallback = null;
 };
 
 window.confirmOk = function() {
-  el("confirm-modal").classList.add("hidden");
+  closeConfirm();
   if (_confirmCallback) { _confirmCallback(); _confirmCallback = null; }
 };
 
@@ -4557,6 +4565,36 @@ window.loadPartnerStock = async function() {
         +'</div>';
     }).join('');
   }catch(e){wrap.innerHTML='<div style="color:#ef4444;padding:20px 0;font-size:13px">Error loading stock</div>';}
+};
+
+
+window.renderPartnerLanding = function(mode) {
+  if (mode === 'signin') {
+    return '<div style="text-align:center;padding:60px 40px;max-width:480px;margin:0 auto">'
+      + '<div style="font-size:48px;margin-bottom:20px">🚁</div>'
+      + '<h2 style="font-size:24px;font-weight:800;color:#111;margin-bottom:10px">Droveia Partner Portal</h2>'
+      + '<p style="color:#6b7280;font-size:15px;margin-bottom:28px;line-height:1.6">Sign in with your partner account to manage your inventory, orders, and API keys.</p>'
+      + '<button class="biz-btn-primary" onclick="showAuth()" style="font-size:15px;padding:12px 32px">Sign In</button>'
+      + '</div>';
+  }
+  return '<div style="max-width:700px;margin:0 auto;padding:40px 20px">'
+    + '<div style="text-align:center;margin-bottom:40px">'
+    + '<div style="display:inline-block;background:#eff6ff;color:#1a6ef0;font-size:12px;font-weight:700;padding:6px 14px;border-radius:20px;margin-bottom:20px">Partner Program</div>'
+    + '<h1 style="font-size:30px;font-weight:800;color:#111;margin-bottom:14px">Reach customers in under 7 minutes</h1>'
+    + '<p style="color:#6b7280;font-size:15px;line-height:1.7">List your tools on Droveia and we\'ll deliver them by drone. Zero infrastructure needed.</p>'
+    + '</div>'
+    + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:40px">'
+    + '<div style="background:#fff;border:1px solid #e8e8e8;border-radius:12px;padding:18px;text-align:center"><div style="font-size:24px;font-weight:800;color:#1a6ef0">~7 min</div><div style="font-size:11px;color:#9ca3af;margin-top:3px">Delivery</div></div>'
+    + '<div style="background:#fff;border:1px solid #e8e8e8;border-radius:12px;padding:18px;text-align:center"><div style="font-size:24px;font-weight:800;color:#1a6ef0">90%</div><div style="font-size:11px;color:#9ca3af;margin-top:3px">Revenue share</div></div>'
+    + '<div style="background:#fff;border:1px solid #e8e8e8;border-radius:12px;padding:18px;text-align:center"><div style="font-size:24px;font-weight:800;color:#1a6ef0">Free</div><div style="font-size:11px;color:#9ca3af;margin-top:3px">To join</div></div>'
+    + '</div>'
+    + '<div style="background:linear-gradient(120deg,#1a6ef0,#3b82f6);border-radius:16px;padding:28px;text-align:center;margin-bottom:20px">'
+    + '<div style="font-size:18px;font-weight:800;color:#fff;margin-bottom:8px">Ready to get started?</div>'
+    + '<div style="font-size:13px;color:rgba(255,255,255,.8);margin-bottom:20px">Contact us and we\'ll set up your station within a week.</div>'
+    + '<a href="mailto:partners@droveia.com" style="display:inline-block;background:#fff;color:#1a6ef0;font-size:13px;font-weight:700;padding:10px 24px;border-radius:8px;text-decoration:none">partners@droveia.com</a>'
+    + '</div>'
+    + '<div style="text-align:center"><p style="font-size:13px;color:#9ca3af">Already a partner? <button onclick="showAuth()" style="background:none;border:none;color:#1a6ef0;font-weight:600;cursor:pointer;font-size:13px">Sign in here</button></p></div>'
+    + '</div>';
 };
 
 var _bizCurrentTab='overview';

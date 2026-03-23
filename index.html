@@ -1235,7 +1235,7 @@ html, body { height:100%; }
 
 <!-- ═══ CATEGORY PAGE ═══ -->
 <div class="page" id="page-category">
-<div style="height:100%;overflow-y:auto">
+<div style="display:flex;height:calc(100vh - 60px);background:#fff;overflow:hidden">
   
     <aside class="dd-sidebar" id="cat-sidebar"><!-- filled by JS --></aside>
 
@@ -1269,13 +1269,15 @@ html, body { height:100%; }
 
 <!-- ═══ BROWSE ALL PAGE ═══ -->
 <div class="page" id="page-browse-all">
-<div style="height:100%;overflow-y:auto">
+<div style="display:flex;height:calc(100vh - 60px);background:#fff;overflow:hidden">
 
   <!-- Sidebar -->
   
 
 
   <!-- Main -->
+  
+
   <aside class="dd-sidebar" style="width:220px;flex-shrink:0;border-right:1px solid #e8e8e8;padding:8px 0;background:#fff;height:100%;overflow-y:auto">
     <div class="ddnav-item active" id="sbnav-home" data-navpage="home" onclick="showPage('home')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home
@@ -1310,7 +1312,6 @@ html, body { height:100%; }
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Admin Console
     </div>
   </aside>
-
   <main style="flex:1;min-width:0;padding:28px 32px;overflow-y:auto;height:100%">
 
     <!-- Header + search filter -->
@@ -3918,6 +3919,7 @@ async function loadToolsFromRTDB() {
     renderTools();
     if (window.homeRenderSections) homeRenderSections();
     if (window.renderBrowseAllGrid) renderBrowseAllGrid();
+    if (window.renderCatPage && document.getElementById("page-category") && document.getElementById("page-category").classList.contains("active")) renderCatPage();
     if (window.onShowBrowseAll && document.getElementById("page-browse-all") && document.getElementById("page-browse-all").classList.contains("active")) onShowBrowseAll();
     if (window.brRender) brRender();
     // Refresh admin inventory table if open
@@ -4309,7 +4311,7 @@ window.renderCatPage = function() {
   var heading = document.getElementById('cat-heading');
   var count = document.getElementById('cat-item-count');
   if (!grid) return;
-  if (!window.TOOLS || !TOOLS.length) { grid.innerHTML = '<div style="text-align:center;padding:60px;color:#9ca3af">Loading...</div>'; return; }
+  if (!window.TOOLS || !TOOLS.length) { grid.innerHTML = '<div style="text-align:center;padding:60px;color:#9ca3af">Loading...</div>'; setTimeout(window.renderCatPage, 500); return; }
 
   var list = TOOLS.filter(function(t){ return t.cat === _catCurrent; });
   if (_catSort === 'price-asc')  list.sort(function(a,b){ return calcCost(a,1)-calcCost(b,1); });

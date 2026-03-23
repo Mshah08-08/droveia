@@ -3907,7 +3907,9 @@ async function loadToolsFromRTDB() {
         img:       t.img                 || "",
         qty:       parseInt(t.qty)       || 1,
         rentedQty: parseInt(t.rentedQty) || 0,
-        available: (parseInt(t.qty) || 1) > (parseInt(t.rentedQty) || 0)
+        available: (parseInt(t.qty) || 1) > (parseInt(t.rentedQty) || 0),
+        partnerEmail: t.partnerEmail || null,
+        partnerName:  t.partnerName  || null
       };
     });
     renderCatIcons();

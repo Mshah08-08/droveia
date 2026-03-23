@@ -2499,8 +2499,8 @@ function fmtDate(d) {
 function renderAccount() {
   if (!currentUser) { showAuth(); return; }
   if (!userProfile) return;
-  // Guard: don't run on pages that don't have account elements
-  if (!document.getElementById('page-account')) return;
+  // Guard: only run if account page elements are present
+  if (!document.getElementById('prof-name')) return;
   var full = ((userProfile.firstName||"")+" "+(userProfile.lastName||"")).trim()||"Student";
   setText("prof-name",    full);
   setText("prof-email",   userProfile.email||"");

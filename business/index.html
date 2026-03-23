@@ -4769,6 +4769,8 @@ window.renderBizTab=async function(tab){
     wrap.innerHTML=renderPartnerLanding('apply');
     return;
   }
+  // Partner confirmed — show full sidebar
+  if(window.bizShowPartnerSidebar) bizShowPartnerSidebar();
   document.body.classList.remove('landing-mode'); wrap.innerHTML='<div style="text-align:center;padding:60px;color:#9ca3af">Loading...</div>';
   if(tab==='overview')await renderBizOverview(wrap);
   else if(tab==='orders')await renderBizOrders(wrap);

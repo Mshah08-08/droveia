@@ -3786,7 +3786,7 @@ function startApp() {
       currentUser = user;
       var first = (user.displayName||user.email).split(/[\s@]/)[0];
       var btn = el("nav-auth-btn");
-      if (btn) { btn.textContent=first; btn.onclick=function(){showPage("account");}; }
+      if (btn) { btn.textContent=first; btn.onclick=function(){ if(window.doSignOut) doSignOut(); window.location.reload(); }; }
       var heroBtn = el("hero-signup-btn");
       if (heroBtn) heroBtn.style.display = "none";
 
@@ -3823,7 +3823,8 @@ function startApp() {
       try { subscribeOrders(); } catch(e) {}
       subscribeHomeReviews(fb);
       if (el('page-admin') && el('page-admin').classList.contains('active')) renderAdmin();
-      if (el('page-api') && el('page-api').classList.contains('active')) renderPartnerApiPage();
+      // Render business dashboard
+      if (window.renderBizTab) renderBizTab('overview');
       if (window._openAdminOnAuth) { window._openAdminOnAuth = false; showPage('admin'); }
     } else {
       if (ordersUnsub){ ordersUnsub(); ordersUnsub=null; }
@@ -4684,8 +4685,10 @@ window.renderBizDocs=function(wrap){
 <script>
 // Init
 function initBusinessPage() {
-  var fb = window._fb;
-  fb.onAuthStateChanged(fb.auth, async function(user) {
+  // Auth handled by main script auth listener
+  if (window._fb && window.renderBizTab) {
+  /* placeholder — real init done via main auth handler */
+  if (false) { var fb = window._fb; fb.onAuthStateChanged(fb.auth, async function(user) {
     if (user) {
       var btn = document.getElementById('nav-auth-btn');
       if (btn) { btn.textContent = (user.displayName||user.email).split(/[\s@]/)[0]; btn.onclick = function(){ doSignOut(); window.location.reload(); }; }
@@ -4706,7 +4709,7 @@ function initBusinessPage() {
       if (btn) { btn.textContent = 'Sign In'; btn.onclick = showAuth; }
       renderBizTab('overview');
     }
-  });
+  }); } }
 }
 if (window._fbReady) { initBusinessPage(); }
 else { document.addEventListener('fbready', initBusinessPage, {once:true}); }

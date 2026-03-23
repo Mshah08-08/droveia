@@ -3987,8 +3987,7 @@ async function markToolAvailable(fb, toolId) {
 var _confirmCallback = null;
 
 window.closeConfirm = function() {
-  var m = document.getElementById('confirm-modal');
-  if (m) { m.style.display = 'none'; }
+  var m = document.getElementById('confirm-modal'); if(m) m.style.display="none";
 };
 window.showConfirm = function(opts) {
   // opts: { title, msg, okLabel, color, onOk }
@@ -4003,7 +4002,7 @@ window.showConfirm = function(opts) {
   if (msg)     msg.textContent   = opts.msg   || "";
   if (okBtn) { okBtn.textContent = opts.okLabel || "Confirm"; var btnColors = {red:"#ef4444",amber:"#d97706",green:"#16a34a",blue:"#1a6ef0"}; okBtn.style.background = btnColors[color]||"#1a6ef0"; okBtn.style.color="#fff"; }
   _confirmCallback = opts.onOk || null;
-  el("confirm-modal").classList.remove("hidden");
+  var _cm = document.getElementById("confirm-modal"); if(_cm){ _cm.style.display="flex"; }
 };
 
 window.closeConfirm = function() {
@@ -5072,7 +5071,7 @@ else { document.addEventListener('fbready', initAdminPage, {once:true}); }
 </script>
 
 <!-- Confirm Modal -->
-<div class="hidden" id="confirm-modal" style="position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:2000;display:none;align-items:center;justify-content:center">
+<div id="confirm-modal" style="position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:2000;display:none;align-items:center;justify-content:center">
   <div style="background:#fff;border-radius:14px;padding:28px;max-width:380px;width:90%">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
       <div id="confirm-icon" style="width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;flex-shrink:0"></div>

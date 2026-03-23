@@ -3318,7 +3318,7 @@ function startApp() {
     var q = fb.query(oCol(currentUser.uid));
     ordersUnsub = fb.onSnapshot(q, function(snap){
       liveOrders = snap.docs.map(function(d){ return Object.assign({_id:d.id},d.data()); });
-      if (el("page-orders").classList.contains("active")) renderOrders();
+      var _po = el("page-orders"); if (_po && _po.classList.contains("active")) renderOrders();
     }, function(e){ console.error("orders",e); });
   }
 
@@ -3826,9 +3826,11 @@ function startApp() {
       // Update welcome heading
       var _wEl = document.getElementById('home-welcome');
       if (_wEl && user.displayName) _wEl.textContent = 'Welcome, ' + user.displayName.split(' ')[0];
-      // Show admin link if admin
+      // Show admin link if admin (after loadAdminEmails)
+      await loadAdminEmails();
+      isAdmin = checkAdmin();
       var _admLink = document.getElementById('sbnav-admin-link');
-      if (_admLink) _admLink.style.display = checkAdmin() ? 'flex' : 'none';
+      if (_admLink) _admLink.style.display = isAdmin ? 'flex' : 'none';
       if (window._openAdminOnAuth) { window._openAdminOnAuth = false; showPage('admin'); }
       // Update nav address from profile
       var _navAddr = document.getElementById('nav-address-label');
@@ -4002,7 +4004,7 @@ window.showConfirm = function(opts) {
   if (msg)     msg.textContent   = opts.msg   || "";
   if (okBtn) { okBtn.textContent = opts.okLabel || "Confirm"; okBtn.className = "confirm-ok " + color; }
   _confirmCallback = opts.onOk || null;
-  var _cm = el("confirm-modal"); if(_cm) _cm.classList.remove("hidden");
+  var _cm = el("confirm-modal"); if(_cm) { _cm.classList.remove("hidden"); }
 };
 
 window.closeConfirm = function() {

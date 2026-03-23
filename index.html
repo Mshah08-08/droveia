@@ -865,6 +865,16 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
 .home-section-row::-webkit-scrollbar { display:none }
 
 /* ── Browse All category cards ─── */
+
+.cat-filter-btn {
+  display:inline-flex;align-items:center;gap:5px;padding:8px 14px;
+  background:#f4f4f4;border:1.5px solid #e8e8e8;border-radius:20px;
+  cursor:pointer;font-family:var(--font);font-size:13px;font-weight:500;
+  color:#374151;transition:.12s;white-space:nowrap
+}
+.cat-filter-btn:hover { border-color:#1a6ef0;color:#1a6ef0 }
+.cat-filter-btn.active { background:#1a6ef0;border-color:#1a6ef0;color:#fff }
+
 .bcat-card { background:#fff;border:1px solid #e8e8e8;border-radius:12px;padding:16px 12px;text-align:center;cursor:pointer;transition:.15s }
 .bcat-card:hover { border-color:#1a6ef0;box-shadow:0 2px 12px rgba(26,110,240,.1) }
 .bcat-icon { width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 10px }
@@ -1090,16 +1100,16 @@ html, body { height:100%; }
     <div class="ddnav-item active" onclick="showPage('home')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home
     </div>
-    <div class="ddnav-item" onclick="showPage('home');setTimeout(function(){homeSectionScroll('home-sec-workshop');},80)">
+    <div class="ddnav-item" onclick="showCategory('Workshop')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>Workshop
     </div>
-    <div class="ddnav-item" onclick="showPage('home');setTimeout(function(){homeSectionScroll('home-sec-electronics');},80)">
+    <div class="ddnav-item" onclick="showCategory('Electronics')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Electronics
     </div>
-    <div class="ddnav-item" onclick="showPage('home');setTimeout(function(){homeSectionScroll('home-sec-crafts');},80)">
+    <div class="ddnav-item" onclick="showCategory('Crafts')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>Crafts
     </div>
-    <div class="ddnav-item" onclick="showPage('home');setTimeout(function(){homeSectionScroll('home-sec-office');},80)">
+    <div class="ddnav-item" onclick="showCategory('Office')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Office
     </div>
     <div class="ddnav-item" onclick="showPage('browse-all')">
@@ -1169,6 +1179,39 @@ html, body { height:100%; }
 
 
 
+
+<!-- ═══ CATEGORY PAGE ═══ -->
+<div class="page" id="page-category">
+<div style="display:flex;height:calc(100vh - 60px);background:#fff;overflow:hidden">
+  <aside class="dd-sidebar" id="cat-sidebar"><!-- filled by JS --></aside>
+  <main style="flex:1;min-width:0;padding:28px 32px;overflow-y:auto;height:100%">
+
+    <h1 id="cat-heading" style="font-size:24px;font-weight:800;color:#111;font-family:var(--font);letter-spacing:-.02em;margin:0 0 6px"></h1>
+    <div id="cat-item-count" style="font-size:13px;color:#9ca3af;margin-bottom:20px"></div>
+
+    <!-- Filter chips -->
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px" id="cat-filter-row">
+      <button class="cat-filter-btn active" onclick="catFilterSort('popular',this)">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        Popular
+      </button>
+      <button class="cat-filter-btn" onclick="catFilterSort('price-asc',this)">Price: Low to High</button>
+      <button class="cat-filter-btn" onclick="catFilterSort('price-desc',this)">Price: High to Low</button>
+      <button class="cat-filter-btn" onclick="catFilterSort('eta',this)">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Fastest
+      </button>
+      <button class="cat-filter-btn" onclick="catFilterSort('available',this)">Available Now</button>
+    </div>
+
+    <!-- Tool grid -->
+    <div id="cat-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;padding-bottom:40px"></div>
+
+  </main>
+</div>
+</div>
+<!-- ═══ END CATEGORY ═══ -->
+
 <!-- ═══ BROWSE ALL PAGE ═══ -->
 <div class="page" id="page-browse-all">
 <div style="display:flex;height:calc(100vh - 60px);background:#fff;overflow:hidden">
@@ -1178,16 +1221,16 @@ html, body { height:100%; }
     <div class="ddnav-item" onclick="showPage('home')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home
     </div>
-    <div class="ddnav-item" onclick="showPage('home');setTimeout(function(){homeSectionScroll('home-sec-workshop');},80)">
+    <div class="ddnav-item" onclick="showCategory('Workshop')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>Workshop
     </div>
-    <div class="ddnav-item" onclick="showPage('home');setTimeout(function(){homeSectionScroll('home-sec-electronics');},80)">
+    <div class="ddnav-item" onclick="showCategory('Electronics')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Electronics
     </div>
-    <div class="ddnav-item" onclick="showPage('home');setTimeout(function(){homeSectionScroll('home-sec-crafts');},80)">
+    <div class="ddnav-item" onclick="showCategory('Crafts')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>Crafts
     </div>
-    <div class="ddnav-item" onclick="showPage('home');setTimeout(function(){homeSectionScroll('home-sec-office');},80)">
+    <div class="ddnav-item" onclick="showCategory('Office')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Office
     </div>
     <div class="ddnav-item active" onclick="showPage('browse-all')">
@@ -1346,16 +1389,16 @@ html, body { height:100%; }
     <div class="ddnav-item" onclick="showPage('home')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home
     </div>
-    <div class="ddnav-item" onclick="showPage('home');setTimeout(function(){homeSectionScroll('home-sec-workshop');},80)">
+    <div class="ddnav-item" onclick="showCategory('Workshop')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>Workshop
     </div>
-    <div class="ddnav-item" onclick="showPage('home');setTimeout(function(){homeSectionScroll('home-sec-electronics');},80)">
+    <div class="ddnav-item" onclick="showCategory('Electronics')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Electronics
     </div>
-    <div class="ddnav-item" onclick="showPage('home');setTimeout(function(){homeSectionScroll('home-sec-crafts');},80)">
+    <div class="ddnav-item" onclick="showCategory('Crafts')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>Crafts
     </div>
-    <div class="ddnav-item" onclick="showPage('home');setTimeout(function(){homeSectionScroll('home-sec-office');},80)">
+    <div class="ddnav-item" onclick="showCategory('Office')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Office
     </div>
     <div class="ddnav-item" onclick="showPage('browse-all')">
@@ -1431,16 +1474,16 @@ html, body { height:100%; }
     <div class="ddnav-item" onclick="showPage('home')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home
     </div>
-    <div class="ddnav-item" onclick="showPage('home');setTimeout(function(){homeSectionScroll('home-sec-workshop');},80)">
+    <div class="ddnav-item" onclick="showCategory('Workshop')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>Workshop
     </div>
-    <div class="ddnav-item" onclick="showPage('home');setTimeout(function(){homeSectionScroll('home-sec-electronics');},80)">
+    <div class="ddnav-item" onclick="showCategory('Electronics')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Electronics
     </div>
-    <div class="ddnav-item" onclick="showPage('home');setTimeout(function(){homeSectionScroll('home-sec-crafts');},80)">
+    <div class="ddnav-item" onclick="showCategory('Crafts')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>Crafts
     </div>
-    <div class="ddnav-item" onclick="showPage('home');setTimeout(function(){homeSectionScroll('home-sec-office');},80)">
+    <div class="ddnav-item" onclick="showCategory('Office')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Office
     </div>
     <div class="ddnav-item" onclick="showPage('browse-all')">
@@ -3180,6 +3223,8 @@ function startApp() {
       var snap = await fb.getDoc(pRef(currentUser.uid));
       if (snap.exists()) {
         userProfile = snap.data();
+        var _a = document.getElementById('nav-address-label');
+        if (_a) _a.textContent = userProfile.building || userProfile.address || 'Set address';
       } else {
         var parts = (currentUser.displayName||"").split(" ");
         userProfile = {
@@ -3294,7 +3339,7 @@ function startApp() {
     var pass  = (el("su-pass")||{value:""}).value;
     var phone = (el("su-phone")||{value:""}).value.trim()||"";
     if (!first||!email||!pass){ showToast("Please fill in required fields"); return; }
-    if (!email.endsWith(".edu")){ showToast("Must use a .edu email address"); return; }
+    
     if (pass.length<8){ showToast("Password must be at least 8 characters"); return; }
     setAuthBusy(true);
     try {
@@ -3719,6 +3764,9 @@ function startApp() {
       var _wEl = document.getElementById('home-welcome');
       if (_wEl && user.displayName) _wEl.textContent = 'Welcome, ' + user.displayName.split(' ')[0];
       if (window._openAdminOnAuth) { window._openAdminOnAuth = false; showPage('admin'); }
+      // Update nav address from profile
+      var _navAddr = document.getElementById('nav-address-label');
+      if (_navAddr && window.userProfile) _navAddr.textContent = userProfile.building || userProfile.address || 'Set address';
     } else {
       if (ordersUnsub){ ordersUnsub(); ordersUnsub=null; }
       currentUser=null; userProfile=null; cart=[]; liveOrders=[];
@@ -4124,6 +4172,73 @@ window.onShowBrowseAll = function() {
   var inp = document.getElementById('ba-search'); if(inp) inp.value = '';
   document.querySelectorAll('#ba-chips .ddchip').forEach(function(b,i){ b.classList.toggle('active', i === 0); });
   renderBrowseAllGrid();
+};
+
+
+var _catCurrent = 'Workshop', _catSort = 'popular';
+
+window.showCategory = function(cat) {
+  _catCurrent = cat;
+  _catSort = 'popular';
+  // Update sidebar
+  var sidebar = document.getElementById('cat-sidebar');
+  if (sidebar) sidebar.innerHTML = buildSidebarHTML(cat);
+  showPage('category');
+  setTimeout(function() { renderCatPage(); }, 50);
+};
+
+function buildSidebarHTML(activeCat) {
+  var cats = [
+    ['home', 'Home', '<path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>'],
+    ['Workshop', 'Workshop', '<path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/>'],
+    ['Electronics', 'Electronics', '<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>'],
+    ['Crafts', 'Crafts', '<path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>'],
+    ['Office', 'Office', '<rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>'],
+    ['Browse All', 'Browse All', '<circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>'],
+  ];
+  var rows = cats.map(function(c) {
+    var id = c[0], label = c[1], path = c[2];
+    var isActive = id === activeCat;
+    var onclick = id === 'home' ? "showPage('home')"
+      : id === 'Browse All' ? "showPage('browse-all')"
+      : "showCategory('" + id + "')";
+    return '<div class="ddnav-item' + (isActive ? ' active' : '') + '" onclick="' + onclick + '">'
+      + '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">' + path + '</svg>' + label
+      + '</div>';
+  });
+  rows.push('<div style="height:1px;background:#f0f0f0;margin:8px 0"></div>');
+  rows.push('<div class="ddnav-item" onclick="showPage(&quot;orders&quot;)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Orders</div>');
+  rows.push('<div class="ddnav-item" onclick="showPage(&quot;account&quot;)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Account</div>');
+  return rows.join('');
+}
+
+window.catFilterSort = function(sort, btn) {
+  _catSort = sort;
+  document.querySelectorAll('.cat-filter-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  renderCatPage();
+};
+
+window.renderCatPage = function() {
+  var grid = document.getElementById('cat-grid');
+  var heading = document.getElementById('cat-heading');
+  var count = document.getElementById('cat-item-count');
+  if (!grid) return;
+  if (!window.TOOLS || !TOOLS.length) { grid.innerHTML = '<div style="text-align:center;padding:60px;color:#9ca3af">Loading...</div>'; return; }
+
+  var list = TOOLS.filter(function(t){ return t.cat === _catCurrent; });
+  if (_catSort === 'price-asc')  list.sort(function(a,b){ return calcCost(a,1)-calcCost(b,1); });
+  if (_catSort === 'price-desc') list.sort(function(a,b){ return calcCost(b,1)-calcCost(a,1); });
+  if (_catSort === 'eta')        list.sort(function(a,b){ return parseFloat(a.eta)-parseFloat(b.eta); });
+  if (_catSort === 'available')  list = list.filter(function(t){ return t.available !== false; });
+  if (_catSort === 'popular')    list.sort(function(a,b){ return (b.rating||0)-(a.rating||0); });
+
+  if (heading) heading.textContent = _catCurrent;
+  if (count)   count.textContent   = list.length + ' item' + (list.length!==1?'s':'') + ' available';
+
+  grid.innerHTML = list.length
+    ? list.map(function(t){ return makeToolCard(t, false); }).join('')
+    : '<div style="text-align:center;padding:60px;color:#9ca3af">No items found</div>';
 };
 
 var _homeCatFilter = 'All';

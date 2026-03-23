@@ -2,12 +2,15 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-  <link rel="icon" type="image/png" href="1.png">
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Droveia — Admin</title>
+<link rel="icon" type="image/png" href="1.png">
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Droveia — Admin Console</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDcuU4-XXzzEU8O84rs3W7cWgVStNicBTo&callback=Function.prototype" async defer></script>
+<script src="https://js.stripe.com/v3/"></script>
 <style>
+
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --blue:#1a6ef0;
@@ -849,19 +852,83 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
 .order-act-btn:hover{border-color:var(--blue);color:var(--blue)}
 .order-act-btn.green:hover{border-color:var(--green);color:var(--green)}
 .order-act-btn.red:hover{border-color:#ef4444;color:#ef4444}
+
+/* ── Admin dashboard ── */
+body{background:#f6f8ff;font-family:'Sora',sans-serif;padding-top:0!important;margin:0}
+.adm-layout{display:flex;min-height:100vh}
+.adm-sidebar{width:220px;flex-shrink:0;background:#fff;border-right:1px solid #ebebeb;padding:8px 0;position:fixed;top:60px;left:0;height:calc(100vh - 60px);overflow-y:auto;z-index:100}
+.adm-main{flex:1;margin-left:220px;padding-top:60px}
+.adm-content{padding:24px 28px}
+.adm-nav-item{display:flex;align-items:center;gap:12px;padding:11px 20px;font-size:14px;font-weight:400;color:#4b5563;cursor:pointer;transition:.12s;font-family:var(--font)}
+.adm-nav-item svg{flex-shrink:0;opacity:.7}
+.adm-nav-item:hover{background:#f8f8f8;color:#111}
+.adm-nav-item.active{color:#1a6ef0;font-weight:700;background:#eff6ff}
+.adm-nav-item.active svg{opacity:1;color:#1a6ef0}
+.adm-stat-card{background:#fff;border:1px solid #ebebeb;border-radius:12px;padding:20px;flex:1;min-width:120px}
+.adm-stat-val{font-size:28px;font-weight:800;color:#111;letter-spacing:-.02em}
+.adm-stat-label{font-size:12px;color:#9ca3af;margin-top:3px}
+.adm-card{background:#fff;border:1px solid #ebebeb;border-radius:12px;overflow:hidden;margin-bottom:16px}
+.adm-card-header{padding:16px 20px;border-bottom:1px solid #ebebeb;display:flex;align-items:center;justify-content:space-between}
+.adm-card-title{font-size:15px;font-weight:700;color:#111}
+.adm-card-body{padding:20px}
+.adm-btn{background:#1a6ef0;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);transition:.15s;display:inline-flex;align-items:center;gap:7px}
+.adm-btn:hover{background:#1560d8}
+.adm-btn-sm{padding:6px 12px;font-size:12px}
+.adm-btn-ghost{background:none;color:#111;border:1.5px solid #e8e8e8;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);transition:.15s}
+.adm-btn-ghost:hover{border-color:#1a6ef0;color:#1a6ef0}
+.adm-btn-danger{background:none;color:#ef4444;border:1.5px solid rgba(239,68,68,.25);border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font)}
+.adm-btn-danger:hover{background:rgba(239,68,68,.06)}
+.adm-btn-green{background:#16a34a;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font)}
+.adm-btn-green:hover{background:#15803d}
+.adm-input{width:100%;background:#f8f9fa;border:1.5px solid #e8e8e8;border-radius:8px;padding:10px 14px;font-size:14px;color:#111;font-family:var(--font);outline:none;transition:.15s;box-sizing:border-box}
+.adm-input:focus{border-color:#1a6ef0;background:#fff;box-shadow:0 0 0 3px rgba(26,110,240,.1)}
+.adm-badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700}
+.adm-badge-green{background:rgba(22,163,74,.1);color:#15803d}
+.adm-badge-amber{background:rgba(217,119,6,.1);color:#d97706}
+.adm-badge-red{background:rgba(239,68,68,.1);color:#ef4444}
+.adm-badge-blue{background:rgba(26,110,240,.1);color:#1a6ef0}
+.adm-badge-gray{background:#f3f4f6;color:#6b7280}
+.adm-table{width:100%;border-collapse:collapse}
+.adm-table th{padding:10px 14px;text-align:left;font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid #f0f0f0}
+.adm-table td{padding:12px 14px;font-size:13px;color:#111;border-bottom:1px solid #f8f8f8;vertical-align:middle}
+.adm-table tr:last-child td{border-bottom:none}
+.adm-table tr:hover td{background:#fafafa}
+@media(max-width:768px){.adm-sidebar{display:none}.adm-main{margin-left:0}.adm-content{padding:16px}}
+
 </style>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDcuU4-XXzzEU8O84rs3W7cWgVStNicBTo&callback=Function.prototype" async defer></script>
-<script src="https://js.stripe.com/v3/"></script>
 </head>
 <body>
-
-<div class="glow-blob glow-1"></div>
-<div class="glow-blob glow-2"></div>
-<div class="noise-overlay"></div>
 <div class="toast" id="toast"></div>
 
-<!-- ── Auth Modal ─────────────────────────────────────────────── -->
+<div id="adm-splash" style="position:fixed;inset:0;background:#fff;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px">
+  <div id="adm-splash-logo" style="display:flex;align-items:center;gap:16px;opacity:0;transform:translateY(20px);transition:opacity .5s ease,transform .5s ease">
+    <img src="1.png" style="width:80px;height:80px;border-radius:20px;box-shadow:0 12px 40px rgba(26,110,240,.3)">
+    <div>
+      <div style="font-size:36px;font-weight:800;color:#1a6ef0;letter-spacing:-.03em;line-height:1">Droveia</div>
+      <div style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.14em;margin-top:4px">Admin Console</div>
+    </div>
+  </div>
+  <div id="adm-splash-bar-wrap" style="width:200px;height:3px;background:#f0f0f0;border-radius:4px;overflow:hidden;opacity:0;transition:opacity .3s ease .4s">
+    <div id="adm-splash-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#1a6ef0,#3b82f6);border-radius:4px;transition:width .8s ease .5s"></div>
+  </div>
+</div>
+<script>
+(function(){
+  setTimeout(function(){
+    var logo=document.getElementById('adm-splash-logo');
+    var bar=document.getElementById('adm-splash-bar-wrap');
+    var fill=document.getElementById('adm-splash-bar');
+    if(logo){logo.style.opacity='1';logo.style.transform='translateY(0)';}
+    if(bar)bar.style.opacity='1';
+    if(fill)fill.style.width='100%';
+    setTimeout(function(){
+      var s=document.getElementById('adm-splash');
+      if(s){s.style.transition='opacity .4s ease';s.style.opacity='0';setTimeout(function(){s.style.display='none';},400);}
+    },1400);
+  },80);
+})();
+</script>
+
 <div class="auth-overlay hidden" id="auth-overlay" onclick="if(event.target===this)this.classList.add('hidden')">
   <div class="auth-box">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
@@ -936,133 +1003,57 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
   </div>
 </div>
 
-
-
-<nav>
-  <div class="nav-logo" onclick="window.location.href='https://droveia.com'">
-    <div class="nav-logo-mark">
-      <img src="1.png" style="width:40px;height:auto;display:block;border-radius:0"/>
-    </div>
-    <span class="nav-wordmark">Droveia</span>
-    <span style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:5px;background:rgba(239,68,68,.1);color:#ef4444;margin-left:4px">Admin</span>
-  </div>
-  <div style="flex:1"></div>
-  <div class="nav-right">
-    <button class="nav-auth-btn" id="nav-auth-btn" onclick="showAuth()">Sign In</button>
-  </div>
-</nav>
-
-<!-- Admin Page -->
-<div class="page active" id="page-admin">
-  <div class="admin-wrap" id="admin-content">
-    <!-- Login gate shown by default, replaced by JS -->
-    <div class="admin-login-gate" id="admin-gate">
-      <h2>Admin Access</h2>
-      <p>Sign in with an authorized admin account to continue.</p>
-      <button class="btn-primary" onclick="showAuth()">Sign In</button>
+<!-- Full-width header -->
+<header style="position:fixed;top:0;left:0;right:0;height:60px;background:#fff;border-bottom:1px solid #ebebeb;z-index:300;display:flex;align-items:center;padding:0;gap:0">
+  <div style="width:220px;flex-shrink:0;height:60px;display:flex;align-items:center;gap:10px;padding:0 20px;border-right:1px solid #ebebeb;box-sizing:border-box">
+    <img src="1.png" style="width:28px;height:28px;border-radius:6px;object-fit:contain;flex-shrink:0">
+    <div>
+      <div style="font-size:15px;font-weight:800;color:#1a6ef0;letter-spacing:-.02em;line-height:1.2">Droveia</div>
+      <div style="font-size:9px;color:#9ca3af;font-weight:600;text-transform:uppercase;letter-spacing:.08em">Admin Console</div>
     </div>
   </div>
-</div>
-
-
-<!-- Confirm Modal -->
-<div class="confirm-modal hidden" id="confirm-modal">
-  <div class="confirm-box">
-    <div class="confirm-box-icon" id="confirm-icon"></div>
-    <div class="confirm-box-title" id="confirm-title">Are you sure?</div>
-    <div class="confirm-box-msg" id="confirm-msg"></div>
-    <div class="confirm-box-actions">
-      <button class="confirm-cancel-btn" onclick="closeConfirm()">Cancel</button>
-      <button class="confirm-ok" id="confirm-ok-btn" onclick="confirmOk()">Confirm</button>
-    </div>
+  <div style="flex:1;display:flex;align-items:center;padding:0 24px;gap:12px">
+    <div id="adm-page-title" style="font-size:16px;font-weight:700;color:#111;letter-spacing:-.01em">Inventory</div>
+    <div style="flex:1"></div>
+    <div id="adm-user-name" style="font-size:13px;font-weight:600;color:#6b7280"></div>
+    <button class="adm-btn" id="nav-auth-btn" onclick="showAuth()" style="padding:7px 16px;font-size:13px">Sign In</button>
   </div>
-</div>
-<!-- Review Modal -->
-<div class="review-modal hidden" id="review-modal">
-  <div class="review-box">
-    <button class="review-close" onclick="closeReviewModal()">✕</button>
-    <div class="review-box-title" id="review-modal-title">Review Tool</div>
-    <div class="review-box-sub" id="review-modal-sub">Share your experience</div>
-    <div class="star-picker" id="star-picker">
-      <span class="star-pick" onclick="setReviewStar(1)">★</span>
-      <span class="star-pick" onclick="setReviewStar(2)">★</span>
-      <span class="star-pick" onclick="setReviewStar(3)">★</span>
-      <span class="star-pick" onclick="setReviewStar(4)">★</span>
-      <span class="star-pick" onclick="setReviewStar(5)">★</span>
+</header>
+
+<div class="adm-layout">
+  <aside class="adm-sidebar">
+    <div class="adm-nav-item active" id="adm-nav-inventory" onclick="admTab('inventory',this)">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>Inventory
     </div>
-    <textarea class="review-textarea" id="review-text" placeholder="What did you think? Was it easy to use, in good condition..."></textarea>
-    <button class="review-submit-btn" onclick="submitReview()">Submit Review</button>
-  </div>
-</div>
-
-  <button class="theme-fab" id="theme-toggle" onclick="toggleTheme()" title="Toggle dark/light mode">
-    <svg id="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
-    <svg id="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-  </button>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-
-
-<!-- Order confirm modal -->
-<div id="order-confirm-overlay" class="modal-overlay hidden" onclick="closeOrderConfirm(event)" style="z-index:4500">
-  <div class="modal-box" style="max-width:480px;padding:0;overflow:hidden;background:#fff" onclick="event.stopPropagation()">
-    <div style="padding:20px 24px 16px;border-bottom:1px solid #e2e8f0;background:#fff">
-      <div style="font-size:17px;font-weight:800;letter-spacing:-.02em;color:#0f0f1a">Confirm Order</div>
-      <div style="font-size:12px;color:#6b7280;margin-top:3px">Review your delivery details before placing.</div>
+    <div class="adm-nav-item" id="adm-nav-orders" onclick="admTab('orders',this)">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Orders
     </div>
-    <div id="order-confirm-body" style="padding:16px 24px;background:#fff"></div>
-    <div style="padding:14px 24px;border-top:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;gap:12px;background:#fff">
-      <button onclick="closeOrderConfirm()" style="background:transparent;color:#6b7280;border:1px solid #e2e8f0;border-radius:10px;padding:10px 18px;font-size:14px;cursor:pointer;font-family:inherit">Cancel</button>
-      <button onclick="submitOrderConfirm()" style="background:#1a6ef0;color:#fff;border:none;border-radius:10px;padding:10px 24px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">Place Order</button>
+    <div class="adm-nav-item" id="adm-nav-deliveries" onclick="admTab('deliveries',this)">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>API Deliveries
+      <span id="adm-nav-deliveries-badge" style="display:none;background:#ef4444;color:#fff;font-size:9px;font-weight:800;padding:1px 6px;border-radius:10px;margin-left:auto"></span>
+    </div>
+    <div class="adm-nav-item" id="adm-nav-partners" onclick="admTab('partners',this)">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>Partners
+    </div>
+    <div class="adm-nav-item" id="adm-nav-applications" onclick="admTab('applications',this)">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>Applications
+    </div>
+
+    <div style="height:1px;background:#f0f0f0;margin:8px 0"></div>
+    <div class="adm-nav-item" onclick="window.location.href='https://droveia.com'">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg> Visit Store
+    </div>
+  </aside>
+
+  <div class="adm-main">
+    <div class="adm-content" id="adm-content">
+      <div style="text-align:center;padding:60px;color:#9ca3af">Loading...</div>
     </div>
   </div>
 </div>
-
-
-<!-- Stripe Payment Modal -->
-<div id="stripe-overlay" class="modal-overlay hidden" style="z-index:2000">
-  <div class="modal-box" style="max-width:420px;width:100%">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
-      <div>
-        <div style="font-size:17px;font-weight:800">Payment</div>
-        <div id="stripe-amount-label" style="font-size:13px;color:var(--muted);margin-top:2px"></div>
-      </div>
-      <button onclick="closeStripeModal()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:20px;padding:4px">&#x2715;</button>
-    </div>
-    <!-- Stripe card element -->
-    <div id="stripe-card-wrap" style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px 12px;margin-bottom:16px">
-      <div id="stripe-card-element"></div>
-    </div>
-    <div id="stripe-error" style="color:#e53e3e;font-size:12px;margin-bottom:12px;display:none"></div>
-    <button id="stripe-pay-btn" onclick="submitStripePayment()" class="checkout-btn" style="margin:0">
-      Pay &amp; Place Order
-    </button>
-    <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:10px">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-      <span style="font-size:11px;color:var(--muted)">Secured by Stripe — test mode</span>
-    </div>
-  </div>
-</div>
-
-<div class="page" id="page-api" style="min-height:calc(100vh - var(--nav-h))"></div>
-
-</body>
-</html
-
-<!-- Confirm Modal -->
-<div class="confirm-modal hidden" id="confirm-modal">
-  <div class="confirm-box">
-    <div class="confirm-box-icon" id="confirm-icon"></div>
-    <div class="confirm-box-title" id="confirm-title">Are you sure?</div>
-    <div class="confirm-box-msg" id="confirm-msg"></div>
-    <div class="confirm-box-actions">
-      <button class="confirm-cancel-btn" onclick="closeConfirm()">Cancel</button>
-      <button class="confirm-ok" id="confirm-ok-btn" onclick="confirmOk()">Confirm</button>
-    </div>
-  </div>
-</div>
-
 
 <script type="module">
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword,
   signInWithEmailAndPassword, signOut, updateProfile,
@@ -1091,9 +1082,10 @@ window._fb = {
 };
 window._fbReady = true;
 document.dispatchEvent(new Event("fbready"));
-</script>
 
+</script>
 <script>
+
 
 
 // =============================================================================
@@ -4211,8 +4203,8 @@ window.adminLoadDeliveries = async function() {
               '<span style="font-size:11px;font-weight:700;padding:4px 12px;border-radius:7px;white-space:nowrap;background:'+sc.replace("var(--","rgba(").replace(")",",0.1)")+';color:'+sc+'">'+(d.status||"").replace(/_/g," ")+'</span>' +
               (isPend
                 ? '<div style="font-size:11px;color:#d97706;font-weight:600;margin-top:6px">⏳ Waiting for partner to confirm package is in station</div>' +
-                  '<button data-did="'+d._id+'" onclick="adminForceApprove(this)" style="margin-top:6px;padding:5px 12px;border-radius:7px;background:var(--surface2);color:var(--muted);border:1px solid var(--border);font-size:11px;font-weight:600;cursor:pointer;font-family:var(--font)">Force approve</button>' +
-                  '<button data-did="'+d._id+'" onclick="adminRejectDelivery(this.dataset.did)" style="padding:7px 16px;border-radius:9px;background:rgba(239,68,68,.08);color:#ef4444;border:1px solid rgba(239,68,68,.2);font-size:13px;font-weight:700;cursor:pointer">✕ Reject</button>'
+          +'<td>'+(isPending?'<button class="adm-btn-green" onclick="adminForceApprove(this.dataset.id)" data-id="'+d._id+'" style="font-size:11px;padding:5px 10px">Force Approve</button>':'—')+'</td>'
+                  +'<button data-did="'+d._id+'" onclick="adminRejectDelivery(this.dataset.did)" style="padding:7px 16px;border-radius:9px;background:rgba(239,68,68,.08);color:#ef4444;border:1px solid rgba(239,68,68,.2);font-size:13px;font-weight:700;cursor:pointer">✕ Reject</button>'
                 : '') +
             '</div>' +
           '</div>' +
@@ -4522,110 +4514,384 @@ if (_savedPage && _savedPage !== "admin") {
 }
 
 
+
+var _admTab = 'inventory';
+
+window.admTab = function(tab, btn) {
+  _admTab = tab;
+  document.querySelectorAll('.adm-nav-item').forEach(function(b){b.classList.remove('active');});
+  if(btn) btn.classList.add('active');
+  var titles = {inventory:'Inventory', orders:'Orders', deliveries:'API Deliveries', partners:'Partners', applications:'Applications'};
+  var titleEl = document.getElementById('adm-page-title');
+  if(titleEl) titleEl.textContent = titles[tab] || tab;
+  renderAdmTab(tab);
+};
+
+window.renderAdmTab = async function(tab) {
+  var wrap = document.getElementById('adm-content');
+  if (!wrap) return;
+  if (!window.currentUser || !window.isAdmin) {
+    wrap.innerHTML = '<div style="text-align:center;padding:80px"><p style="color:#9ca3af;margin-bottom:16px">Sign in with an admin account.</p><button class="adm-btn" onclick="showAuth()">Sign In</button></div>';
+    return;
+  }
+  wrap.innerHTML = '<div style="text-align:center;padding:60px;color:#9ca3af">Loading...</div>';
+  if (tab === 'inventory')    await renderAdmInventory(wrap);
+  else if (tab === 'orders')  await renderAdmOrders(wrap);
+  else if (tab === 'deliveries') await renderAdmDeliveries(wrap);
+  else if (tab === 'partners') await renderAdmPartners(wrap);
+  else if (tab === 'applications') await renderAdmApplications(wrap);
+};
+
+// ── INVENTORY ────────────────────────────────────────────────────────────────
+window.renderAdmInventory = async function(wrap) {
+  wrap.innerHTML = [
+    '<div class="adm-card">',
+    '<div class="adm-card-header"><div class="adm-card-title">Tools ('+TOOLS.length+')</div>',
+    '<button class="adm-btn adm-btn-sm" onclick="adminShowAddTool()">+ Add Tool</button>',
+    '</div>',
+    '<div id="admin-add-form-wrap"></div>',
+    '<div id="admin-edit-form-wrap"></div>',
+    '<div style="overflow-x:auto"><table class="adm-table">',
+    '<thead><tr><th>Name</th><th>Category</th><th>Price/hr</th><th>Qty</th><th>Rented</th><th>Status</th><th>Actions</th></tr></thead>',
+    '<tbody>',
+    TOOLS.map(function(t){
+      var avail = t.available !== false;
+      return '<tr>'
+        +'<td><strong>'+t.name+'</strong></td>'
+        +'<td>'+t.cat+'</td>'
+        +'<td>$'+calcCost(t,1).toFixed(2)+'/hr</td>'
+        +'<td>'+t.qty+'</td>'
+        +'<td>'+(t.rentedQty||0)+'</td>'
+        +'<td><span class="adm-badge '+(avail?'adm-badge-green':'adm-badge-red')+'">'+(avail?'Available':'Rented')+'</span></td>'
+        +'<td style="display:flex;gap:6px">'
+        +'<button class="adm-btn-ghost" onclick="adminEditTool('+t.id+')">Edit</button>'
+        +'<button class="adm-btn-danger" onclick="adminDeleteTool('+t.id+')">Delete</button>'
+        +'</td></tr>';
+    }).join(''),
+    '</tbody></table></div>',
+    '</div>',
+    // Pending inventory from partners
+    '<div class="adm-card" style="margin-top:16px">',
+    '<div class="adm-card-header"><div class="adm-card-title">Pending Partner Submissions</div></div>',
+    '<div class="adm-card-body" id="adm-pending-inv">Loading...</div>',
+    '</div>',
+  ].join('');
+  loadAdmPendingInventory();
+};
+
+window.loadAdmPendingInventory = async function() {
+  var wrap = document.getElementById('adm-pending-inv');
+  if (!wrap) return;
+  var fb = window._fb;
+  try {
+    var snap = await fb.getDocs(fb.query(fb.collection(fb.db,'pendingInventory'), fb.where('status','==','pending')));
+    var items = snap.docs.map(function(d){return Object.assign({_id:d.id},d.data());});
+    if (!items.length) { wrap.innerHTML = '<div style="color:#9ca3af;text-align:center;padding:20px;font-size:13px">No pending submissions.</div>'; return; }
+    wrap.innerHTML = '<table class="adm-table"><thead><tr><th>Item</th><th>Category</th><th>Partner</th><th>Qty</th><th>Price/hr</th><th>Actions</th></tr></thead><tbody>'
+      + items.map(function(item){
+        return '<tr>'
+          +'<td><strong>'+item.name+'</strong>'+(item.desc?'<br><span style="font-size:11px;color:#9ca3af">'+item.desc+'</span>':'')+'</td>'
+          +'<td>'+item.cat+'</td>'
+          +'<td style="font-size:12px">'+item.partnerName+'<br><span style="color:#9ca3af">'+item.partnerEmail+'</span></td>'
+          +'<td>'+item.qty+'</td>'
+          +'<td>$'+(item.pph||0).toFixed(2)+'</td>'
+          +'<td style="display:flex;gap:6px">'
+          +'<button class="adm-btn-green" onclick="admApproveInventory(this)" data-id="'+item._id+'" data-item=\''+encodeURIComponent(JSON.stringify(item))+'\' style="font-size:11px;padding:5px 10px">✓ Approve</button>'
+          +'<button class="adm-btn-danger" onclick="admRejectInventory(\"'+item._id+'\")" style="font-size:11px;padding:5px 10px">✕ Reject</button>'
+          +'</td></tr>';
+      }).join('')
+      + '</tbody></table>';
+  } catch(e) { wrap.innerHTML = '<div style="color:#ef4444;font-size:13px">Error: '+e.message+'</div>'; }
+};
+
+window.admApproveInventory = async function(btn) {
+  var docId = btn.dataset.id;
+  var item = JSON.parse(decodeURIComponent(btn.dataset.item));
+  var fb = window._fb;
+  try {
+    // Add to RTDB
+    var newTool = {
+      id: TOOLS.length + 1,
+      name: item.name, cat: item.cat, desc: item.desc||'',
+      pph: item.pph||0, retail: (item.pph||0)*20,
+      rating: 4.5, eta: '7 min',
+      img: item.imgUrl||'x', qty: item.qty||1, rentedQty: 0,
+      available: true,
+      partnerEmail: item.partnerEmail, partnerName: item.partnerName
+    };
+    await adminSyncToRTDB();
+    TOOLS.push(newTool);
+    await fetch('https://droveia-default-rtdb.firebaseio.com/tools.json', {
+      method:'PUT', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(TOOLS)
+    });
+    await fb.updateDoc(fb.doc(fb.db,'pendingInventory',docId), {status:'approved'});
+    showToast('✓ Item approved and added to inventory');
+    admTab('inventory', document.getElementById('adm-nav-inventory'));
+  } catch(e) { showToast('Error: '+e.message); }
+};
+
+window.admRejectInventory = async function(docId) {
+  var fb = window._fb;
+  try {
+    await fb.updateDoc(fb.doc(fb.db,'pendingInventory',docId), {status:'rejected'});
+    showToast('Item rejected');
+    loadAdmPendingInventory();
+  } catch(e) { showToast('Error: '+e.message); }
+};
+
+// ── ORDERS ───────────────────────────────────────────────────────────────────
+window.renderAdmOrders = async function(wrap) {
+  var fb = window._fb;
+  try {
+    var snap = await fb.getDocs(fb.query(fb.collection(fb.db,'allOrders'),fb.limit(100)));
+    var orders = snap.docs.map(function(d){return Object.assign({_id:d.id},d.data());});
+    orders.sort(function(a,b){
+      var ta = a.createdAt&&a.createdAt.toMillis?a.createdAt.toMillis():0;
+      var tb = b.createdAt&&b.createdAt.toMillis?b.createdAt.toMillis():0;
+      return tb-ta;
+    });
+    var statusColors = {in_flight:'blue',delivered:'green',cancelled:'red',pending:'amber'};
+    wrap.innerHTML = '<div class="adm-card"><div class="adm-card-header"><div class="adm-card-title">All Orders ('+orders.length+')</div></div>'
+      +'<div style="overflow-x:auto"><table class="adm-table"><thead><tr><th>User</th><th>Items</th><th>Total</th><th>Address</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead><tbody>'
+      + (orders.length ? orders.map(function(o){
+        var sc = statusColors[o.status]||'gray';
+        var date = o.createdAt&&o.createdAt.toDate?o.createdAt.toDate().toLocaleDateString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}):'';
+        var items = (o.items||[]).map(function(i){return i.name;}).join(', ');
+        return '<tr>'
+          +'<td style="font-size:12px">'+o.userEmail+'</td>'
+          +'<td style="font-size:12px;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+items+'</td>'
+          +'<td><strong>$'+(o.total||0).toFixed(2)+'</strong></td>'
+          +'<td style="font-size:12px">'+(o.address&&o.address.building||'—')+'</td>'
+          +'<td><span class="adm-badge adm-badge-'+sc+'">'+o.status+'</span></td>'
+          +'<td style="font-size:11px;color:#9ca3af">'+date+'</td>'
+          +'<td style="display:flex;gap:4px">'
+          +'<td style="display:flex;gap:4px"><button class="adm-btn-ghost" style="font-size:11px;padding:4px 8px" onclick="admSetOrderStatus(this.dataset.id,\'delivered\')" data-id="'+o._id+'">✓ Delivered</button><button class="adm-btn-danger" style="font-size:11px;padding:4px 8px" onclick="admSetOrderStatus(this.dataset.id,\'cancelled\')" data-id="'+o._id+'">Cancel</button></td>'
+          +'<td style="display:flex;gap:4px"><button class="adm-btn-ghost" style="font-size:11px;padding:4px 8px" onclick="admSetOrderStatus(this.dataset.id,\'delivered\')" data-id="'+o._id+'">✓ Delivered</button><button class="adm-btn-danger" style="font-size:11px;padding:4px 8px" onclick="admSetOrderStatus(this.dataset.id,\'cancelled\')" data-id="'+o._id+'">Cancel</button></td>'
+          +'</td></tr>';
+      }).join('') : '<tr><td colspan="7" style="text-align:center;padding:32px;color:#9ca3af">No orders yet.</td></tr>')
+      +'</tbody></table></div></div>';
+  } catch(e) { wrap.innerHTML = '<div style="color:#ef4444;padding:20px">Error: '+e.message+'</div>'; }
+};
+
+window.admSetOrderStatus = async function(orderId, status) {
+  var fb = window._fb;
+  try {
+    await fb.updateDoc(fb.doc(fb.db,'allOrders',orderId),{status:status});
+    showToast('Order marked as '+status);
+    renderAdmOrders(document.getElementById('adm-content'));
+  } catch(e) { showToast('Error: '+e.message); }
+};
+
+// ── API DELIVERIES ───────────────────────────────────────────────────────────
+window.renderAdmDeliveries = async function(wrap) {
+  var fb = window._fb;
+  try {
+    var snap = await fb.getDocs(fb.query(fb.collection(fb.db,'deliveries'),fb.limit(100)));
+    var deliveries = snap.docs.map(function(d){return Object.assign({_id:d.id},d.data());});
+    deliveries.sort(function(a,b){
+      var ta=a.createdAt&&a.createdAt.toMillis?a.createdAt.toMillis():0;
+      var tb=b.createdAt&&b.createdAt.toMillis?b.createdAt.toMillis():0;
+      return tb-ta;
+    });
+    var pending = deliveries.filter(function(d){return d.status==='pending_approval';}).length;
+    var badge = document.getElementById('adm-nav-deliveries-badge');
+    if(badge){badge.style.display=pending?'inline':'none';badge.textContent=pending;}
+    var sc = {pending_approval:'amber',approved:'blue',dispatching:'blue',dispatched:'blue',delivered:'green',failed:'red'};
+    wrap.innerHTML = '<div class="adm-card"><div class="adm-card-header"><div class="adm-card-title">API Deliveries ('+deliveries.length+')</div></div>'
+      +'<div style="overflow-x:auto"><table class="adm-table"><thead><tr><th>Customer</th><th>Partner</th><th>Items</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead><tbody>'
+      +(deliveries.length ? deliveries.map(function(d){
+        var color = sc[d.status]||'gray';
+        var date = d.createdAt&&d.createdAt.toDate?d.createdAt.toDate().toLocaleDateString([],{month:'short',day:'numeric'}):'';
+        var items = (d.items||[]).map(function(i){return i.name;}).join(', ')||'—';
+        var isPending = d.status==='pending_approval';
+        return '<tr>'
+          +'<td><strong style="font-size:13px">'+(d.customerName||'—')+'</strong><br><span style="font-size:11px;color:#9ca3af">'+(d.deliveryAddress||'')+'</span></td>'
+          +'<td style="font-size:12px">'+(d.partnerName||d.partnerEmail||'—')+'</td>'
+          +'<td style="font-size:12px;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+items+'</td>'
+          +'<td>'+(isPending?'<span class="adm-badge adm-badge-amber">⏳ Waiting pickup</span>':'<span class="adm-badge adm-badge-'+color+'">'+d.status.replace(/_/g,' ')+'</span>')+'</td>'
+          +'<td style="font-size:11px;color:#9ca3af">'+date+'</td>'
+          +'<td>'+(isPending?'<button class="adm-btn-green" onclick="adminForceApprove(this.dataset.id)" data-id="'+d._id+'" style="font-size:11px;padding:5px 10px">Force Approve</button>':'—')+'</td>'
+          +'</tr>';
+      }).join('') : '<tr><td colspan="6" style="text-align:center;padding:32px;color:#9ca3af">No deliveries yet.</td></tr>')
+      +'</tbody></table></div></div>';
+  } catch(e) { wrap.innerHTML = '<div style="color:#ef4444;padding:20px">Error: '+e.message+'</div>'; }
+};
+
+window.adminForceApprove = async function(idOrEl) {
+  var deliveryId = typeof idOrEl === "string" ? idOrEl : idOrEl.dataset.id;
+  var fb = window._fb;
+  try {
+    await fb.updateDoc(fb.doc(fb.db,'deliveries',deliveryId),{status:'approved',approvedAt:fb.serverTimestamp(),approvedBy:'admin'});
+    showToast('✓ Delivery approved');
+    renderAdmDeliveries(document.getElementById('adm-content'));
+  } catch(e) { showToast('Error: '+e.message); }
+};
+
+// ── PARTNERS ─────────────────────────────────────────────────────────────────
+window.renderAdmPartners = async function(wrap) {
+  var fb = window._fb;
+  try {
+    var snap = await fb.getDocs(fb.collection(fb.db,'partners'));
+    var partners = snap.docs.map(function(d){return Object.assign({_id:d.id},d.data());});
+    wrap.innerHTML = [
+      '<div class="adm-card">',
+      '<div class="adm-card-header"><div class="adm-card-title">Partners ('+partners.length+')</div>',
+      '<button class="adm-btn adm-btn-sm" onclick="admShowAddPartner()">+ Add Partner</button></div>',
+      '<div id="adm-add-partner-form"></div>',
+      '<div style="overflow-x:auto"><table class="adm-table"><thead><tr><th>Name</th><th>Email</th><th>Station ID</th><th>Status</th><th>Actions</th></tr></thead><tbody>',
+      partners.length ? partners.map(function(p){
+        var sc = p.status==='active'?'adm-badge-green':'adm-badge-gray';
+        return '<tr>'
+          +'<td><strong>'+p.name+'</strong></td>'
+          +'<td style="font-size:12px">'+p.email+'</td>'
+          +'<td style="font-family:monospace;font-size:12px">'+(p.stationId||'—')+'</td>'
+          +'<td><span class="adm-badge '+sc+'">'+(p.status||'active')+'</span></td>'
+          +'<td style="display:flex;gap:6px">'
+          +'<button class="adm-btn-ghost" onclick="admEditPartner(this.dataset.id,this.dataset.name,this.dataset.email,this.dataset.station)" data-id="'+p._id+'" data-name="'+p.name+'" data-email="'+p.email+'" data-station="'+(p.stationId||'')+'" style="font-size:11px;padding:5px 10px">Edit</button>'
+          +'<button class="adm-btn-danger" onclick="admRemovePartner(this.dataset.id)" data-id="'+p._id+'">Remove</button>'
+          +'</td></tr>';
+      }).join('') : '<tr><td colspan="5" style="text-align:center;padding:32px;color:#9ca3af">No partners yet.</td></tr>',
+      '</tbody></table></div></div>',
+    ].join('');
+  } catch(e) { wrap.innerHTML = '<div style="color:#ef4444;padding:20px">Error: '+e.message+'</div>'; }
+};
+
+window.admCancelAddPartner = function() { var f=document.getElementById("adm-add-partner-form"); if(f) f.innerHTML=""; };
+window.admShowAddPartner = function() {
+  var f = document.getElementById('adm-add-partner-form');
+  if (!f) return;
+  f.innerHTML = '<div style="padding:16px 20px;border-bottom:1px solid #ebebeb;background:#f8f9fa">'
+    +'<div style="font-size:13px;font-weight:700;margin-bottom:12px;color:#111">New Partner</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;align-items:end">'
+    +'<div><label style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:5px">Name</label><input class="adm-input" id="np-name" placeholder="Business name"></div>'
+    +'<div><label style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:5px">Email</label><input class="adm-input" id="np-email" placeholder="partner@email.com"></div>'
+    +'<div><label style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:5px">Station ID</label><input class="adm-input" id="np-station" placeholder="STN001"></div>'
+    +'<div><label style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:5px">Logo URL</label><input class="adm-input" id="np-logo" placeholder="https://..."></div>'
+    +'</div>'
+    +'<div style="margin-top:12px;display:flex;gap:8px">'
+    +'<button class="adm-btn adm-btn-sm" onclick="admSaveNewPartner()">Save Partner</button>'
+    +'<button class="adm-btn-ghost" onclick="admCancelAddPartner()">Cancel</button>'
+    +'</div></div>';
+};
+
+window.admSaveNewPartner = async function() {
+  var name    = (document.getElementById('np-name')||{value:''}).value.trim();
+  var email   = (document.getElementById('np-email')||{value:''}).value.trim();
+  var station = (document.getElementById('np-station')||{value:''}).value.trim();
+  var logo    = (document.getElementById('np-logo')||{value:''}).value.trim();
+  if (!name||!email) { showToast('Name and email required'); return; }
+  var fb = window._fb;
+  try {
+    await fb.addDoc(fb.collection(fb.db,'partners'),{name,email,stationId:station,logoUrl:logo||null,status:'active',createdAt:fb.serverTimestamp()});
+    showToast('✓ Partner added');
+    admTab('partners', document.getElementById('adm-nav-partners'));
+  } catch(e) { showToast('Error: '+e.message); }
+};
+
+window.admEditPartner = async function(id, name, email, stationId) {
+  if (typeof id !== "string") { var el=id; id=el.dataset.id; name=el.dataset.name; email=el.dataset.email; stationId=el.dataset.station; }
+  var newName    = prompt('Partner name:', name);
+  if (newName === null) return;
+  var newStation = prompt('Station ID:', stationId||'');
+  if (newStation === null) return;
+  var fb = window._fb;
+  try {
+    await fb.updateDoc(fb.doc(fb.db,'partners',id), {name:newName, stationId:newStation});
+    showToast('✓ Partner updated');
+    admTab('partners', document.getElementById('adm-nav-partners'));
+  } catch(e) { showToast('Error: '+e.message); }
+};
+
+window.admRemovePartner = async function(id) {
+  if (typeof id !== "string") id = id.dataset.id;
+  if (!confirm('Remove this partner?')) return;
+  var fb = window._fb;
+  try {
+    await fb.deleteDoc(fb.doc(fb.db,'partners',id));
+    showToast('Partner removed');
+    admTab('partners', document.getElementById('adm-nav-partners'));
+  } catch(e) { showToast('Error: '+e.message); }
+};
+
+// ── APPLICATIONS ─────────────────────────────────────────────────────────────
+window.renderAdmApplications = async function(wrap) {
+  var fb = window._fb;
+  try {
+    var snap = await fb.getDocs(fb.query(fb.collection(fb.db,'partnerApplications'),fb.where('status','==','pending')));
+    var apps = snap.docs.map(function(d){return Object.assign({_id:d.id},d.data());});
+    wrap.innerHTML = '<div class="adm-card"><div class="adm-card-header"><div class="adm-card-title">Partner Applications ('+apps.length+')</div></div>'
+      +'<div style="overflow-x:auto"><table class="adm-table"><thead><tr><th>Business</th><th>Email</th><th>Message</th><th>Date</th><th>Actions</th></tr></thead><tbody>'
+      +(apps.length ? apps.map(function(a){
+        var date=a.createdAt&&a.createdAt.toDate?a.createdAt.toDate().toLocaleDateString([],{month:'short',day:'numeric'}):'';
+        return '<tr>'
+          +'<td><strong>'+a.businessName+'</strong></td>'
+          +'<td style="font-size:12px">'+a.email+'</td>'
+          +'<td style="font-size:12px;max-width:200px">'+( a.message||'—')+'</td>'
+          +'<td style="font-size:11px;color:#9ca3af">'+date+'</td>'
+          +'<td style="display:flex;gap:6px">'
+          +'<button class="adm-btn-green" onclick="admApproveApp(this.dataset.id,this.dataset.name,this.dataset.email)" data-id="'+a._id+'" data-name="'+a.businessName+'" data-email="'+a.email+'" style="font-size:11px;padding:5px 10px">✓ Approve</button>'
+          +'<button class="adm-btn-danger" onclick="admRejectApp(this.dataset.id)" data-id="'+a._id+'" style="font-size:11px;padding:5px 10px">Reject</button>'
+          +'</td></tr>';
+      }).join('') : '<tr><td colspan="5" style="text-align:center;padding:32px;color:#9ca3af">No pending applications.</td></tr>')
+      +'</tbody></table></div></div>';
+  } catch(e) { wrap.innerHTML = '<div style="color:#ef4444;padding:20px">Error: '+e.message+'</div>'; }
+};
+
+window.admApproveApp = async function(id, name, email) {
+  if (typeof id !== "string") { var el=id; id=el.dataset.id; name=el.dataset.name; email=el.dataset.email; }
+  var fb = window._fb;
+  try {
+    var station = prompt('Assign station ID:', 'STN00'+Math.floor(Math.random()*99));
+    if (!station) return;
+    await fb.addDoc(fb.collection(fb.db,'partners'),{name,email,stationId:station,status:'active',createdAt:fb.serverTimestamp()});
+    await fb.updateDoc(fb.doc(fb.db,'partnerApplications',id),{status:'approved'});
+    showToast('✓ Partner approved');
+    admTab('applications', document.getElementById('adm-nav-applications'));
+  } catch(e) { showToast('Error: '+e.message); }
+};
+
+window.admRejectApp = async function(id) {
+  if (typeof id !== "string") id = id.dataset.id;
+  var fb = window._fb;
+  try {
+    await fb.updateDoc(fb.doc(fb.db,'partnerApplications',id),{status:'rejected'});
+    showToast('Application rejected');
+    admTab('applications', document.getElementById('adm-nav-applications'));
+  } catch(e) { showToast('Error: '+e.message); }
+};
+
 </script>
-
-
-
-<!-- Mobile bottom nav -->
-<div class="mobile-nav" id="mobile-nav">
-  <button class="mobile-nav-item active" id="mnav-home" onclick="showPage('home');updateMobileNav('home')">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-    Home
-  </button>
-  <button class="mobile-nav-item" id="mnav-browse" onclick="showPage('browse');updateMobileNav('browse')">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-    Browse
-  </button>
-  <button class="mobile-nav-item" id="mnav-cart" onclick="showPage('cart');updateMobileNav('cart')">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
-    Cart
-  </button>
-  <button class="mobile-nav-item" id="mnav-orders" onclick="showPage('orders');updateMobileNav('orders')">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-    Orders
-  </button>
-  <button class="mobile-nav-item" id="mnav-account" onclick="showPage('account');updateMobileNav('account')">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-    Account
-  </button>
-  <button class="mobile-nav-item" id="mnav-api" onclick="showPage('api');updateMobileNav('api')" style="display:none">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-    API
-  </button>
-</div>
-
-
-<!-- ══ ADMIN PAGE ══════════════════════════════════════════════════════════ -->
-<div class="page" id="page-admin">
-  <div class="admin-wrap" id="admin-content">
-    <!-- Login gate shown by default, replaced by JS -->
-    <div class="admin-login-gate" id="admin-gate">
-      <h2>Admin Access</h2>
-      <p>Sign in with an authorized admin account to continue.</p>
-      <button class="btn-primary" onclick="showAuth()">Sign In</button>
-    </div>
-  </div>
-</div>
-
-
-<!-- Confirm Modal -->
-<div class="confirm-modal hidden" id="confirm-modal">
-  <div class="confirm-box">
-    <div class="confirm-box-icon" id="confirm-icon"></div>
-    <div class="confirm-box-title" id="confirm-title">Are you sure?</div>
-    <div class="confirm-box-msg" id="confirm-msg"></div>
-    <div class="confirm-box-actions">
-      <button class="confirm-cancel-btn" onclick="closeConfirm()">Cancel</button>
-      <button class="confirm-ok" id="confirm-ok-btn" onclick="confirmOk()">Confirm</button>
-    </div>
-  </div>
-</div>
-<!-- Review Modal -->
-<div class="review-modal hidden" id="review-modal">
-  <div class="review-box">
-    <button class="review-close" onclick="closeReviewModal()">✕</button>
-    <div class="review-box-title" id="review-modal-title">Review Tool</div>
-    <div class="review-box-sub" id="review-modal-sub">Share your experience</div>
-    <div class="star-picker" id="star-picker">
-      <span class="star-pick" onclick="setReviewStar(1)">★</span>
-      <span class="star-pick" onclick="setReviewStar(2)">★</span>
-      <span class="star-pick" onclick="setReviewStar(3)">★</span>
-      <span class="star-pick" onclick="setReviewStar(4)">★</span>
-      <span class="star-pick" onclick="setReviewStar(5)">★</span>
-    </div>
-    <textarea class="review-textarea" id="review-text" placeholder="What did you think? Was it easy to use, in good condition..."></textarea>
-    <button class="review-submit-btn" onclick="submitReview()">Submit Review</button>
-  </div>
-</div>
-
-  <button class="theme-fab" id="theme-toggle" onclick="toggleTheme()" title="Toggle dark/light mode">
-    <svg id="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
-    <svg id="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-  </button>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-
 <script>
+
 function initAdminPage() {
   var fb = window._fb;
   fb.onAuthStateChanged(fb.auth, async function(user) {
     if (user) {
       var btn = document.getElementById('nav-auth-btn');
       if (btn) { btn.textContent = (user.displayName||user.email).split(/[\s@]/)[0]; btn.onclick = function(){ doSignOut(); window.location.href='/'; }; }
+      var nameEl = document.getElementById('adm-user-name');
+      if (nameEl) nameEl.textContent = user.displayName || user.email;
       await loadAdminEmails();
       await loadToolsFromRTDB();
-      renderAdmin();
+      isAdmin = checkAdmin();
+      if (!isAdmin) {
+        var wrap = document.getElementById('adm-content');
+        if (wrap) wrap.innerHTML = '<div style="text-align:center;padding:80px"><p style="color:#ef4444;margin-bottom:16px;font-weight:600">Access denied — not an admin account.</p></div>';
+        return;
+      }
+      admTab('inventory', document.getElementById('adm-nav-inventory'));
     } else {
       var btn = document.getElementById('nav-auth-btn');
       if (btn) { btn.textContent = 'Sign In'; btn.onclick = showAuth; }
-      var wrap = document.getElementById('admin-content');
-      if (wrap) wrap.innerHTML = '<div class="admin-login-gate"><h2>Admin Access</h2><p>Sign in with an authorized admin account.</p><button class="btn-primary" onclick="showAuth()">Sign In</button></div>';
+      var wrap = document.getElementById('adm-content');
+      if (wrap) wrap.innerHTML = '<div style="text-align:center;padding:80px"><p style="color:#9ca3af;margin-bottom:16px">Sign in with an admin account.</p><button class="adm-btn" onclick="showAuth()">Sign In</button></div>';
     }
   });
 }
-
 if (window._fbReady) { initAdminPage(); }
 else { document.addEventListener('fbready', initAdminPage, {once:true}); }
-</script>
 
+</script>
 </body>
 </html>

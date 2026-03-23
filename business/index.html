@@ -3269,7 +3269,7 @@ function startApp() {
         };
         await fb.setDoc(pRef(currentUser.uid), userProfile);
       }
-      renderAccount();
+      // renderAccount not needed on this page
     } catch(e){ console.error("loadProfile",e); }
   }
 

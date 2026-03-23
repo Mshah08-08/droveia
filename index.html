@@ -904,8 +904,8 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
 
 /* ── Page transitions ─── */
 .page { animation: none }
-.page.active { animation: fadeIn .18s ease }
-@keyframes fadeIn { from { opacity:0;transform:translateY(6px) } to { opacity:1;transform:none } }
+.page.active { animation: pageFadeIn .12s ease }
+@keyframes pageFadeIn { from { opacity:0 } to { opacity:1 } }
 
 /* ── Tool card hover glow ─── */
 .ddtool:hover { box-shadow:0 4px 24px rgba(26,110,240,.12);border-color:#c4d0f0 }
@@ -920,7 +920,8 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
 
 /* ── Persistent sidebar layout for inner pages ─── */
 .dd-sidebar { width:220px;flex-shrink:0;border-right:1px solid #e8e8e8;padding:16px 0;background:#fff;height:calc(100vh - 60px);position:sticky;top:0;overflow-y:auto }
-.dd-page-layout { display:flex;height:calc(100vh - 60px);background:#fff;overflow:hidden;margin-top:60px }
+.dd-page-layout { display:flex;height:calc(100vh - 60px);background:#fff;overflow:hidden }
+.dd-page-main { flex:1;min-width:0;overflow-y:auto;height:100% }
 .dd-page-main { flex:1;min-width:0;overflow-y:auto;height:100% }
 @media(max-width:768px){ .dd-sidebar{display:none} }
 
@@ -949,7 +950,7 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
 #page-cart.active { padding-top:60px; }
 
 /* ── DoorDash layout ─────────────────────────────────── */
-body { background:#fff; padding-top:0 !important; }
+body { background:#fff; padding-top:60px; }
 
 html, body { height:100%; }
 #page-home { height:100vh; overflow:hidden; }
@@ -1143,26 +1144,26 @@ html, body { height:100%; }
 
 <!-- ═══ HOME PAGE ═══ -->
 <div class="page active" id="page-home">
-<div style="display:flex;height:calc(100vh - 60px);margin-top:60px;background:#fff;overflow:hidden">
+<div style="display:flex;height:calc(100vh - 60px);background:#fff;overflow:hidden">
 
   <!-- Sidebar -->
-  <aside class="dd-sidebar" id="home-sidebar" style="width:220px;flex-shrink:0;border-right:1px solid #e8e8e8;padding:8px 0;position:sticky;top:0;height:100%;overflow-y:auto;background:#fff">
-    <div class="ddnav-item active" data-navpage="home" onclick="showPage('home')">
+  <aside id="home-sidebar" style="width:220px;flex-shrink:0;border-right:1px solid #e8e8e8;padding:8px 0;background:#fff;height:100%;overflow-y:auto">
+    <div class="ddnav-item active" id="sbnav-home" data-navpage="home" onclick="showPage('home')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home
     </div>
-    <div class="ddnav-item" data-navpage="cat-workshop" onclick="showCategory('Workshop')">
+    <div class="ddnav-item" id="sbnav-workshop" data-navpage="cat-workshop" onclick="showCategory('Workshop')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>Workshop
     </div>
-    <div class="ddnav-item" data-navpage="cat-electronics" onclick="showCategory('Electronics')">
+    <div class="ddnav-item" id="sbnav-electronics" data-navpage="cat-electronics" onclick="showCategory('Electronics')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Electronics
     </div>
-    <div class="ddnav-item" data-navpage="cat-crafts" onclick="showCategory('Crafts')">
+    <div class="ddnav-item" id="sbnav-crafts" data-navpage="cat-crafts" onclick="showCategory('Crafts')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>Crafts
     </div>
-    <div class="ddnav-item" data-navpage="cat-office" onclick="showCategory('Office')">
+    <div class="ddnav-item" id="sbnav-office" data-navpage="cat-office" onclick="showCategory('Office')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Office
     </div>
-    <div class="ddnav-item" onclick="showPage('browse-all')">
+    <div class="ddnav-item" id="sbnav-browse" data-navpage="browse-all" onclick="showPage('browse-all')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>Browse All
     </div>
     <div style="height:1px;background:#f0f0f0;margin:8px 0"></div>
@@ -1176,11 +1177,13 @@ html, body { height:100%; }
     <div class="ddnav-item" onclick="window.open('https://business.droveia.com')" style="color:#1a6ef0">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>For Businesses
     </div>
+    <div class="ddnav-item" id="sbnav-admin-link" onclick="window.open('https://admin.droveia.com')" style="display:none;color:#ef4444">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Admin Console
+    </div>
   </aside>
 
-
   <!-- Main -->
-  <main id="home-main" style="flex:1;min-width:0;padding:0;overflow-y:auto;height:100%">
+  <main id="home-main" style="flex:1;min-width:0;padding:0;overflow-y:auto;height:100%;min-height:0">
     <div style="padding:24px 28px" id="home-top">
 
       <h1 id="home-welcome" style="font-size:22px;font-weight:800;color:#111;font-family:var(--font);margin:0 0 18px;letter-spacing:-.02em">Welcome to Droveia</h1>
@@ -1232,8 +1235,10 @@ html, body { height:100%; }
 
 <!-- ═══ CATEGORY PAGE ═══ -->
 <div class="page" id="page-category">
-<div style="display:flex;height:calc(100vh - 60px);margin-top:60px;background:#fff;overflow:hidden">
-  <aside class="dd-sidebar" id="cat-sidebar"><!-- filled by JS --></aside>
+<div style="height:100%;overflow-y:auto">
+  
+    <aside class="dd-sidebar" id="cat-sidebar"><!-- filled by JS --></aside>
+
   <main style="flex:1;min-width:0;padding:28px 32px;overflow-y:auto;height:100%">
 
     <h1 id="cat-heading" style="font-size:24px;font-weight:800;color:#111;font-family:var(--font);letter-spacing:-.02em;margin:0 0 6px"></h1>
@@ -1264,26 +1269,30 @@ html, body { height:100%; }
 
 <!-- ═══ BROWSE ALL PAGE ═══ -->
 <div class="page" id="page-browse-all">
-<div style="display:flex;height:calc(100vh - 60px);margin-top:60px;background:#fff;overflow:hidden">
+<div style="height:100%;overflow-y:auto">
 
   <!-- Sidebar -->
-  <aside class="dd-sidebar">
-    <div class="ddnav-item" data-navpage="home" onclick="showPage('home')">
+  
+
+
+  <!-- Main -->
+  <aside class="dd-sidebar" style="width:220px;flex-shrink:0;border-right:1px solid #e8e8e8;padding:8px 0;background:#fff;height:100%;overflow-y:auto">
+    <div class="ddnav-item active" id="sbnav-home" data-navpage="home" onclick="showPage('home')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home
     </div>
-    <div class="ddnav-item" data-navpage="cat-workshop" onclick="showCategory('Workshop')">
+    <div class="ddnav-item" id="sbnav-workshop" data-navpage="cat-workshop" onclick="showCategory('Workshop')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>Workshop
     </div>
-    <div class="ddnav-item" data-navpage="cat-electronics" onclick="showCategory('Electronics')">
+    <div class="ddnav-item" id="sbnav-electronics" data-navpage="cat-electronics" onclick="showCategory('Electronics')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Electronics
     </div>
-    <div class="ddnav-item" data-navpage="cat-crafts" onclick="showCategory('Crafts')">
+    <div class="ddnav-item" id="sbnav-crafts" data-navpage="cat-crafts" onclick="showCategory('Crafts')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>Crafts
     </div>
-    <div class="ddnav-item" data-navpage="cat-office" onclick="showCategory('Office')">
+    <div class="ddnav-item" id="sbnav-office" data-navpage="cat-office" onclick="showCategory('Office')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Office
     </div>
-    <div class="ddnav-item active" onclick="showPage('browse-all')">
+    <div class="ddnav-item" id="sbnav-browse" data-navpage="browse-all" onclick="showPage('browse-all')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>Browse All
     </div>
     <div style="height:1px;background:#f0f0f0;margin:8px 0"></div>
@@ -1297,10 +1306,11 @@ html, body { height:100%; }
     <div class="ddnav-item" onclick="window.open('https://business.droveia.com')" style="color:#1a6ef0">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>For Businesses
     </div>
+    <div class="ddnav-item" id="sbnav-admin-link" onclick="window.open('https://admin.droveia.com')" style="display:none;color:#ef4444">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Admin Console
+    </div>
   </aside>
 
-
-  <!-- Main -->
   <main style="flex:1;min-width:0;padding:28px 32px;overflow-y:auto;height:100%">
 
     <!-- Header + search filter -->
@@ -1336,7 +1346,7 @@ html, body { height:100%; }
 
 <!-- ═══ BROWSE ═══ -->
 <div class="page" id="page-browse">
-<div style="display:flex;height:calc(100vh - 60px);margin-top:60px;background:#fff;overflow:hidden">
+<div style="height:100%;overflow-y:auto">
 
   <!-- Sidebar -->
   <aside class="dd-sidebar" style="width:220px">
@@ -1451,11 +1461,11 @@ html, body { height:100%; }
     <div class="ddnav-item" data-navpage="cat-office" onclick="showCategory('Office')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Office
     </div>
-    <div class="ddnav-item" onclick="showPage('browse-all')">
+    <div class="ddnav-item" data-navpage="browse-all" onclick="showPage('browse-all')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>Browse All
     </div>
     <div style="height:1px;background:#f0f0f0;margin:8px 0"></div>
-    <div class="ddnav-item active" data-navpage="orders" onclick="showPage('orders')">
+    <div class="ddnav-item" data-navpage="orders" onclick="showPage('orders')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Orders
     </div>
     <div class="ddnav-item" data-navpage="account" onclick="showPage('account')">
@@ -1465,8 +1475,10 @@ html, body { height:100%; }
     <div class="ddnav-item" onclick="window.open('https://business.droveia.com')" style="color:#1a6ef0">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>For Businesses
     </div>
+    <div class="ddnav-item" id="sbnav-admin-link" onclick="window.open('https://admin.droveia.com')" style="display:none;color:#ef4444">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Admin Console
+    </div>
   </aside>
-
   <main class="dd-page-main">
   <div class="orders-layout">
     <h2 style="font-size:22px;font-weight:800;margin-bottom:20px;letter-spacing:-.02em">My Orders</h2>
@@ -1536,22 +1548,24 @@ html, body { height:100%; }
     <div class="ddnav-item" data-navpage="cat-office" onclick="showCategory('Office')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Office
     </div>
-    <div class="ddnav-item" onclick="showPage('browse-all')">
+    <div class="ddnav-item" data-navpage="browse-all" onclick="showPage('browse-all')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>Browse All
     </div>
     <div style="height:1px;background:#f0f0f0;margin:8px 0"></div>
     <div class="ddnav-item" data-navpage="orders" onclick="showPage('orders')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Orders
     </div>
-    <div class="ddnav-item active" data-navpage="account" onclick="showPage('account')">
+    <div class="ddnav-item" data-navpage="account" onclick="showPage('account')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Account
     </div>
     <div style="height:1px;background:#f0f0f0;margin:8px 0"></div>
     <div class="ddnav-item" onclick="window.open('https://business.droveia.com')" style="color:#1a6ef0">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>For Businesses
     </div>
+    <div class="ddnav-item" id="sbnav-admin-link" onclick="window.open('https://admin.droveia.com')" style="display:none;color:#ef4444">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Admin Console
+    </div>
   </aside>
-
   <main class="dd-page-main">
   <div class="account-layout">
     <div class="account-sidebar">
@@ -1726,6 +1740,10 @@ html, body { height:100%; }
   </div>
 </div>
 
+  </div>
+</div>
+<!-- ═══ END APP SHELL ═══ -->
+
 <!-- ══════════════════════════════════════════════════════════════
   FIREBASE — live config
 ══════════════════════════════════════════════════════════════ -->
@@ -1831,9 +1849,7 @@ window.showToast = showToast;
 // ── Navigation ────────────────────────────────────────────────────────────────
 function showPage(id) {
   // Allow scrolling on non-home pages
-  var _lockScroll = ['home','browse-all'].indexOf(id) >= 0;
-  document.body.style.overflow = _lockScroll ? 'hidden' : '';
-  document.documentElement.style.overflow = _lockScroll ? 'hidden' : '';
+  // Overflow handled by app-content-area, not body
   qsa(".page").forEach(function(p){ p.classList.remove("active"); });
   var pg = el("page-"+id); if(pg) pg.classList.add("active");
   if (id === 'browse-all' && window.onShowBrowseAll) onShowBrowseAll();
@@ -1844,7 +1860,6 @@ function showPage(id) {
   if (id !== 'category') {
     document.querySelectorAll('.ddnav-item').forEach(function(el){ el.classList.remove('active'); });
     document.querySelectorAll('.ddnav-item[data-navpage="'+id+'"]').forEach(function(el){ el.classList.add('active'); });
-    // Also highlight sbnav-home etc by ID for home sidebar
     var idMap = {home:'sbnav-home','browse-all':'sbnav-browse'};
     if (idMap[id]) { var sb = document.getElementById(idMap[id]); if(sb) sb.classList.add('active'); }
   }
@@ -4335,7 +4350,7 @@ window.homeSectionScroll = function(id) {
 };
 
 window.homeSetSidebarActive = function(id) {
-  document.querySelectorAll('#home-sidebar .ddnav-item, #page-browse-all aside .ddnav-item').forEach(function(el){ el.classList.remove('active'); });
+  document.querySelectorAll('#app-sidebar-persistent .ddnav-item, #cat-sidebar .ddnav-item').forEach(function(el){ el.classList.remove('active'); });
   var el = document.getElementById(id); if(el) el.classList.add('active');
 };
 

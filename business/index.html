@@ -4649,61 +4649,81 @@ window.loadPartnerStock = async function() {
 window.renderPartnerLanding = function(mode) {
   if (mode === 'signin') {
     return '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;padding:40px 24px">'
-      + '<div style="width:72px;height:72px;border-radius:20px;background:linear-gradient(135deg,#1a6ef0,#3b82f6);display:flex;align-items:center;justify-content:center;font-size:32px;margin-bottom:24px;box-shadow:0 8px 24px rgba(26,110,240,.3)">🚁</div>'
-      + '<h2 style="font-size:26px;font-weight:800;color:#111;margin-bottom:10px;letter-spacing:-.03em">Partner Portal</h2>'
+      + '<div style="width:72px;height:72px;border-radius:20px;background:linear-gradient(135deg,#1a6ef0,#3b82f6);display:flex;align-items:center;justify-content:center;font-size:32px;margin-bottom:24px;box-shadow:0 8px 24px rgba(26,110,240,.25)">🚁</div>'
+      + '<h2 style="font-size:26px;font-weight:800;color:#111;margin-bottom:10px">Partner Portal</h2>'
       + '<p style="color:#6b7280;font-size:15px;margin-bottom:32px;max-width:380px;line-height:1.6">Sign in with your partner account to manage inventory, track orders, and access your API.</p>'
-      + '<button onclick="showAuth()" style="background:#1a6ef0;color:#fff;border:none;border-radius:10px;padding:14px 36px;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--font);box-shadow:0 4px 14px rgba(26,110,240,.4)">Sign In</button>'
+      + '<button onclick="showAuth()" style="background:#1a6ef0;color:#fff;border:none;border-radius:10px;padding:14px 36px;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--font);box-shadow:0 4px 14px rgba(26,110,240,.35)">Sign In</button>'
       + '</div>';
   }
 
-  return '<div style="padding:0;overflow-y:auto">'
+  return '<div style="overflow-y:auto;padding-bottom:40px">'
 
-    // Hero
-    + '<div style="background:linear-gradient(135deg,#0f172a 0%,#1e3a8a 60%,#1a6ef0 100%);padding:60px 40px;text-align:center;position:relative;overflow:hidden">'
-    + '<div style="position:relative">'
-    + '<div style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:11px;font-weight:700;padding:6px 14px;border-radius:20px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:24px;backdrop-filter:blur(8px)">🚁 Partner Program</div>'
-    + '<h1 style="font-size:38px;font-weight:900;color:#fff;letter-spacing:-.04em;line-height:1.1;margin-bottom:16px">Deliver anything.<br><span style="color:#60a5fa">In under 30 minutes.</span></h1>'
-    + '<p style="color:rgba(255,255,255,.75);font-size:16px;line-height:1.7;max-width:500px;margin:0 auto 32px">List your tools and products on Droveia. We handle the drone delivery — you just pack the order and earn.</p>'
-    + '<a href="mailto:partners@droveia.com" style="display:inline-block;background:#fff;color:#1a6ef0;font-size:15px;font-weight:800;padding:14px 36px;border-radius:10px;text-decoration:none;box-shadow:0 4px 20px rgba(0,0,0,.2)">Apply to Partner →</a>'
-    + '</div></div>'
-
-    // Stats
-    + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-bottom:1px solid #f0f0f0">'
-    + '<div style="padding:28px 20px;text-align:center;border-right:1px solid #f0f0f0"><div style="font-size:32px;font-weight:900;color:#111;letter-spacing:-.03em">&lt;30<span style="font-size:18px">min</span></div><div style="font-size:12px;color:#9ca3af;margin-top:4px">Avg delivery time</div></div>'
-    + '<div style="padding:28px 20px;text-align:center;border-right:1px solid #f0f0f0"><div style="font-size:32px;font-weight:900;color:#111;letter-spacing:-.03em">98<span style="font-size:18px">%</span></div><div style="font-size:12px;color:#9ca3af;margin-top:4px">Revenue goes to you</div></div>'
-    + '<div style="padding:28px 20px;text-align:center"><div style="font-size:28px;font-weight:900;color:#111;letter-spacing:-.03em">$2k</div><div style="font-size:12px;color:#9ca3af;margin-top:4px">Setup cost</div></div>'
+    // ── Hero ──────────────────────────────────────────────────────────────────
+    + '<div style="background:linear-gradient(135deg,#0f172a 0%,#1e3a8a 55%,#1a6ef0 100%);padding:56px 40px 48px;text-align:center">'
+    + '<div style="display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:11px;font-weight:800;padding:6px 16px;border-radius:20px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:22px">🚁 Partner Program</div>'
+    + '<h1 style="font-size:36px;font-weight:900;color:#fff;letter-spacing:-.04em;line-height:1.15;margin-bottom:14px">Deliver anything.<br><span style="color:#60a5fa">In under 30 minutes.</span></h1>'
+    + '<p style="color:rgba(255,255,255,.75);font-size:15px;line-height:1.7;max-width:480px;margin:0 auto 32px">List your tools and products on Droveia. We fly them to customers — you just pack the order and earn 98% of every sale.</p>'
+    + '<a href="mailto:partners@droveia.com" style="display:inline-block;background:#fff;color:#1a6ef0;font-size:15px;font-weight:800;padding:14px 36px;border-radius:10px;text-decoration:none;box-shadow:0 4px 20px rgba(0,0,0,.25)">Apply to Partner →</a>'
     + '</div>'
 
-    // How it works
-    + '<div style="padding:40px 32px">'
-    + '<div style="font-size:11px;font-weight:800;color:#9ca3af;text-transform:uppercase;letter-spacing:.1em;margin-bottom:24px">How it works</div>'
-    + '<div style="display:flex;flex-direction:column;gap:0">'
-    + _bizStep('1','Submit your inventory','List your tools, equipment, or products. Our team reviews and approves within 24 hours.','#eff6ff','#1a6ef0')
-    + _bizStep('2','We install your station','Droveia installs a drone docking station at your location at zero cost to you.','#f0fdf4','#16a34a')
-    + _bizStep('3','Orders fly out automatically','When a customer orders, your station dispatches the drone. You load it, we fly it.','#fff7ed','#d97706')
-    + _bizStep('4','Get paid weekly','Keep 90% of every rental. Track orders, revenue, and analytics in real time.','#fdf4ff','#9333ea')
-    + '</div></div>'
-
-    // What you get
-    + '<div style="padding:0 32px 40px">'
-    + '<div style="font-size:11px;font-weight:800;color:#9ca3af;text-transform:uppercase;letter-spacing:.1em;margin-bottom:20px">What you get</div>'
-    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'
-    + _bizFeature("📦","Full dashboard","Manage inventory, view orders, and track revenue all in one place.")
-    + _bizFeature("🔑","API access","Integrate Droveia deliveries directly into your existing systems.")
-    + _bizFeature("📍","Real-time tracking","Customers track their drone delivery live on a map.")
-    + _bizFeature("💰","Weekly payouts","Automatic transfers every Monday. No chasing invoices.")
-    + '</div></div>'
-
-    // CTA
-    + '<div style="margin:0 32px 40px;background:linear-gradient(120deg,#1a6ef0,#3b82f6);border-radius:16px;padding:36px;text-align:center">'
-    + '<div style="font-size:22px;font-weight:900;color:#fff;margin-bottom:8px;letter-spacing:-.02em">Ready to join?</div>'
-    + '<div style="font-size:14px;color:rgba(255,255,255,.8);margin-bottom:24px">We onboard new partners every week. Get in touch and we&rsquo;ll have you live within days.</div>'
-    + '<a href="mailto:partners@droveia.com" style="display:inline-block;background:#fff;color:#1a6ef0;font-size:14px;font-weight:800;padding:12px 32px;border-radius:10px;text-decoration:none;margin-right:12px">Email Us</a>'
-    + '<button onclick="showAuth()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;font-size:14px;font-weight:700;padding:12px 24px;border-radius:10px;cursor:pointer;font-family:var(--font)">Already a partner?</button>'
+    // ── Stats ─────────────────────────────────────────────────────────────────
+    + '<div style="display:grid;grid-template-columns:repeat(3,1fr);background:#fff;border-bottom:2px solid #f0f0f0">'
+    + '<div style="padding:28px 16px;text-align:center;border-right:1px solid #f0f0f0">'
+    +   '<div style="font-size:30px;font-weight:900;color:#1a6ef0;letter-spacing:-.03em">&lt;30<span style="font-size:16px">min</span></div>'
+    +   '<div style="font-size:12px;color:#9ca3af;margin-top:4px;font-weight:500">Avg delivery</div></div>'
+    + '<div style="padding:28px 16px;text-align:center;border-right:1px solid #f0f0f0">'
+    +   '<div style="font-size:30px;font-weight:900;color:#1a6ef0;letter-spacing:-.03em">98<span style="font-size:16px">%</span></div>'
+    +   '<div style="font-size:12px;color:#9ca3af;margin-top:4px;font-weight:500">Revenue to you</div></div>'
+    + '<div style="padding:28px 16px;text-align:center">'
+    +   '<div style="font-size:30px;font-weight:900;color:#1a6ef0;letter-spacing:-.03em">$2k</div>'
+    +   '<div style="font-size:12px;color:#9ca3af;margin-top:4px;font-weight:500">Setup cost</div></div>'
     + '</div>'
 
-    + '</div>';
+    // ── How it works ──────────────────────────────────────────────────────────
+    + '<div style="padding:36px 32px 0">'
+    + '<div style="font-size:11px;font-weight:800;color:#9ca3af;text-transform:uppercase;letter-spacing:.1em;margin-bottom:20px">How it works</div>'
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:32px">'
+    + _bizCard('1','Submit inventory','List your tools through this portal. Approved within 24hrs.','#1a6ef0','#eff6ff')
+    + _bizCard('2','Get your station','We install a drone dock at your location. Zero cost.','#16a34a','#f0fdf4')
+    + _bizCard('3','Orders fly out','Customer orders → your station dispatches automatically.','#d97706','#fffbeb')
+    + _bizCard('4','Get paid weekly','98% of every rental, transferred every Monday.','#9333ea','#fdf4ff')
+    + '</div>'
+
+    // ── Features ──────────────────────────────────────────────────────────────
+    + '<div style="font-size:11px;font-weight:800;color:#9ca3af;text-transform:uppercase;letter-spacing:.1em;margin-bottom:16px">What you get</div>'
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:32px">'
+    + _bizFeat('📊','Live dashboard','Track orders, revenue, and stock in real time.')
+    + _bizFeat('🔑','API access','Integrate Droveia into your own systems.')
+    + _bizFeat('📍','Live tracking','Customers watch their drone delivery on a map.')
+    + _bizFeat('💸','Weekly payouts','Auto-transfers every Monday. No invoices needed.')
+    + '</div>'
+
+    // ── CTA ───────────────────────────────────────────────────────────────────
+    + '<div style="background:linear-gradient(120deg,#1a6ef0,#2563eb);border-radius:16px;padding:32px;text-align:center;margin-bottom:16px">'
+    + '<div style="font-size:20px;font-weight:900;color:#fff;margin-bottom:8px;letter-spacing:-.02em">Ready to launch?</div>'
+    + '<div style="font-size:14px;color:rgba(255,255,255,.8);margin-bottom:22px">We onboard new partners every week. Get in touch — we&rsquo;ll have you live within days.</div>'
+    + '<a href="mailto:partners@droveia.com" style="display:inline-block;background:#fff;color:#1a6ef0;font-size:14px;font-weight:800;padding:12px 28px;border-radius:8px;text-decoration:none;margin-right:10px">Email Us</a>'
+    + '<button onclick="showAuth()" style="background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.35);color:#fff;font-size:14px;font-weight:700;padding:12px 20px;border-radius:8px;cursor:pointer;font-family:var(--font)">Already a partner?</button>'
+    + '</div>'
+
+    + '</div></div>';
 };
+
+function _bizCard(num, title, desc, color, bg) {
+  return '<div style="background:'+bg+';border-radius:12px;padding:18px;border:1px solid '+color+'22">'
+    + '<div style="width:32px;height:32px;border-radius:9px;background:'+color+';color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;margin-bottom:12px">'+num+'</div>'
+    + '<div style="font-size:13px;font-weight:800;color:#111;margin-bottom:5px">'+title+'</div>'
+    + '<div style="font-size:12px;color:#6b7280;line-height:1.5">'+desc+'</div>'
+    + '</div>';
+}
+function _bizFeat(icon, title, desc) {
+  return '<div style="background:#fff;border:1.5px solid #e8e8e8;border-radius:12px;padding:16px">'
+    + '<div style="font-size:20px;margin-bottom:8px">'+icon+'</div>'
+    + '<div style="font-size:13px;font-weight:700;color:#111;margin-bottom:3px">'+title+'</div>'
+    + '<div style="font-size:12px;color:#9ca3af;line-height:1.5">'+desc+'</div>'
+    + '</div>';
+}
+
 
 function _bizStep(num, title, desc, bg, color) {
   return '<div style="display:flex;gap:16px;padding:20px 0;border-bottom:1px solid #f8f8f8">'

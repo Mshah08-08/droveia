@@ -4676,17 +4676,16 @@ window.admApproveInventory = async function(btn) {
   var item = JSON.parse(decodeURIComponent(btn.dataset.item));
   var fb = window._fb;
   try {
-    // Add to RTDB
+    // Add to RTDB - push first, then write
     var newTool = {
-      id: TOOLS.length + 1,
+      id: Date.now(),
       name: item.name, cat: item.cat, desc: item.desc||'',
       pph: item.pph||0, retail: (item.pph||0)*20,
-      rating: 4.5, eta: '7 min',
+      rating: 4.5, eta: '< 30 min',
       img: item.imgUrl||'x', qty: item.qty||1, rentedQty: 0,
       available: true,
       partnerEmail: item.partnerEmail, partnerName: item.partnerName
     };
-    await adminSyncToRTDB();
     TOOLS.push(newTool);
     await fetch('https://droveia-default-rtdb.firebaseio.com/tools.json', {
       method:'PUT', headers:{'Content-Type':'application/json'},

@@ -920,7 +920,7 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
 
 /* ── Persistent sidebar layout for inner pages ─── */
 .dd-sidebar { width:220px;flex-shrink:0;border-right:1px solid #e8e8e8;padding:16px 0;background:#fff;height:calc(100vh - 60px);position:sticky;top:0;overflow-y:auto }
-.dd-page-layout { display:flex;height:calc(100vh - 60px);background:#fff;overflow:hidden }
+.dd-page-layout { display:flex;height:calc(100vh - 60px);background:#fff;overflow:hidden;margin-top:60px }
 .dd-page-main { flex:1;min-width:0;overflow-y:auto;height:100% }
 @media(max-width:768px){ .dd-sidebar{display:none} }
 
@@ -929,11 +929,17 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
 #page-category.active,
 #page-browse-all.active { min-height:0 !important; }
 
+/* Pages that scroll normally need top offset */
+#page-browse.active,
+#page-cart.active,
+#page-orders.active,
+#page-account.active { padding-top:60px; }
+
 /* ── DoorDash layout ─────────────────────────────────── */
-body { background:#fff; padding-top:60px; }
+body { background:#fff; padding-top:0 !important; }
 
 html, body { height:100%; }
-#page-home { height:calc(100vh - 60px); overflow:hidden; }
+#page-home { height:100vh; overflow:hidden; }
 
 
 /* Sidebar nav items */
@@ -1098,7 +1104,7 @@ html, body { height:100%; }
 
 <!-- ═══ HOME PAGE ═══ -->
 <div class="page active" id="page-home">
-<div style="display:flex;height:calc(100vh - 60px);background:#fff;overflow:hidden">
+<div style="display:flex;height:calc(100vh - 60px);margin-top:60px;background:#fff;overflow:hidden">
 
   <!-- Sidebar -->
   <aside class="dd-sidebar" id="home-sidebar" style="width:220px;flex-shrink:0;border-right:1px solid #e8e8e8;padding:8px 0;position:sticky;top:0;height:100%;overflow-y:auto;background:#fff">
@@ -1187,7 +1193,7 @@ html, body { height:100%; }
 
 <!-- ═══ CATEGORY PAGE ═══ -->
 <div class="page" id="page-category">
-<div style="display:flex;height:calc(100vh - 60px);background:#fff;overflow:hidden;margin-top:0">
+<div style="display:flex;height:calc(100vh - 60px);margin-top:60px;background:#fff;overflow:hidden">
   <aside class="dd-sidebar" id="cat-sidebar"><!-- filled by JS --></aside>
   <main style="flex:1;min-width:0;padding:28px 32px;overflow-y:auto;height:100%">
 
@@ -1219,7 +1225,7 @@ html, body { height:100%; }
 
 <!-- ═══ BROWSE ALL PAGE ═══ -->
 <div class="page" id="page-browse-all">
-<div style="display:flex;height:calc(100vh - 60px);background:#fff;overflow:hidden;margin-top:0">
+<div style="display:flex;height:calc(100vh - 60px);margin-top:60px;background:#fff;overflow:hidden">
 
   <!-- Sidebar -->
   <aside class="dd-sidebar">
@@ -1291,7 +1297,7 @@ html, body { height:100%; }
 
 <!-- ═══ BROWSE ═══ -->
 <div class="page" id="page-browse">
-<div style="display:flex;height:calc(100vh - 60px);background:#fff;overflow:hidden">
+<div style="display:flex;height:calc(100vh - 60px);margin-top:60px;background:#fff;overflow:hidden">
 
   <!-- Sidebar -->
   <aside class="dd-sidebar" style="width:220px">
@@ -1795,11 +1801,13 @@ function showPage(id) {
   if (id === 'browse') { _brCat='All'; _brSearch=''; setTimeout(function(){ brRender(); }, 50); }
   if (window.location.hash) history.replaceState(null, "", window.location.pathname);
   sessionStorage.setItem("currentPage", id);
-  // Update sidebar active states
-  document.querySelectorAll('.ddnav-item').forEach(function(el){ el.classList.remove('active'); });
-  var sidebarMap = {home:'sbnav-home',browse:'sbnav-browse',orders:'sbnav-orders',account:'sbnav-account','browse-all':'sbnav-browse'};
-  var sbId = sidebarMap[id];
-  if (sbId) { var sb = document.getElementById(sbId); if(sb) sb.classList.add('active'); }
+  // Update sidebar active states (skip for category - handled by showCategory)
+  if (id !== 'category') {
+    document.querySelectorAll('.ddnav-item').forEach(function(el){ el.classList.remove('active'); });
+    var sidebarMap = {home:'sbnav-home',browse:'sbnav-browse',orders:'sbnav-orders',account:'sbnav-account','browse-all':'sbnav-browse'};
+    var sbId = sidebarMap[id];
+    if (sbId) { var sb = document.getElementById(sbId); if(sb) sb.classList.add('active'); }
+  }
   qsa(".nav-link").forEach(function(l){ l.classList.remove("active"); });
   var nl = el("nav-"+id); if(nl) nl.classList.add("active");
   if (id === "admin") { renderAdmin(); }

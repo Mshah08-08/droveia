@@ -3294,7 +3294,7 @@ function startApp() {
       var snap = await fb.getDoc(cRef(currentUser.uid));
       if (snap.exists() && snap.data().items) {
         cart = snap.data().items; updateBadge();
-        if (el("page-cart").classList.contains("active")) renderCart();
+        if (el("page-cart") && el("page-cart").classList.contains("active")) renderCart();
       }
     } catch(e){ console.error("loadCart",e); }
   }
@@ -3304,7 +3304,7 @@ function startApp() {
     var q = fb.query(oCol(currentUser.uid), fb.orderBy("createdAt","desc"));
     ordersUnsub = fb.onSnapshot(q, function(snap){
       liveOrders = snap.docs.map(function(d){ return Object.assign({_id:d.id},d.data()); });
-      if (el("page-orders").classList.contains("active")) renderOrders();
+      var _po = el("page-orders"); if (_po && _po.classList.contains("active")) renderOrders();
     }, function(e){ console.error("orders",e); });
   }
 

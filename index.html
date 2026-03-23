@@ -924,6 +924,21 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
 .dd-page-main { flex:1;min-width:0;overflow-y:auto;height:100% }
 @media(max-width:768px){ .dd-sidebar{display:none} }
 
+/* ── Mobile nav ─────────────────────────────────── */
+@media(max-width:640px) {
+  .nav-search-dd  { display:none !important }
+  .nav-addr-dd    { display:none !important }
+  .nav-search-icon-dd { display:flex !important }
+  .cart-label-dd  { display:none }
+  .nav-wordmark-dd { font-size:15px }
+  #dd-topnav { padding:0 12px; gap:6px }
+  .nav-auth-btn { padding:6px 10px !important; font-size:12px !important }
+}
+@media(min-width:641px) {
+  #nav-mobile-search { display:none !important }
+}
+
+
 /* ── Page height overrides ───────────────────────────────── */
 #page-home.active,
 #page-category.active,
@@ -931,9 +946,7 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
 
 /* Pages that scroll normally need top offset */
 #page-browse.active,
-#page-cart.active,
-#page-orders.active,
-#page-account.active { padding-top:60px; }
+#page-cart.active { padding-top:60px; }
 
 /* ── DoorDash layout ─────────────────────────────────── */
 body { background:#fff; padding-top:0 !important; }
@@ -1076,31 +1089,57 @@ html, body { height:100%; }
 
 
 <!-- ═══ TOP NAV ═══ -->
-<header style="position:fixed;top:0;left:0;right:0;height:60px;background:#fff;border-bottom:1px solid #e8e8e8;z-index:1000;display:flex;align-items:center;padding:0 20px;gap:12px">
+<header id="dd-topnav" style="position:fixed;top:0;left:0;right:0;height:60px;background:#fff;border-bottom:1px solid #e8e8e8;z-index:1000;display:flex;align-items:center;padding:0 16px;gap:10px">
+
+  <!-- Logo -->
   <div onclick="showPage('home')" style="cursor:pointer;display:flex;align-items:center;gap:7px;flex-shrink:0">
     <img src="1.png" style="width:28px;height:28px;border-radius:6px;object-fit:contain">
-    <span style="font-size:16px;font-weight:800;color:#1a6ef0;font-family:var(--font);letter-spacing:-.02em">Droveia</span>
+    <span class="nav-wordmark-dd" style="font-size:16px;font-weight:800;color:#1a6ef0;font-family:var(--font);letter-spacing:-.02em">Droveia</span>
   </div>
-  <div style="flex:1;max-width:560px">
-    <div style="display:flex;align-items:center;height:40px;background:#f8f8f8;border-radius:8px;padding:0 12px;gap:8px">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-      <input id="nav-search-input" type="text" placeholder="Search Droveia" style="flex:1;border:none;outline:none;background:transparent;font-size:14px;color:#111;font-family:var(--font)" onkeydown="if(event.key==='Enter')goSearch()"/>
+
+  <!-- Search — hidden on mobile -->
+  <div class="nav-search-dd" style="flex:1;max-width:500px">
+    <div style="display:flex;align-items:center;height:38px;background:#f8f8f8;border-radius:8px;padding:0 12px;gap:8px">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" style="flex-shrink:0"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <input id="nav-search-input" type="text" placeholder="Search Droveia" style="flex:1;border:none;outline:none;background:transparent;font-size:13px;color:#111;font-family:var(--font)" onkeydown="if(event.key==='Enter')goSearch()"/>
     </div>
   </div>
-  <div style="display:flex;align-items:center;gap:6px;margin-left:auto">
-    <button onclick="showPage('account')" style="display:flex;align-items:center;gap:5px;background:none;border:none;cursor:pointer;font-family:var(--font);padding:7px 10px;border-radius:8px" onmouseenter="this.style.background='#f8f8f8'" onmouseleave="this.style.background='none'">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-      <span id="nav-address-label" style="font-size:13px;font-weight:600;color:#111">Set address</span>
-      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+
+  <!-- Right items -->
+  <div style="display:flex;align-items:center;gap:4px;margin-left:auto">
+
+    <!-- Address — hidden on mobile -->
+    <button class="nav-addr-dd" onclick="showPage('account')" style="display:flex;align-items:center;gap:4px;background:none;border:none;cursor:pointer;font-family:var(--font);padding:6px 8px;border-radius:8px;max-width:180px;overflow:hidden">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2" stroke-linecap="round" style="flex-shrink:0"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      <span id="nav-address-label" style="font-size:12px;font-weight:600;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Set address</span>
+      <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2.5" stroke-linecap="round" style="flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>
     </button>
-    <button onclick="showPage('cart')" style="display:flex;align-items:center;gap:6px;background:#1a6ef0;color:#fff;border:none;border-radius:8px;padding:8px 14px;cursor:pointer;font-family:var(--font);font-size:13px;font-weight:700">
+
+    <!-- Cart -->
+    <button onclick="showPage('cart')" style="position:relative;display:flex;align-items:center;gap:5px;background:#1a6ef0;color:#fff;border:none;border-radius:8px;padding:8px 14px;cursor:pointer;font-family:var(--font);font-size:13px;font-weight:700;flex-shrink:0">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
       <span id="cart-badge" class="cart-badge"></span>
-      Cart
+      <span class="cart-label-dd">Cart</span>
     </button>
-    <button class="nav-auth-btn" id="nav-auth-btn" onclick="showAuth()" style="background:none;border:1px solid #e8e8e8;color:#111;border-radius:8px;padding:7px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font)" onmouseenter="this.style.background='#f8f8f8'" onmouseleave="this.style.background='none'">Sign In</button>
+
+    <!-- Mobile search icon -->
+    <button class="nav-search-icon-dd" onclick="navToggleMobileSearch()" style="display:none;background:none;border:none;cursor:pointer;padding:8px;border-radius:8px">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+    </button>
+
+    <!-- Sign in -->
+    <button class="nav-auth-btn" id="nav-auth-btn" onclick="showAuth()" style="background:none;border:1px solid #e8e8e8;color:#111;border-radius:8px;padding:7px 12px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);flex-shrink:0">Sign In</button>
   </div>
 </header>
+
+<!-- Mobile search bar (hidden, slides down on tap) -->
+<div id="nav-mobile-search" style="display:none;position:fixed;top:60px;left:0;right:0;background:#fff;border-bottom:1px solid #e8e8e8;padding:10px 16px;z-index:999">
+  <div style="display:flex;align-items:center;height:40px;background:#f8f8f8;border-radius:8px;padding:0 12px;gap:8px">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+    <input id="nav-search-mobile" type="text" placeholder="Search Droveia" style="flex:1;border:none;outline:none;background:transparent;font-size:14px;color:#111;font-family:var(--font)" onkeydown="if(event.key==='Enter'){goSearchMobile();navToggleMobileSearch();}"/>
+    <button onclick="navToggleMobileSearch()" style="background:none;border:none;cursor:pointer;color:#9ca3af;font-size:18px;padding:0 4px">✕</button>
+  </div>
+</div>
 
 <!-- ═══ HOME PAGE ═══ -->
 <div class="page active" id="page-home">
@@ -4261,6 +4300,21 @@ window.renderCatPage = function() {
 };
 
 var _homeCatFilter = 'All';
+
+
+window.navToggleMobileSearch = function() {
+  var bar = document.getElementById('nav-mobile-search');
+  if (!bar) return;
+  var show = bar.style.display === 'none' || !bar.style.display;
+  bar.style.display = show ? 'block' : 'none';
+  if (show) { var inp = document.getElementById('nav-search-mobile'); if(inp) inp.focus(); }
+};
+window.goSearchMobile = function() {
+  var inp = document.getElementById('nav-search-mobile');
+  if (!inp || !inp.value.trim()) return;
+  document.getElementById('nav-search-input').value = inp.value;
+  goSearch();
+};
 
 window.homeSectionScroll = function(id) {
   var el = document.getElementById(id);

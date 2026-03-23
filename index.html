@@ -2523,9 +2523,9 @@ function renderAccount() {
     window._addrDropLat  = userProfile.dropLat;
     window._addrDropLng  = userProfile.dropLng;
     if (userProfile.dropBboxRaw) { try { window._addrBbox = JSON.parse(userProfile.dropBboxRaw); } catch(e){} }
-    el("addr-stage-1").style.display = "none";
-    el("addr-stage-2").style.display = "none";
-    el("addr-stage-3").style.display = "block";
+    (el("addr-stage-1")||{style:{}}).style.display = "none";
+    (el("addr-stage-2")||{style:{}}).style.display = "none";
+    (el("addr-stage-3")||{style:{}}).style.display = "block";
     // Apply saved UI state immediately — no setTimeout
     var _steps   = el("addr-steps");    if (_steps)   _steps.style.display   = "none";
     var _backBtn = el("addr-back-btn"); if (_backBtn) _backBtn.style.display  = "none";
@@ -2538,9 +2538,9 @@ function renderAccount() {
     var _cmEl = el("addr-confirm-map"); if (_cmEl) _cmEl.innerHTML = "";
     setTimeout(function() { if (window.addrNext2) window.addrNext2(); }, 200);
   } else {
-    el("addr-stage-1").style.display = "block";
-    el("addr-stage-2").style.display = "none";
-    el("addr-stage-3").style.display = "none";
+    (el("addr-stage-1")||{style:{}}).style.display = "block";
+    (el("addr-stage-2")||{style:{}}).style.display = "none";
+    (el("addr-stage-3")||{style:{}}).style.display = "none";
     var _steps2 = el("addr-steps");    if (_steps2)  _steps2.style.display   = "flex";
     var _back2  = el("addr-back-btn"); if (_back2)   _back2.style.display    = "none";
     var _save2  = el("addr-save-btn");
@@ -3252,7 +3252,7 @@ function startApp() {
 
   function subscribeOrders() {
     if (ordersUnsub) ordersUnsub();
-    var q = fb.query(oCol(currentUser.uid), fb.orderBy("createdAt","desc"));
+    var q = fb.query(oCol(currentUser.uid));
     ordersUnsub = fb.onSnapshot(q, function(snap){
       liveOrders = snap.docs.map(function(d){ return Object.assign({_id:d.id},d.data()); });
       if (el("page-orders").classList.contains("active")) renderOrders();
@@ -3448,16 +3448,16 @@ function startApp() {
   window.addrNext1 = function() {
     var addr = (el("addr-building")||{value:""}).value.trim();
     if (!addr) { showToast("Enter your street address"); return; }
-    el("addr-stage-1").style.display = "none";
-    el("addr-stage-2").style.display = "block";
+    (el("addr-stage-1")||{style:{}}).style.display = "none";
+    (el("addr-stage-2")||{style:{}}).style.display = "block";
     window.addrSetStep(2);
     showToast("Finding your address...");
 
     // Use Google Geocoder for precise house-level coordinates
     if (!window.google || !window.google.maps) {
       showToast("Maps still loading, try again in a moment");
-      el("addr-stage-1").style.display = "block";
-      el("addr-stage-2").style.display = "none";
+      (el("addr-stage-1")||{style:{}}).style.display = "block";
+      (el("addr-stage-2")||{style:{}}).style.display = "none";
       window.addrSetStep(1);
       return;
     }
@@ -3465,8 +3465,8 @@ function startApp() {
     geocoder.geocode({ address: addr }, function(results, status) {
       if (status !== "OK" || !results.length) {
         showToast("Address not found — try including city and state");
-        el("addr-stage-1").style.display = "block";
-        el("addr-stage-2").style.display = "none";
+        (el("addr-stage-1")||{style:{}}).style.display = "block";
+        (el("addr-stage-2")||{style:{}}).style.display = "none";
         window.addrSetStep(1);
         return;
       }
@@ -3489,15 +3489,15 @@ function startApp() {
   };
 
   window.addrBack1 = function() {
-    el("addr-stage-2").style.display = "none";
-    el("addr-stage-1").style.display = "block";
+    (el("addr-stage-2")||{style:{}}).style.display = "none";
+    (el("addr-stage-1")||{style:{}}).style.display = "block";
     addrSetStep(1);
   };
 
   window.addrNext2 = function() {
     if (!window._addrDropLat) { showToast("Place a pin on your property first"); return; }
-    el("addr-stage-2").style.display = "none";
-    el("addr-stage-3").style.display = "block";
+    (el("addr-stage-2")||{style:{}}).style.display = "none";
+    (el("addr-stage-3")||{style:{}}).style.display = "block";
     window.addrSetStep(3);
 
     var addr  = (el("addr-building")||{value:""}).value.trim();
@@ -3598,8 +3598,8 @@ function startApp() {
 
   window.addrStartOver = function() {
     // Full reset back to stage 1
-    el("addr-stage-3").style.display = "none";
-    el("addr-stage-1").style.display = "block";
+    (el("addr-stage-3")||{style:{}}).style.display = "none";
+    (el("addr-stage-1")||{style:{}}).style.display = "block";
     window.addrSetStep(1);
     var steps = el("addr-steps"); if (steps) steps.style.display = "flex";
     var backBtn = el("addr-back-btn"); if (backBtn) backBtn.style.display = "none"; // back only shows mid-flow
@@ -3618,8 +3618,8 @@ function startApp() {
   };
 
   window.addrBack2 = function() {
-    el("addr-stage-3").style.display = "none";
-    el("addr-stage-2").style.display = "block";
+    (el("addr-stage-3")||{style:{}}).style.display = "none";
+    (el("addr-stage-2")||{style:{}}).style.display = "block";
     window.addrSetStep(2);
     // Google Maps has no .remove() — just null the reference so it reinits
     window._addrConfirmMap = null;

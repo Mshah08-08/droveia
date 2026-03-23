@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <link rel="icon" type="image/png" href="../1.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Droveia — Partner Dashboard</title>
+<title>Droveia</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
 <style>
@@ -4878,6 +4878,9 @@ function initBusinessPage() {
     }
   }); } }
 }
+// Show loading/landing immediately
+var _bizInitWrap = document.getElementById('biz-page-content');
+if (_bizInitWrap) _bizInitWrap.innerHTML = '<div style="text-align:center;padding:60px;color:#9ca3af"><div style="font-size:32px;margin-bottom:12px">🚁</div><div style="font-size:14px">Loading...</div></div>';
 if (window._fbReady) { initBusinessPage(); }
 else { document.addEventListener('fbready', initBusinessPage, {once:true}); }
 </script>

@@ -4745,7 +4745,8 @@ window.renderBizTab=async function(tab){
     return;
   }
   if(!window._isPartnerUser){
-    document.body.classList.add('landing-mode'); wrap.innerHTML=renderPartnerLanding('apply');
+    if(window.bizShowLandingSidebar) bizShowLandingSidebar();
+    wrap.innerHTML=renderPartnerLanding('apply');
     return;
   }
   document.body.classList.remove('landing-mode'); wrap.innerHTML='<div style="text-align:center;padding:60px;color:#9ca3af">Loading...</div>';

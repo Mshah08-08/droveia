@@ -3795,6 +3795,7 @@ async function loadToolsFromRTDB() {
     renderTools();
     if (window.homeRenderSections) homeRenderSections();
     if (window.renderBrowseAllGrid) renderBrowseAllGrid();
+    if (window.onShowBrowseAll && document.getElementById("page-browse-all") && document.getElementById("page-browse-all").classList.contains("active")) onShowBrowseAll();
     if (window.brRender) brRender();
     // Refresh admin inventory table if open
     var adminInv = el("admin-panel-inventory");
@@ -4187,6 +4188,65 @@ if (_savedPage && _savedPage !== "admin") {
 
 
 <script>
+
+var _baCat = 'All', _baSearch = '';
+
+window.baFilterCat = function(cat) {
+  _baCat = cat; _baSearch = '';
+  showPage('browse-all');
+  setTimeout(function() {
+    document.querySelectorAll('#ba-chips .ddchip').forEach(function(b){
+      var txt = b.textContent.trim().replace(/[^a-zA-Z]/g,'');
+      b.classList.toggle('active', cat === 'All' ? b.textContent.trim() === 'All' : txt.toLowerCase() === cat.toLowerCase());
+    });
+    var h = document.getElementById('browse-all-heading');
+    if (h) h.textContent = cat === 'All' ? 'Browse' : cat;
+    renderBrowseAllGrid();
+  }, 60);
+};
+
+window.baChip = function(btn, cat) {
+  _baCat = cat; _baSearch = '';
+  document.querySelectorAll('#ba-chips .ddchip').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  var h = document.getElementById('browse-all-heading');
+  if (h) h.textContent = cat === 'All' ? 'Browse' : cat;
+  renderBrowseAllGrid();
+};
+
+window.baSearch = function(val) {
+  _baSearch = val;
+  renderBrowseAllGrid();
+};
+
+window.renderBrowseAllGrid = function() {
+  var grid = document.getElementById('browse-all-grid');
+  if (!grid) return;
+  if (!window.TOOLS || !TOOLS.length) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px;color:#9ca3af">Loading tools...</div>';
+    setTimeout(window.renderBrowseAllGrid, 800);
+    return;
+  }
+  var list = TOOLS.filter(function(t){
+    if (_baCat && _baCat !== 'All' && t.cat !== _baCat) return false;
+    if (_baSearch && t.name.toLowerCase().indexOf(_baSearch.toLowerCase()) < 0) return false;
+    return true;
+  });
+  var count = document.getElementById('ba-count');
+  if (count) count.textContent = list.length + ' item' + (list.length !== 1 ? 's' : '') + ' available';
+  grid.innerHTML = list.length
+    ? list.map(function(t){ return makeToolCard(t, false); }).join('')
+    : '<div style="grid-column:1/-1;text-align:center;padding:60px;color:#9ca3af">No tools found</div>';
+};
+
+window.onShowBrowseAll = function() {
+  _baCat = 'All'; _baSearch = '';
+  var h = document.getElementById('browse-all-heading'); if(h) h.textContent = 'Browse';
+  var inp = document.getElementById('ba-search'); if(inp) inp.value = '';
+  document.querySelectorAll('#ba-chips .ddchip').forEach(function(b,i){ b.classList.toggle('active', i === 0); });
+  renderBrowseAllGrid();
+};
+
 var _homeCatFilter = 'All';
 
 window.homeSectionScroll = function(id) {

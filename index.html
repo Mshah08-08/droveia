@@ -3816,6 +3816,9 @@ function startApp() {
       // Update welcome heading
       var _wEl = document.getElementById('home-welcome');
       if (_wEl && user.displayName) _wEl.textContent = 'Welcome, ' + user.displayName.split(' ')[0];
+      // Show admin link if admin
+      var _admLink = document.getElementById('sbnav-admin-link');
+      if (_admLink) _admLink.style.display = checkAdmin() ? 'flex' : 'none';
       if (window._openAdminOnAuth) { window._openAdminOnAuth = false; showPage('admin'); }
       // Update nav address from profile
       var _navAddr = document.getElementById('nav-address-label');
@@ -3828,6 +3831,7 @@ function startApp() {
       if(btn){ btn.textContent="Sign In"; btn.onclick=showAuth; }
       var heroBtn = el("hero-signup-btn");
       if (heroBtn) heroBtn.style.display = "";
+      var _aLink=document.getElementById('sbnav-admin-link');if(_aLink)_aLink.style.display='none';
       var adminBtn = el("hero-admin-btn");
       if (adminBtn) adminBtn.style.display = "none";
     }
@@ -4233,16 +4237,21 @@ var _catCurrent = 'Workshop', _catSort = 'popular';
 window.showCategory = function(cat) {
   _catCurrent = cat;
   _catSort = 'popular';
+  // Build sidebar first (so items exist before we mark active)
   var sidebar = document.getElementById('cat-sidebar');
   if (sidebar) sidebar.innerHTML = buildSidebarHTML(cat);
   showPage('category');
-  // Mark all matching nav items active
-  document.querySelectorAll('.ddnav-item').forEach(function(el){ el.classList.remove('active'); });
-  document.querySelectorAll('.ddnav-item[data-navpage="cat-'+cat.toLowerCase()+'"]').forEach(function(el){ el.classList.add('active'); });
-  // Also by ID on home sidebar
-  var catIdMap = {Workshop:'sbnav-workshop',Electronics:'sbnav-electronics',Crafts:'sbnav-crafts',Office:'sbnav-office'};
-  var sbId2 = catIdMap[cat]; if(sbId2){var sb2=document.getElementById(sbId2);if(sb2)sb2.classList.add('active');}
-  setTimeout(function() { renderCatPage(); }, 50);
+  // Mark active on ALL sidebars (home sidebar + cat-sidebar)
+  function setActive() {
+    document.querySelectorAll('.ddnav-item').forEach(function(el){ el.classList.remove('active'); });
+    var key = 'cat-' + cat.toLowerCase();
+    document.querySelectorAll('.ddnav-item[data-navpage="'+key+'"]').forEach(function(el){ el.classList.add('active'); });
+    // by ID on home sidebar
+    var m = {Workshop:'sbnav-workshop',Electronics:'sbnav-electronics',Crafts:'sbnav-crafts',Office:'sbnav-office'};
+    var sbId = m[cat]; if(sbId){var sb=document.getElementById(sbId);if(sb)sb.classList.add('active');}
+  }
+  setActive();
+  setTimeout(function() { renderCatPage(); setActive(); }, 60);
 };
 
 function buildSidebarHTML(activeCat) {
@@ -4260,7 +4269,10 @@ function buildSidebarHTML(activeCat) {
     var onclick = id === 'home' ? "showPage('home')"
       : id === 'Browse All' ? "showPage('browse-all')"
       : "showCategory('" + id + "')";
-    return '<div class="ddnav-item' + (isActive ? ' active' : '') + '" onclick="' + onclick + '">'
+    var datanp = id === 'home' ? 'home'
+      : id === 'Browse All' ? 'browse-all'
+      : 'cat-' + id.toLowerCase();
+    return '<div class="ddnav-item' + (isActive ? ' active' : '') + '" data-navpage="' + datanp + '" onclick="' + onclick + '">'
       + '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">' + path + '</svg>' + label
       + '</div>';
   });

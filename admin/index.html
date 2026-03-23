@@ -1024,20 +1024,20 @@ body{background:#f6f8ff;font-family:'Sora',sans-serif;padding-top:0!important;ma
 
 <div class="adm-layout">
   <aside class="adm-sidebar">
-    <div class="adm-nav-item active" id="adm-nav-inventory" onclick="admTab('inventory',this)">
+    <div class="adm-nav-item active" id="adm-nav-inventory" onclick="admTab('inventory',document.getElementById('adm-nav-inventory'))">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>Droveia Stock
     </div>
-    <div class="adm-nav-item" id="adm-nav-orders" onclick="admTab('orders',this)">
+    <div class="adm-nav-item" id="adm-nav-orders" onclick="admTab('orders',document.getElementById('adm-nav-orders'))">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Orders
     </div>
-    <div class="adm-nav-item" id="adm-nav-deliveries" onclick="admTab('deliveries',this)">
+    <div class="adm-nav-item" id="adm-nav-deliveries" onclick="admTab('deliveries',document.getElementById('adm-nav-deliveries'))">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>API Deliveries
       <span id="adm-nav-deliveries-badge" style="display:none;background:#ef4444;color:#fff;font-size:9px;font-weight:800;padding:1px 6px;border-radius:10px;margin-left:auto"></span>
     </div>
-    <div class="adm-nav-item" id="adm-nav-partnerstock" onclick="admTab('partnerstock',this)">
+    <div class="adm-nav-item" id="adm-nav-partnerstock" onclick="admTab('partnerstock',document.getElementById('adm-nav-partnerstock'))">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>Partner Stock
     </div>
-    <div class="adm-nav-item" id="adm-nav-partners" onclick="admTab('partners',this)">
+    <div class="adm-nav-item" id="adm-nav-partners" onclick="admTab('partners',document.getElementById('adm-nav-partners'))">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>Partners
     </div>
 

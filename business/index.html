@@ -894,7 +894,7 @@ body{background:#f6f8ff;font-family:'Sora',sans-serif;padding-top:0!important;ma
 <!-- Splash screen -->
 <div id="biz-splash" style="position:fixed;inset:0;background:#fff;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px">
   <div id="splash-logo-wrap" style="display:flex;align-items:center;gap:14px;opacity:0;transform:translateY(20px);transition:opacity .5s ease,transform .5s ease">
-    <img src="../1.png" style="width:52px;height:52px;border-radius:14px;box-shadow:0 8px 32px rgba(26,110,240,.25)">
+    <img src="1.png" style="width:52px;height:52px;border-radius:14px;box-shadow:0 8px 32px rgba(26,110,240,.25)">
     <div>
       <div style="font-size:32px;font-weight:800;color:#1a6ef0;letter-spacing:-.03em;line-height:1">Droveia</div>
       <div style="font-size:12px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:.12em;margin-top:3px">Partner Portal</div>
@@ -1002,7 +1002,7 @@ body{background:#f6f8ff;font-family:'Sora',sans-serif;padding-top:0!important;ma
 <header style="position:fixed;top:0;left:0;right:0;height:60px;background:#fff;border-bottom:1px solid #ebebeb;z-index:300;display:flex;align-items:center;padding:0;gap:0">
   <!-- Logo section — exactly 220px, aligns with sidebar -->
   <div style="width:220px;flex-shrink:0;height:60px;display:flex;align-items:center;gap:10px;padding:0 20px;border-right:1px solid #ebebeb;box-sizing:border-box">
-    <img src="../1.png" style="width:28px;height:28px;border-radius:6px;object-fit:contain;flex-shrink:0">
+    <img src="1.png" style="width:28px;height:28px;border-radius:6px;object-fit:contain;flex-shrink:0">
     <div>
       <div style="font-size:15px;font-weight:800;color:#1a6ef0;letter-spacing:-.02em;line-height:1.2">Droveia</div>
       <div style="font-size:9px;color:#9ca3af;font-weight:600;text-transform:uppercase;letter-spacing:.08em">Partner Portal</div>
@@ -1861,6 +1861,8 @@ function fmtDate(d) {
 
 // ── Account ───────────────────────────────────────────────────────────────────
 function renderAccount() {
+  if (!document.getElementById('page-account') && !document.getElementById('biz-page-content')) return;
+  if (document.getElementById('biz-page-content') && !document.getElementById('page-account')) return; // business portal
   if (!currentUser) { showAuth(); return; }
   if (!userProfile) return;
   var full = ((userProfile.firstName||"")+" "+(userProfile.lastName||"")).trim()||"Student";
@@ -3816,9 +3818,9 @@ function startApp() {
       var heroBtnLabel = el("hero-admin-btn-label");
       if (heroBtnLabel) heroBtnLabel.textContent = _isPrt && !_isAdm ? "Partner Dashboard" : "Admin Dashboard";
 
-      await loadProfile();
-      await loadCart();
-      subscribeOrders();
+      try { await loadProfile(); } catch(e) {}
+      try { await loadCart(); } catch(e) {}
+      try { subscribeOrders(); } catch(e) {}
       subscribeHomeReviews(fb);
       if (el('page-admin') && el('page-admin').classList.contains('active')) renderAdmin();
       if (el('page-api') && el('page-api').classList.contains('active')) renderPartnerApiPage();
@@ -4537,7 +4539,7 @@ window.loadPartnerStock = async function() {
   wrap.innerHTML='<div style="color:#9ca3af;padding:20px 0;font-size:14px">Loading...</div>';
   try{
     var fb=window._fb;
-    var snap=await fb.getDocs(fb.query(fb.collection(fb.db,'pendingInventory'),fb.where('partnerEmail','==',currentUser.email),fb.orderBy('submittedAt','desc')));
+    var snap=await fb.getDocs(fb.query(fb.collection(fb.db,'pendingInventory'),fb.where('partnerEmail','==',currentUser.email)));
     var items=snap.docs.map(function(d){return Object.assign({_id:d.id},d.data());});
     if(!items.length){wrap.innerHTML='<div style="color:#9ca3af;padding:20px 0;font-size:14px;text-align:center">No items submitted yet.</div>';return;}
     var sc={pending:'amber',approved:'green',rejected:'red'};
@@ -4588,7 +4590,7 @@ window.renderBizTab=async function(tab){
 window.renderBizOverview=async function(wrap){
   var fb=window._fb;
   var deliveries=[],apiKeys=[];
-  try{var dSnap=await fb.getDocs(fb.query(fb.collection(fb.db,'deliveries'),fb.where('partnerEmail','==',currentUser.email),fb.orderBy('createdAt','desc'),fb.limit(5)));deliveries=dSnap.docs.map(function(d){return Object.assign({_id:d.id},d.data());});}catch(e){}
+  try{var dSnap=await fb.getDocs(fb.query(fb.collection(fb.db,'deliveries'),fb.where('partnerEmail','==',currentUser.email),fb.limit(20)));deliveries=dSnap.docs.map(function(d){return Object.assign({_id:d.id},d.data());});}catch(e){}
   try{var kSnap=await fb.getDocs(fb.query(fb.collection(fb.db,'apiKeys'),fb.where('partnerEmail','==',currentUser.email)));apiKeys=kSnap.docs.map(function(d){return Object.assign({_docId:d.id},d.data());});}catch(e){}
   var pending=deliveries.filter(function(d){return d.status==='pending_approval';}).length;
   var badge=document.getElementById('bnav-orders-badge');
@@ -4619,7 +4621,7 @@ window.renderBizOrders=async function(wrap){
   wrap.innerHTML='<div style="color:#9ca3af;padding:20px">Loading...</div>';
   try{
     var fb=window._fb;
-    var dSnap=await fb.getDocs(fb.query(fb.collection(fb.db,'deliveries'),fb.where('partnerEmail','==',currentUser.email),fb.orderBy('createdAt','desc'),fb.limit(50)));
+    var dSnap=await fb.getDocs(fb.query(fb.collection(fb.db,'deliveries'),fb.where('partnerEmail','==',currentUser.email),fb.limit(50)));
     var deliveries=dSnap.docs.map(function(d){return Object.assign({_id:d.id},d.data());});
     var pending=deliveries.filter(function(d){return d.status==='pending_approval';}).length;
     var badge=document.getElementById('bnav-orders-badge');

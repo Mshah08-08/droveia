@@ -2,11 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<link rel="icon" type="image/png" href="../1.png">
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<link rel="icon" type="image/png" href="1.png">
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Droveia</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDcuU4-XXzzEU8O84rs3W7cWgVStNicBTo&callback=Function.prototype" async defer></script>
+<script src="https://js.stripe.com/v3/"></script>
 <style>
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -205,6 +207,7 @@ img{max-width:100%}
 .glow-blob{position:fixed;border-radius:50%;filter:blur(130px);pointer-events:none;z-index:0;animation:blobMove 18s ease-in-out infinite}
 .glow-1{width:600px;height:600px;background:radial-gradient(circle,rgba(26,110,240,.10),transparent 70%);top:-100px;left:-100px}
 .glow-2{width:500px;height:500px;background:radial-gradient(circle,rgba(26,110,240,.06),transparent 70%);bottom:0;right:-80px;animation-delay:-9s}
+.noise-overlay{position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.025;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
 
 /* ── Toast ─────────────────────────────────── */
 .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(8px);background:var(--toast-bg);backdrop-filter:blur(20px);border:1px solid var(--toast-border);border-radius:40px;padding:11px 20px;font-size:13px;font-weight:500;color:var(--toast-text);white-space:nowrap;z-index:10000;pointer-events:none;opacity:0;transition:opacity .25s,transform .25s}
@@ -413,6 +416,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:var(--nav-h);backgro
 .browse-main{}
 .browse-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
 .result-count{font-size:14px;color:var(--muted)}
+.sort-select{background:var(--bg2);border:1.5px solid var(--border2);border-radius:8px;padding:8px 32px 8px 12px;font-size:13px;color:var(--text);outline:none;cursor:pointer;font-family:var(--font);appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2.5' stroke-linecap='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;transition:border-color .15s,box-shadow .15s}
 .search-bar{display:flex;align-items:center;background:var(--surface);border:1px solid var(--border2);border-radius:11px;overflow:hidden;margin-bottom:20px;transition:.2s}
 .search-bar:focus-within{border-color:var(--blue)}
 .search-bar svg{margin-left:14px;flex-shrink:0;color:var(--dim)}
@@ -566,6 +570,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:var(--nav-h);backgro
 .payment-card.selected{border-color:var(--blue);background:var(--blue-dim)}
 select:hover{border-color:var(--blue)}
 select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
+[data-theme="dark"] select{background:var(--bg2);color:var(--text);border-color:var(--border2);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237a7a9a' stroke-width='2.5' stroke-linecap='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
 .payment-logo{width:40px;height:26px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .add-payment{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px dashed var(--dim);border-radius:12px;padding:14px 16px;cursor:pointer;width:100%;font-size:13px;color:var(--muted);transition:.18s;font-family:var(--font)}
 .add-payment:hover{border-color:var(--blue);color:var(--blue)}
@@ -848,82 +853,81 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
 .order-act-btn.green:hover{border-color:var(--green);color:var(--green)}
 .order-act-btn.red:hover{border-color:#ef4444;color:#ef4444}
 
-/* ── Business dashboard ── */
+/* ── Admin dashboard ── */
 body{background:#f6f8ff;font-family:'Sora',sans-serif;padding-top:0!important;margin:0}
-.biz-layout{display:flex;min-height:100vh}
-.biz-sidebar{width:220px;flex-shrink:0;background:#fff;border-right:1px solid #ebebeb;padding:8px 0;position:fixed;top:60px;left:0;height:calc(100vh - 60px);overflow-y:auto;z-index:100}
-.biz-main{flex:1;margin-left:220px;padding-top:60px}
-.biz-topbar{background:#fff;border-bottom:1px solid #ebebeb;padding:0 28px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
-.biz-content{padding:20px 28px}
-.biz-nav-item{display:flex;align-items:center;gap:12px;padding:11px 20px;font-size:14px;font-weight:400;color:#4b5563;cursor:pointer;transition:.12s;font-family:var(--font)}
-.biz-nav-item svg{flex-shrink:0;opacity:.7}
-.biz-nav-item:hover{background:#f8f8f8;color:#111}
-.biz-nav-item.active{color:#1a6ef0;font-weight:700;background:#eff6ff}
-.biz-nav-item.active svg{opacity:1;color:#1a6ef0}
-.biz-stat-card{background:#fff;border:1px solid #ebebeb;border-radius:12px;padding:20px;flex:1;min-width:120px}
-.biz-stat-val{font-size:28px;font-weight:800;color:#111;letter-spacing:-.02em}
-.biz-stat-label{font-size:12px;color:#9ca3af;margin-top:3px}
-.biz-card{background:#fff;border:1px solid #ebebeb;border-radius:12px;overflow:hidden;margin-bottom:16px}
-.biz-card-header{padding:16px 20px;border-bottom:1px solid #ebebeb;display:flex;align-items:center;justify-content:space-between}
-.biz-card-title{font-size:15px;font-weight:700;color:#111}
-.biz-card-body{padding:20px}
-.biz-btn-primary{background:#1a6ef0;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);transition:.15s;display:inline-flex;align-items:center;gap:7px}
-.biz-btn-primary:hover{background:#1560d8}
-.biz-btn-secondary{background:#fff;color:#111;border:1.5px solid #e8e8e8;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);transition:.15s;display:inline-flex;align-items:center;gap:7px}
-.biz-btn-secondary:hover{border-color:#1a6ef0;color:#1a6ef0}
-.biz-btn-danger{background:none;color:#ef4444;border:1.5px solid rgba(239,68,68,.25);border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font)}
-.biz-input{width:100%;background:#f8f9fa;border:1.5px solid #e8e8e8;border-radius:8px;padding:11px 14px;font-size:14px;color:#111;font-family:var(--font);outline:none;transition:.15s;box-sizing:border-box}
-.biz-input:focus{border-color:#1a6ef0;background:#fff;box-shadow:0 0 0 3px rgba(26,110,240,.1)}
-.biz-badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700}
-.biz-badge-green{background:rgba(22,163,74,.1);color:#15803d}
-.biz-badge-amber{background:rgba(217,119,6,.1);color:#d97706}
-.biz-badge-red{background:rgba(239,68,68,.1);color:#ef4444}
-.biz-badge-blue{background:rgba(26,110,240,.1);color:#1a6ef0}
-.stock-row{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid #f0f0f0}
-.stock-row:last-child{border-bottom:none}
-@media(max-width:768px){.biz-sidebar{display:none}.biz-main{margin-left:0}.biz-content{padding:16px}}
+.adm-layout{display:flex;min-height:100vh}
+.adm-sidebar{width:220px;flex-shrink:0;background:#fff;border-right:1px solid #ebebeb;padding:8px 0;position:fixed;top:60px;left:0;height:calc(100vh - 60px);overflow-y:auto;z-index:100}
+.adm-main{flex:1;margin-left:220px;padding-top:60px}
+.adm-content{padding:24px 28px}
+.adm-nav-item{display:flex;align-items:center;gap:12px;padding:11px 20px;font-size:14px;font-weight:400;color:#4b5563;cursor:pointer;transition:.12s;font-family:var(--font)}
+.adm-nav-item svg{flex-shrink:0;opacity:.7}
+.adm-nav-item:hover{background:#f8f8f8;color:#111}
+.adm-nav-item.active{color:#1a6ef0;font-weight:700;background:#eff6ff}
+.adm-nav-item.active svg{opacity:1;color:#1a6ef0}
+.adm-stat-card{background:#fff;border:1px solid #ebebeb;border-radius:12px;padding:20px;flex:1;min-width:120px}
+.adm-stat-val{font-size:28px;font-weight:800;color:#111;letter-spacing:-.02em}
+.adm-stat-label{font-size:12px;color:#9ca3af;margin-top:3px}
+.adm-card{background:#fff;border:1px solid #ebebeb;border-radius:12px;overflow:hidden;margin-bottom:16px}
+.adm-card-header{padding:16px 20px;border-bottom:1px solid #ebebeb;display:flex;align-items:center;justify-content:space-between}
+.adm-card-title{font-size:15px;font-weight:700;color:#111}
+.adm-card-body{padding:20px}
+.adm-btn{background:#1a6ef0;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);transition:.15s;display:inline-flex;align-items:center;gap:7px}
+.adm-btn:hover{background:#1560d8}
+.adm-btn-sm{padding:6px 12px;font-size:12px}
+.adm-btn-ghost{background:none;color:#111;border:1.5px solid #e8e8e8;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);transition:.15s}
+.adm-btn-ghost:hover{border-color:#1a6ef0;color:#1a6ef0}
+.adm-btn-danger{background:none;color:#ef4444;border:1.5px solid rgba(239,68,68,.25);border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font)}
+.adm-btn-danger:hover{background:rgba(239,68,68,.06)}
+.adm-btn-green{background:#16a34a;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font)}
+.adm-btn-green:hover{background:#15803d}
+.adm-input{width:100%;background:#f8f9fa;border:1.5px solid #e8e8e8;border-radius:8px;padding:10px 14px;font-size:14px;color:#111;font-family:var(--font);outline:none;transition:.15s;box-sizing:border-box}
+.adm-input:focus{border-color:#1a6ef0;background:#fff;box-shadow:0 0 0 3px rgba(26,110,240,.1)}
+.adm-badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700}
+.adm-badge-green{background:rgba(22,163,74,.1);color:#15803d}
+.adm-badge-amber{background:rgba(217,119,6,.1);color:#d97706}
+.adm-badge-red{background:rgba(239,68,68,.1);color:#ef4444}
+.adm-badge-blue{background:rgba(26,110,240,.1);color:#1a6ef0}
+.adm-badge-gray{background:#f3f4f6;color:#6b7280}
+.adm-table{width:100%;border-collapse:collapse}
+.adm-table th{padding:10px 14px;text-align:left;font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid #f0f0f0}
+.adm-table td{padding:12px 14px;font-size:13px;color:#111;border-bottom:1px solid #f8f8f8;vertical-align:middle}
+.adm-table tr:last-child td{border-bottom:none}
+.adm-table tr:hover td{background:#fafafa}
+.ps-card{background:#fff;border:1px solid #e8e8e8;border-radius:10px;overflow:hidden;transition:.15s}
+.ps-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.08);transform:translateY(-1px)}
+@media(max-width:768px){.adm-sidebar{display:none}.adm-main{margin-left:0}.adm-content{padding:16px}}
 
-
-/* Non-partner landing: hide sidebar nav, show only visit store */
-body.landing-mode .biz-nav-item:not(.biz-nav-keep) { display:none !important }
-body.landing-mode .biz-sidebar { justify-content:flex-end; padding-bottom:16px; }
 </style>
 </head>
 <body>
 <div class="toast" id="toast"></div>
 
-<!-- Splash screen -->
-<div id="biz-splash" style="position:fixed;inset:0;background:#fff;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px">
-  <div id="splash-logo-wrap" style="display:flex;align-items:center;gap:14px;opacity:0;transform:translateY(20px);transition:opacity .5s ease,transform .5s ease">
+<div id="adm-splash" style="position:fixed;inset:0;background:#fff;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px">
+  <div id="adm-splash-logo" style="display:flex;align-items:center;gap:16px;opacity:0;transform:translateY(20px);transition:opacity .5s ease,transform .5s ease">
     <img src="1.png" style="width:80px;height:80px;border-radius:20px;box-shadow:0 12px 40px rgba(26,110,240,.3)">
     <div>
-      <div style="font-size:32px;font-weight:800;color:#1a6ef0;letter-spacing:-.03em;line-height:1">Droveia</div>
-      <div style="font-size:12px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:.12em;margin-top:3px">Partner Portal</div>
+      <div style="font-size:36px;font-weight:800;color:#1a6ef0;letter-spacing:-.03em;line-height:1">Droveia</div>
+      <div style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.14em;margin-top:4px">Admin Console</div>
     </div>
   </div>
-  <div id="splash-bar-wrap" style="width:180px;height:3px;background:#f0f0f0;border-radius:4px;overflow:hidden;opacity:0;transition:opacity .3s ease .4s">
-    <div id="splash-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#1a6ef0,#3b82f6);border-radius:4px;transition:width .8s ease .5s"></div>
+  <div id="adm-splash-bar-wrap" style="width:200px;height:3px;background:#f0f0f0;border-radius:4px;overflow:hidden;opacity:0;transition:opacity .3s ease .4s">
+    <div id="adm-splash-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#1a6ef0,#3b82f6);border-radius:4px;transition:width .8s ease .5s"></div>
   </div>
 </div>
-
 <script>
-(function() {
-  setTimeout(function() {
-    var logo = document.getElementById('splash-logo-wrap');
-    var bar  = document.getElementById('splash-bar-wrap');
-    var fill = document.getElementById('splash-bar');
-    if (logo) { logo.style.opacity = '1'; logo.style.transform = 'translateY(0)'; }
-    if (bar)  bar.style.opacity = '1';
-    if (fill) fill.style.width = '100%';
-    setTimeout(function() {
-      var splash = document.getElementById('biz-splash');
-      if (splash) {
-        splash.style.transition = 'opacity .4s ease';
-        splash.style.opacity = '0';
-        setTimeout(function() { splash.style.display = 'none'; }, 400);
-      }
-    }, 1400);
-  }, 80);
+(function(){
+  setTimeout(function(){
+    var logo=document.getElementById('adm-splash-logo');
+    var bar=document.getElementById('adm-splash-bar-wrap');
+    var fill=document.getElementById('adm-splash-bar');
+    if(logo){logo.style.opacity='1';logo.style.transform='translateY(0)';}
+    if(bar)bar.style.opacity='1';
+    if(fill)fill.style.width='100%';
+    setTimeout(function(){
+      var s=document.getElementById('adm-splash');
+      if(s){s.style.transition='opacity .4s ease';s.style.opacity='0';setTimeout(function(){s.style.display='none';},400);}
+    },1400);
+  },80);
 })();
 </script>
 
@@ -1000,38 +1004,51 @@ body.landing-mode .biz-sidebar { justify-content:flex-end; padding-bottom:16px; 
     </div>
   </div>
 </div>
+
+<!-- Full-width header -->
 <header style="position:fixed;top:0;left:0;right:0;height:60px;background:#fff;border-bottom:1px solid #ebebeb;z-index:300;display:flex;align-items:center;padding:0;gap:0">
-  <!-- Logo section — exactly 220px, aligns with sidebar -->
   <div style="width:220px;flex-shrink:0;height:60px;display:flex;align-items:center;gap:10px;padding:0 20px;border-right:1px solid #ebebeb;box-sizing:border-box">
     <img src="1.png" style="width:28px;height:28px;border-radius:6px;object-fit:contain;flex-shrink:0">
     <div>
       <div style="font-size:15px;font-weight:800;color:#1a6ef0;letter-spacing:-.02em;line-height:1.2">Droveia</div>
-      <div style="font-size:9px;color:#9ca3af;font-weight:600;text-transform:uppercase;letter-spacing:.08em">Partner Portal</div>
+      <div style="font-size:9px;color:#9ca3af;font-weight:600;text-transform:uppercase;letter-spacing:.08em">Admin Console</div>
     </div>
   </div>
-  <!-- Right section -->
   <div style="flex:1;display:flex;align-items:center;padding:0 24px;gap:12px">
-    <div id="biz-page-title-top" style="font-size:16px;font-weight:700;color:#111;letter-spacing:-.01em">Overview</div>
+    <div id="adm-page-title" style="font-size:16px;font-weight:700;color:#111;letter-spacing:-.01em">Inventory</div>
     <div style="flex:1"></div>
-    <div id="biz-partner-name" style="font-size:13px;font-weight:600;color:#6b7280"></div>
-    <button class="biz-btn-primary" id="nav-auth-btn" onclick="showAuth()" style="padding:7px 16px;font-size:13px">Sign In</button>
+    <div id="adm-user-name" style="font-size:13px;font-weight:600;color:#6b7280"></div>
+    <button class="adm-btn" id="nav-auth-btn" onclick="showAuth()" style="padding:7px 16px;font-size:13px">Sign In</button>
   </div>
 </header>
-<div class="biz-layout">
-  <aside class="biz-sidebar" id="biz-sidebar-el">
-    <div class="biz-nav-item" id="bnav-visit" onclick="window.location.href='https://droveia.com'">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 014-10z"/></svg>Visit Store
+
+<div class="adm-layout">
+  <aside class="adm-sidebar">
+    <div class="adm-nav-item active" id="adm-nav-inventory" onclick="admTab('inventory',document.getElementById('adm-nav-inventory'))">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>Droveia Stock
+    </div>
+    <div class="adm-nav-item" id="adm-nav-orders" onclick="admTab('orders',document.getElementById('adm-nav-orders'))">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Orders
+    </div>
+    <div class="adm-nav-item" id="adm-nav-deliveries" onclick="admTab('deliveries',document.getElementById('adm-nav-deliveries'))">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>API Deliveries
+      <span id="adm-nav-deliveries-badge" style="display:none;background:#ef4444;color:#fff;font-size:9px;font-weight:800;padding:1px 6px;border-radius:10px;margin-left:auto"></span>
+    </div>
+    <div class="adm-nav-item" id="adm-nav-partnerstock" onclick="admTab('partnerstock',document.getElementById('adm-nav-partnerstock'))">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>Partner Stock
+    </div>
+    <div class="adm-nav-item" id="adm-nav-partners" onclick="admTab('partners',document.getElementById('adm-nav-partners'))">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>Partners
+    </div>
+
+    <div style="height:1px;background:#f0f0f0;margin:8px 0"></div>
+    <div class="adm-nav-item" onclick="window.location.href='https://droveia.com'">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg> Visit Store
     </div>
   </aside>
-  <div class="biz-main">
-    <div class="biz-topbar" style="display:none">
-      <div id="biz-page-title" style="font-size:17px;font-weight:800;color:#111;letter-spacing:-.02em">Overview</div>
-      <div style="display:flex;align-items:center;gap:10px">
-        <div id="biz-partner-name" style="font-size:13px;font-weight:600;color:#6b7280"></div>
-        <button class="nav-auth-btn biz-btn-primary" id="nav-auth-btn" onclick="showAuth()" style="padding:8px 16px;font-size:13px">Sign In</button>
-      </div>
-    </div>
-    <div class="biz-content" id="biz-page-content">
+
+  <div class="adm-main">
+    <div class="adm-content" id="adm-content">
       <div style="text-align:center;padding:60px;color:#9ca3af">Loading...</div>
     </div>
   </div>
@@ -1857,8 +1874,6 @@ function fmtDate(d) {
 
 // ── Account ───────────────────────────────────────────────────────────────────
 function renderAccount() {
-  if (!document.getElementById('page-account') && !document.getElementById('biz-page-content')) return;
-  if (document.getElementById('biz-page-content') && !document.getElementById('page-account')) return; // business portal
   if (!currentUser) { showAuth(); return; }
   if (!userProfile) return;
   var full = ((userProfile.firstName||"")+" "+(userProfile.lastName||"")).trim()||"Student";
@@ -2445,8 +2460,8 @@ window.adminDeleteTool = function(id) {
     onOk: async function() {
       TOOLS = TOOLS.filter(function(t){ return t.id !== id; });
       await adminSyncToRTDB();
-      showToast("Tool deleted");
-      renderAdmin();
+      showToast('Tool deleted');
+      admTab('inventory', document.getElementById('adm-nav-inventory'));
     }
   });
 };
@@ -3782,7 +3797,7 @@ function startApp() {
       currentUser = user;
       var first = (user.displayName||user.email).split(/[\s@]/)[0];
       var btn = el("nav-auth-btn");
-      if (btn) { btn.textContent=first; btn.onclick=function(){ if(window.doSignOut) doSignOut(); window.location.reload(); }; }
+      if (btn) { btn.textContent=first; btn.onclick=function(){showPage("account");}; }
       var heroBtn = el("hero-signup-btn");
       if (heroBtn) heroBtn.style.display = "none";
 
@@ -3814,13 +3829,12 @@ function startApp() {
       var heroBtnLabel = el("hero-admin-btn-label");
       if (heroBtnLabel) heroBtnLabel.textContent = _isPrt && !_isAdm ? "Partner Dashboard" : "Admin Dashboard";
 
-      try { await loadProfile(); } catch(e) {}
-      try { await loadCart(); } catch(e) {}
-      try { subscribeOrders(); } catch(e) {}
+      await loadProfile();
+      await loadCart();
+      subscribeOrders();
       subscribeHomeReviews(fb);
       if (el('page-admin') && el('page-admin').classList.contains('active')) renderAdmin();
-      // Render business dashboard
-      if (window.renderBizTab) renderBizTab('overview');
+      if (el('page-api') && el('page-api').classList.contains('active')) renderPartnerApiPage();
       if (window._openAdminOnAuth) { window._openAdminOnAuth = false; showPage('admin'); }
     } else {
       if (ordersUnsub){ ordersUnsub(); ordersUnsub=null; }
@@ -3829,7 +3843,6 @@ function startApp() {
       updateBadge();
       var btn=el("nav-auth-btn");
       if(btn){ btn.textContent="Sign In"; btn.onclick=showAuth; }
-      if (window.renderBizTab) renderBizTab('overview');
       var heroBtn = el("hero-signup-btn");
       if (heroBtn) heroBtn.style.display = "";
       var adminBtn = el("hero-admin-btn");
@@ -3894,7 +3907,9 @@ async function loadToolsFromRTDB() {
         img:       t.img                 || "",
         qty:       parseInt(t.qty)       || 1,
         rentedQty: parseInt(t.rentedQty) || 0,
-        available: (parseInt(t.qty) || 1) > (parseInt(t.rentedQty) || 0)
+        available: (parseInt(t.qty) || 1) > (parseInt(t.rentedQty) || 0),
+        partnerEmail: t.partnerEmail || null,
+        partnerName:  t.partnerName  || null
       };
     });
     renderCatIcons();
@@ -3973,6 +3988,9 @@ async function markToolAvailable(fb, toolId) {
 // ── Confirm Modal ─────────────────────────────────────────────────────────────
 var _confirmCallback = null;
 
+window.closeConfirm = function() {
+  var m = document.getElementById('confirm-modal'); if(m) m.style.display="none";
+};
 window.showConfirm = function(opts) {
   var icon  = document.getElementById('confirm-icon');
   var title = document.getElementById('confirm-title');
@@ -4200,8 +4218,8 @@ window.adminLoadDeliveries = async function() {
               '<span style="font-size:11px;font-weight:700;padding:4px 12px;border-radius:7px;white-space:nowrap;background:'+sc.replace("var(--","rgba(").replace(")",",0.1)")+';color:'+sc+'">'+(d.status||"").replace(/_/g," ")+'</span>' +
               (isPend
                 ? '<div style="font-size:11px;color:#d97706;font-weight:600;margin-top:6px">⏳ Waiting for partner to confirm package is in station</div>' +
-                  '<button data-did="'+d._id+'" onclick="adminForceApprove(this)" style="margin-top:6px;padding:5px 12px;border-radius:7px;background:var(--surface2);color:var(--muted);border:1px solid var(--border);font-size:11px;font-weight:600;cursor:pointer;font-family:var(--font)">Force approve</button>' +
-                  '<button data-did="'+d._id+'" onclick="adminRejectDelivery(this.dataset.did)" style="padding:7px 16px;border-radius:9px;background:rgba(239,68,68,.08);color:#ef4444;border:1px solid rgba(239,68,68,.2);font-size:13px;font-weight:700;cursor:pointer">✕ Reject</button>'
+          +'<td>'+(isPending?'<button class="adm-btn-green" onclick="adminForceApprove(this.dataset.id)" data-id="'+d._id+'" style="font-size:11px;padding:5px 10px">Force Approve</button>':'—')+'</td>'
+                  +'<button data-did="'+d._id+'" onclick="adminRejectDelivery(this.dataset.did)" style="padding:7px 16px;border-radius:9px;background:rgba(239,68,68,.08);color:#ef4444;border:1px solid rgba(239,68,68,.2);font-size:13px;font-weight:700;cursor:pointer">✕ Reject</button>'
                 : '') +
             '</div>' +
           '</div>' +
@@ -4512,423 +4530,568 @@ if (_savedPage && _savedPage !== "admin") {
 
 
 
-window.partnerSubmitStock = async function() {
-  var name  = (document.getElementById('inv-name')||{value:''}).value.trim();
-  var cat   = (document.getElementById('inv-cat')||{value:''}).value;
-  var desc  = (document.getElementById('inv-desc')||{value:''}).value.trim();
-  var qty   = parseInt((document.getElementById('inv-qty')||{value:'1'}).value)||1;
-  var price = parseFloat((document.getElementById('inv-price')||{value:'0'}).value)||0;
-  var img   = (document.getElementById('inv-img')||{value:''}).value.trim();
-  if (!name||!cat){showToast('Name and category required');return;}
-  var fb=window._fb;if(!fb||!window.currentUser)return;
-  var btn=document.getElementById('inv-submit-btn');
-  if(btn){btn.disabled=true;btn.textContent='Submitting...';}
-  try{
-    var pSnap=await fb.getDocs(fb.query(fb.collection(fb.db,'partners'),fb.where('email','==',currentUser.email)));
-    var pData=pSnap.empty?{}:pSnap.docs[0].data();
-    await fb.addDoc(fb.collection(fb.db,'pendingInventory'),{
-      name,cat,desc,qty,pph:price,imgUrl:img||null,status:'pending',
-      partnerEmail:currentUser.email,partnerName:pData.name||currentUser.email,
-      submittedAt:fb.serverTimestamp()
-    });
-    showToast('Item submitted for review');
-    ['inv-name','inv-desc','inv-img','inv-price'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
-    var qEl=document.getElementById('inv-qty');if(qEl)qEl.value='1';
-    loadPartnerStock();
-  }catch(e){showToast('Error: '+e.message);}
-  finally{if(btn){btn.disabled=false;btn.textContent='Submit for Review';}}
+var _admTab = 'inventory';
+
+window.admTab = function(tab, btn) {
+  _admTab = tab;
+  document.querySelectorAll('.adm-nav-item').forEach(function(b){b.classList.remove('active');});
+  if(btn) btn.classList.add('active');
+  var titles = {inventory:'Droveia Stock', orders:'Orders', deliveries:'API Deliveries', partners:'Partners', partnerstock:'Partner Stock'};
+  var titleEl = document.getElementById('adm-page-title');
+  if(titleEl) titleEl.textContent = titles[tab] || tab;
+  renderAdmTab(tab);
 };
 
-
-window.partnerEditStock = async function(docId) {
-  if (typeof docId !== "string") docId = docId.dataset ? docId.dataset.id : String(docId);
-  var fb = window._fb; if(!fb||!window.currentUser) return;
-  var snap = await fb.getDoc(fb.doc(fb.db,'pendingInventory',docId));
-  if (!snap.exists()) return;
-  var item = Object.assign({_id:docId}, snap.data());
-
-  var row = document.getElementById('srow-'+docId);
-  if (!row) return;
-
-  // Replace row with inline edit form
-  row.style.display = 'block';
-  row.innerHTML = '<div style="display:flex;flex-direction:column;gap:10px;padding:12px 0;width:100%">'
-    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
-    +'<div><label style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Name</label>'
-    +'<input class="biz-input" id="edit-name-'+docId+'" value="'+item.name+'"></div>'
-    +'<div><label style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Category</label>'
-    +'<select class="biz-input" id="edit-cat-'+docId+'"><option value="Workshop"'+(item.cat==='Workshop'?' selected':'')+'>Workshop</option><option value="Electronics"'+(item.cat==='Electronics'?' selected':'')+'>Electronics</option><option value="Crafts"'+(item.cat==='Crafts'?' selected':'')+'>Crafts</option><option value="Office"'+(item.cat==='Office'?' selected':'')+'>Office</option></select></div>'
-    +'</div>'
-    +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">'
-    +'<div><label style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Qty</label>'
-    +'<input class="biz-input" id="edit-qty-'+docId+'" type="number" min="1" value="'+(item.qty||1)+'"></div>'
-    +'<div><label style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Price/hr ($)</label>'
-    +'<input class="biz-input" id="edit-pph-'+docId+'" type="number" min="0" step="0.01" value="'+(item.pph||0)+'"></div>'
-    +'<div><label style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Image URL</label>'
-    +'<input class="biz-input" id="edit-img-'+docId+'" value="'+(item.imgUrl||'')+'"></div>'
-    +'</div>'
-    +'<div style="display:flex;gap:8px">'
-    +'<button class="biz-btn-primary" onclick="partnerSaveStock(this.dataset.id)" data-id="'+docId+'" style="font-size:12px;padding:8px 16px">Save</button>'
-    +'<button class="biz-btn-secondary" onclick="loadPartnerStock()" style="font-size:12px;padding:8px 16px">Cancel</button>'
-    +'</div>'
-    +'</div>';
+window.renderAdmTab = async function(tab) {
+  var wrap = document.getElementById('adm-content');
+  if (!wrap) return;
+  if (!window.currentUser || !isAdmin) {
+    wrap.innerHTML = '<div style="text-align:center;padding:80px"><p style="color:#9ca3af;margin-bottom:16px">Sign in with an admin account.</p><button class="adm-btn" onclick="showAuth()">Sign In</button></div>';
+    return;
+  }
+  wrap.innerHTML = '<div style="text-align:center;padding:60px;color:#9ca3af">Loading...</div>';
+  if (tab === 'inventory')    await renderAdmInventory(wrap);
+  else if (tab === 'orders')  await renderAdmOrders(wrap);
+  else if (tab === 'deliveries') await renderAdmDeliveries(wrap);
+  else if (tab === 'partners') await renderAdmPartners(wrap);
+  else if (tab === 'partnerstock') await renderAdmPartnerStock(wrap);
+  
 };
 
-window.partnerSaveStock = async function(docId) {
-  if (typeof docId !== "string") docId = docId.dataset ? docId.dataset.id : String(docId);
-  var fb = window._fb; if(!fb||!window.currentUser) return;
-  var name = (document.getElementById('edit-name-'+docId)||{value:''}).value.trim();
-  var cat  = (document.getElementById('edit-cat-'+docId)||{value:''}).value;
-  var qty  = parseInt((document.getElementById('edit-qty-'+docId)||{value:'1'}).value)||1;
-  var pph  = parseFloat((document.getElementById('edit-pph-'+docId)||{value:'0'}).value)||0;
-  var img  = (document.getElementById('edit-img-'+docId)||{value:''}).value.trim();
-  if (!name) { showToast('Name required'); return; }
+// ── INVENTORY ────────────────────────────────────────────────────────────────
+window.renderAdmInventory = async function(wrap) {
+  var droTools = TOOLS.filter(function(t){ return !t.partnerEmail; });
+  var html = [
+    '<div class="adm-card">',
+    '<div class="adm-card-header">',
+    '<div class="adm-card-title">Droveia Stock ('+droTools.length+')</div>',
+    '<div style="display:flex;gap:8px;align-items:center">',
+    '<div style="display:flex;align-items:center;gap:6px;background:#f8f9fa;border:1.5px solid #e8e8e8;border-radius:8px;padding:7px 12px">',
+    '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>',
+    '<input id="adm-inv-search" type="text" placeholder="Search stock..." oninput="admFilterInventory()" style="border:none;outline:none;background:transparent;font-size:13px;color:#111;font-family:var(--font);width:160px">',
+    '</div>',
+    '<button class="adm-btn adm-btn-sm" onclick="adminShowAddTool()">+ Add Tool</button>',
+    '</div>',
+    '</div>',
+    '<div id="admin-add-form-wrap"></div>',
+    '<div id="admin-edit-form-wrap"></div>',
+    '<div style="overflow-x:auto"><table class="adm-table" id="adm-inv-table"><thead><tr>',
+    '<th></th><th>Name</th><th>Category</th><th>Price/hr</th><th>Qty / Rented</th><th>Status</th><th>Actions</th>',
+    '</tr></thead>',
+    '<tbody id="adm-inv-body">',
+    droTools.map(function(t){
+      var avail=t.available!==false;
+      var img=t.img&&t.img!=='x'?'<img src="'+t.img+'" style="width:36px;height:36px;border-radius:6px;object-fit:contain;background:#f8f8f8">':'<div style="width:36px;height:36px;border-radius:6px;background:#f0f4ff;display:flex;align-items:center;justify-content:center;font-size:16px">🔧</div>';
+      return '<tr>'
+        +'<td>'+img+'</td>'
+        +'<td><div style="font-weight:600;font-size:13px">'+t.name+'</div><div style="font-size:11px;color:#9ca3af">ID: '+t.id+'</div></td>'
+        +'<td><span class="adm-badge adm-badge-blue" style="font-size:10px">'+t.cat+'</span></td>'
+        +'<td style="font-weight:600">$'+calcCost(t,1).toFixed(2)+'<span style="font-size:10px;color:#9ca3af">/hr</span></td>'
+        +'<td><span style="font-weight:600">'+t.qty+'</span><span style="color:#9ca3af"> / '+(t.rentedQty||0)+'</span></td>'
+        +'<td><span class="adm-badge '+(avail?'adm-badge-green':'adm-badge-red')+'">'+(avail?'Available':'Rented')+'</span></td>'
+        +'<td><div style="display:flex;gap:6px">'
+        +'<button class="adm-btn-ghost" onclick="adminEditTool('+t.id+')" style="font-size:11px;padding:5px 10px">Edit</button>'
+        +'<button class="adm-btn-danger" onclick="adminDeleteTool('+t.id+')" style="font-size:11px;padding:5px 10px">Del</button>'
+        +'</div></td></tr>';
+    }).join(''),
+    '</tbody></table></div>',
+    '</div>',
+  ].join('');
+  wrap.innerHTML = html;
+};
+
+window.admFilterInventory = function() {
+  var q = (document.getElementById('adm-inv-search')||{value:''}).value.toLowerCase();
+  var droTools = TOOLS.filter(function(t){ return !t.partnerEmail; });
+  var filtered = q ? droTools.filter(function(t){ return t.name.toLowerCase().indexOf(q)>=0 || t.cat.toLowerCase().indexOf(q)>=0; }) : droTools;
+  var body = document.getElementById('adm-inv-body');
+  if (!body) return;
+  body.innerHTML = filtered.map(function(t){
+    var avail=t.available!==false;
+    var img=t.img&&t.img!=='x'?'<img src="'+t.img+'" style="width:36px;height:36px;border-radius:6px;object-fit:contain;background:#f8f8f8">':'<div style="width:36px;height:36px;border-radius:6px;background:#f0f4ff;display:flex;align-items:center;justify-content:center;font-size:16px">🔧</div>';
+    return '<tr>'
+      +'<td>'+img+'</td>'
+      +'<td><div style="font-weight:600;font-size:13px">'+t.name+'</div><div style="font-size:11px;color:#9ca3af">ID: '+t.id+'</div></td>'
+      +'<td><span class="adm-badge adm-badge-blue" style="font-size:10px">'+t.cat+'</span></td>'
+      +'<td style="font-weight:600">$'+calcCost(t,1).toFixed(2)+'<span style="font-size:10px;color:#9ca3af">/hr</span></td>'
+      +'<td><span style="font-weight:600">'+t.qty+'</span><span style="color:#9ca3af"> / '+(t.rentedQty||0)+'</span></td>'
+      +'<td><span class="adm-badge '+(avail?'adm-badge-green':'adm-badge-red')+'">'+(avail?'Available':'Rented')+'</span></td>'
+      +'<td><div style="display:flex;gap:6px">'
+      +'<button class="adm-btn-ghost" onclick="adminEditTool('+t.id+')" style="font-size:11px;padding:5px 10px">Edit</button>'
+      +'<button class="adm-btn-danger" onclick="adminDeleteTool('+t.id+')" style="font-size:11px;padding:5px 10px">Del</button>'
+      +'</div></td></tr>';
+  }).join('');
+};
+
+window.loadAdmPendingInventory = async function() {
+  var wrap = document.getElementById('adm-pending-inv');
+  if (!wrap) return;
+  var fb = window._fb;
   try {
-    // Update Firestore pendingInventory doc
-    await fb.updateDoc(fb.doc(fb.db,'pendingInventory',docId), {
-      name, cat, qty, pph, imgUrl: img||null
-    });
-    // Also update in RTDB if it's live (approved)
-    var snap = await fb.getDoc(fb.doc(fb.db,'pendingInventory',docId));
-    if (snap.exists() && snap.data().status === 'approved') {
-      try {
-        var rtdbResp = await fetch('https://droveia-default-rtdb.firebaseio.com/tools.json');
-        var tools = await rtdbResp.json();
-        var arr = tools ? (Array.isArray(tools) ? tools : Object.values(tools)) : [];
-        var updated = false;
-        arr = arr.map(function(t) {
-          if (t && t.partnerEmail === currentUser.email && t.name === snap.data().name) {
-            updated = true;
-            return Object.assign({}, t, {name, cat, qty, pph, img: img||t.img||'x'});
-          }
-          return t;
-        });
-        if (updated) {
-          await fetch('https://droveia-default-rtdb.firebaseio.com/tools.json', {
-            method:'PUT', headers:{'Content-Type':'application/json'},
-            body: JSON.stringify(arr)
-          });
-        }
-      } catch(e2) { console.warn('RTDB update skipped:', e2); }
+    var snap = await fb.getDocs(fb.query(fb.collection(fb.db,'pendingInventory'), fb.where('status','==','pending')));
+    var items = snap.docs.map(function(d){return Object.assign({_id:d.id},d.data());});
+    if (!items.length) {
+      wrap.innerHTML = '<div style="color:#9ca3af;text-align:center;padding:20px;font-size:13px">No pending submissions.</div>';
+      return;
     }
-    showToast('✓ Item updated');
-    loadPartnerStock();
+    // Group by partner
+    var byPartner = {};
+    items.forEach(function(item) {
+      var key = item.partnerEmail || 'unknown';
+      if (!byPartner[key]) byPartner[key] = { name: item.partnerName||item.partnerEmail||'Unknown', items: [] };
+      byPartner[key].items.push(item);
+    });
+    wrap.innerHTML = Object.keys(byPartner).map(function(email) {
+      var partner = byPartner[email];
+      var count = partner.items.length;
+      var itemsHtml = partner.items.map(function(item) {
+        return '<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid #f0f0f0" id="pend-row-'+item._id+'">'
+          + (item.imgUrl ? '<img src="'+item.imgUrl+'" style="width:40px;height:40px;border-radius:8px;object-fit:cover;flex-shrink:0">'
+            : '<div style="width:40px;height:40px;border-radius:8px;background:#f0f4ff;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📦</div>')
+          + '<div style="flex:1;min-width:0">'
+          + '<div style="font-size:13px;font-weight:600;color:#111">'+item.name+'</div>'
+          + '<div style="font-size:11px;color:#9ca3af;margin-top:2px">'
+          + '<span class="adm-badge adm-badge-blue" style="font-size:10px;margin-right:6px">'+item.cat+'</span>'
+          + 'Qty: '+item.qty+' · $'+(item.pph||0).toFixed(2)+'/hr'
+          + (item.desc ? ' · '+item.desc : '')
+          + '</div></div>'
+          + '<div style="display:flex;gap:6px;flex-shrink:0">'
+          + '<button class="adm-btn-green" onclick="admApproveInventory(this)" data-id="'+item._id+'" data-item="'+encodeURIComponent(JSON.stringify(item))+'" style="font-size:11px;padding:6px 12px">✓ Approve</button>'
+          + '<button class="adm-btn-danger" onclick="admRejectInventory(this.dataset.id)" data-id="'+item._id+'" style="font-size:11px;padding:6px 12px">✕ Reject</button>'
+          + '</div></div>';
+      }).join('');
+      return '<div style="border:1px solid #e8e8e8;border-radius:10px;overflow:hidden;margin-bottom:12px">'
+        + '<div style="display:flex;align-items:center;gap:10px;padding:14px 16px;background:#fff;cursor:pointer" onclick="admTogglePartnerItems(this)">'
+        + '<div style="width:36px;height:36px;border-radius:8px;background:#1a6ef0;color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;flex-shrink:0">'+partner.name[0].toUpperCase()+'</div>'
+        + '<div style="flex:1"><div style="font-size:14px;font-weight:700;color:#111">'+partner.name+'</div><div style="font-size:11px;color:#9ca3af">'+email+'</div></div>'
+        + '<span class="adm-badge adm-badge-amber">'+count+' pending</span>'
+        + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" style="margin-left:8px"><polyline points="6 9 12 15 18 9"/></svg>'
+        + '</div>'
+        + '<div style="display:none;padding:0 16px 4px">' + itemsHtml + '</div>'
+        + '</div>';
+    }).join('');
+  } catch(e) { wrap.innerHTML = '<div style="color:#ef4444;font-size:13px;padding:16px">Error: '+e.message+'</div>'; }
+};
+
+window.admApproveInventory = async function(btn) {
+  var docId = btn.dataset.id;
+  var item = JSON.parse(decodeURIComponent(btn.dataset.item));
+  var fb = window._fb;
+  try {
+    // Add to RTDB - push first, then write
+    var newTool = {
+      id: Date.now(),
+      name: item.name, cat: item.cat, desc: item.desc||'',
+      pph: item.pph||0, retail: (item.pph||0)*20,
+      rating: 4.5, eta: '< 30 min',
+      img: item.imgUrl||'x', qty: item.qty||1, rentedQty: 0,
+      available: true,
+      partnerEmail: item.partnerEmail, partnerName: item.partnerName
+    };
+    TOOLS.push(newTool);
+    await fetch('https://droveia-default-rtdb.firebaseio.com/tools.json', {
+      method:'PUT', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(TOOLS)
+    });
+    await fb.updateDoc(fb.doc(fb.db,'pendingInventory',docId), {status:'approved'});
+    showToast('✓ Item approved and added to inventory');
+    admTab('inventory', document.getElementById('adm-nav-inventory'));
   } catch(e) { showToast('Error: '+e.message); }
 };
 
-window.loadPartnerStock = async function() {
-  var wrap=document.getElementById('partner-stock-list');
-  if(!wrap||!window._fb||!window.currentUser)return;
-  wrap.innerHTML='<div style="color:#9ca3af;padding:20px 0;font-size:14px">Loading...</div>';
-  try{
-    var fb=window._fb;
-    var snap=await fb.getDocs(fb.query(fb.collection(fb.db,'pendingInventory'),fb.where('partnerEmail','==',currentUser.email)));
-    var items=snap.docs.map(function(d){return Object.assign({_id:d.id},d.data());});
-    if(!items.length){wrap.innerHTML='<div style="color:#9ca3af;padding:20px 0;font-size:14px;text-align:center">No items submitted yet.</div>';return;}
-    var sc={pending:'amber',approved:'green',rejected:'red'};
-    wrap.innerHTML=items.map(function(item){
-      var date=item.submittedAt&&item.submittedAt.toDate?item.submittedAt.toDate().toLocaleDateString([],{month:'short',day:'numeric'}):'';
-      var canEdit = item.status === 'approved';
-      return '<div class="stock-row" id="srow-'+item._id+'">'
-        +(item.imgUrl?'<img src="'+item.imgUrl+'" style="width:44px;height:44px;border-radius:8px;object-fit:cover;flex-shrink:0">'
-          :'<div style="width:44px;height:44px;border-radius:8px;background:#f0f4ff;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:18px">📦</div>')
-        +'<div style="flex:1;min-width:0">'
-        +'<div style="font-size:14px;font-weight:600;color:#111">'+item.name+'</div>'
-        +'<div style="font-size:11px;color:#9ca3af;margin-top:2px">'+item.cat+(item.qty>1?' · '+item.qty+' units':'')+(item.pph?' · $'+item.pph+'/hr':'')+(date?' · '+date:'')+'</div>'
+window.admRejectInventory = async function(docId) {
+  var fb = window._fb;
+  try {
+    await fb.updateDoc(fb.doc(fb.db,'pendingInventory',docId), {status:'rejected'});
+    var row = document.getElementById('pend-row-'+docId);
+    if (row) { row.style.opacity='0'; row.style.transition='opacity .3s'; setTimeout(function(){ row.remove(); }, 300); }
+    showToast('Item rejected');
+  } catch(e) { showToast('Error: '+e.message); }
+};
+
+// ── ORDERS ───────────────────────────────────────────────────────────────────
+window.renderAdmOrders = async function(wrap) {
+  var fb = window._fb;
+  try {
+    var snap = await fb.getDocs(fb.query(fb.collection(fb.db,'allOrders'),fb.limit(100)));
+    var orders = snap.docs.map(function(d){return Object.assign({_id:d.id},d.data());});
+    orders.sort(function(a,b){
+      var ta=a.createdAt&&a.createdAt.toMillis?a.createdAt.toMillis():0;
+      var tb=b.createdAt&&b.createdAt.toMillis?b.createdAt.toMillis():0;
+      return tb-ta;
+    });
+    var statusColors={in_flight:'blue',delivered:'green',cancelled:'red',pending:'amber',returned:'gray'};
+    var rows = orders.length ? orders.map(function(o){
+      var sc  = statusColors[o.status]||'gray';
+      var date = o.createdAt&&o.createdAt.toDate ? o.createdAt.toDate().toLocaleDateString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
+      var items = (o.items||[]).map(function(i){return i.name;}).join(', ');
+      var addr  = o.address&&o.address.building || '—';
+      return '<tr>'
+        +'<td style="font-size:12px">'+o.userEmail+'</td>'
+        +'<td style="font-size:12px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+items+'</td>'
+        +'<td><strong>$'+(o.total||0).toFixed(2)+'</strong></td>'
+        +'<td style="font-size:12px">'+addr+'</td>'
+        +'<td><span class="adm-badge adm-badge-'+sc+'">'+o.status+'</span></td>'
+        +'<td style="font-size:11px;color:#9ca3af">'+date+'</td>'
+        +'<td><div style="display:flex;gap:6px">'
+        +'<button class="adm-btn-ghost" style="font-size:11px;padding:5px 10px" onclick="admSetOrderStatus(this.dataset.id,this.dataset.st)" data-id="'+o._id+'" data-st="delivered">✓ Delivered</button>'
+        +'<button class="adm-btn-danger" style="font-size:11px;padding:5px 10px" onclick="admSetOrderStatus(this.dataset.id,this.dataset.st)" data-id="'+o._id+'" data-st="cancelled">Cancel</button>'
+        +'</div></td>'
+        +'</tr>';
+    }).join('') : '<tr><td colspan="7" style="text-align:center;padding:32px;color:#9ca3af">No orders yet.</td></tr>';
+
+    wrap.innerHTML = '<div class="adm-card">'
+      +'<div class="adm-card-header"><div class="adm-card-title">All Orders ('+orders.length+')</div></div>'
+      +'<div style="overflow-x:auto"><table class="adm-table"><thead><tr>'
+      +'<th>User</th><th>Items</th><th>Total</th><th>Address</th><th>Status</th><th>Date</th><th>Actions</th>'
+      +'</tr></thead><tbody>'+rows+'</tbody></table></div></div>';
+  } catch(e) { wrap.innerHTML = '<div style="color:#ef4444;padding:20px">Error: '+e.message+'</div>'; }
+};
+
+window.admSetOrderStatus = async function(orderId, status) {
+  var fb = window._fb;
+  try {
+    await fb.updateDoc(fb.doc(fb.db,'allOrders',orderId),{status:status});
+    showToast('Order marked as '+status);
+    renderAdmOrders(document.getElementById('adm-content'));
+  } catch(e) { showToast('Error: '+e.message); }
+};
+
+// ── API DELIVERIES ───────────────────────────────────────────────────────────
+window.renderAdmDeliveries = async function(wrap) {
+  var fb = window._fb;
+  try {
+    var snap = await fb.getDocs(fb.query(fb.collection(fb.db,'deliveries'),fb.limit(100)));
+    var deliveries = snap.docs.map(function(d){return Object.assign({_id:d.id},d.data());});
+    deliveries.sort(function(a,b){
+      var ta=a.createdAt&&a.createdAt.toMillis?a.createdAt.toMillis():0;
+      var tb=b.createdAt&&b.createdAt.toMillis?b.createdAt.toMillis():0;
+      return tb-ta;
+    });
+    var pending = deliveries.filter(function(d){return d.status==='pending_approval';}).length;
+    var badge = document.getElementById('adm-nav-deliveries-badge');
+    if(badge){badge.style.display=pending?'inline':'none';badge.textContent=pending;}
+    var sc = {pending_approval:'amber',approved:'blue',dispatching:'blue',dispatched:'blue',delivered:'green',failed:'red'};
+    wrap.innerHTML = '<div class="adm-card"><div class="adm-card-header"><div class="adm-card-title">API Deliveries ('+deliveries.length+')</div></div>'
+      +'<div style="overflow-x:auto"><table class="adm-table"><thead><tr><th>Customer</th><th>Partner</th><th>Items</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead><tbody>'
+      +(deliveries.length ? deliveries.map(function(d){
+        var color = sc[d.status]||'gray';
+        var date = d.createdAt&&d.createdAt.toDate?d.createdAt.toDate().toLocaleDateString([],{month:'short',day:'numeric'}):'';
+        var items = (d.items||[]).map(function(i){return i.name;}).join(', ')||'—';
+        var isPending = d.status==='pending_approval';
+        return '<tr>'
+          +'<td><strong style="font-size:13px">'+(d.customerName||'—')+'</strong><br><span style="font-size:11px;color:#9ca3af">'+(d.deliveryAddress||'')+'</span></td>'
+          +'<td style="font-size:12px">'+(d.partnerName||d.partnerEmail||'—')+'</td>'
+          +'<td style="font-size:12px;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+items+'</td>'
+          +'<td>'+(isPending?'<span class="adm-badge adm-badge-amber">⏳ Waiting pickup</span>':'<span class="adm-badge adm-badge-'+color+'">'+d.status.replace(/_/g,' ')+'</span>')+'</td>'
+          +'<td style="font-size:11px;color:#9ca3af">'+date+'</td>'
+          +'<td>'+(isPending?'<button class="adm-btn-green" onclick="adminForceApprove(this.dataset.id)" data-id="'+d._id+'" style="font-size:11px;padding:5px 10px">Force Approve</button>':'—')+'</td>'
+          +'</tr>';
+      }).join('') : '<tr><td colspan="6" style="text-align:center;padding:32px;color:#9ca3af">No deliveries yet.</td></tr>')
+      +'</tbody></table></div></div>';
+  } catch(e) { wrap.innerHTML = '<div style="color:#ef4444;padding:20px">Error: '+e.message+'</div>'; }
+};
+
+window.adminForceApprove = async function(idOrEl) {
+  var deliveryId = typeof idOrEl === "string" ? idOrEl : idOrEl.dataset.id;
+  var fb = window._fb;
+  try {
+    await fb.updateDoc(fb.doc(fb.db,'deliveries',deliveryId),{status:'approved',approvedAt:fb.serverTimestamp(),approvedBy:'admin'});
+    showToast('✓ Delivery approved');
+    renderAdmDeliveries(document.getElementById('adm-content'));
+  } catch(e) { showToast('Error: '+e.message); }
+};
+
+// ── PARTNERS ─────────────────────────────────────────────────────────────────
+
+window.renderAdmPartnerStock = async function(wrap) {
+  var fb = window._fb;
+  try {
+    var [pSnap, pendSnap] = await Promise.all([
+      fb.getDocs(fb.collection(fb.db,'partners')),
+      fb.getDocs(fb.query(fb.collection(fb.db,'pendingInventory'), fb.where('status','==','pending')))
+    ]);
+    var partners  = pSnap.docs.map(function(d){return Object.assign({_id:d.id},d.data());});
+    var pending   = pendSnap.docs.map(function(d){return Object.assign({_id:d.id},d.data());});
+    var partnerTools = TOOLS.filter(function(t){return t.partnerEmail;});
+
+    var pendingByPartner = {};
+    pending.forEach(function(item){
+      var k=item.partnerEmail||'unknown';
+      if(!pendingByPartner[k])pendingByPartner[k]=[];
+      pendingByPartner[k].push(item);
+    });
+
+    if (!partners.length) {
+      wrap.innerHTML = '<div class="adm-card"><div class="adm-card-body" style="text-align:center;padding:40px;color:#9ca3af">No partners yet.</div></div>';
+      return;
+    }
+
+    var gridCards = partners.map(function(p) {
+      var pTools   = partnerTools.filter(function(t){return t.partnerEmail===p.email;});
+      var pPending = pendingByPartner[p.email]||[];
+      var initials = p.name.split(' ').map(function(w){return w[0];}).slice(0,2).join('').toUpperCase();
+      return '<div class="ps-card" onclick="admOpenPartner(this.dataset.pid,this.dataset.email)" data-pid="'+p._id+'" data-email="'+p.email+'" style="cursor:pointer;position:relative">'
+        +(pPending.length?'<div style="position:absolute;top:10px;right:10px;background:#ef4444;color:#fff;font-size:10px;font-weight:800;padding:2px 8px;border-radius:10px;z-index:2">'+pPending.length+' pending</div>':'')
+        +'<div style="height:110px;background:linear-gradient(135deg,#eff6ff,#dbeafe);display:flex;align-items:center;justify-content:center">'
+        +(p.logoUrl?'<img src="'+p.logoUrl+'" style="max-width:80%;max-height:90px;object-fit:contain">':'<div style="width:64px;height:64px;border-radius:14px;background:#1a6ef0;color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800">'+initials+'</div>')
         +'</div>'
-        +'<div style="display:flex;align-items:center;gap:8px">'
-        +'<span class="biz-badge biz-badge-'+(sc[item.status]||'blue')+'">'+(item.status||'pending')+'</span>'
-        +(canEdit?'<button class="biz-btn-secondary" onclick="partnerEditStock(this.dataset.id)" data-id="'+item._id+'" style="font-size:11px;padding:5px 10px">Edit</button>':'')
+        +'<div style="padding:14px">'
+        +'<div style="font-size:14px;font-weight:700;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px">'+p.name+'</div>'
+        +'<div style="font-size:11px;color:#9ca3af">'+pTools.length+' live'+(pPending.length?' · <span style="color:#d97706;font-weight:600">'+pPending.length+' pending</span>':'')+'</div>'
+        +'<div style="margin-top:10px;padding-top:10px;border-top:1px solid #f0f0f0;font-size:11px;color:#6b7280">'+p.email+'</div>'
         +'</div>'
         +'</div>';
     }).join('');
-  }catch(e){wrap.innerHTML='<div style="color:#ef4444;padding:20px 0;font-size:13px">Error loading stock</div>';}
+
+    wrap.innerHTML = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px">' + gridCards + '</div>';
+  } catch(e) { wrap.innerHTML = '<div style="color:#ef4444;padding:20px">Error: '+e.message+'</div>'; }
+};
+
+window.admOpenPartner = async function(partnerId, email) {
+  var wrap = document.getElementById('adm-content');
+  if (!wrap) return;
+  wrap.innerHTML = '<div style="text-align:center;padding:40px;color:#9ca3af">Loading...</div>';
+  var fb = window._fb;
+  var pTools   = TOOLS.filter(function(t){return t.partnerEmail===email;});
+  var pendSnap = await fb.getDocs(fb.query(fb.collection(fb.db,'pendingInventory'),fb.where('partnerEmail','==',email)));
+  var pending  = pendSnap.docs.map(function(d){return Object.assign({_id:d.id},d.data());}).filter(function(i){return i.status==='pending';});
+  var pSnap    = await fb.getDocs(fb.query(fb.collection(fb.db,'partners'),fb.where('email','==',email)));
+  var partner  = pSnap.empty ? {name:email} : pSnap.docs[0].data();
+
+  var liveHtml = pTools.length ? pTools.map(function(t){
+    var avail=t.available!==false;
+    var img=t.img&&t.img!=='x'?t.img:null;
+    return '<div class="ps-card">'
+      +'<div style="height:100px;background:#f8f9fa;display:flex;align-items:center;justify-content:center">'+(img?'<img src="'+img+'" style="max-width:90%;max-height:88px;object-fit:contain">':'<div style="font-size:32px">🔧</div>')+'</div>'
+      +'<div style="padding:12px">'
+      +'<div style="font-size:13px;font-weight:700;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px">'+t.name+'</div>'
+      +'<div style="font-size:11px;color:#9ca3af;margin-bottom:8px"><span class="adm-badge adm-badge-blue" style="font-size:10px">'+t.cat+'</span> · $'+calcCost(t,1).toFixed(2)+'/hr</div>'
+      +'<div style="display:flex;align-items:center;justify-content:space-between">'
+      +'<span class="adm-badge '+(avail?'adm-badge-green':'adm-badge-red')+'">'+(avail?'Live':'Rented')+'</span>'
+      +'<button class="adm-btn-danger" onclick="admRemovePartnerTool('+t.id+')" style="font-size:10px;padding:3px 8px">Remove</button>'
+      +'</div></div></div>';
+  }).join('') : '<div style="color:#9ca3af;font-size:13px;padding:4px 0;grid-column:1/-1">No live items yet.</div>';
+
+  var pendHtml = pending.length ? pending.map(function(item){
+    return '<div class="ps-card" id="pend-row-'+item._id+'" style="border:1.5px solid #fde68a">'
+      +'<div style="height:100px;background:#fffbeb;display:flex;align-items:center;justify-content:center">'+(item.imgUrl?'<img src="'+item.imgUrl+'" style="max-width:90%;max-height:88px;object-fit:contain">':'<div style="font-size:32px">📦</div>')+'</div>'
+      +'<div style="padding:12px">'
+      +'<div style="font-size:13px;font-weight:700;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px">'+item.name+'</div>'
+      +'<div style="font-size:11px;color:#9ca3af;margin-bottom:8px"><span class="adm-badge adm-badge-amber" style="font-size:10px">'+item.cat+'</span> · $'+(item.pph||0).toFixed(2)+'/hr · qty '+item.qty+'</div>'
+      +(item.desc?'<div style="font-size:11px;color:#6b7280;margin-bottom:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+item.desc+'</div>':'')
+      +'<div style="display:flex;gap:6px">'
+      +'<button class="adm-btn-green" onclick="admApproveInventory(this)" data-id="'+item._id+'" data-item="'+encodeURIComponent(JSON.stringify(item))+'" style="flex:1;font-size:11px;padding:6px">✓ Approve</button>'
+      +'<button class="adm-btn-danger" onclick="admRejectInventory(this.dataset.id)" data-id="'+item._id+'" style="flex:1;font-size:11px;padding:6px">✕ Reject</button>'
+      +'</div></div></div>';
+  }).join('') : '<div style="color:#9ca3af;font-size:13px;padding:4px 0;grid-column:1/-1">No pending submissions.</div>';
+
+  wrap.innerHTML = '<div style="margin-bottom:16px;display:flex;align-items:center;gap:12px">'
+    +'<button class="adm-btn-ghost" onclick="admGoPartnerStock()" style="padding:7px 14px;font-size:13px">← All Partners</button>'
+    +'<div style="font-size:18px;font-weight:800;color:#111;letter-spacing:-.02em">'+partner.name+'</div>'
+    +'</div>'
+    +'<div class="adm-card" style="margin-bottom:16px">'
+    +'<div class="adm-card-header"><div class="adm-card-title">Live Inventory ('+pTools.length+')</div></div>'
+    +'<div style="padding:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px">'+liveHtml+'</div>'
+    +'</div>'
+    +'<div class="adm-card">'
+    +'<div class="adm-card-header"><div class="adm-card-title">Pending Submissions ('+pending.length+')</div></div>'
+    +'<div style="padding:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px">'+pendHtml+'</div>'
+    +'</div>';
+};
+
+window.admGoPartnerStock = function() { admTab("partnerstock", document.getElementById("adm-nav-partnerstock")); };
+window.admRemovePartnerTool = async function(toolId) {
+  if (!confirm('Remove this tool from the live catalog?')) return;
+  var idx = TOOLS.findIndex(function(t){return t.id===toolId;});
+  if (idx<0) return;
+  TOOLS.splice(idx,1);
+  try {
+    await fetch('https://droveia-default-rtdb.firebaseio.com/tools.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(TOOLS)});
+    showToast('Tool removed');
+  } catch(e){showToast('Error: '+e.message);}
 };
 
 
-window.renderPartnerLanding = function(mode) {
-  if (mode === 'signin') {
-    return '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;padding:40px 24px">'
-      + '<div style="width:72px;height:72px;border-radius:20px;background:linear-gradient(135deg,#1a6ef0,#3b82f6);display:flex;align-items:center;justify-content:center;font-size:32px;margin-bottom:24px;box-shadow:0 8px 24px rgba(26,110,240,.25)">🚁</div>'
-      + '<h2 style="font-size:26px;font-weight:800;color:#111;margin-bottom:10px">Partner Portal</h2>'
-      + '<p style="color:#6b7280;font-size:15px;margin-bottom:32px;max-width:380px;line-height:1.6">Sign in with your partner account to manage inventory, track orders, and access your API.</p>'
-      + '<button onclick="showAuth()" style="background:#1a6ef0;color:#fff;border:none;border-radius:10px;padding:14px 36px;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--font);box-shadow:0 4px 14px rgba(26,110,240,.35)">Sign In</button>'
-      + '</div>';
-  }
 
-  return '<div style="overflow-y:auto;padding-bottom:40px">'
-
-    // ── Hero ──────────────────────────────────────────────────────────────────
-    + '<div style="background:linear-gradient(135deg,#0f172a 0%,#1e3a8a 55%,#1a6ef0 100%);padding:56px 40px 48px;text-align:center">'
-    + '<div style="display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:11px;font-weight:800;padding:6px 16px;border-radius:20px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:22px">🚁 Partner Program</div>'
-    + '<h1 style="font-size:36px;font-weight:900;color:#fff;letter-spacing:-.04em;line-height:1.15;margin-bottom:14px">Deliver anything.<br><span style="color:#60a5fa">In under 30 minutes.</span></h1>'
-    + '<p style="color:rgba(255,255,255,.75);font-size:15px;line-height:1.7;max-width:480px;margin:0 auto 32px">List your tools and products on Droveia. We fly them to customers — you just pack the order and earn 98% of every sale.</p>'
-    + '<a href="mailto:partners@droveia.com" style="display:inline-block;background:#fff;color:#1a6ef0;font-size:15px;font-weight:800;padding:14px 36px;border-radius:10px;text-decoration:none;box-shadow:0 4px 20px rgba(0,0,0,.25)">Apply to Partner →</a>'
-    + '</div>'
-
-    // ── Stats ─────────────────────────────────────────────────────────────────
-    + '<div style="display:grid;grid-template-columns:repeat(3,1fr);background:#fff;border-bottom:2px solid #f0f0f0">'
-    + '<div style="padding:28px 16px;text-align:center;border-right:1px solid #f0f0f0">'
-    +   '<div style="font-size:30px;font-weight:900;color:#1a6ef0;letter-spacing:-.03em">&lt;30<span style="font-size:16px">min</span></div>'
-    +   '<div style="font-size:12px;color:#9ca3af;margin-top:4px;font-weight:500">Avg delivery</div></div>'
-    + '<div style="padding:28px 16px;text-align:center;border-right:1px solid #f0f0f0">'
-    +   '<div style="font-size:30px;font-weight:900;color:#1a6ef0;letter-spacing:-.03em">98<span style="font-size:16px">%</span></div>'
-    +   '<div style="font-size:12px;color:#9ca3af;margin-top:4px;font-weight:500">Revenue to you</div></div>'
-    + '<div style="padding:28px 16px;text-align:center">'
-    +   '<div style="font-size:30px;font-weight:900;color:#1a6ef0;letter-spacing:-.03em">$2k</div>'
-    +   '<div style="font-size:12px;color:#9ca3af;margin-top:4px;font-weight:500">Setup cost</div></div>'
-    + '</div>'
-
-    // ── How it works ──────────────────────────────────────────────────────────
-    + '<div style="padding:36px 32px 0">'
-    + '<div style="font-size:11px;font-weight:800;color:#9ca3af;text-transform:uppercase;letter-spacing:.1em;margin-bottom:20px">How it works</div>'
-    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:32px">'
-    + _bizCard('1','Submit inventory','List your tools through this portal. Approved within 24hrs.','#1a6ef0','#eff6ff')
-    + _bizCard('2','Get your station','We install a drone dock at your location. Zero cost.','#16a34a','#f0fdf4')
-    + _bizCard('3','Orders fly out','Customer orders → your station dispatches automatically.','#d97706','#fffbeb')
-    + _bizCard('4','Get paid weekly','98% of every rental, transferred every Monday.','#9333ea','#fdf4ff')
-    + '</div>'
-
-    // ── Features ──────────────────────────────────────────────────────────────
-    + '<div style="font-size:11px;font-weight:800;color:#9ca3af;text-transform:uppercase;letter-spacing:.1em;margin-bottom:16px">What you get</div>'
-    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:32px">'
-    + _bizFeat('📊','Live dashboard','Track orders, revenue, and stock in real time.')
-    + _bizFeat('🔑','API access','Integrate Droveia into your own systems.')
-    + _bizFeat('📍','Live tracking','Customers watch their drone delivery on a map.')
-    + _bizFeat('💸','Weekly payouts','Auto-transfers every Monday. No invoices needed.')
-    + '</div>'
-
-    // ── CTA ───────────────────────────────────────────────────────────────────
-    + '<div style="background:linear-gradient(120deg,#1a6ef0,#2563eb);border-radius:16px;padding:32px;text-align:center;margin-bottom:16px">'
-    + '<div style="font-size:20px;font-weight:900;color:#fff;margin-bottom:8px;letter-spacing:-.02em">Ready to launch?</div>'
-    + '<div style="font-size:14px;color:rgba(255,255,255,.8);margin-bottom:22px">We onboard new partners every week. Get in touch — we&rsquo;ll have you live within days.</div>'
-    + '<a href="mailto:partners@droveia.com" style="display:inline-block;background:#fff;color:#1a6ef0;font-size:14px;font-weight:800;padding:12px 28px;border-radius:8px;text-decoration:none;margin-right:10px">Email Us</a>'
-    + '<button onclick="showAuth()" style="background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.35);color:#fff;font-size:14px;font-weight:700;padding:12px 20px;border-radius:8px;cursor:pointer;font-family:var(--font)">Already a partner?</button>'
-    + '</div>'
-
-    + '</div></div>';
+window.renderAdmPartners = async function(wrap) {
+  var fb = window._fb;
+  try {
+    var snap = await fb.getDocs(fb.collection(fb.db,'partners'));
+    var partners = snap.docs.map(function(d){return Object.assign({_id:d.id},d.data());});
+    wrap.innerHTML = [
+      '<div class="adm-card">',
+      '<div class="adm-card-header"><div class="adm-card-title">Partners ('+partners.length+')</div>',
+      '<button class="adm-btn adm-btn-sm" onclick="admShowAddPartner()">+ Add Partner</button></div>',
+      '<div id="adm-add-partner-form"></div>',
+      '<div style="overflow-x:auto"><table class="adm-table"><thead><tr><th>Name</th><th>Email</th><th>Station ID</th><th>Status</th><th>Actions</th></tr></thead><tbody>',
+      partners.length ? partners.map(function(p){
+        var sc = p.status==='active'?'adm-badge-green':'adm-badge-gray';
+        return '<tr>'
+          +'<td><strong>'+p.name+'</strong></td>'
+          +'<td style="font-size:12px">'+p.email+'</td>'
+          +'<td style="font-family:monospace;font-size:12px">'+(p.stationId||'—')+'</td>'
+          +'<td><span class="adm-badge '+sc+'">'+(p.status||'active')+'</span></td>'
+          +'<td style="display:flex;gap:6px">'
+          +'<button class="adm-btn-ghost" onclick="admEditPartner(this.dataset.id,this.dataset.name,this.dataset.email,this.dataset.station)" data-id="'+p._id+'" data-name="'+p.name+'" data-email="'+p.email+'" data-station="'+(p.stationId||'')+'" style="font-size:11px;padding:5px 10px">Edit</button>'
+          +'<button class="adm-btn-danger" onclick="admRemovePartner(this.dataset.id)" data-id="'+p._id+'">Remove</button>'
+          +'</td></tr>';
+      }).join('') : '<tr><td colspan="5" style="text-align:center;padding:32px;color:#9ca3af">No partners yet.</td></tr>',
+      '</tbody></table></div></div>',
+    ].join('');
+  } catch(e) { wrap.innerHTML = '<div style="color:#ef4444;padding:20px">Error: '+e.message+'</div>'; }
 };
 
-function _bizCard(num, title, desc, color, bg) {
-  return '<div style="background:'+bg+';border-radius:12px;padding:18px;border:1px solid '+color+'22">'
-    + '<div style="width:32px;height:32px;border-radius:9px;background:'+color+';color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;margin-bottom:12px">'+num+'</div>'
-    + '<div style="font-size:13px;font-weight:800;color:#111;margin-bottom:5px">'+title+'</div>'
-    + '<div style="font-size:12px;color:#6b7280;line-height:1.5">'+desc+'</div>'
-    + '</div>';
-}
-function _bizFeat(icon, title, desc) {
-  return '<div style="background:#fff;border:1.5px solid #e8e8e8;border-radius:12px;padding:16px">'
-    + '<div style="font-size:20px;margin-bottom:8px">'+icon+'</div>'
-    + '<div style="font-size:13px;font-weight:700;color:#111;margin-bottom:3px">'+title+'</div>'
-    + '<div style="font-size:12px;color:#9ca3af;line-height:1.5">'+desc+'</div>'
-    + '</div>';
-}
-
-
-function _bizStep(num, title, desc, bg, color) {
-  return '<div style="display:flex;gap:16px;padding:20px 0;border-bottom:1px solid #f8f8f8">'
-    + '<div style="width:40px;height:40px;border-radius:12px;background:'+bg+';color:'+color+';display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;flex-shrink:0">'+num+'</div>'
-    + '<div><div style="font-size:14px;font-weight:700;color:#111;margin-bottom:4px">'+title+'</div>'
-    + '<div style="font-size:13px;color:#6b7280;line-height:1.5">'+desc+'</div></div>'
-    + '</div>';
-}
-function _bizFeature(icon, title, desc) {
-  return '<div style="background:#f8f9fa;border-radius:12px;padding:18px">'
-    + '<div style="font-size:22px;margin-bottom:8px">'+icon+'</div>'
-    + '<div style="font-size:13px;font-weight:700;color:#111;margin-bottom:4px">'+title+'</div>'
-    + '<div style="font-size:12px;color:#6b7280;line-height:1.5">'+desc+'</div>'
-    + '</div>';
-}
-
-
-
-var _bizCurrentTab='overview';
-
-window.bizShowLandingSidebar = function() {
-  var sb = document.getElementById('biz-sidebar-el');
-  if (!sb) return;
-  sb.innerHTML = '<div class="biz-nav-item" onclick="window.location.href=\'https://droveia.com\'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 014-10z"/></svg>Visit Store</div>';
+window.admCancelAddPartner = function() { var f=document.getElementById("adm-add-partner-form"); if(f) f.innerHTML=""; };
+window.admShowAddPartner = function() {
+  var f = document.getElementById('adm-add-partner-form');
+  if (!f) return;
+  f.innerHTML = '<div style="padding:16px 20px;border-bottom:1px solid #ebebeb;background:#f8f9fa">'
+    +'<div style="font-size:13px;font-weight:700;margin-bottom:12px;color:#111">New Partner</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;align-items:end">'
+    +'<div><label style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:5px">Name</label><input class="adm-input" id="np-name" placeholder="Business name"></div>'
+    +'<div><label style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:5px">Email</label><input class="adm-input" id="np-email" placeholder="partner@email.com"></div>'
+    +'<div><label style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:5px">Station ID</label><input class="adm-input" id="np-station" placeholder="STN001"></div>'
+    +'<div><label style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:5px">Logo URL</label><input class="adm-input" id="np-logo" placeholder="https://..."></div>'
+    +'</div>'
+    +'<div style="margin-top:12px;display:flex;gap:8px">'
+    +'<button class="adm-btn adm-btn-sm" onclick="admSaveNewPartner()">Save Partner</button>'
+    +'<button class="adm-btn-ghost" onclick="admCancelAddPartner()">Cancel</button>'
+    +'</div></div>';
 };
 
-window.bizShowPartnerSidebar = function() {
-  var sb = document.getElementById('biz-sidebar-el');
-  if (!sb) return;
-  sb.innerHTML = [
-    '<div class="biz-nav-item" id="bnav-overview" onclick="bizTab(\'overview\',document.getElementById(\'bnav-overview\'))"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Overview</div>',
-    '<div class="biz-nav-item" id="bnav-orders" onclick="bizTab(\'orders\',document.getElementById(\'bnav-orders\'))"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Orders<span id="bnav-orders-badge" style="display:none;background:#ef4444;color:#fff;font-size:10px;font-weight:800;padding:1px 6px;border-radius:10px;margin-left:auto"></span></div>',
-    '<div class="biz-nav-item" id="bnav-inventory" onclick="bizTab(\'inventory\',document.getElementById(\'bnav-inventory\'))"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>My Inventory</div>',
-    '<div class="biz-nav-item" id="bnav-apikey" onclick="bizTab(\'apikey\',document.getElementById(\'bnav-apikey\'))"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.778 7.778 5.5 5.5 0 017.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>API Key</div>',
-    '<div class="biz-nav-item" id="bnav-docs" onclick="bizTab(\'docs\',document.getElementById(\'bnav-docs\'))"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>API Docs</div>',
-    '<div style="height:1px;background:#f0f0f0;margin:8px 0"></div>',
-    '<div class="biz-nav-item" onclick="window.location.href=\'https://droveia.com\'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 014-10z"/></svg>Visit Store</div>'
-  ].join('');
+window.admSaveNewPartner = async function() {
+  var name    = (document.getElementById('np-name')||{value:''}).value.trim();
+  var email   = (document.getElementById('np-email')||{value:''}).value.trim();
+  var station = (document.getElementById('np-station')||{value:''}).value.trim();
+  var logo    = (document.getElementById('np-logo')||{value:''}).value.trim();
+  if (!name||!email) { showToast('Name and email required'); return; }
+  var fb = window._fb;
+  try {
+    await fb.addDoc(fb.collection(fb.db,'partners'),{name,email,stationId:station,logoUrl:logo||null,status:'active',createdAt:fb.serverTimestamp()});
+    showToast('✓ Partner added');
+    admTab('partners', document.getElementById('adm-nav-partners'));
+  } catch(e) { showToast('Error: '+e.message); }
 };
 
-window.bizGoOrders=function(){ bizTab("orders",document.getElementById("bnav-orders")); };
-window.bizTab=function(tab,btn){
-  _bizCurrentTab=tab;
-  document.querySelectorAll('.biz-nav-item').forEach(function(b){b.classList.remove('active');});
-  if(btn)btn.classList.add('active');
-  var titles={overview:'Overview',orders:'Orders',inventory:'Inventory',apikey:'API Key',docs:'API Docs'};
-  var titleEl=document.getElementById('biz-page-title');
-  if(titleEl)titleEl.textContent=titles[tab]||tab;
-  var t2=document.getElementById('biz-page-title-top'); if(t2)t2.textContent=titles[tab]||tab;
-  renderBizTab(tab);
+window.admEditPartner = async function(id, name, email, stationId) {
+  if (typeof id !== "string") { var el=id; id=el.dataset.id; name=el.dataset.name; email=el.dataset.email; stationId=el.dataset.station; }
+  var newName    = prompt('Partner name:', name);
+  if (newName === null) return;
+  var newStation = prompt('Station ID:', stationId||'');
+  if (newStation === null) return;
+  var fb = window._fb;
+  try {
+    await fb.updateDoc(fb.doc(fb.db,'partners',id), {name:newName, stationId:newStation});
+    showToast('✓ Partner updated');
+    admTab('partners', document.getElementById('adm-nav-partners'));
+  } catch(e) { showToast('Error: '+e.message); }
 };
 
-window.renderBizTab=async function(tab){
-  var wrap=document.getElementById('biz-page-content');
-  if(!wrap)return;
-  if(!window.currentUser){
-    if(window.bizShowLandingSidebar) bizShowLandingSidebar();
-    wrap.innerHTML=renderPartnerLanding('apply');
-    return;
-  }
-  if(!window._isPartnerUser){
-    if(window.bizShowLandingSidebar) bizShowLandingSidebar();
-    wrap.innerHTML=renderPartnerLanding('apply');
-    return;
-  }
-  // Partner confirmed — show full sidebar
-  if(window.bizShowPartnerSidebar) {
-    bizShowPartnerSidebar();
-    // Set correct active tab
-    var _activeBtn = document.getElementById('bnav-'+tab);
-    document.querySelectorAll('.biz-nav-item').forEach(function(b){b.classList.remove('active');});
-    if(_activeBtn) _activeBtn.classList.add('active');
-  }
-  document.body.classList.remove('landing-mode'); wrap.innerHTML='<div style="text-align:center;padding:60px;color:#9ca3af">Loading...</div>';
-  if(tab==='overview')await renderBizOverview(wrap);
-  else if(tab==='orders')await renderBizOrders(wrap);
-  else if(tab==='inventory')renderBizInventory(wrap);
-  else if(tab==='apikey')await renderBizApiKey(wrap);
-  else if(tab==='docs')renderBizDocs(wrap);
+window.admRemovePartner = async function(id) {
+  if (typeof id !== "string") id = id.dataset.id;
+  if (!confirm('Remove this partner?')) return;
+  var fb = window._fb;
+  try {
+    await fb.deleteDoc(fb.doc(fb.db,'partners',id));
+    showToast('Partner removed');
+    admTab('partners', document.getElementById('adm-nav-partners'));
+  } catch(e) { showToast('Error: '+e.message); }
 };
 
-window.renderBizOverview=async function(wrap){
-  var fb=window._fb;
-  var deliveries=[],apiKeys=[];
-  try{var dSnap=await fb.getDocs(fb.query(fb.collection(fb.db,'deliveries'),fb.where('partnerEmail','==',currentUser.email),fb.limit(20)));deliveries=dSnap.docs.map(function(d){return Object.assign({_id:d.id},d.data());});}catch(e){}
-  try{var kSnap=await fb.getDocs(fb.query(fb.collection(fb.db,'apiKeys'),fb.where('partnerEmail','==',currentUser.email)));apiKeys=kSnap.docs.map(function(d){return Object.assign({_docId:d.id},d.data());});}catch(e){}
-  var pending=deliveries.filter(function(d){return d.status==='pending_approval';}).length;
-  var badge=document.getElementById('bnav-orders-badge');
-  if(badge){badge.style.display=pending?'inline':'none';badge.textContent=pending;}
-  wrap.innerHTML=[
-    '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:24px">',
-    '<div class="biz-stat-card"><div class="biz-stat-val" style="color:#1a6ef0">'+deliveries.length+'</div><div class="biz-stat-label">Total Orders</div></div>',
-    '<div class="biz-stat-card"><div class="biz-stat-val" style="color:#d97706">'+pending+'</div><div class="biz-stat-label">Awaiting Pickup</div></div>',
-    '<div class="biz-stat-card"><div class="biz-stat-val" style="color:#15803d">'+apiKeys.filter(function(k){return k.active;}).length+'</div><div class="biz-stat-label">Active Keys</div></div>',
-    '</div>',
-    '<div class="biz-card">',
-    '<div class="biz-card-header"><div class="biz-card-title">Recent Orders</div>',
-    '<button class="biz-btn-secondary" style="font-size:12px;padding:6px 12px" onclick="bizGoOrders()">View All</button>',
-    '</div><div class="biz-card-body">',
-    deliveries.length?deliveries.map(function(d){
-      var sc={pending_approval:'amber',approved:'blue',dispatched:'blue',delivered:'green',failed:'red'}[d.status]||'blue';
-      var date=d.createdAt&&d.createdAt.toDate?d.createdAt.toDate().toLocaleDateString([],{month:'short',day:'numeric'}):'';
-      return '<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f0f0f0">'
-        +'<div style="flex:1"><div style="font-size:14px;font-weight:600;color:#111">'+(d.customerName||'—')+'</div>'
-        +'<div style="font-size:11px;color:#9ca3af">'+((d.items||[]).map(function(i){return i.name;}).join(', ')||'—')+(date?' · '+date:'')+'</div></div>'
-        +'<span class="biz-badge biz-badge-'+sc+'">'+(d.status||'').replace(/_/g,' ')+'</span></div>';
-    }).join(''):'<div style="text-align:center;padding:32px;color:#9ca3af;font-size:13px">No orders yet.</div>',
-    '</div></div>',
-  ].join('');
+// ── APPLICATIONS ─────────────────────────────────────────────────────────────
+window.renderAdmApplications = async function(wrap) {
+  var fb = window._fb;
+  try {
+    var snap = await fb.getDocs(fb.query(fb.collection(fb.db,'partnerApplications'),fb.where('status','==','pending')));
+    var apps = snap.docs.map(function(d){return Object.assign({_id:d.id},d.data());});
+    wrap.innerHTML = '<div class="adm-card"><div class="adm-card-header"><div class="adm-card-title">Partner Applications ('+apps.length+')</div></div>'
+      +'<div style="overflow-x:auto"><table class="adm-table"><thead><tr><th>Business</th><th>Email</th><th>Message</th><th>Date</th><th>Actions</th></tr></thead><tbody>'
+      +(apps.length ? apps.map(function(a){
+        var date=a.createdAt&&a.createdAt.toDate?a.createdAt.toDate().toLocaleDateString([],{month:'short',day:'numeric'}):'';
+        return '<tr>'
+          +'<td><strong>'+a.businessName+'</strong></td>'
+          +'<td style="font-size:12px">'+a.email+'</td>'
+          +'<td style="font-size:12px;max-width:200px">'+( a.message||'—')+'</td>'
+          +'<td style="font-size:11px;color:#9ca3af">'+date+'</td>'
+          +'<td style="display:flex;gap:6px">'
+          +'<button class="adm-btn-green" onclick="admApproveApp(this.dataset.id,this.dataset.name,this.dataset.email)" data-id="'+a._id+'" data-name="'+a.businessName+'" data-email="'+a.email+'" style="font-size:11px;padding:5px 10px">✓ Approve</button>'
+          +'<button class="adm-btn-danger" onclick="admRejectApp(this.dataset.id)" data-id="'+a._id+'" style="font-size:11px;padding:5px 10px">Reject</button>'
+          +'</td></tr>';
+      }).join('') : '<tr><td colspan="5" style="text-align:center;padding:32px;color:#9ca3af">No pending applications.</td></tr>')
+      +'</tbody></table></div></div>';
+  } catch(e) { wrap.innerHTML = '<div style="color:#ef4444;padding:20px">Error: '+e.message+'</div>'; }
 };
 
-window.renderBizOrders=async function(wrap){
-  wrap.innerHTML='<div style="color:#9ca3af;padding:20px">Loading...</div>';
-  try{
-    var fb=window._fb;
-    var dSnap=await fb.getDocs(fb.query(fb.collection(fb.db,'deliveries'),fb.where('partnerEmail','==',currentUser.email),fb.limit(50)));
-    var deliveries=dSnap.docs.map(function(d){return Object.assign({_id:d.id},d.data());});
-    var pending=deliveries.filter(function(d){return d.status==='pending_approval';}).length;
-    var badge=document.getElementById('bnav-orders-badge');
-    if(badge){badge.style.display=pending?'inline':'none';badge.textContent=pending;}
-    wrap.innerHTML='<div class="biz-card"><div class="biz-card-body">'+renderPartnerOrders(deliveries)+'</div></div>';
-  }catch(e){wrap.innerHTML='<div style="color:#ef4444;padding:20px">Error: '+e.message+'</div>';}
+window.admApproveApp = async function(id, name, email) {
+  if (typeof id !== "string") { var el=id; id=el.dataset.id; name=el.dataset.name; email=el.dataset.email; }
+  var fb = window._fb;
+  try {
+    var station = prompt('Assign station ID:', 'STN00'+Math.floor(Math.random()*99));
+    if (!station) return;
+    await fb.addDoc(fb.collection(fb.db,'partners'),{name,email,stationId:station,status:'active',createdAt:fb.serverTimestamp()});
+    await fb.updateDoc(fb.doc(fb.db,'partnerApplications',id),{status:'approved'});
+    showToast('✓ Partner approved');
+    admTab('applications', document.getElementById('adm-nav-applications'));
+  } catch(e) { showToast('Error: '+e.message); }
 };
 
-window.renderBizInventory=function(wrap){
-  wrap.innerHTML=[
-    '<div class="biz-card" style="margin-bottom:20px">',
-    '<div class="biz-card-header"><div class="biz-card-title">Submit New Item</div></div>',
-    '<div class="biz-card-body">',
-    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">',
-    '<div><label style="display:block;font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Item Name *</label><input class="biz-input" id="inv-name" placeholder="e.g. DeWalt Drill"></div>',
-    '<div><label style="display:block;font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Category *</label><select class="biz-input" id="inv-cat"><option value="">Select...</option><option value="Workshop">Workshop</option><option value="Electronics">Electronics</option><option value="Crafts">Crafts</option><option value="Office">Office</option></select></div>',
-    '</div>',
-    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px">',
-    '<div><label style="display:block;font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Qty</label><input class="biz-input" id="inv-qty" type="number" min="1" value="1"></div>',
-    '<div><label style="display:block;font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Price/hr ($)</label><input class="biz-input" id="inv-price" type="number" min="0" step="0.01" placeholder="0.00"></div>',
-    '<div><label style="display:block;font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Image URL</label><input class="biz-input" id="inv-img" placeholder="https://..."></div>',
-    '</div>',
-    '<div style="margin-bottom:16px"><label style="display:block;font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Description</label>',
-    '<textarea class="biz-input" id="inv-desc" rows="2" placeholder="Brief description..." style="resize:vertical"></textarea></div>',
-    '<button class="biz-btn-primary" id="inv-submit-btn" onclick="partnerSubmitStock()">',
-    '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
-    'Submit for Review</button>',
-    '</div></div>',
-    '<div class="biz-card">',
-    '<div class="biz-card-header"><div class="biz-card-title">My Inventory</div></div>',
-    '<div class="biz-card-body" id="partner-stock-list"><div style="color:#9ca3af;font-size:13px">Loading...</div></div>',
-    '</div>',
-  ].join('');
-  loadPartnerStock();
-};
-
-window.renderBizApiKey=async function(wrap){
-  var fb=window._fb;var apiKeys=[];
-  try{var kSnap=await fb.getDocs(fb.query(fb.collection(fb.db,'apiKeys'),fb.where('partnerEmail','==',currentUser.email)));apiKeys=kSnap.docs.map(function(d){return Object.assign({_docId:d.id},d.data());});}catch(e){}
-  wrap.innerHTML=[
-    '<div class="biz-card">',
-    '<div class="biz-card-header"><div class="biz-card-title">API Keys</div>',
-    '<button class="biz-btn-primary" style="font-size:12px;padding:8px 14px" onclick="partnerGenerateKey()">',
-    '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New Key</button>',
-    '</div><div class="biz-card-body">',
-    apiKeys.length?renderApiKeysList(apiKeys):'<div style="text-align:center;padding:32px;color:#9ca3af;font-size:13px">No API keys yet.<br><br><button class="biz-btn-primary" onclick="partnerGenerateKey()">Generate your first key</button></div>',
-    '</div></div>',
-  ].join('');
-};
-
-window.renderBizDocs=function(wrap){
-  wrap.innerHTML='<div class="biz-card"><div class="biz-card-body">'+renderApiDocs()+'</div></div>';
+window.admRejectApp = async function(id) {
+  if (typeof id !== "string") id = id.dataset.id;
+  var fb = window._fb;
+  try {
+    await fb.updateDoc(fb.doc(fb.db,'partnerApplications',id),{status:'rejected'});
+    showToast('Application rejected');
+    admTab('applications', document.getElementById('adm-nav-applications'));
+  } catch(e) { showToast('Error: '+e.message); }
 };
 
 </script>
 <script>
-// Init
-function initBusinessPage() {
-  // Auth handled by main script auth listener
-  if (window._fb && window.renderBizTab) {
-  /* placeholder — real init done via main auth handler */
-  if (false) { var fb = window._fb; fb.onAuthStateChanged(fb.auth, async function(user) {
+
+function initAdminPage() {
+  var fb = window._fb;
+  fb.onAuthStateChanged(fb.auth, async function(user) {
     if (user) {
       var btn = document.getElementById('nav-auth-btn');
-      if (btn) { btn.textContent = (user.displayName||user.email).split(/[\s@]/)[0]; btn.onclick = function(){ doSignOut(); window.location.reload(); }; }
-      var nameEl = document.getElementById('biz-partner-name');
+      if (btn) { btn.textContent = (user.displayName||user.email).split(/[\s@]/)[0]; btn.onclick = function(){ doSignOut(); window.location.href='/'; }; }
+      var nameEl = document.getElementById('adm-user-name');
       if (nameEl) nameEl.textContent = user.displayName || user.email;
       await loadAdminEmails();
-      var _isAdm = checkAdmin();
-      window._isPartnerUser = false;
-      try {
-        var pSnap = await fb.getDocs(fb.query(fb.collection(fb.db,'partners'),fb.where('email','==',user.email)));
-        window._isPartnerUser = !pSnap.empty;
-      } catch(e) {}
-      if (_isAdm) { window._isPartnerUser = true; } // admins can preview
-      renderBizTab('overview');
+      await loadToolsFromRTDB();
+      isAdmin = checkAdmin();
+      if (!isAdmin) {
+        var wrap = document.getElementById('adm-content');
+        if (wrap) wrap.innerHTML = '<div style="text-align:center;padding:80px"><p style="color:#ef4444;margin-bottom:16px;font-weight:600">Access denied — not an admin account.</p></div>';
+        return;
+      }
+      admTab('inventory', document.getElementById('adm-nav-inventory'));
     } else {
-      window._isPartnerUser = false;
       var btn = document.getElementById('nav-auth-btn');
       if (btn) { btn.textContent = 'Sign In'; btn.onclick = showAuth; }
-      renderBizTab('overview');
+      var wrap = document.getElementById('adm-content');
+      if (wrap) wrap.innerHTML = '<div style="text-align:center;padding:80px"><p style="color:#9ca3af;margin-bottom:16px">Sign in with an admin account.</p><button class="adm-btn" onclick="showAuth()">Sign In</button></div>';
     }
-  }); } }
+  });
 }
-// Show landing immediately - don't wait for auth
-var _bizInitWrap = document.getElementById('biz-page-content');
-setTimeout(function(){ var w=document.getElementById('biz-page-content'); if(w && window.renderPartnerLanding) w.innerHTML=renderPartnerLanding('apply'); },0);
-if (window._fbReady) { initBusinessPage(); }
-else { document.addEventListener('fbready', initBusinessPage, {once:true}); }
+if (window._fbReady) { initAdminPage(); }
+else { document.addEventListener('fbready', initAdminPage, {once:true}); }
+
 </script>
+
+<!-- Confirm Modal -->
+<div class="hidden" id="confirm-modal" style="position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:2000;display:none;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:14px;padding:28px;max-width:380px;width:90%">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+      <div id="confirm-icon" style="width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;flex-shrink:0"></div>
+      <div id="confirm-title" style="font-size:16px;font-weight:800;color:#111"></div>
+    </div>
+    <div id="confirm-msg" style="font-size:13px;color:#6b7280;margin-bottom:20px"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button onclick="closeConfirm()" style="background:#f4f4f4;border:none;border-radius:8px;padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font)">Cancel</button>
+      <button id="confirm-ok-btn" onclick="if(window._confirmCallback){window._confirmCallback();}closeConfirm();" style="border:none;border-radius:8px;padding:9px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font)">Confirm</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>

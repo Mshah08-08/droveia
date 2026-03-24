@@ -4516,8 +4516,10 @@ window.partnerSubmitStock = async function() {
   var cat   = (document.getElementById('inv-cat')||{value:''}).value;
   var desc  = (document.getElementById('inv-desc')||{value:''}).value.trim();
   var qty   = parseInt((document.getElementById('inv-qty')||{value:'1'}).value)||1;
-  var price = parseFloat((document.getElementById('inv-price')||{value:'0'}).value)||0;
-  var img   = (document.getElementById('inv-img')||{value:''}).value.trim();
+  var price    = parseFloat((document.getElementById('inv-price')||{value:'0'}).value)||0;
+  var buyPrice = parseFloat((document.getElementById('inv-buyPrice')||{value:'0'}).value)||0;
+  var listType = (document.getElementById('inv-type')||{value:'rent'}).value || 'rent';
+  var img      = (document.getElementById('inv-img')||{value:''}).value.trim();
   if (!name||!cat){showToast('Name and category required');return;}
   var fb=window._fb;if(!fb||!window.currentUser)return;
   var btn=document.getElementById('inv-submit-btn');
@@ -4526,7 +4528,7 @@ window.partnerSubmitStock = async function() {
     var pSnap=await fb.getDocs(fb.query(fb.collection(fb.db,'partners'),fb.where('email','==',currentUser.email)));
     var pData=pSnap.empty?{}:pSnap.docs[0].data();
     await fb.addDoc(fb.collection(fb.db,'pendingInventory'),{
-      name,cat,desc,qty,pph:price,imgUrl:img||null,status:'pending',
+      name,cat,desc,qty,pph:price,buyPrice:buyPrice||0,type:listType||'rent',imgUrl:img||null,status:'pending',
       partnerEmail:currentUser.email,partnerName:pData.name||currentUser.email,
       submittedAt:fb.serverTimestamp()
     });
@@ -4556,7 +4558,17 @@ window.partnerEditStock = async function(docId) {
     +'<div><label style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Name</label>'
     +'<input class="biz-input" id="edit-name-'+docId+'" value="'+item.name+'"></div>'
     +'<div><label style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Category</label>'
-    +'<select class="biz-input" id="edit-cat-'+docId+'"><option value="Workshop"'+(item.cat==='Workshop'?' selected':'')+'>Workshop</option><option value="Electronics"'+(item.cat==='Electronics'?' selected':'')+'>Electronics</option><option value="Crafts"'+(item.cat==='Crafts'?' selected':'')+'>Crafts</option><option value="Office"'+(item.cat==='Office'?' selected':'')+'>Office</option></select></div>'
+    +'<select class="biz-input" id="edit-cat-'+docId+'"><option value="Workshop"'+(item.cat==='Workshop'?' selected':'')+'>Workshop</option><option value="Electronics"'+(item.cat==='Electronics'?' selected':'')+'>Electronics</option><option value="Crafts"'+(item.cat==='Crafts'?' selected':'')+'>Crafts</option><option value="Office"'+(item.cat==='Office'?' selected':'')+'>Office</option><option value="Food"'+(item.cat==='Food'?' selected':'')+'>Food &amp; Drinks</option></select></div>'
+    +'</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">'
+    +'<div><label style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Listing Type</label>'
+    +'<select class="biz-input" id="edit-type-'+docId+'">'
+    +'<option value="rent"'+(!item.type||item.type==="rent"?' selected':'')+'>Rent only</option>'
+    +'<option value="buy"'+(item.type==="buy"?' selected':'')+'>Buy only</option>'
+    +'<option value="both"'+(item.type==="both"?' selected':'')+'>Rent &amp; Buy</option>'
+    +'</select></div>'
+    +'<div><label style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Buy Price ($)</label>'
+    +'<input class="biz-input" id="edit-buyPrice-'+docId+'" type="number" min="0" step="0.01" value="'+(item.buyPrice||0)+'"></div>'
     +'</div>'
     +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">'
     +'<div><label style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Qty</label>'
@@ -4585,7 +4597,11 @@ window.partnerSaveStock = async function(docId) {
   try {
     // Update Firestore pendingInventory doc
     await fb.updateDoc(fb.doc(fb.db,'pendingInventory',docId), {
-      name, cat, qty, pph, imgUrl: img||null
+      name, cat, qty,
+      pph: parseFloat((document.getElementById('edit-pph-'+docId)||{value:'0'}).value)||0,
+      buyPrice: parseFloat((document.getElementById('edit-buyPrice-'+docId)||{value:'0'}).value)||0,
+      type: (document.getElementById('edit-type-'+docId)||{value:'rent'}).value||'rent',
+      imgUrl: img||null
     });
     // Also update in RTDB if it's live (approved)
     var snap = await fb.getDoc(fb.doc(fb.db,'pendingInventory',docId));
@@ -4854,7 +4870,11 @@ window.renderBizInventory=function(wrap){
     '<div class="biz-card-body">',
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">',
     '<div><label style="display:block;font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Item Name *</label><input class="biz-input" id="inv-name" placeholder="e.g. DeWalt Drill"></div>',
-    '<div><label style="display:block;font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Category *</label><select class="biz-input" id="inv-cat"><option value="">Select...</option><option value="Workshop">Workshop</option><option value="Electronics">Electronics</option><option value="Crafts">Crafts</option><option value="Office">Office</option></select></div>',
+    '<div><label style="display:block;font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Category *</label><select class="biz-input" id="inv-cat"><option value="">Select...</option><option value="Workshop">Workshop</option><option value="Electronics">Electronics</option><option value="Crafts">Crafts</option><option value="Office">Office</option><option value=\'Food\'>Food &amp; Drinks</option></select></div>',
+    '</div>',
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">',
+    '<div><label style="display:block;font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Listing Type</label><select class="biz-input" id="inv-type"><option value="rent">Rent only</option><option value="buy">Buy only</option><option value="both">Rent &amp; Buy</option></select></div>',
+    '<div><label style="display:block;font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Buy Price ($)</label><input class="biz-input" id="inv-buyPrice" type="number" min="0" step="0.01" placeholder="0.00"></div>',
     '</div>',
     '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px">',
     '<div><label style="display:block;font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Qty</label><input class="biz-input" id="inv-qty" type="number" min="1" value="1"></div>',

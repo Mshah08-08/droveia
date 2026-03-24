@@ -2262,14 +2262,22 @@ function adminInventoryTable() {
 }
 
 function adminToolForm(tool, isEdit) {
-  var t = tool || { id:"", name:"", cat:"Workshop", retail:"", pph:0, rating:4.5, desc:"", eta:"", img:"" };
+  var t = tool || { id:"", name:"", cat:"Workshop", retail:"", pph:0, rating:4.5, desc:"", eta:"", img:"", type:"rent", buyPrice:0 };
+  var typeSelect = '<div class="admin-field"><label class="admin-label">Listing Type</label>' +
+    '<select class="admin-input" id="af-type">' +
+    '<option value="rent"'  + ((!t.type||t.type==='rent') ?' selected':'') + '>Rent only</option>' +
+    '<option value="buy"'   + (t.type==='buy'  ?' selected':'') + '>Buy only</option>' +
+    '<option value="both"'  + (t.type==='both' ?' selected':'') + '>Rent &amp; Buy</option>' +
+    '</select></div>';
   return '<div class="admin-form" id="' + (isEdit ? "admin-edit-form" : "admin-add-form") + '">' +
     '<div class="admin-form-title">' + (isEdit ? "Edit Tool — " + t.name : "Add New Tool") + '</div>' +
     '<div class="admin-form-grid">' +
       adminField("Name", "text", "af-name", t.name, true) +
       adminSelectField("Category", "af-cat", t.cat) +
+      typeSelect +
+      adminField("Buy Price ($)", "number", "af-buyPrice", t.buyPrice || 0, false) +
       adminField("Retail Price ($)", "number", "af-retail", t.retail, true) +
-      adminField("PPH (0 = auto)", "number", "af-pph", t.pph || 0, false) +
+      adminField("PPH / hr (0 = auto)", "number", "af-pph", t.pph || 0, false) +
       adminField("Rating", "number", "af-rating", t.rating || 4.5, false) +
       adminField("ETA (e.g. 8 min)", "text", "af-eta", t.eta, true) +
       adminField("Qty in Stock", "number", "af-qty", t.qty || 1, false) +

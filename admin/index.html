@@ -4588,7 +4588,7 @@ if (_savedPage && _savedPage !== "admin") {
 
 var _admTab = 'inventory';
 
-window.window.admShowStatusPicker = function(btn) {
+window.admShowStatusPicker = function(btn) {
   var orderId = btn.getAttribute('data-id');
   var picker = document.getElementById('spicker-' + orderId);
   if (!picker) return;
@@ -4615,7 +4615,7 @@ window.window.admShowStatusPicker = function(btn) {
     + '</div>';
 };
 
-window.window.admDeleteOrderById = async function(orderId) {
+window.admDeleteOrderById = async function(orderId) {
   showConfirm({ title:'Delete Order?', msg:'This cannot be undone.', okLabel:'Delete', color:'red', onOk: async function() {
     var fb = window._fb;
     try {
@@ -4627,7 +4627,7 @@ window.window.admDeleteOrderById = async function(orderId) {
   }});
 };
 
-window.window.admSetOrderStatus = async function(orderId, newStatus) {
+window.admSetOrderStatus = async function(orderId, newStatus) {
   // Close picker
   var picker = document.getElementById('spicker-' + orderId);
   if (picker) picker.style.display = 'none';

@@ -323,7 +323,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:var(--nav-h);backgro
 
 /* ── How it works ───────────────────────────── */
 .hiw-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:56px}
-.hiw-card{background:#fff;border:1.5px solid #d1d9f0;border-radius:var(--radius);padding:24px 20px;position:relative;overflow:hidden;box-shadow:0 2px 12px rgba(26,110,240,.08),0 1px 3px rgba(0,0,0,.06)}
+.hiw-card{background:#fff;border:1px solid #e8edf5;border-radius:14px;padding:24px 20px;position:relative;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04)}
 .hiw-step-num{font-size:48px;font-weight:900;color:rgba(26,110,240,.08);position:absolute;top:12px;right:16px;letter-spacing:-.05em;font-family:var(--font)}
 .hiw-icon{width:44px;height:44px;border-radius:12px;background:var(--blue-dim);border:1px solid var(--blue-mid);display:flex;align-items:center;justify-content:center;margin-bottom:14px}
 .hiw-title{font-size:15px;font-weight:700;margin-bottom:6px}
@@ -802,7 +802,7 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
 
 .cat-filter-btn {
   display:inline-flex;align-items:center;gap:5px;padding:8px 14px;
-  background:#f4f4f4;border:1.5px solid #e8e8e8;border-radius:20px;
+  background:#fff;border:1.5px solid #e8edf5;border-radius:20px;
   cursor:pointer;font-family:var(--font);font-size:13px;font-weight:500;
   color:#374151;transition:.12s;white-space:nowrap
 }
@@ -815,9 +815,9 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
 .bcat-name { font-size:12px;font-weight:600;color:#111 }
 
 /* ── Tool cards (compact for horizontal rows) ─── */
-.ddtool-sm { width:160px;flex-shrink:0;background:#fff;border:1px solid #e8e8e8;border-radius:10px;overflow:hidden;cursor:pointer;transition:.18s }
+.ddtool-sm { width:160px;flex-shrink:0;background:#fff;border:1px solid #e8edf5;border-radius:12px;overflow:hidden;cursor:pointer;transition:.18s;box-shadow:0 1px 4px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04) }
 .ddtool-sm:hover { box-shadow:0 2px 16px rgba(0,0,0,.1);transform:translateY(-1px) }
-.ddtool-sm-img { height:110px;background:#f8f8f8;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative }
+.ddtool-sm-img { height:110px;background:#f9fafb;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative }
 .ddtool-sm-img img { width:100%;height:100%;object-fit:contain;padding:8px }
 .ddtool-sm-body { padding:10px 10px }
 .ddtool-sm-name { font-size:13px;font-weight:700;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px }
@@ -843,7 +843,7 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
 
 /* ── Tool card hover glow ─── */
 .ddtool:hover { box-shadow:0 4px 24px rgba(26,110,240,.12);border-color:#c4d0f0 }
-.ddtool-sm:hover { box-shadow:0 4px 20px rgba(26,110,240,.1);border-color:#c4d0f0 }
+.ddtool-sm:hover { box-shadow:0 4px 16px rgba(0,0,0,.12);border-color:#c4d0f0;transform:translateY(-2px) }
 
 /* ── Add button pulse ─── */
 .ddtool-add:active, .ddtool-sm-add:active { transform:scale(.88) }
@@ -899,14 +899,14 @@ html, body { height:100%; }
 
 
 /* Category chips */
-.ddchip { display:inline-flex;align-items:center;gap:5px;padding:7px 14px;background:#f4f4f4;border:1.5px solid #e8e8e8;border-radius:20px;cursor:pointer;font-family:var(--font);font-size:13px;font-weight:500;color:#374151;transition:.12s;white-space:nowrap;flex-shrink:0 }
+.ddchip { display:inline-flex;align-items:center;gap:5px;padding:7px 14px;background:#fff;border:1.5px solid #e8edf5;border-radius:20px;cursor:pointer;font-family:var(--font);font-size:13px;font-weight:500;color:#374151;transition:.12s;white-space:nowrap;flex-shrink:0 }
 .ddchip:hover { border-color:#111; color:#111 }
 .ddchip.active { background:#1a6ef0; border-color:#1a6ef0; color:#fff }
 
 /* Tool cards */
-.ddtool { background:#fff;border:1px solid #e8e8e8;border-radius:10px;overflow:hidden;cursor:pointer;transition:.18s }
+.ddtool { background:#fff;border:1px solid #e8edf5;border-radius:12px;overflow:hidden;cursor:pointer;transition:.18s;box-shadow:0 1px 4px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04) }
 .ddtool:hover { box-shadow:0 2px 16px rgba(0,0,0,.1); transform:translateY(-1px) }
-.ddtool-img { aspect-ratio:4/3;background:#f8f8f8;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative }
+.ddtool-img { aspect-ratio:4/3;background:#f9fafb;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative }
 .ddtool-img img { width:100%;height:100%;object-fit:contain;padding:8px }
 .ddtool-body { padding:10px 12px }
 .ddtool-name { font-size:13px;font-weight:700;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px }

@@ -907,7 +907,7 @@ body{background:#f6f8ff;font-family:'Sora',sans-serif;padding-top:0!important;ma
 
 <div id="adm-splash" style="position:fixed;inset:0;background:#fff;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px">
   <div id="adm-splash-logo" style="display:flex;align-items:center;gap:16px;opacity:0;transform:translateY(20px);transition:opacity .5s ease,transform .5s ease">
-    <img src="1.png" style="width:80px;height:80px;border-radius:20px;box-shadow:0 12px 40px rgba(26,110,240,.3)">
+    <img src="1.png" style="height:72px;width:auto;border-radius:16px;box-shadow:0 12px 40px rgba(26,110,240,.3)">
     <div>
       <div style="font-size:36px;font-weight:800;color:#1a6ef0;letter-spacing:-.03em;line-height:1">Droveia</div>
       <div style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.14em;margin-top:4px">Admin Console</div>
@@ -4705,26 +4705,50 @@ window.admApproveInventory = async function(btn) {
   var item = JSON.parse(decodeURIComponent(btn.dataset.item));
   var fb = window._fb;
   try {
-    // Add to RTDB - push first, then write
+    // 1. Reload fresh RTDB data first so we don't overwrite with stale TOOLS
+    var liveData = await fetch('https://droveia-default-rtdb.firebaseio.com/tools.json?auth=NKLKSY1Cshm1pba0vuKK6RQOmjV2uOfeje7hzxkI').then(function(r){ return r.json(); });
+    var liveArr = !liveData ? [] : Array.isArray(liveData) ? liveData : Object.values(liveData);
+    liveArr = liveArr.filter(Boolean);
+
+    // 2. Build new tool with a unique id
+    var maxId = liveArr.reduce(function(m,t){ return Math.max(m, parseInt(t.id)||0); }, 0);
     var newTool = {
-      id: Date.now(),
+      id: maxId + 1,
       name: item.name, cat: item.cat, desc: item.desc||'',
-      pph: item.pph||0, retail: (item.pph||0)*20,
-      type: item.type||'rent', buyPrice: parseFloat(item.buyPrice)||0,
+      pph: parseFloat(item.pph)||0,
+      retail: parseFloat(item.pph) ? parseFloat(item.pph)*20 : 20,
+      type: item.type||'rent',
+      buyPrice: parseFloat(item.buyPrice)||0,
       rating: 4.5, eta: '< 30 min',
-      img: item.imgUrl||'x', qty: item.qty||1, rentedQty: 0,
+      img: item.imgUrl||'x',
+      qty: parseInt(item.qty)||1, rentedQty: 0,
       available: true,
-      partnerEmail: item.partnerEmail, partnerName: item.partnerName
+      partnerEmail: item.partnerEmail||'',
+      partnerName: item.partnerName||''
     };
-    TOOLS.push(newTool);
-    await fetch('https://droveia-default-rtdb.firebaseio.com/tools.json', {
-      method:'PUT', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify(TOOLS)
+
+    // 3. Append and write back
+    liveArr.push(newTool);
+    await fetch('https://droveia-default-rtdb.firebaseio.com/tools.json?auth=NKLKSY1Cshm1pba0vuKK6RQOmjV2uOfeje7hzxkI', {
+      method: 'PUT',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(liveArr)
     });
-    await fb.updateDoc(fb.doc(fb.db,'pendingInventory',docId), {status:'approved'});
-    showToast('✓ Item approved and added to inventory');
-    admTab('inventory', document.getElementById('adm-nav-inventory'));
-  } catch(e) { showToast('Error: '+e.message); }
+
+    // 4. Update Firestore status
+    await fb.updateDoc(fb.doc(fb.db,'pendingInventory',docId), {
+      status: 'approved', approvedAt: fb.serverTimestamp()
+    });
+
+    // 5. Sync local TOOLS array
+    await loadToolsFromRTDB();
+
+    showToast('✓ ' + item.name + ' approved and live on store');
+
+    // 6. Refresh partner stock view
+    var wrap = document.getElementById('adm-content');
+    if (wrap) await renderAdmPartnerStock(wrap);
+  } catch(e) { showToast('Error: '+e.message); console.error(e); }
 };
 
 window.admRejectInventory = async function(docId) {

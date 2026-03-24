@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <link rel="icon" type="image/png" href="../1.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Droveia</title>
+<title>Droveia: Business</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
 <style>
@@ -88,7 +88,7 @@
   color:#93c5fd !important;
 }
 [data-theme="dark"] .tool-card { background:var(--bg2) !important; }
-[data-theme="dark"] .tool-card-img {background:var(--bg2) !important}
+[data-theme="dark"] .tool-card-
 [data-theme="dark"] .tool-card:hover {
   box-shadow:0 12px 36px rgba(0,0,0,.5) !important;
   border-color:rgba(26,110,240,.3) !important;
@@ -895,7 +895,7 @@ body.landing-mode .biz-sidebar { justify-content:flex-end; padding-bottom:16px; 
 <!-- Splash screen -->
 <div id="biz-splash" style="position:fixed;inset:0;background:#fff;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px">
   <div id="splash-logo-wrap" style="display:flex;align-items:center;gap:14px;opacity:0;transform:translateY(20px);transition:opacity .5s ease,transform .5s ease">
-    <img src="1.png" style="width:80px;height:80px;border-radius:20px;box-shadow:0 12px 40px rgba(26,110,240,.3)">
+    <img src="1.png" style="height:72px;width:auto;border-radius:0;box-shadow:none;background:transparent">
     <div>
       <div style="font-size:32px;font-weight:800;color:#1a6ef0;letter-spacing:-.03em;line-height:1">Droveia</div>
       <div style="font-size:12px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:.12em;margin-top:3px">Partner Portal</div>
@@ -1003,7 +1003,7 @@ body.landing-mode .biz-sidebar { justify-content:flex-end; padding-bottom:16px; 
 <header style="position:fixed;top:0;left:0;right:0;height:60px;background:#fff;border-bottom:1px solid #ebebeb;z-index:300;display:flex;align-items:center;padding:0;gap:0">
   <!-- Logo section — exactly 220px, aligns with sidebar -->
   <div style="width:220px;flex-shrink:0;height:60px;display:flex;align-items:center;gap:10px;padding:0 20px;border-right:1px solid #ebebeb;box-sizing:border-box">
-    <img src="1.png" style="width:28px;height:28px;border-radius:6px;object-fit:contain;flex-shrink:0">
+    <img src="1.png" style="height:28px;width:auto;border-radius:0;object-fit:contain;flex-shrink:0;background:transparent">
     <div>
       <div style="font-size:15px;font-weight:800;color:#1a6ef0;letter-spacing:-.02em;line-height:1.2">Droveia</div>
       <div style="font-size:9px;color:#9ca3af;font-weight:600;text-transform:uppercase;letter-spacing:.08em">Partner Portal</div>
@@ -1857,8 +1857,7 @@ function fmtDate(d) {
 
 // ── Account ───────────────────────────────────────────────────────────────────
 function renderAccount() {
-  if (!document.getElementById('page-account') && !document.getElementById('biz-page-content')) return;
-  if (document.getElementById('biz-page-content') && !document.getElementById('page-account')) return; // business portal
+  if (!document.getElementById('prof-name')) return;
   if (!currentUser) { showAuth(); return; }
   if (!userProfile) return;
   var full = ((userProfile.firstName||"")+" "+(userProfile.lastName||"")).trim()||"Student";
@@ -3079,79 +3078,86 @@ function renderApiKeysList(keys) {
 
 function renderApiDocs() {
   var pre = function(code) {
-    return '<pre style="background:var(--bg3);border-radius:8px;padding:12px;font-size:12px;overflow-x:auto;margin:0;color:var(--text2);font-family:monospace">' + code + '</pre>';
+    return '<pre style="background:#f8f9fa;border-radius:8px;padding:12px;font-size:12px;overflow-x:auto;margin:0;color:#374151;font-family:monospace">' + code + '</pre>';
   };
-  var tag = function(method, color) {
-    return '<span style="font-size:11px;font-weight:800;padding:3px 9px;border-radius:5px;background:' + color + ';font-family:monospace">' + method + '</span>';
-  };
-
-    var nl = "\n";
-  var reqBody = ['{', nl,
-    '  "customerName": "John Smith",', nl,
-    '  "customerPhone": "555-123-4567",', nl,
-    '  "deliveryAddress": "123 Main St, Plano TX",', nl,
-    '  "items": [{ "name": "DeWalt Drill", "qty": 1 }],', nl,
-    '  "notes": "Leave at door"', nl, '}'
-  ].join('');
-  var postResp = ['{', nl,
-    '  "deliveryId": "abc123xyz",', nl,
-    '  "status": "pending_approval",', nl,
-    '  "message": "Awaiting partner confirmation."', nl, '}'
-  ].join('');
-  var getResp = ['{', nl,
-    '  "deliveryId": "abc123xyz",', nl,
-    '  "status": "dispatched",', nl,
-    '  "customerName": "John Smith"', nl, '}'
-  ].join('');
-  var listResp = ['{', nl,
-    '  "deliveries": [{ "deliveryId": "...", "status": "delivered" }]', nl, '}'
-  ].join('');
-
-    var endpoint = function(method, path, desc, body, resp) {
-    var colors = { POST: 'rgba(29,78,216,.12);color:#1d4ed8', GET: 'rgba(21,128,61,.1);color:#15803d' };
-    return '<div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:12px">' +
-      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">' +
-        tag(method, colors[method]) +
-        '<code style="font-size:13px;font-weight:600;color:var(--text)">' + path + '</code>' +
-      '</div>' +
-      '<div style="font-size:13px;color:var(--muted);margin-bottom:10px">' + desc + '</div>' +
-      (body ? '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--dim);margin-bottom:5px">Request body</div>' + pre(body) + '<br>' : '') +
-      '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--dim);margin-bottom:5px">Response</div>' +
-      pre(resp) +
-    '</div>';
+  var endpoint = function(method, path, desc, body, resp) {
+    var colors = {
+      POST: 'background:rgba(29,78,216,.1);color:#1d4ed8',
+      GET:  'background:rgba(21,128,61,.1);color:#15803d'
+    };
+    return '<div style="background:#fff;border:1px solid #e8e8e8;border-radius:12px;padding:18px 20px;margin-bottom:12px">'
+      + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">'
+      + '<span style="font-size:11px;font-weight:800;padding:3px 9px;border-radius:5px;font-family:monospace;' + colors[method] + '">' + method + '</span>'
+      + '<code style="font-size:13px;font-weight:600;color:#111">' + path + '</code>'
+      + '</div>'
+      + '<div style="font-size:13px;color:#6b7280;margin-bottom:10px">' + desc + '</div>'
+      + (body ? '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#9ca3af;margin-bottom:5px">Request body</div>' + pre(body) + '<br>' : '')
+      + '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#9ca3af;margin-bottom:5px">Response</div>'
+      + pre(resp)
+      + '</div>';
   };
 
-  return '<div style="max-width:640px">' +
+  var reqBody  = '{\n  "customerName": "John Smith",\n  "customerPhone": "555-123-4567",\n  "deliveryAddress": "123 Main St, Plano TX",\n  "items": [{ "name": "DeWalt Drill", "qty": 1 }],\n  "notes": "Leave at door"\n}';
+  var postResp = '{\n  "deliveryId": "abc123xyz",\n  "status": "pending_approval",\n  "message": "Awaiting partner confirmation."\n}';
+  var getResp  = '{\n  "deliveryId": "abc123xyz",\n  "status": "dispatched",\n  "customerName": "John Smith"\n}';
+  var listResp = '{\n  "deliveries": [{ "deliveryId": "...", "status": "delivered" }]\n}';
+  var statusReqBody  = '{\n  "status": "station_ready"\n}';
+  var statusResp = '{\n  "deliveryId": "abc123xyz",\n  "status": "station_ready",\n  "message": "Drone will dispatch shortly."\n}';
 
-    '<div style="margin-bottom:20px">' +
-      '<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:6px">Base URL</div>' +
-      '<code style="display:block;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px 16px;font-size:13px;color:var(--blue)">http://localhost:3001</code>' +
-    '</div>' +
+  return '<div style="max-width:640px">'
 
-    '<div style="background:var(--blue-dim);border:1px solid var(--blue-mid);border-radius:12px;padding:14px 18px;margin-bottom:20px">' +
-      '<div style="font-size:13px;font-weight:700;color:var(--blue);margin-bottom:5px">Authentication</div>' +
-      '<code style="font-size:12px;font-family:monospace;color:var(--text2)">x-api-key: drv_your_key_here</code>' +
-    '</div>' +
+    + '<div style="margin-bottom:20px">'
+    + '<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#9ca3af;margin-bottom:6px">Base URL</div>'
+    + '<code style="display:block;background:#f8f9fa;border:1px solid #e8e8e8;border-radius:10px;padding:12px 16px;font-size:13px;color:#1a6ef0">http://localhost:3001</code>'
+    + '</div>'
 
-    endpoint('POST', '/v1/deliveries', 'Place a new delivery order', reqBody, postResp) +
-    endpoint('GET',  '/v1/deliveries/:id', 'Check status of a specific order', null, getResp) +
-    endpoint('GET',  '/v1/deliveries', 'List your last 50 orders', null, listResp) +
+    + '<div style="background:#eff6ff;border:1px solid rgba(26,110,240,.2);border-radius:12px;padding:14px 18px;margin-bottom:20px">'
+    + '<div style="font-size:13px;font-weight:700;color:#1a6ef0;margin-bottom:5px">Authentication</div>'
+    + '<code style="font-size:12px;font-family:monospace;color:#374151">x-api-key: drv_your_key_here</code>'
+    + '<div style="font-size:12px;color:#6b7280;margin-top:6px">Include this header on every request. Generate a key in the API Key tab.</div>'
+    + '</div>'
 
-    '<div style="background:rgba(217,119,6,.08);border:1px solid rgba(217,119,6,.2);border-radius:12px;padding:14px 18px">' +
-      '<div style="font-size:13px;font-weight:700;color:#d97706;margin-bottom:8px">Status flow</div>' +
-      '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:12px;font-family:monospace">' +
-        '<span style="background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:3px 9px">pending_approval</span>' +
-        '<span style="color:var(--muted)">&rarr;</span>' +
-        '<span style="background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:3px 9px">approved</span>' +
-        '<span style="color:var(--muted)">&rarr;</span>' +
-        '<span style="background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:3px 9px">dispatched</span>' +
-        '<span style="color:var(--muted)">&rarr;</span>' +
-        '<span style="background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:3px 9px">delivered</span>' +
-      '</div>' +
-      '<div style="font-size:12px;color:var(--muted);margin-top:8px">Mark the order <strong>approved</strong> in your dashboard once the package is in the docking station. The drone dispatches automatically.</div>' +
-    '</div>' +
+    + endpoint('POST', '/v1/deliveries', 'Place a new delivery order', reqBody, postResp)
+    + endpoint('GET',  '/v1/deliveries/:id', 'Check status of a specific order', null, getResp)
+    + endpoint('GET',  '/v1/deliveries', 'List your last 50 orders', null, listResp)
 
-  '</div>';
+    + endpoint('POST', '/v1/deliveries/:id/status',
+        'Update the status of an order. Only two values accepted — <strong>received</strong> or <strong>station_ready</strong>. All other transitions (dispatching, delivered) happen automatically.',
+        statusReqBody, statusResp)
+
+    + '<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:14px 18px;margin-bottom:16px">'
+    + '<div style="font-size:12px;font-weight:800;color:#d97706;margin-bottom:10px">ALLOWED STATUS VALUES</div>'
+    + '<div style="display:flex;flex-direction:column;gap:10px">'
+    + '<div style="display:flex;align-items:flex-start;gap:12px">'
+    + '<code style="background:#f0fdf4;color:#16a34a;padding:3px 10px;border-radius:5px;font-size:11px;font-weight:700;flex-shrink:0">received</code>'
+    + '<div style="font-size:12px;color:#6b7280;line-height:1.5">Your system acknowledged the order. Use this as a confirmation that your integration picked up the delivery request.</div>'
+    + '</div>'
+    + '<div style="display:flex;align-items:flex-start;gap:12px">'
+    + '<code style="background:#eff6ff;color:#1a6ef0;padding:3px 10px;border-radius:5px;font-size:11px;font-weight:700;flex-shrink:0">station_ready</code>'
+    + '<div style="font-size:12px;color:#6b7280;line-height:1.5">Item is physically loaded into the docking station. <strong>This is the launch trigger</strong> — the drone dispatches automatically once this is set.</div>'
+    + '</div>'
+    + '</div>'
+    + '</div>'
+
+    + '<div style="background:rgba(217,119,6,.08);border:1px solid rgba(217,119,6,.2);border-radius:12px;padding:14px 18px;margin-bottom:20px">'
+    + '<div style="font-size:13px;font-weight:700;color:#d97706;margin-bottom:8px">Status flow</div>'
+    + '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:12px;font-family:monospace">'
+    + '<span style="background:#fff;border:1px solid #e8e8e8;border-radius:6px;padding:3px 10px">pending_approval</span>'
+    + '<span style="color:#9ca3af">&rarr;</span>'
+    + '<span style="background:#fff;border:1px solid #e8e8e8;border-radius:6px;padding:3px 10px">received</span>'
+    + '<span style="color:#9ca3af">&rarr;</span>'
+    + '<span style="background:#fff;border:1px solid #e8e8e8;border-radius:6px;padding:3px 10px">station_ready</span>'
+    + '<span style="color:#9ca3af">&rarr;</span>'
+    + '<span style="background:#fff;border:1px solid #e8e8e8;border-radius:6px;padding:3px 10px">dispatching</span>'
+    + '<span style="color:#9ca3af">&rarr;</span>'
+    + '<span style="background:#fff;border:1px solid #e8e8e8;border-radius:6px;padding:3px 10px">dispatched</span>'
+    + '<span style="color:#9ca3af">&rarr;</span>'
+    + '<span style="background:#fff;border:1px solid #e8e8e8;border-radius:6px;padding:3px 10px">delivered</span>'
+    + '</div>'
+    + '<div style="font-size:12px;color:#6b7280;margin-top:8px">You control: <strong>received</strong> and <strong>station_ready</strong>. Everything after dispatching is automatic.</div>'
+    + '</div>'
+
+    + '</div>';
 }
 
 function renderPartnerOrders(deliveries) {
@@ -3270,7 +3276,7 @@ function startApp() {
         };
         await fb.setDoc(pRef(currentUser.uid), userProfile);
       }
-      renderAccount();
+      // renderAccount not needed on this page
     } catch(e){ console.error("loadProfile",e); }
   }
 
@@ -4517,8 +4523,10 @@ window.partnerSubmitStock = async function() {
   var cat   = (document.getElementById('inv-cat')||{value:''}).value;
   var desc  = (document.getElementById('inv-desc')||{value:''}).value.trim();
   var qty   = parseInt((document.getElementById('inv-qty')||{value:'1'}).value)||1;
-  var price = parseFloat((document.getElementById('inv-price')||{value:'0'}).value)||0;
-  var img   = (document.getElementById('inv-img')||{value:''}).value.trim();
+  var price    = parseFloat((document.getElementById('inv-price')||{value:'0'}).value)||0;
+  var buyPrice = parseFloat((document.getElementById('inv-buyPrice')||{value:'0'}).value)||0;
+  var listType = (document.getElementById('inv-type')||{value:'rent'}).value || 'rent';
+  var img      = (document.getElementById('inv-img')||{value:''}).value.trim();
   if (!name||!cat){showToast('Name and category required');return;}
   var fb=window._fb;if(!fb||!window.currentUser)return;
   var btn=document.getElementById('inv-submit-btn');
@@ -4527,7 +4535,7 @@ window.partnerSubmitStock = async function() {
     var pSnap=await fb.getDocs(fb.query(fb.collection(fb.db,'partners'),fb.where('email','==',currentUser.email)));
     var pData=pSnap.empty?{}:pSnap.docs[0].data();
     await fb.addDoc(fb.collection(fb.db,'pendingInventory'),{
-      name,cat,desc,qty,pph:price,imgUrl:img||null,status:'pending',
+      name,cat,desc,qty,pph:price,buyPrice:buyPrice||0,type:listType||'rent',imgUrl:img||null,status:'pending',
       partnerEmail:currentUser.email,partnerName:pData.name||currentUser.email,
       submittedAt:fb.serverTimestamp()
     });
@@ -4557,7 +4565,17 @@ window.partnerEditStock = async function(docId) {
     +'<div><label style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Name</label>'
     +'<input class="biz-input" id="edit-name-'+docId+'" value="'+item.name+'"></div>'
     +'<div><label style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Category</label>'
-    +'<select class="biz-input" id="edit-cat-'+docId+'"><option value="Workshop"'+(item.cat==='Workshop'?' selected':'')+'>Workshop</option><option value="Electronics"'+(item.cat==='Electronics'?' selected':'')+'>Electronics</option><option value="Crafts"'+(item.cat==='Crafts'?' selected':'')+'>Crafts</option><option value="Office"'+(item.cat==='Office'?' selected':'')+'>Office</option></select></div>'
+    +'<select class="biz-input" id="edit-cat-'+docId+'"><option value="Workshop"'+(item.cat==='Workshop'?' selected':'')+'>Workshop</option><option value="Electronics"'+(item.cat==='Electronics'?' selected':'')+'>Electronics</option><option value="Crafts"'+(item.cat==='Crafts'?' selected':'')+'>Crafts</option><option value="Office"'+(item.cat==='Office'?' selected':'')+'>Office</option><option value="Food"'+(item.cat==='Food'?' selected':'')+'>Food &amp; Drinks</option></select></div>'
+    +'</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">'
+    +'<div><label style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Listing Type</label>'
+    +'<select class="biz-input" id="edit-type-'+docId+'">'
+    +'<option value="rent"'+(!item.type||item.type==="rent"?' selected':'')+'>Rent only</option>'
+    +'<option value="buy"'+(item.type==="buy"?' selected':'')+'>Buy only</option>'
+    +'<option value="both"'+(item.type==="both"?' selected':'')+'>Rent &amp; Buy</option>'
+    +'</select></div>'
+    +'<div><label style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Buy Price ($)</label>'
+    +'<input class="biz-input" id="edit-buyPrice-'+docId+'" type="number" min="0" step="0.01" value="'+(item.buyPrice||0)+'"></div>'
     +'</div>'
     +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">'
     +'<div><label style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Qty</label>'
@@ -4577,39 +4595,61 @@ window.partnerEditStock = async function(docId) {
 window.partnerSaveStock = async function(docId) {
   if (typeof docId !== "string") docId = docId.dataset ? docId.dataset.id : String(docId);
   var fb = window._fb; if(!fb||!window.currentUser) return;
-  var name = (document.getElementById('edit-name-'+docId)||{value:''}).value.trim();
-  var cat  = (document.getElementById('edit-cat-'+docId)||{value:''}).value;
-  var qty  = parseInt((document.getElementById('edit-qty-'+docId)||{value:'1'}).value)||1;
-  var pph  = parseFloat((document.getElementById('edit-pph-'+docId)||{value:'0'}).value)||0;
-  var img  = (document.getElementById('edit-img-'+docId)||{value:''}).value.trim();
+  var name     = (document.getElementById('edit-name-'+docId)||{value:''}).value.trim();
+  var cat      = (document.getElementById('edit-cat-'+docId)||{value:''}).value;
+  var qty      = parseInt((document.getElementById('edit-qty-'+docId)||{value:'1'}).value)||1;
+  var pph      = parseFloat((document.getElementById('edit-pph-'+docId)||{value:'0'}).value)||0;
+  var buyPrice = parseFloat((document.getElementById('edit-buyPrice-'+docId)||{value:'0'}).value)||0;
+  var type     = (document.getElementById('edit-type-'+docId)||{value:'rent'}).value||'rent';
+  var img      = (document.getElementById('edit-img-'+docId)||{value:''}).value.trim();
   if (!name) { showToast('Name required'); return; }
   try {
-    // Update Firestore pendingInventory doc
+    // 1. Get current Firestore doc BEFORE updating (to get rtdbId and status)
+    var snapBefore = await fb.getDoc(fb.doc(fb.db,'pendingInventory',docId));
+    var dataBefore = snapBefore.exists() ? snapBefore.data() : {};
+
+    // 2. Update Firestore
     await fb.updateDoc(fb.doc(fb.db,'pendingInventory',docId), {
-      name, cat, qty, pph, imgUrl: img||null
+      name, cat, qty, pph, buyPrice, type,
+      imgUrl: img||null,
+      partnerEmail: window.currentUser.email
     });
-    // Also update in RTDB if it's live (approved)
-    var snap = await fb.getDoc(fb.doc(fb.db,'pendingInventory',docId));
-    if (snap.exists() && snap.data().status === 'approved') {
+
+    // 3. If approved, sync to RTDB
+    if (dataBefore.status === 'approved') {
       try {
-        var rtdbResp = await fetch('https://droveia-default-rtdb.firebaseio.com/tools.json');
-        var tools = await rtdbResp.json();
+        var RTDB = 'https://droveia-default-rtdb.firebaseio.com/tools.json?auth=NKLKSY1Cshm1pba0vuKK6RQOmjV2uOfeje7hzxkI';
+        var tools = await fetch(RTDB).then(function(r){ return r.json(); });
         var arr = tools ? (Array.isArray(tools) ? tools : Object.values(tools)) : [];
-        var updated = false;
+        arr = arr.filter(Boolean);
+        var rtdbId   = dataBefore.rtdbId;     // set when approved
+        var oldName  = dataBefore.name;
+        var updated  = false;
         arr = arr.map(function(t) {
-          if (t && t.partnerEmail === currentUser.email && t.name === snap.data().name) {
+          // Match by rtdbId if available, otherwise fall back to partnerEmail+oldName
+          var match = rtdbId ? (parseInt(t.id) === parseInt(rtdbId))
+                             : (t.partnerEmail === window.currentUser.email && t.name === oldName);
+          if (match) {
             updated = true;
-            return Object.assign({}, t, {name, cat, qty, pph, img: img||t.img||'x'});
+            return Object.assign({}, t, {
+              name: name, cat: cat, qty: qty, pph: pph,
+              buyPrice: buyPrice, type: type,
+              img: img || t.img || 'x',
+              available: qty > (t.rentedQty||0)
+            });
           }
           return t;
         });
         if (updated) {
-          await fetch('https://droveia-default-rtdb.firebaseio.com/tools.json', {
-            method:'PUT', headers:{'Content-Type':'application/json'},
+          await fetch(RTDB, {
+            method: 'PUT',
+            headers: {'Content-Type':'application/json'},
             body: JSON.stringify(arr)
           });
+        } else {
+          console.warn('partnerSaveStock: no matching RTDB tool found');
         }
-      } catch(e2) { console.warn('RTDB update skipped:', e2); }
+      } catch(e2) { console.warn('RTDB update failed:', e2); }
     }
     showToast('✓ Item updated');
     loadPartnerStock();
@@ -4845,9 +4885,7 @@ window.renderBizOrders=async function(wrap){
     var badge=document.getElementById('bnav-orders-badge');
     if(badge){badge.style.display=pending?'inline':'none';badge.textContent=pending;}
     wrap.innerHTML='<div class="biz-card"><div class="biz-card-body">'+renderPartnerOrders(deliveries)+'</div></div>';
-  }catch(e){wrap.innerHTML='<div style="color:#ef4444;padding:20px">Error: '+e.message+'</div>';}
-};
-
+  }catch(e){wrap.innerHTML='<div style="color:#ef4444;padding:20px">Error: '+e.message;}};
 window.renderBizInventory=function(wrap){
   wrap.innerHTML=[
     '<div class="biz-card" style="margin-bottom:20px">',
@@ -4855,7 +4893,11 @@ window.renderBizInventory=function(wrap){
     '<div class="biz-card-body">',
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">',
     '<div><label style="display:block;font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Item Name *</label><input class="biz-input" id="inv-name" placeholder="e.g. DeWalt Drill"></div>',
-    '<div><label style="display:block;font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Category *</label><select class="biz-input" id="inv-cat"><option value="">Select...</option><option value="Workshop">Workshop</option><option value="Electronics">Electronics</option><option value="Crafts">Crafts</option><option value="Office">Office</option></select></div>',
+    '<div><label style="display:block;font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Category *</label><select class="biz-input" id="inv-cat"><option value="">Select...</option><option value="Workshop">Workshop</option><option value="Electronics">Electronics</option><option value="Crafts">Crafts</option><option value="Office">Office</option><option value=\'Food\'>Food &amp; Drinks</option></select></div>',
+    '</div>',
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">',
+    '<div><label style="display:block;font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Listing Type</label><select class="biz-input" id="inv-type"><option value="rent">Rent only</option><option value="buy">Buy only</option><option value="both">Rent &amp; Buy</option></select></div>',
+    '<div><label style="display:block;font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Buy Price ($)</label><input class="biz-input" id="inv-buyPrice" type="number" min="0" step="0.01" placeholder="0.00"></div>',
     '</div>',
     '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px">',
     '<div><label style="display:block;font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Qty</label><input class="biz-input" id="inv-qty" type="number" min="1" value="1"></div>',

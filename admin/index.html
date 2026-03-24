@@ -4586,8 +4586,10 @@ window.renderAdmInventory = async function(wrap) {
         +'<td>'+img+'</td>'
         +'<td><div style="font-weight:600;font-size:13px">'+t.name+'</div><div style="font-size:11px;color:#9ca3af">ID: '+t.id+'</div></td>'
         +'<td><span class="adm-badge adm-badge-blue" style="font-size:10px">'+t.cat+'</span></td>'
-        +'<td style="font-weight:600">$'+calcCost(t,1).toFixed(2)+'<span style="font-size:10px;color:#9ca3af">/hr</span></td>'
-        +'<td><span style="font-weight:600">'+t.qty+'</span><span style="color:#9ca3af"> / '+(t.rentedQty||0)+'</span></td>'
+        +'<td><span class="adm-badge adm-badge-'+(t.type==='buy'?'amber':t.type==='both'?'blue':'green')+'" style="font-size:10px">'+(t.type==='buy'?'Buy only':t.type==='both'?'Rent+Buy':'Rent only')+'</span></td>'
+        +'<td style="font-weight:600">'+((t.type==='rent'||!t.type)?'$'+calcCost(t,1).toFixed(2)+'/hr':'—')+'</td>'
+        +'<td style="font-weight:600">'+((t.type==='buy'||t.type==='both')?'$'+(t.buyPrice||0).toFixed(2):'—')+'</td>'
+        +'<td><span style="font-weight:600">'+t.qty+'</span></td>'
         +'<td><span class="adm-badge '+(avail?'adm-badge-green':'adm-badge-red')+'">'+(avail?'Available':'Rented')+'</span></td>'
         +'<td><div style="display:flex;gap:6px">'
         +'<button class="adm-btn-ghost" onclick="adminEditTool('+t.id+')" style="font-size:11px;padding:5px 10px">Edit</button>'
@@ -4683,6 +4685,7 @@ window.admApproveInventory = async function(btn) {
       id: Date.now(),
       name: item.name, cat: item.cat, desc: item.desc||'',
       pph: item.pph||0, retail: (item.pph||0)*20,
+      type: item.type||'rent', buyPrice: parseFloat(item.buyPrice)||0,
       rating: 4.5, eta: '< 30 min',
       img: item.imgUrl||'x', qty: item.qty||1, rentedQty: 0,
       available: true,

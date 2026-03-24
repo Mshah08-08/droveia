@@ -4595,46 +4595,61 @@ window.partnerEditStock = async function(docId) {
 window.partnerSaveStock = async function(docId) {
   if (typeof docId !== "string") docId = docId.dataset ? docId.dataset.id : String(docId);
   var fb = window._fb; if(!fb||!window.currentUser) return;
-  var name = (document.getElementById('edit-name-'+docId)||{value:''}).value.trim();
-  var cat  = (document.getElementById('edit-cat-'+docId)||{value:''}).value;
-  var qty  = parseInt((document.getElementById('edit-qty-'+docId)||{value:'1'}).value)||1;
-  var pph  = parseFloat((document.getElementById('edit-pph-'+docId)||{value:'0'}).value)||0;
-  var img  = (document.getElementById('edit-img-'+docId)||{value:''}).value.trim();
+  var name     = (document.getElementById('edit-name-'+docId)||{value:''}).value.trim();
+  var cat      = (document.getElementById('edit-cat-'+docId)||{value:''}).value;
+  var qty      = parseInt((document.getElementById('edit-qty-'+docId)||{value:'1'}).value)||1;
+  var pph      = parseFloat((document.getElementById('edit-pph-'+docId)||{value:'0'}).value)||0;
+  var buyPrice = parseFloat((document.getElementById('edit-buyPrice-'+docId)||{value:'0'}).value)||0;
+  var type     = (document.getElementById('edit-type-'+docId)||{value:'rent'}).value||'rent';
+  var img      = (document.getElementById('edit-img-'+docId)||{value:''}).value.trim();
   if (!name) { showToast('Name required'); return; }
   try {
-    // Update Firestore pendingInventory doc
+    // 1. Get current Firestore doc BEFORE updating (to get rtdbId and status)
+    var snapBefore = await fb.getDoc(fb.doc(fb.db,'pendingInventory',docId));
+    var dataBefore = snapBefore.exists() ? snapBefore.data() : {};
+
+    // 2. Update Firestore
     await fb.updateDoc(fb.doc(fb.db,'pendingInventory',docId), {
-      name, cat, qty,
-      pph: parseFloat((document.getElementById('edit-pph-'+docId)||{value:'0'}).value)||0,
-      buyPrice: parseFloat((document.getElementById('edit-buyPrice-'+docId)||{value:'0'}).value)||0,
-      type: (document.getElementById('edit-type-'+docId)||{value:'rent'}).value||'rent',
+      name, cat, qty, pph, buyPrice, type,
       imgUrl: img||null,
       partnerEmail: window.currentUser.email
     });
-    // Also update in RTDB if it's live (approved)
-    var snap = await fb.getDoc(fb.doc(fb.db,'pendingInventory',docId));
-    if (snap.exists() && snap.data().status === 'approved') {
+
+    // 3. If approved, sync to RTDB
+    if (dataBefore.status === 'approved') {
       try {
-        var rtdbResp = await fetch('https://droveia-default-rtdb.firebaseio.com/tools.json');
-        var tools = await rtdbResp.json();
+        var RTDB = 'https://droveia-default-rtdb.firebaseio.com/tools.json?auth=NKLKSY1Cshm1pba0vuKK6RQOmjV2uOfeje7hzxkI';
+        var tools = await fetch(RTDB).then(function(r){ return r.json(); });
         var arr = tools ? (Array.isArray(tools) ? tools : Object.values(tools)) : [];
-        var updated = false;
+        arr = arr.filter(Boolean);
+        var rtdbId   = dataBefore.rtdbId;     // set when approved
+        var oldName  = dataBefore.name;
+        var updated  = false;
         arr = arr.map(function(t) {
-          if (t && t.partnerEmail === currentUser.email && t.name === snap.data().name) {
+          // Match by rtdbId if available, otherwise fall back to partnerEmail+oldName
+          var match = rtdbId ? (parseInt(t.id) === parseInt(rtdbId))
+                             : (t.partnerEmail === window.currentUser.email && t.name === oldName);
+          if (match) {
             updated = true;
-            var _type = (document.getElementById('edit-type-'+docId)||{value:'rent'}).value||'rent';
-            var _buy  = parseFloat((document.getElementById('edit-buyPrice-'+docId)||{value:'0'}).value)||0;
-            return Object.assign({}, t, {name, cat, qty, pph, img: img||t.img||'x', type: _type, buyPrice: _buy});
+            return Object.assign({}, t, {
+              name: name, cat: cat, qty: qty, pph: pph,
+              buyPrice: buyPrice, type: type,
+              img: img || t.img || 'x',
+              available: qty > (t.rentedQty||0)
+            });
           }
           return t;
         });
         if (updated) {
-          await fetch('https://droveia-default-rtdb.firebaseio.com/tools.json', {
-            method:'PUT', headers:{'Content-Type':'application/json'},
+          await fetch(RTDB, {
+            method: 'PUT',
+            headers: {'Content-Type':'application/json'},
             body: JSON.stringify(arr)
           });
+        } else {
+          console.warn('partnerSaveStock: no matching RTDB tool found');
         }
-      } catch(e2) { console.warn('RTDB update skipped:', e2); }
+      } catch(e2) { console.warn('RTDB update failed:', e2); }
     }
     showToast('✓ Item updated');
     loadPartnerStock();

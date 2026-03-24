@@ -4737,7 +4737,7 @@ window.admApproveInventory = async function(btn) {
 
     // 4. Update Firestore status
     await fb.updateDoc(fb.doc(fb.db,'pendingInventory',docId), {
-      status: 'approved', approvedAt: fb.serverTimestamp()
+      status: 'approved', approvedAt: fb.serverTimestamp(), rtdbId: newTool.id
     });
 
     // 5. Sync local TOOLS array

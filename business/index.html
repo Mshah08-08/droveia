@@ -3078,79 +3078,86 @@ function renderApiKeysList(keys) {
 
 function renderApiDocs() {
   var pre = function(code) {
-    return '<pre style="background:var(--bg3);border-radius:8px;padding:12px;font-size:12px;overflow-x:auto;margin:0;color:var(--text2);font-family:monospace">' + code + '</pre>';
+    return '<pre style="background:#f8f9fa;border-radius:8px;padding:12px;font-size:12px;overflow-x:auto;margin:0;color:#374151;font-family:monospace">' + code + '</pre>';
   };
-  var tag = function(method, color) {
-    return '<span style="font-size:11px;font-weight:800;padding:3px 9px;border-radius:5px;background:' + color + ';font-family:monospace">' + method + '</span>';
-  };
-
-    var nl = "\n";
-  var reqBody = ['{', nl,
-    '  "customerName": "John Smith",', nl,
-    '  "customerPhone": "555-123-4567",', nl,
-    '  "deliveryAddress": "123 Main St, Plano TX",', nl,
-    '  "items": [{ "name": "DeWalt Drill", "qty": 1 }],', nl,
-    '  "notes": "Leave at door"', nl, '}'
-  ].join('');
-  var postResp = ['{', nl,
-    '  "deliveryId": "abc123xyz",', nl,
-    '  "status": "pending_approval",', nl,
-    '  "message": "Awaiting partner confirmation."', nl, '}'
-  ].join('');
-  var getResp = ['{', nl,
-    '  "deliveryId": "abc123xyz",', nl,
-    '  "status": "dispatched",', nl,
-    '  "customerName": "John Smith"', nl, '}'
-  ].join('');
-  var listResp = ['{', nl,
-    '  "deliveries": [{ "deliveryId": "...", "status": "delivered" }]', nl, '}'
-  ].join('');
-
-    var endpoint = function(method, path, desc, body, resp) {
-    var colors = { POST: 'rgba(29,78,216,.12);color:#1d4ed8', GET: 'rgba(21,128,61,.1);color:#15803d' };
-    return '<div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:12px">' +
-      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">' +
-        tag(method, colors[method]) +
-        '<code style="font-size:13px;font-weight:600;color:var(--text)">' + path + '</code>' +
-      '</div>' +
-      '<div style="font-size:13px;color:var(--muted);margin-bottom:10px">' + desc + '</div>' +
-      (body ? '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--dim);margin-bottom:5px">Request body</div>' + pre(body) + '<br>' : '') +
-      '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--dim);margin-bottom:5px">Response</div>' +
-      pre(resp) +
-    '</div>';
+  var endpoint = function(method, path, desc, body, resp) {
+    var colors = {
+      POST: 'background:rgba(29,78,216,.1);color:#1d4ed8',
+      GET:  'background:rgba(21,128,61,.1);color:#15803d'
+    };
+    return '<div style="background:#fff;border:1px solid #e8e8e8;border-radius:12px;padding:18px 20px;margin-bottom:12px">'
+      + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">'
+      + '<span style="font-size:11px;font-weight:800;padding:3px 9px;border-radius:5px;font-family:monospace;' + colors[method] + '">' + method + '</span>'
+      + '<code style="font-size:13px;font-weight:600;color:#111">' + path + '</code>'
+      + '</div>'
+      + '<div style="font-size:13px;color:#6b7280;margin-bottom:10px">' + desc + '</div>'
+      + (body ? '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#9ca3af;margin-bottom:5px">Request body</div>' + pre(body) + '<br>' : '')
+      + '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#9ca3af;margin-bottom:5px">Response</div>'
+      + pre(resp)
+      + '</div>';
   };
 
-  return '<div style="max-width:640px">' +
+  var reqBody  = '{\n  "customerName": "John Smith",\n  "customerPhone": "555-123-4567",\n  "deliveryAddress": "123 Main St, Plano TX",\n  "items": [{ "name": "DeWalt Drill", "qty": 1 }],\n  "notes": "Leave at door"\n}';
+  var postResp = '{\n  "deliveryId": "abc123xyz",\n  "status": "pending_approval",\n  "message": "Awaiting partner confirmation."\n}';
+  var getResp  = '{\n  "deliveryId": "abc123xyz",\n  "status": "dispatched",\n  "customerName": "John Smith"\n}';
+  var listResp = '{\n  "deliveries": [{ "deliveryId": "...", "status": "delivered" }]\n}';
+  var statusReqBody  = '{\n  "status": "station_ready"\n}';
+  var statusResp = '{\n  "deliveryId": "abc123xyz",\n  "status": "station_ready",\n  "message": "Drone will dispatch shortly."\n}';
 
-    '<div style="margin-bottom:20px">' +
-      '<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:6px">Base URL</div>' +
-      '<code style="display:block;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px 16px;font-size:13px;color:var(--blue)">http://localhost:3001</code>' +
-    '</div>' +
+  return '<div style="max-width:640px">'
 
-    '<div style="background:var(--blue-dim);border:1px solid var(--blue-mid);border-radius:12px;padding:14px 18px;margin-bottom:20px">' +
-      '<div style="font-size:13px;font-weight:700;color:var(--blue);margin-bottom:5px">Authentication</div>' +
-      '<code style="font-size:12px;font-family:monospace;color:var(--text2)">x-api-key: drv_your_key_here</code>' +
-    '</div>' +
+    + '<div style="margin-bottom:20px">'
+    + '<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#9ca3af;margin-bottom:6px">Base URL</div>'
+    + '<code style="display:block;background:#f8f9fa;border:1px solid #e8e8e8;border-radius:10px;padding:12px 16px;font-size:13px;color:#1a6ef0">http://localhost:3001</code>'
+    + '</div>'
 
-    endpoint('POST', '/v1/deliveries', 'Place a new delivery order', reqBody, postResp) +
-    endpoint('GET',  '/v1/deliveries/:id', 'Check status of a specific order', null, getResp) +
-    endpoint('GET',  '/v1/deliveries', 'List your last 50 orders', null, listResp) +
+    + '<div style="background:#eff6ff;border:1px solid rgba(26,110,240,.2);border-radius:12px;padding:14px 18px;margin-bottom:20px">'
+    + '<div style="font-size:13px;font-weight:700;color:#1a6ef0;margin-bottom:5px">Authentication</div>'
+    + '<code style="font-size:12px;font-family:monospace;color:#374151">x-api-key: drv_your_key_here</code>'
+    + '<div style="font-size:12px;color:#6b7280;margin-top:6px">Include this header on every request. Generate a key in the API Key tab.</div>'
+    + '</div>'
 
-    '<div style="background:rgba(217,119,6,.08);border:1px solid rgba(217,119,6,.2);border-radius:12px;padding:14px 18px">' +
-      '<div style="font-size:13px;font-weight:700;color:#d97706;margin-bottom:8px">Status flow</div>' +
-      '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:12px;font-family:monospace">' +
-        '<span style="background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:3px 9px">pending_approval</span>' +
-        '<span style="color:var(--muted)">&rarr;</span>' +
-        '<span style="background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:3px 9px">approved</span>' +
-        '<span style="color:var(--muted)">&rarr;</span>' +
-        '<span style="background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:3px 9px">dispatched</span>' +
-        '<span style="color:var(--muted)">&rarr;</span>' +
-        '<span style="background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:3px 9px">delivered</span>' +
-      '</div>' +
-      '<div style="font-size:12px;color:var(--muted);margin-top:8px">Mark the order <strong>approved</strong> in your dashboard once the package is in the docking station. The drone dispatches automatically.</div>' +
-    '</div>' +
+    + endpoint('POST', '/v1/deliveries', 'Place a new delivery order', reqBody, postResp)
+    + endpoint('GET',  '/v1/deliveries/:id', 'Check status of a specific order', null, getResp)
+    + endpoint('GET',  '/v1/deliveries', 'List your last 50 orders', null, listResp)
 
-  '</div>';
+    + endpoint('POST', '/v1/deliveries/:id/status',
+        'Update the status of an order. Only two values accepted — <strong>received</strong> or <strong>station_ready</strong>. All other transitions (dispatching, delivered) happen automatically.',
+        statusReqBody, statusResp)
+
+    + '<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:14px 18px;margin-bottom:16px">'
+    + '<div style="font-size:12px;font-weight:800;color:#d97706;margin-bottom:10px">ALLOWED STATUS VALUES</div>'
+    + '<div style="display:flex;flex-direction:column;gap:10px">'
+    + '<div style="display:flex;align-items:flex-start;gap:12px">'
+    + '<code style="background:#f0fdf4;color:#16a34a;padding:3px 10px;border-radius:5px;font-size:11px;font-weight:700;flex-shrink:0">received</code>'
+    + '<div style="font-size:12px;color:#6b7280;line-height:1.5">Your system acknowledged the order. Use this as a confirmation that your integration picked up the delivery request.</div>'
+    + '</div>'
+    + '<div style="display:flex;align-items:flex-start;gap:12px">'
+    + '<code style="background:#eff6ff;color:#1a6ef0;padding:3px 10px;border-radius:5px;font-size:11px;font-weight:700;flex-shrink:0">station_ready</code>'
+    + '<div style="font-size:12px;color:#6b7280;line-height:1.5">Item is physically loaded into the docking station. <strong>This is the launch trigger</strong> — the drone dispatches automatically once this is set.</div>'
+    + '</div>'
+    + '</div>'
+    + '</div>'
+
+    + '<div style="background:rgba(217,119,6,.08);border:1px solid rgba(217,119,6,.2);border-radius:12px;padding:14px 18px;margin-bottom:20px">'
+    + '<div style="font-size:13px;font-weight:700;color:#d97706;margin-bottom:8px">Status flow</div>'
+    + '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:12px;font-family:monospace">'
+    + '<span style="background:#fff;border:1px solid #e8e8e8;border-radius:6px;padding:3px 10px">pending_approval</span>'
+    + '<span style="color:#9ca3af">&rarr;</span>'
+    + '<span style="background:#fff;border:1px solid #e8e8e8;border-radius:6px;padding:3px 10px">received</span>'
+    + '<span style="color:#9ca3af">&rarr;</span>'
+    + '<span style="background:#fff;border:1px solid #e8e8e8;border-radius:6px;padding:3px 10px">station_ready</span>'
+    + '<span style="color:#9ca3af">&rarr;</span>'
+    + '<span style="background:#fff;border:1px solid #e8e8e8;border-radius:6px;padding:3px 10px">dispatching</span>'
+    + '<span style="color:#9ca3af">&rarr;</span>'
+    + '<span style="background:#fff;border:1px solid #e8e8e8;border-radius:6px;padding:3px 10px">dispatched</span>'
+    + '<span style="color:#9ca3af">&rarr;</span>'
+    + '<span style="background:#fff;border:1px solid #e8e8e8;border-radius:6px;padding:3px 10px">delivered</span>'
+    + '</div>'
+    + '<div style="font-size:12px;color:#6b7280;margin-top:8px">You control: <strong>received</strong> and <strong>station_ready</strong>. Everything after dispatching is automatic.</div>'
+    + '</div>'
+
+    + '</div>';
 }
 
 function renderPartnerOrders(deliveries) {
@@ -4861,39 +4868,7 @@ window.renderBizOrders=async function(wrap){
     var badge=document.getElementById('bnav-orders-badge');
     if(badge){badge.style.display=pending?'inline':'none';badge.textContent=pending;}
     wrap.innerHTML='<div class="biz-card"><div class="biz-card-body">'+renderPartnerOrders(deliveries)+'</div></div>';
-  }catch(e){wrap.innerHTML='<div style="color:#ef4444;padding:20px">Error: '+e.message
-    endpoint('POST', '/v1/deliveries/:id/status',
-      'Update the status of an order. Use this to mark when an order has been <strong>received</strong> by your system, or when the item is <strong>loaded into the docking station</strong> and ready for drone dispatch. Only these two transitions are allowed via the API — dispatch and delivery are handled automatically by the station.',
-      [
-        '{', nl,
-        '  "status": "received"  // or "station_ready"', nl,
-        '}'
-      ].join(''),
-      [
-        '{', nl,
-        '  "deliveryId": "abc123xyz",', nl,
-        '  "status": "station_ready",', nl,
-        '  "message": "Drone will dispatch shortly."', nl,
-        '}'
-      ].join('')
-    ) +
-
-    '<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:14px 18px;margin-bottom:12px">' +
-      '<div style="font-size:12px;font-weight:800;color:#d97706;margin-bottom:6px">STATUS VALUES</div>' +
-      '<div style="display:flex;flex-direction:column;gap:8px">' +
-        '<div style="display:flex;gap:10px;align-items:flex-start">' +
-          '<code style="background:#f0fdf4;color:#16a34a;padding:2px 8px;border-radius:5px;font-size:11px;font-weight:700;flex-shrink:0">received</code>' +
-          '<span style="font-size:12px;color:#6b7280">Order received by your system. Use this as an acknowledgement when your integration picks up a new delivery request.</span>' +
-        '</div>' +
-        '<div style="display:flex;gap:10px;align-items:flex-start">' +
-          '<code style="background:#eff6ff;color:#1a6ef0;padding:2px 8px;border-radius:5px;font-size:11px;font-weight:700;flex-shrink:0">station_ready</code>' +
-          '<span style="font-size:12px;color:#6b7280">Item is physically loaded into the docking station. The drone will automatically dispatch once this status is set. This is the trigger for launch.</span>' +
-        '</div>' +
-      '</div>' +
-    '</div>' +
-+'</div>';}
-};
-
+  }catch(e){wrap.innerHTML='<div style="color:#ef4444;padding:20px">Error: '+e.message;}};
 window.renderBizInventory=function(wrap){
   wrap.innerHTML=[
     '<div class="biz-card" style="margin-bottom:20px">',

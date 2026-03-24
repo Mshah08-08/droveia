@@ -4601,7 +4601,8 @@ window.partnerSaveStock = async function(docId) {
       pph: parseFloat((document.getElementById('edit-pph-'+docId)||{value:'0'}).value)||0,
       buyPrice: parseFloat((document.getElementById('edit-buyPrice-'+docId)||{value:'0'}).value)||0,
       type: (document.getElementById('edit-type-'+docId)||{value:'rent'}).value||'rent',
-      imgUrl: img||null
+      imgUrl: img||null,
+      partnerEmail: window.currentUser.email
     });
     // Also update in RTDB if it's live (approved)
     var snap = await fb.getDoc(fb.doc(fb.db,'pendingInventory',docId));

@@ -4588,7 +4588,7 @@ if (_savedPage && _savedPage !== "admin") {
 
 var _admTab = 'inventory';
 
-window.admShowStatusPicker = function(btn) {
+window.window.admShowStatusPicker = function(btn) {
   var orderId = btn.getAttribute('data-id');
   var picker = document.getElementById('spicker-' + orderId);
   if (!picker) return;
@@ -4615,7 +4615,7 @@ window.admShowStatusPicker = function(btn) {
     + '</div>';
 };
 
-window.admDeleteOrderById = async function(orderId) {
+window.window.admDeleteOrderById = async function(orderId) {
   showConfirm({ title:'Delete Order?', msg:'This cannot be undone.', okLabel:'Delete', color:'red', onOk: async function() {
     var fb = window._fb;
     try {
@@ -4627,7 +4627,7 @@ window.admDeleteOrderById = async function(orderId) {
   }});
 };
 
-window.admSetOrderStatus = async function(orderId, newStatus) {
+window.window.admSetOrderStatus = async function(orderId, newStatus) {
   // Close picker
   var picker = document.getElementById('spicker-' + orderId);
   if (picker) picker.style.display = 'none';
@@ -4898,14 +4898,7 @@ window.renderAdmOrders = async function(wrap) {
   } catch(e) { wrap.innerHTML = '<div style="color:#ef4444;padding:20px">Error: '+e.message+'</div>'; }
 };
 
-window.admSetOrderStatus = async function(orderId, status) {
-  var fb = window._fb;
-  try {
-    await fb.updateDoc(fb.doc(fb.db,'allOrders',orderId),{status:status});
-    showToast('Order marked as '+status);
-    renderAdmOrders(document.getElementById('adm-content'));
-  } catch(e) { showToast('Error: '+e.message); }
-};
+window.
 
 // ── API DELIVERIES ───────────────────────────────────────────────────────────
 window.renderAdmDeliveries = async function(wrap) {

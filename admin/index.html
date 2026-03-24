@@ -4588,6 +4588,71 @@ if (_savedPage && _savedPage !== "admin") {
 
 var _admTab = 'inventory';
 
+window.admShowStatusPicker = function(btn) {
+  var orderId = btn.getAttribute('data-id');
+  var picker = document.getElementById('spicker-' + orderId);
+  if (!picker) return;
+  if (picker.style.display !== 'none') { picker.style.display = 'none'; return; }
+
+  var statuses = [
+    { key:'in_flight',        label:'In Flight',   color:'#1a6ef0', bg:'#eff6ff' },
+    { key:'delivered',        label:'Delivered',   color:'#16a34a', bg:'#f0fdf4' },
+    { key:'returned',         label:'Returned',    color:'#16a34a', bg:'#f0fdf4' },
+    { key:'cancelled',        label:'Cancelled',   color:'#ef4444', bg:'#fef2f2' },
+    { key:'delayed',          label:'Delayed',     color:'#d97706', bg:'#fffbeb' },
+    { key:'failed',           label:'Failed',      color:'#ef4444', bg:'#fef2f2' },
+    { key:'refunded',         label:'Refunded',    color:'#7c3aed', bg:'#f5f3ff' },
+    { key:'pending_approval', label:'Pending',     color:'#f59e0b', bg:'#fffbeb' },
+  ];
+
+  picker.innerHTML = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;padding:8px;background:#fff;border:1px solid #e8e8e8;border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.1);margin-top:6px;width:220px">'
+    + '<div style="grid-column:1/-1;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#9ca3af;margin-bottom:2px">Set status</div>'
+    + statuses.map(function(st) {
+        return '<button onclick="admSetOrderStatus(this.dataset.oid,this.dataset.ns)" data-oid="' + orderId + '" data-ns="' + st.key + '" '
+          + 'style="padding:7px 8px;border-radius:7px;border:1px solid ' + st.color + '33;background:' + st.bg + ';color:' + st.color + ';font-size:11px;font-weight:700;cursor:pointer;font-family:var(--font);text-align:left">' 
+          + st.label + '</button>';
+      }).join('')
+    + '</div>';
+};
+
+window.admDeleteOrderById = async function(orderId) {
+  showConfirm({ title:'Delete Order?', msg:'This cannot be undone.', okLabel:'Delete', color:'red', onOk: async function() {
+    var fb = window._fb;
+    try {
+      await fb.deleteDoc(fb.doc(fb.db,'allOrders',orderId));
+      showToast('Order deleted');
+      var wrap = document.getElementById('adm-content');
+      if (wrap) await renderAdmOrders(wrap);
+    } catch(e) { showToast('Error: '+e.message); }
+  }});
+};
+
+window.admSetOrderStatus = async function(orderId, newStatus) {
+  // Close picker
+  var picker = document.getElementById('spicker-' + orderId);
+  if (picker) picker.style.display = 'none';
+  var fb = window._fb;
+  var msgs = {
+    delivered:'Mark as delivered?', cancelled:'Cancel this order?',
+    in_flight:'Mark as in flight?', returned:'Mark as returned?',
+    delayed:'Mark as delayed?', failed:'Mark as failed?',
+    refunded:'Mark as refunded?', pending_approval:'Reset to pending?'
+  };
+  var colors = { delivered:'green', cancelled:'red', in_flight:'blue', returned:'green', delayed:'amber', failed:'red', refunded:'blue', pending_approval:'amber' };
+  showConfirm({ title: 'Update Status', msg: msgs[newStatus]||'Update order status?', okLabel:'Confirm', color: colors[newStatus]||'blue',
+    onOk: async function() {
+      try {
+        await fb.updateDoc(fb.doc(fb.db,'allOrders',orderId), {
+          status: newStatus, updatedAt: fb.serverTimestamp()
+        });
+        showToast('✓ Status updated to ' + newStatus.replace(/_/g,' '));
+        var wrap = document.getElementById('adm-content');
+        if (wrap) await renderAdmOrders(wrap);
+      } catch(e) { showToast('Error: '+e.message); }
+    }
+  });
+};
+
 window.admTab = function(tab, btn) {
   _admTab = tab;
   document.querySelectorAll('.adm-nav-item').forEach(function(b){b.classList.remove('active');});
@@ -4817,9 +4882,11 @@ window.renderAdmOrders = async function(wrap) {
         +'<td><span class="adm-badge adm-badge-'+sc+'">'+o.status+'</span></td>'
         +'<td style="font-size:11px;color:#9ca3af">'+date+'</td>'
         +'<td><div style="display:flex;gap:6px">'
-        +'<button class="adm-btn-ghost" style="font-size:11px;padding:5px 10px" onclick="admSetOrderStatus(this.dataset.id,this.dataset.st)" data-id="'+o._id+'" data-st="delivered">✓ Delivered</button>'
-        +'<button class="adm-btn-danger" style="font-size:11px;padding:5px 10px" onclick="admSetOrderStatus(this.dataset.id,this.dataset.st)" data-id="'+o._id+'" data-st="cancelled">Cancel</button>'
-        +'</div></td>'
+        +'<button class="adm-btn-ghost" style="font-size:11px;padding:5px 10px;display:flex;align-items:center;gap:4px" onclick="admShowStatusPicker(this)" data-id="'+o._id+'"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/></svg>Status</button>'
+        +'<button class="adm-btn-danger" style="font-size:11px;padding:5px 10px" onclick="admDeleteOrderById(this.dataset.id)" data-id="'+o._id+'">Delete</button>'
+        +'</div>'
+        +'<div id="spicker-'+o._id+'" style="display:none"></div>'
+        +'</td>'
         +'</tr>';
     }).join('') : '<tr><td colspan="7" style="text-align:center;padding:32px;color:#9ca3af">No orders yet.</td></tr>';
 

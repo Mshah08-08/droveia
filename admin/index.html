@@ -2307,15 +2307,17 @@ function adminSelectField(label, id, val) {
 
 function adminGetFormVals() {
   return {
-    name:   (el("af-name")   || {}).value || "",
-    cat:    (el("af-cat")    || {}).value || "Workshop",
-    retail: parseFloat((el("af-retail") || {}).value) || 0,
-    pph:    parseFloat((el("af-pph")    || {}).value) || 0,
-    rating: parseFloat((el("af-rating") || {}).value) || 4.5,
-    eta:    (el("af-eta")    || {}).value || "",
-    qty:    parseInt((el("af-qty") || {}).value) || 1,
-    img:    (el("af-img")    || {}).value || "x",
-    desc:   (el("af-desc")   || {}).value || "",
+    name:     (el("af-name")     || {}).value || "",
+    cat:      (el("af-cat")      || {}).value || "Workshop",
+    type:     (el("af-type")     || {value:"rent"}).value || "rent",
+    buyPrice: parseFloat((el("af-buyPrice") || {value:"0"}).value) || 0,
+    retail:   parseFloat((el("af-retail")   || {}).value) || 0,
+    pph:      parseFloat((el("af-pph")      || {}).value) || 0,
+    rating:   parseFloat((el("af-rating")   || {}).value) || 4.5,
+    eta:      (el("af-eta")      || {}).value || "",
+    qty:      parseInt((el("af-qty")        || {}).value) || 1,
+    img:      (el("af-img")      || {}).value || "x",
+    desc:     (el("af-desc")     || {}).value || "",
   };
 }
 
@@ -2420,8 +2422,14 @@ window.adminSaveAdd = async function() {
   if (!tool.img) tool.img = "x";
   TOOLS.push(tool);
   await adminSyncToRTDB();
-  showToast("Tool added");
-  renderAdmin();
+  // Clear form
+  var addWrap = el("admin-add-form-wrap");
+  if (addWrap) addWrap.innerHTML = "";
+  // Show success
+  showToast("✓ " + vals.name + " added to inventory");
+  // Re-render inventory table in place
+  var wrap = document.getElementById("adm-content");
+  if (wrap) await renderAdmInventory(wrap);
 };
 
 window.adminEditTool = function(id) {

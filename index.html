@@ -2056,47 +2056,86 @@ function calcCost(t, hours) {
   return parseFloat(Math.max(total, 0.01).toFixed(2));
 }
 function renderModal() {
-  var t    = currentTool;
-  var cost = calcCost(t, currentHours).toFixed(2);
-  var pct  = Math.max(0, Math.round((1 - parseFloat(cost)/t.retail)*100));
-  var pre  = DURATIONS.map(function(h){
-    var lbl = h<24 ? h+'h' : (h/24)+'d';
-    var c2 = calcCost(t,h).toFixed(2);
-    return '<button class="dur-preset'+(currentHours===h?' active':'')+'" onclick="setHours('+h+')">'+lbl+'<span class="dur-preset-price">$'+c2+'</span></button>';
-  }).join("");
-  el("modal-content").innerHTML =
-    (t.img && t.img !== 'x'
-      ? '<div style="width:100%;height:180px;border-radius:12px;overflow:hidden;margin-bottom:16px;background:#ffffff;border:1px solid #f0f0f0;display:flex;align-items:center;justify-content:center">'+
-          '<img src="'+t.img+'" style="max-width:100%;max-height:100%;width:100%;height:100%;object-fit:contain;object-position:center;display:block;padding:10px"/>'+
-        '</div>'
-      : '') +
-    '<div class="modal-title">'+t.name+'</div>'+
-    '<div class="modal-meta">'+stars(t.rating)+
-      '<span style="color:var(--dim)">·</span>'+
-      '<span style="color:#fff;font-size:12px;font-weight:700;background:#1a6ef0;padding:2px 8px;border-radius:6px">Save '+pct+'%</span>'+
-    '</div>'+
-    '<div class="modal-desc">'+t.desc+'</div>'+
-    '<div class="dur-label">RENTAL DURATION</div>'+
-    '<div class="dur-presets">'+pre+'</div>'+
-    '<div class="dur-stepper">'+
-      '<button class="step-btn step-minus" onclick="adjHours(-1)">−</button>'+
-      '<div class="step-display"><div class="step-val">'+currentHours+'</div><div class="step-unit">hours</div></div>'+
-      '<button class="step-btn step-plus" onclick="adjHours(1)">+</button>'+
-    '</div>'+
-    '<div class="modal-summary">'+
-      '<div>'+
-        '<div class="modal-total-label">Rental total</div>'+
-        '<div class="modal-total-val">$'+cost+'</div>'+
-        '<div class="modal-total-cross">vs $'+t.retail+' to buy</div>'+
+  var t       = currentTool;
+  var isBuyOnly  = t.type === 'buy';
+  var isBoth     = t.type === 'both';
+  var showBuyUI  = isBuyOnly || (isBoth && _appMode === 'buy');
+  var showRentUI = !isBuyOnly && !(_appMode === 'buy' && isBuyOnly);
+  var buyPrice   = parseFloat(t.buyPrice) || 0;
+  var cost       = calcCost(t, currentHours).toFixed(2);
+  var pct        = Math.max(0, Math.round((1 - parseFloat(cost)/t.retail)*100));
+  var imgHtml = (t.img && t.img !== 'x'
+    ? '<div style="width:100%;height:180px;border-radius:12px;overflow:hidden;margin-bottom:16px;background:#fff;border:1px solid #f0f0f0;display:flex;align-items:center;justify-content:center">'+
+        '<img src="'+t.img+'" style="max-width:100%;max-height:100%;width:100%;height:100%;object-fit:contain;object-position:center;display:block;padding:10px"/>'+
+      '</div>'
+    : '');
+
+  if (showBuyUI) {
+    // Buy mode — flat price, no duration picker
+    el("modal-content").innerHTML =
+      imgHtml +
+      '<div class="modal-title">'+t.name+'</div>'+
+      '<div class="modal-meta">'+stars(t.rating)+'</div>'+
+      '<div class="modal-desc">'+t.desc+'</div>'+
+      '<div class="modal-summary">'+
+        '<div>'+
+          '<div class="modal-total-label">Buy price</div>'+
+          '<div class="modal-total-val">$'+buyPrice.toFixed(2)+'</div>'+
+          (isBoth ? '<div style="font-size:12px;color:#6b7280;margin-top:4px">Also available to rent from $'+cost+'/hr</div>' : '')+
+        '</div>'+
+        '<div class="modal-right">'+
+          '<div>ETA ~'+t.eta+'</div>'+
+          '<div style="color:#059669">Yours to keep</div>'+
+        '</div>'+
       '</div>'+
-      '<div class="modal-right">'+
-        '<div>ETA ~'+t.eta+'</div><div>Free return</div>'+
-        '<div style="color:var(--green)">Save $'+Math.max(0, t.retail - calcCost(t, currentHours)).toFixed(2)+'</div>'+
+      (isBoth ? '<div style="display:flex;gap:8px;margin-bottom:0">'+
+        '<button class="modal-add-btn" style="flex:1" onclick="quickBuy('+t.id+');closeModalDirect()">Buy · $'+buyPrice.toFixed(2)+'</button>'+
+        '<button class="modal-add-btn" style="flex:1;background:#6b7280" onclick="switchToRent()">Switch to Rent</button>'+
+      '</div>'
+      : '<button class="modal-add-btn" onclick="quickBuy('+t.id+');closeModalDirect()">Buy Now · $'+buyPrice.toFixed(2)+'</button>');
+  } else {
+    // Rent mode — duration picker
+    var pre = DURATIONS.map(function(h){
+      var lbl = h<24 ? h+'h' : (h/24)+'d';
+      var c2 = calcCost(t,h).toFixed(2);
+      return '<button class="dur-preset'+(currentHours===h?' active':'')+'" onclick="setHours('+h+')">'+lbl+'<span class="dur-preset-price">$'+c2+'</span></button>';
+    }).join("");
+    el("modal-content").innerHTML =
+      imgHtml +
+      '<div class="modal-title">'+t.name+'</div>'+
+      '<div class="modal-meta">'+stars(t.rating)+
+        '<span style="color:var(--dim)">·</span>'+
+        '<span style="color:#fff;font-size:12px;font-weight:700;background:#1a6ef0;padding:2px 8px;border-radius:6px">Save '+pct+'%</span>'+
       '</div>'+
-    '</div>'+
-    '<button class="modal-add-btn" onclick="addToCart('+t.id+')">Add to Cart · $'+cost+'</button>';
+      '<div class="modal-desc">'+t.desc+'</div>'+
+      '<div class="dur-label">RENTAL DURATION</div>'+
+      '<div class="dur-presets">'+pre+'</div>'+
+      '<div class="dur-stepper">'+
+        '<button class="step-btn step-minus" onclick="adjHours(-1)">−</button>'+
+        '<div class="step-display"><div class="step-val">'+currentHours+'</div><div class="step-unit">hours</div></div>'+
+        '<button class="step-btn step-plus" onclick="adjHours(1)">+</button>'+
+      '</div>'+
+      '<div class="modal-summary">'+
+        '<div>'+
+          '<div class="modal-total-label">Rental total</div>'+
+          '<div class="modal-total-val">$'+cost+'</div>'+
+          '<div class="modal-total-cross">vs $'+t.retail+' to buy</div>'+
+        '</div>'+
+        '<div class="modal-right">'+
+          '<div>ETA ~'+t.eta+'</div><div>Free return</div>'+
+          '<div style="color:var(--green)">Save $'+Math.max(0, t.retail - calcCost(t, currentHours)).toFixed(2)+'</div>'+
+        '</div>'+
+      '</div>'+
+      (isBoth ? '<div style="display:flex;gap:8px">'+
+        '<button class="modal-add-btn" style="flex:1" onclick="addToCart('+t.id+')">Rent · $'+cost+'</button>'+
+        '<button class="modal-add-btn" style="flex:1;background:#059669" onclick="quickBuy('+t.id+');closeModalDirect()">Buy · $'+buyPrice.toFixed(2)+'</button>'+
+      '</div>'
+      : '<button class="modal-add-btn" onclick="addToCart('+t.id+')">Add to Cart · $'+cost+'</button>');
+  }
 }
 
+
+window.switchToRent = function(){ setAppMode('rent'); renderModal(); };
 window.setHours = function(h) {
   currentHours = Math.min(48, Math.max(1, h));
   renderModal();

@@ -4861,7 +4861,37 @@ window.renderBizOrders=async function(wrap){
     var badge=document.getElementById('bnav-orders-badge');
     if(badge){badge.style.display=pending?'inline':'none';badge.textContent=pending;}
     wrap.innerHTML='<div class="biz-card"><div class="biz-card-body">'+renderPartnerOrders(deliveries)+'</div></div>';
-  }catch(e){wrap.innerHTML='<div style="color:#ef4444;padding:20px">Error: '+e.message+'</div>';}
+  }catch(e){wrap.innerHTML='<div style="color:#ef4444;padding:20px">Error: '+e.message
+    endpoint('POST', '/v1/deliveries/:id/status',
+      'Update the status of an order. Use this to mark when an order has been <strong>received</strong> by your system, or when the item is <strong>loaded into the docking station</strong> and ready for drone dispatch. Only these two transitions are allowed via the API — dispatch and delivery are handled automatically by the station.',
+      [
+        '{', nl,
+        '  "status": "received"  // or "station_ready"', nl,
+        '}'
+      ].join(''),
+      [
+        '{', nl,
+        '  "deliveryId": "abc123xyz",', nl,
+        '  "status": "station_ready",', nl,
+        '  "message": "Drone will dispatch shortly."', nl,
+        '}'
+      ].join('')
+    ) +
+
+    '<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:14px 18px;margin-bottom:12px">' +
+      '<div style="font-size:12px;font-weight:800;color:#d97706;margin-bottom:6px">STATUS VALUES</div>' +
+      '<div style="display:flex;flex-direction:column;gap:8px">' +
+        '<div style="display:flex;gap:10px;align-items:flex-start">' +
+          '<code style="background:#f0fdf4;color:#16a34a;padding:2px 8px;border-radius:5px;font-size:11px;font-weight:700;flex-shrink:0">received</code>' +
+          '<span style="font-size:12px;color:#6b7280">Order received by your system. Use this as an acknowledgement when your integration picks up a new delivery request.</span>' +
+        '</div>' +
+        '<div style="display:flex;gap:10px;align-items:flex-start">' +
+          '<code style="background:#eff6ff;color:#1a6ef0;padding:2px 8px;border-radius:5px;font-size:11px;font-weight:700;flex-shrink:0">station_ready</code>' +
+          '<span style="font-size:12px;color:#6b7280">Item is physically loaded into the docking station. The drone will automatically dispatch once this status is set. This is the trigger for launch.</span>' +
+        '</div>' +
+      '</div>' +
+    '</div>' +
++'</div>';}
 };
 
 window.renderBizInventory=function(wrap){

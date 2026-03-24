@@ -4589,7 +4589,9 @@ if (_savedPage && _savedPage !== "admin") {
 var _admTab = 'inventory';
 
 window.admShowStatusPicker = function(btn) {
-  var orderId = btn.getAttribute('data-id');
+  var el = btn.closest ? btn.closest('[data-id]') : btn;
+  var orderId = el ? el.getAttribute('data-id') : null;
+  if (!orderId) return;
   var picker = document.getElementById('spicker-' + orderId);
   if (!picker) return;
   if (picker.style.display !== 'none') { picker.style.display = 'none'; return; }

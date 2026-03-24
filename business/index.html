@@ -88,7 +88,7 @@
   color:#93c5fd !important;
 }
 [data-theme="dark"] .tool-card { background:var(--bg2) !important; }
-[data-theme="dark"] .tool-card-img {background:var(--bg2) !important}
+[data-theme="dark"] .tool-card-
 [data-theme="dark"] .tool-card:hover {
   box-shadow:0 12px 36px rgba(0,0,0,.5) !important;
   border-color:rgba(26,110,240,.3) !important;
@@ -1003,7 +1003,7 @@ body.landing-mode .biz-sidebar { justify-content:flex-end; padding-bottom:16px; 
 <header style="position:fixed;top:0;left:0;right:0;height:60px;background:#fff;border-bottom:1px solid #ebebeb;z-index:300;display:flex;align-items:center;padding:0;gap:0">
   <!-- Logo section — exactly 220px, aligns with sidebar -->
   <div style="width:220px;flex-shrink:0;height:60px;display:flex;align-items:center;gap:10px;padding:0 20px;border-right:1px solid #ebebeb;box-sizing:border-box">
-    <img src="1.png" style="width:28px;height:28px;border-radius:6px;object-fit:contain;flex-shrink:0">
+    <img src="1.png" style="height:28px;width:auto;border-radius:0;object-fit:contain;flex-shrink:0;background:transparent">
     <div>
       <div style="font-size:15px;font-weight:800;color:#1a6ef0;letter-spacing:-.02em;line-height:1.2">Droveia</div>
       <div style="font-size:9px;color:#9ca3af;font-weight:600;text-transform:uppercase;letter-spacing:.08em">Partner Portal</div>
@@ -4622,7 +4622,9 @@ window.partnerSaveStock = async function(docId) {
         arr = arr.map(function(t) {
           if (t && t.partnerEmail === currentUser.email && t.name === snap.data().name) {
             updated = true;
-            return Object.assign({}, t, {name, cat, qty, pph, img: img||t.img||'x'});
+            var _type = (document.getElementById('edit-type-'+docId)||{value:'rent'}).value||'rent';
+            var _buy  = parseFloat((document.getElementById('edit-buyPrice-'+docId)||{value:'0'}).value)||0;
+            return Object.assign({}, t, {name, cat, qty, pph, img: img||t.img||'x', type: _type, buyPrice: _buy});
           }
           return t;
         });

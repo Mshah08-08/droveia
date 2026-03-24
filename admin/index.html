@@ -3932,7 +3932,9 @@ async function loadToolsFromRTDB() {
         rentedQty: parseInt(t.rentedQty) || 0,
         available: (parseInt(t.qty) || 1) > (parseInt(t.rentedQty) || 0),
         partnerEmail: t.partnerEmail || null,
-        partnerName:  t.partnerName  || null
+        partnerName:  t.partnerName  || null,
+        type:         t.type     || 'rent',
+        buyPrice:     parseFloat(t.buyPrice) || 0
       };
     });
     renderCatIcons();

@@ -2445,10 +2445,14 @@ window.adminSaveEdit = async function(id) {
   if (idx < 0) return;
   TOOLS[idx] = Object.assign({}, TOOLS[idx], vals);
   if (!TOOLS[idx].img) TOOLS[idx].img = "x";
-  // Pass id so adminSyncToRTDB preserves the edited qty instead of pulling from live
   await adminSyncToRTDB([parseInt(id)]);
-  showToast("Tool updated");
-  renderAdmin();
+  // Clear edit form
+  var editWrap = el("admin-edit-form-wrap");
+  if (editWrap) editWrap.innerHTML = "";
+  showToast("✓ " + vals.name + " updated");
+  // Re-render inventory in place
+  var wrap = document.getElementById("adm-content");
+  if (wrap) await renderAdmInventory(wrap);
 };
 
 window.adminSetAvail = async function(id, available) {

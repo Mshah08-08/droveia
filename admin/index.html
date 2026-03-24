@@ -3,8 +3,11 @@
 <head>
 <meta charset="UTF-8"/>
 <link rel="icon" type="image/png" href="1.png">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Droveia</title>
+<title>Droveia: Admin</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDcuU4-XXzzEU8O84rs3W7cWgVStNicBTo&callback=Function.prototype" async defer></script>
@@ -904,7 +907,7 @@ body{background:#f6f8ff;font-family:'Sora',sans-serif;padding-top:0!important;ma
 
 <div id="adm-splash" style="position:fixed;inset:0;background:#fff;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px">
   <div id="adm-splash-logo" style="display:flex;align-items:center;gap:16px;opacity:0;transform:translateY(20px);transition:opacity .5s ease,transform .5s ease">
-    <img src="1.png" style="width:80px;height:80px;border-radius:20px;box-shadow:0 12px 40px rgba(26,110,240,.3)">
+    <img src="1.png" style="height:72px;width:auto;border-radius:0;box-shadow:none;background:transparent">
     <div>
       <div style="font-size:36px;font-weight:800;color:#1a6ef0;letter-spacing:-.03em;line-height:1">Droveia</div>
       <div style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.14em;margin-top:4px">Admin Console</div>
@@ -2259,14 +2262,22 @@ function adminInventoryTable() {
 }
 
 function adminToolForm(tool, isEdit) {
-  var t = tool || { id:"", name:"", cat:"Workshop", retail:"", pph:0, rating:4.5, desc:"", eta:"", img:"" };
+  var t = tool || { id:"", name:"", cat:"Workshop", retail:"", pph:0, rating:4.5, desc:"", eta:"", img:"", type:"rent", buyPrice:0 };
+  var typeSelect = '<div class="admin-field"><label class="admin-label">Listing Type</label>' +
+    '<select class="admin-input" id="af-type">' +
+    '<option value="rent"'  + ((!t.type||t.type==='rent') ?' selected':'') + '>Rent only</option>' +
+    '<option value="buy"'   + (t.type==='buy'  ?' selected':'') + '>Buy only</option>' +
+    '<option value="both"'  + (t.type==='both' ?' selected':'') + '>Rent &amp; Buy</option>' +
+    '</select></div>';
   return '<div class="admin-form" id="' + (isEdit ? "admin-edit-form" : "admin-add-form") + '">' +
     '<div class="admin-form-title">' + (isEdit ? "Edit Tool — " + t.name : "Add New Tool") + '</div>' +
     '<div class="admin-form-grid">' +
       adminField("Name", "text", "af-name", t.name, true) +
       adminSelectField("Category", "af-cat", t.cat) +
+      typeSelect +
+      adminField("Buy Price ($)", "number", "af-buyPrice", t.buyPrice || 0, false) +
       adminField("Retail Price ($)", "number", "af-retail", t.retail, true) +
-      adminField("PPH (0 = auto)", "number", "af-pph", t.pph || 0, false) +
+      adminField("PPH / hr (0 = auto)", "number", "af-pph", t.pph || 0, false) +
       adminField("Rating", "number", "af-rating", t.rating || 4.5, false) +
       adminField("ETA (e.g. 8 min)", "text", "af-eta", t.eta, true) +
       adminField("Qty in Stock", "number", "af-qty", t.qty || 1, false) +
@@ -2296,15 +2307,17 @@ function adminSelectField(label, id, val) {
 
 function adminGetFormVals() {
   return {
-    name:   (el("af-name")   || {}).value || "",
-    cat:    (el("af-cat")    || {}).value || "Workshop",
-    retail: parseFloat((el("af-retail") || {}).value) || 0,
-    pph:    parseFloat((el("af-pph")    || {}).value) || 0,
-    rating: parseFloat((el("af-rating") || {}).value) || 4.5,
-    eta:    (el("af-eta")    || {}).value || "",
-    qty:    parseInt((el("af-qty") || {}).value) || 1,
-    img:    (el("af-img")    || {}).value || "x",
-    desc:   (el("af-desc")   || {}).value || "",
+    name:     (el("af-name")     || {}).value || "",
+    cat:      (el("af-cat")      || {}).value || "Workshop",
+    type:     (el("af-type")     || {value:"rent"}).value || "rent",
+    buyPrice: parseFloat((el("af-buyPrice") || {value:"0"}).value) || 0,
+    retail:   parseFloat((el("af-retail")   || {}).value) || 0,
+    pph:      parseFloat((el("af-pph")      || {}).value) || 0,
+    rating:   parseFloat((el("af-rating")   || {}).value) || 4.5,
+    eta:      (el("af-eta")      || {}).value || "",
+    qty:      parseInt((el("af-qty")        || {}).value) || 1,
+    img:      (el("af-img")      || {}).value || "x",
+    desc:     (el("af-desc")     || {}).value || "",
   };
 }
 
@@ -2409,8 +2422,14 @@ window.adminSaveAdd = async function() {
   if (!tool.img) tool.img = "x";
   TOOLS.push(tool);
   await adminSyncToRTDB();
-  showToast("Tool added");
-  renderAdmin();
+  // Clear form
+  var addWrap = el("admin-add-form-wrap");
+  if (addWrap) addWrap.innerHTML = "";
+  // Show success
+  showToast("✓ " + vals.name + " added to inventory");
+  // Re-render inventory table in place
+  var wrap = document.getElementById("adm-content");
+  if (wrap) await renderAdmInventory(wrap);
 };
 
 window.adminEditTool = function(id) {
@@ -2426,10 +2445,14 @@ window.adminSaveEdit = async function(id) {
   if (idx < 0) return;
   TOOLS[idx] = Object.assign({}, TOOLS[idx], vals);
   if (!TOOLS[idx].img) TOOLS[idx].img = "x";
-  // Pass id so adminSyncToRTDB preserves the edited qty instead of pulling from live
   await adminSyncToRTDB([parseInt(id)]);
-  showToast("Tool updated");
-  renderAdmin();
+  // Clear edit form
+  var editWrap = el("admin-edit-form-wrap");
+  if (editWrap) editWrap.innerHTML = "";
+  showToast("✓ " + vals.name + " updated");
+  // Re-render inventory in place
+  var wrap = document.getElementById("adm-content");
+  if (wrap) await renderAdmInventory(wrap);
 };
 
 window.adminSetAvail = async function(id, available) {
@@ -2526,20 +2549,9 @@ async function adminLoadOrders() {
       var addr = o.address ? (o.address.building || "—") : "—";
       var dropNotes = o.address && o.address.dropNotes ? o.address.dropNotes : "";
 
-      // Action buttons
-      var actions = "";
-      if (o.status === "in_flight") {
-        actions += '<button class="order-act-btn green" data-oid="' + o._id + '" data-ns="delivered" onclick="adminOrderAction(this)">Mark Delivered</button>';
-        actions += '<button class="order-act-btn" data-oid="' + o._id + '" data-ns="cancelled" onclick="adminOrderAction(this)">Cancel</button>';
-      } else if (o.status === "delivered") {
-        actions += '<button class="order-act-btn green" data-oid="' + o._id + '" data-ns="returned" onclick="adminOrderAction(this)">Mark Returned</button>';
-        actions += '<button class="order-act-btn" data-oid="' + o._id + '" data-ns="in_flight" onclick="adminOrderAction(this)">Reopen</button>';
-      } else if (o.status === "returned") {
-        actions += '<button class="order-act-btn" data-oid="' + o._id + '" data-ns="delivered" onclick="adminOrderAction(this)">Undo Return</button>';
-      } else if (o.status === "cancelled") {
-        actions += '<button class="order-act-btn green" data-oid="' + o._id + '" data-ns="in_flight" onclick="adminOrderAction(this)">Restore</button>';
-      }
-      actions += '<button class="order-act-btn red" data-oid="' + o._id + '" onclick="adminDeleteOrder(this)">Delete</button>';
+      // Action buttons — single status picker button
+      var actions = '<button class="order-act-btn" data-oid="' + o._id + '" onclick="adminShowStatusPicker(this)" style="display:flex;align-items:center;gap:6px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Change Status</button>'
+        + '<button class="order-act-btn red" data-oid="' + o._id + '" onclick="adminDeleteOrder(this)">Delete</button>';
 
       return '<div class="admin-order-card">' +
         // Header row
@@ -2587,16 +2599,58 @@ async function adminLoadOrders() {
   }
 }
 
+
+window.adminShowStatusPicker = function(btn) {
+  var orderId = btn.getAttribute('data-oid');
+  // Remove any existing picker
+  var existing = document.getElementById('status-picker-' + orderId);
+  if (existing) { existing.remove(); return; }
+
+  var statuses = [
+    { key: 'pending_approval', label: 'Pending',    color: '#f59e0b', bg: '#fffbeb' },
+    { key: 'in_flight',        label: 'In Flight',  color: '#1a6ef0', bg: '#eff6ff' },
+    { key: 'delivered',        label: 'Delivered',  color: '#16a34a', bg: '#f0fdf4' },
+    { key: 'returned',         label: 'Returned',   color: '#16a34a', bg: '#f0fdf4' },
+    { key: 'cancelled',        label: 'Cancelled',  color: '#ef4444', bg: '#fef2f2' },
+    { key: 'delayed',          label: 'Delayed',    color: '#d97706', bg: '#fffbeb' },
+    { key: 'failed',           label: 'Failed',     color: '#ef4444', bg: '#fef2f2' },
+    { key: 'refunded',         label: 'Refunded',   color: '#7c3aed', bg: '#f5f3ff' },
+  ];
+
+  var grid = '<div id="status-picker-' + orderId + '" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;padding:10px;background:#fff;border:1px solid #e8e8e8;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.1)">'
+    + '<div style="grid-column:1/-1;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#9ca3af;margin-bottom:2px">Set order status</div>';
+
+  statuses.forEach(function(s) {
+    grid += '<button onclick="adminOrderAction(this)" data-oid="' + orderId + '" data-ns="' + s.key + '" '
+      + 'style="padding:8px 10px;border-radius:8px;border:1px solid ' + s.color + '22;background:' + s.bg + ';color:' + s.color + ';font-size:11px;font-weight:700;cursor:pointer;font-family:var(--font);text-align:left;transition:.12s" '
+      + '>'  
+      + s.label + '</button>';
+  });
+
+  grid += '</div>';
+
+  // Insert after the button's parent actions div
+  var actionsDiv = btn.closest('.order-actions');
+  if (actionsDiv) actionsDiv.insertAdjacentHTML('afterend', grid);
+};
+
 window.adminOrderAction = function(btn) {
   var orderId = btn.getAttribute("data-oid");
   var newStatus = btn.getAttribute("data-ns");
-  var labels = { delivered: "Mark as Delivered", cancelled: "Cancel Order", in_flight: "Reopen Order", returned: "Mark as Returned", };
-  var colors = { delivered: "green", cancelled: "red", in_flight: "amber", returned: "green" };
+  // Close picker if open
+  var picker = document.getElementById('status-picker-' + orderId);
+  if (picker) picker.remove();
+  var labels = { delivered: "Mark as Delivered", cancelled: "Cancel Order", in_flight: "Mark In Flight", returned: "Mark as Returned", delayed: "Mark as Delayed", failed: "Mark as Failed", refunded: "Mark as Refunded", pending_approval: "Reset to Pending" };
+  var colors = { delivered: "green", cancelled: "red", in_flight: "amber", returned: "green", delayed: "amber", failed: "red", refunded: "blue", pending_approval: "amber" };
   var msgs = {
-    delivered: "Mark this order as delivered. Stock stays rented until items are physically returned.",
-    cancelled:  "Cancel this order? The tools will be marked available again.",
-    in_flight:  "Reopen this order and mark it as in-flight?",
-    returned:   "Mark items as returned? This will add them back to stock."
+    delivered:        "Mark this order as delivered.",
+    cancelled:        "Cancel this order? The tools will be marked available again.",
+    in_flight:        "Mark this order as in-flight?",
+    returned:         "Mark items as returned? This will add them back to stock.",
+    delayed:          "Mark this order as delayed?",
+    failed:           "Mark this order as failed?",
+    refunded:         "Mark this order as refunded?",
+    pending_approval: "Reset this order back to pending approval?"
   };
   showConfirm({
     title:   labels[newStatus] || "Update Order",
@@ -3285,7 +3339,7 @@ function startApp() {
         };
         await fb.setDoc(pRef(currentUser.uid), userProfile);
       }
-      renderAccount();
+      // renderAccount not needed on this page
     } catch(e){ console.error("loadProfile",e); }
   }
 
@@ -3907,7 +3961,11 @@ async function loadToolsFromRTDB() {
         img:       t.img                 || "",
         qty:       parseInt(t.qty)       || 1,
         rentedQty: parseInt(t.rentedQty) || 0,
-        available: (parseInt(t.qty) || 1) > (parseInt(t.rentedQty) || 0)
+        available: (parseInt(t.qty) || 1) > (parseInt(t.rentedQty) || 0),
+        partnerEmail: t.partnerEmail || null,
+        partnerName:  t.partnerName  || null,
+        type:         t.type     || 'rent',
+        buyPrice:     parseFloat(t.buyPrice) || 0
       };
     });
     renderCatIcons();
@@ -4568,7 +4626,7 @@ window.renderAdmInventory = async function(wrap) {
     '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>',
     '<input id="adm-inv-search" type="text" placeholder="Search stock..." oninput="admFilterInventory()" style="border:none;outline:none;background:transparent;font-size:13px;color:#111;font-family:var(--font);width:160px">',
     '</div>',
-    '<button class="adm-btn adm-btn-sm" onclick="adminShowAddTool()">+ Add Tool</button>',
+    '<button class="adm-btn adm-btn-sm" onclick="adminShowAddForm()">+ Add Tool</button>',
     '</div>',
     '</div>',
     '<div id="admin-add-form-wrap"></div>',
@@ -4584,8 +4642,10 @@ window.renderAdmInventory = async function(wrap) {
         +'<td>'+img+'</td>'
         +'<td><div style="font-weight:600;font-size:13px">'+t.name+'</div><div style="font-size:11px;color:#9ca3af">ID: '+t.id+'</div></td>'
         +'<td><span class="adm-badge adm-badge-blue" style="font-size:10px">'+t.cat+'</span></td>'
-        +'<td style="font-weight:600">$'+calcCost(t,1).toFixed(2)+'<span style="font-size:10px;color:#9ca3af">/hr</span></td>'
-        +'<td><span style="font-weight:600">'+t.qty+'</span><span style="color:#9ca3af"> / '+(t.rentedQty||0)+'</span></td>'
+        +'<td><span class="adm-badge adm-badge-'+(t.type==='buy'?'amber':t.type==='both'?'blue':'green')+'" style="font-size:10px">'+(t.type==='buy'?'Buy only':t.type==='both'?'Rent+Buy':'Rent only')+'</span></td>'
+        +'<td style="font-weight:600">'+((t.type==='rent'||!t.type)?'$'+calcCost(t,1).toFixed(2)+'/hr':'—')+'</td>'
+        +'<td style="font-weight:600">'+((t.type==='buy'||t.type==='both')?'$'+(t.buyPrice||0).toFixed(2):'—')+'</td>'
+        +'<td><span style="font-weight:600">'+t.qty+'</span></td>'
         +'<td><span class="adm-badge '+(avail?'adm-badge-green':'adm-badge-red')+'">'+(avail?'Available':'Rented')+'</span></td>'
         +'<td><div style="display:flex;gap:6px">'
         +'<button class="adm-btn-ghost" onclick="adminEditTool('+t.id+')" style="font-size:11px;padding:5px 10px">Edit</button>'
@@ -4676,25 +4736,50 @@ window.admApproveInventory = async function(btn) {
   var item = JSON.parse(decodeURIComponent(btn.dataset.item));
   var fb = window._fb;
   try {
-    // Add to RTDB - push first, then write
+    // 1. Reload fresh RTDB data first so we don't overwrite with stale TOOLS
+    var liveData = await fetch('https://droveia-default-rtdb.firebaseio.com/tools.json?auth=NKLKSY1Cshm1pba0vuKK6RQOmjV2uOfeje7hzxkI').then(function(r){ return r.json(); });
+    var liveArr = !liveData ? [] : Array.isArray(liveData) ? liveData : Object.values(liveData);
+    liveArr = liveArr.filter(Boolean);
+
+    // 2. Build new tool with a unique id
+    var maxId = liveArr.reduce(function(m,t){ return Math.max(m, parseInt(t.id)||0); }, 0);
     var newTool = {
-      id: Date.now(),
+      id: maxId + 1,
       name: item.name, cat: item.cat, desc: item.desc||'',
-      pph: item.pph||0, retail: (item.pph||0)*20,
+      pph: parseFloat(item.pph)||0,
+      retail: parseFloat(item.pph) ? parseFloat(item.pph)*20 : 20,
+      type: item.type||'rent',
+      buyPrice: parseFloat(item.buyPrice)||0,
       rating: 4.5, eta: '< 30 min',
-      img: item.imgUrl||'x', qty: item.qty||1, rentedQty: 0,
+      img: item.imgUrl||'x',
+      qty: parseInt(item.qty)||1, rentedQty: 0,
       available: true,
-      partnerEmail: item.partnerEmail, partnerName: item.partnerName
+      partnerEmail: item.partnerEmail||'',
+      partnerName: item.partnerName||''
     };
-    TOOLS.push(newTool);
-    await fetch('https://droveia-default-rtdb.firebaseio.com/tools.json', {
-      method:'PUT', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify(TOOLS)
+
+    // 3. Append and write back
+    liveArr.push(newTool);
+    await fetch('https://droveia-default-rtdb.firebaseio.com/tools.json?auth=NKLKSY1Cshm1pba0vuKK6RQOmjV2uOfeje7hzxkI', {
+      method: 'PUT',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(liveArr)
     });
-    await fb.updateDoc(fb.doc(fb.db,'pendingInventory',docId), {status:'approved'});
-    showToast('✓ Item approved and added to inventory');
-    admTab('inventory', document.getElementById('adm-nav-inventory'));
-  } catch(e) { showToast('Error: '+e.message); }
+
+    // 4. Update Firestore status
+    await fb.updateDoc(fb.doc(fb.db,'pendingInventory',docId), {
+      status: 'approved', approvedAt: fb.serverTimestamp(), rtdbId: newTool.id
+    });
+
+    // 5. Sync local TOOLS array
+    await loadToolsFromRTDB();
+
+    showToast('✓ ' + item.name + ' approved and live on store');
+
+    // 6. Refresh partner stock view
+    var wrap = document.getElementById('adm-content');
+    if (wrap) await renderAdmPartnerStock(wrap);
+  } catch(e) { showToast('Error: '+e.message); console.error(e); }
 };
 
 window.admRejectInventory = async function(docId) {

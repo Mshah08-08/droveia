@@ -775,14 +775,6 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
 .order-act-btn:hover{border-color:var(--blue);color:var(--blue)}
 .order-act-btn.green:hover{border-color:var(--green);color:var(--green)}
 .order-act-btn.red:hover{border-color:#ef4444;color:#ef4444}
-
-.ddnav-item { display:flex;align-items:center;gap:12px;padding:11px 20px;font-size:14px;font-weight:500;color:#374151;cursor:pointer;transition:.12s;font-family:'Sora',sans-serif;line-height:1.4;text-decoration:none }
-.ddnav-item svg { flex-shrink:0;opacity:.6;color:#374151 }
-.ddnav-item:hover { background:#f5f5f5;color:#111 }
-.ddnav-item:hover svg { opacity:.9 }
-.ddnav-item.active { color:#1a6ef0;font-weight:700;background:#eff6ff }
-.ddnav-item.active svg { opacity:1;color:#1a6ef0 }
-
 </style>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDcuU4-XXzzEU8O84rs3W7cWgVStNicBTo&callback=Function.prototype" async defer></script>
@@ -892,11 +884,11 @@ html, body { height:100%; }
 
 
 /* Sidebar nav items */
-
-
-
-
-
+.ddnav-item { display:flex;align-items:center;gap:12px;padding:11px 20px;font-size:14px;font-weight:500;color:#374151 !important;cursor:pointer;transition:.12s;font-family:var(--font);line-height:1.4;user-select:none }
+.ddnav-item svg { flex-shrink:0;opacity:.7 }
+.ddnav-item:hover { background:#f8f8f8;color:#111 }
+.ddnav-item.active { color:#1a6ef0;font-weight:700;background:#eff6ff }
+.ddnav-item.active svg { opacity:1;color:#1a6ef0 }
 
 /* Category chips */
 .ddchip { display:inline-flex;align-items:center;gap:5px;padding:7px 14px;background:#f4f4f4;border:1.5px solid #e8e8e8;border-radius:20px;cursor:pointer;font-family:var(--font);font-size:13px;font-weight:500;color:#374151;transition:.12s;white-space:nowrap;flex-shrink:0 }

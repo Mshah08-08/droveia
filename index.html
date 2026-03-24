@@ -103,7 +103,7 @@ html.theme-transitioning *{
     fill .35s ease,
     stroke .35s ease !important;
 }
-body{font-family:var(--font);background:#f6f8ff !important;color:var(--text);min-height:100vh;overflow-x:clip;padding-top:var(--nav-h);-webkit-font-smoothing:antialiased}
+body{font-family:var(--font);background:#fff !important;color:var(--text);min-height:100vh;overflow-x:clip;padding-top:var(--nav-h);-webkit-font-smoothing:antialiased}
 ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--dim);border-radius:4px}
 a{text-decoration:none;color:inherit}
 button{font-family:var(--font);cursor:pointer;border:none;background:none}
@@ -118,7 +118,7 @@ img{max-width:100%}
 @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 @keyframes droneFloat{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-10px) rotate(1.5deg)}}
-@keyframes blobMove{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(30px,-20px) scale(1.05)}66%{transform:translate(-20px,10px) scale(.97)}}
+33%{transform:translate(30px,-20px) scale(1.05)}66%{transform:translate(-20px,10px) scale(.97)}}
 @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
 @keyframes toastIn{from{opacity:0;transform:translateY(12px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
 @keyframes toastOut{to{opacity:0;transform:translateY(8px) scale(.97)}}
@@ -129,10 +129,10 @@ img{max-width:100%}
 .scale-in{animation:scaleIn .3s ease both}
 
 /* ── Atmosphere ─────────────────────────────── */
-.glow-blob{position:fixed;border-radius:50%;filter:blur(130px);pointer-events:none;z-index:0;animation:blobMove 18s ease-in-out infinite}
-.glow-1{width:600px;height:600px;background:radial-gradient(circle,rgba(26,110,240,.10),transparent 70%);top:-100px;left:-100px}
-.glow-2{width:500px;height:500px;background:radial-gradient(circle,rgba(26,110,240,.06),transparent 70%);bottom:0;right:-80px;animation-delay:-9s}
-.noise-overlay{position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.025;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+
+
+
 
 /* ── Toast ─────────────────────────────────── */
 .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(8px);background:var(--toast-bg);backdrop-filter:blur(20px);border:1px solid var(--toast-border);border-radius:40px;padding:11px 20px;font-size:13px;font-weight:500;color:var(--toast-text);white-space:nowrap;z-index:10000;pointer-events:none;opacity:0;transition:opacity .25s,transform .25s}
@@ -166,7 +166,7 @@ img{max-width:100%}
 .auth-footer a{color:var(--blue);cursor:pointer}
 
 /* ── Navigation ─────────────────────────────── */
-nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:var(--nav-h);background:rgba(255,255,255,.92);backdrop-filter:blur(20px) saturate(160%);border-bottom:1px solid var(--border);box-shadow:0 1px 20px rgba(0,0,0,.06);display:flex;align-items:center;padding:0 24px;gap:16px}
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:var(--nav-h);background:#fff;border-bottom:1px solid #e8e8e8}
 .nav-logo{display:flex;align-items:center;gap:9px;cursor:pointer;flex-shrink:0}
 .nav-logo-mark{height:40px;width:auto;background:transparent;border:none;box-shadow:none;display:flex;align-items:center;justify-content:center;}
 .nav-wordmark{font-size:17px;font-weight:800;letter-spacing:-.03em}
@@ -246,7 +246,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:var(--nav-h);backgro
 .promo-banner span{color:var(--text);font-weight:700}
 
 /* ── Hero ───────────────────────────────────── */
-.hero{padding:60px 0 50px;overflow:hidden;background:linear-gradient(160deg,#f0f5ff 0%,#e8efff 50%,#f5f7ff 100%)}
+.hero{padding:60px 0 50px;overflow:hidden;background:#fff}
 .hero-inner{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:48px;max-width:1280px;margin:0 auto;padding:0 24px}
 .hero-badge{display:inline-flex;align-items:center;gap:7px;background:#dbeafe;border:1px solid rgba(26,110,240,.25);border-radius:20px;padding:6px 12px;font-size:12px;font-weight:600;color:#1d4ed8;margin-bottom:20px;letter-spacing:.02em}
 .hero-h1{font-size:clamp(36px,4.5vw,58px);font-weight:800;line-height:1.08;letter-spacing:-.04em;margin-bottom:18px}
@@ -323,7 +323,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:var(--nav-h);backgro
 
 /* ── How it works ───────────────────────────── */
 .hiw-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:56px}
-.hiw-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px 20px;position:relative;overflow:hidden}
+.hiw-card{background:#fff;border:1.5px solid #d1d9f0;border-radius:var(--radius);padding:24px 20px;position:relative;overflow:hidden;box-shadow:0 2px 12px rgba(26,110,240,.08),0 1px 3px rgba(0,0,0,.06)}
 .hiw-step-num{font-size:48px;font-weight:900;color:rgba(26,110,240,.08);position:absolute;top:12px;right:16px;letter-spacing:-.05em;font-family:var(--font)}
 .hiw-icon{width:44px;height:44px;border-radius:12px;background:var(--blue-dim);border:1px solid var(--blue-mid);display:flex;align-items:center;justify-content:center;margin-bottom:14px}
 .hiw-title{font-size:15px;font-weight:700;margin-bottom:6px}
@@ -775,6 +775,14 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
 .order-act-btn:hover{border-color:var(--blue);color:var(--blue)}
 .order-act-btn.green:hover{border-color:var(--green);color:var(--green)}
 .order-act-btn.red:hover{border-color:#ef4444;color:#ef4444}
+
+.ddnav-item { display:flex;align-items:center;gap:12px;padding:11px 20px;font-size:14px;font-weight:500;color:#374151;cursor:pointer;transition:.12s;font-family:'Sora',sans-serif;line-height:1.4;text-decoration:none }
+.ddnav-item svg { flex-shrink:0;opacity:.6;color:#374151 }
+.ddnav-item:hover { background:#f5f5f5;color:#111 }
+.ddnav-item:hover svg { opacity:.9 }
+.ddnav-item.active { color:#1a6ef0;font-weight:700;background:#eff6ff }
+.ddnav-item.active svg { opacity:1;color:#1a6ef0 }
+
 </style>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDcuU4-XXzzEU8O84rs3W7cWgVStNicBTo&callback=Function.prototype" async defer></script>
@@ -845,7 +853,7 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
 
 
 /* ── Persistent sidebar layout for inner pages ─── */
-.dd-sidebar { width:220px;flex-shrink:0;background:#fff;border-right:1px solid #ebebeb;padding:8px 0;height:calc(100vh - 60px);overflow:hidden }
+.dd-sidebar { width:220px;flex-shrink:0;background:#fff;border-right:1px solid #ebebeb;padding:8px 0;height:calc(100vh - 60px);overflow-y:auto;overscroll-behavior:contain;position:relative;z-index:10 }
 .dd-page-layout { display:flex;height:calc(100vh - 60px);background:#fff;overflow:hidden }
 .dd-page-main { flex:1;min-width:0;overflow-y:auto;height:100% }
 .dd-page-main { flex:1;min-width:0;overflow-y:auto;height:100% }
@@ -876,7 +884,7 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
 #page-cart.active { padding-top:60px; }
 
 /* ── DoorDash layout ─────────────────────────────────── */
-body { background:#f6f8ff !important; padding-top:60px; overflow:hidden; }
+body { background:#fff !important; padding-top:60px; overflow:hidden; }
 html.page-fixed, html.page-fixed body { overflow:hidden; }
 
 html, body { height:100%; }
@@ -884,11 +892,11 @@ html, body { height:100%; }
 
 
 /* Sidebar nav items */
-.ddnav-item { display:flex;align-items:center;gap:12px;padding:11px 20px;font-size:14px;font-weight:400;color:#4b5563;cursor:pointer;transition:.12s;font-family:var(--font) }
-.ddnav-item svg { flex-shrink:0;opacity:.7 }
-.ddnav-item:hover { background:#f8f8f8;color:#111 }
-.ddnav-item.active { color:#1a6ef0;font-weight:700;background:#eff6ff }
-.ddnav-item.active svg { opacity:1;color:#1a6ef0 }
+
+
+
+
+
 
 /* Category chips */
 .ddchip { display:inline-flex;align-items:center;gap:5px;padding:7px 14px;background:#f4f4f4;border:1.5px solid #e8e8e8;border-radius:20px;cursor:pointer;font-family:var(--font);font-size:13px;font-weight:500;color:#374151;transition:.12s;white-space:nowrap;flex-shrink:0 }
@@ -934,9 +942,6 @@ html, body { height:100%; }
 
 
 
-<div class="glow-blob glow-1"></div>
-<div class="glow-blob glow-2"></div>
-<div class="noise-overlay"></div>
 <div class="toast" id="toast"></div>
 
 <!-- Auth Modal ─────────────────────────────────────────────── -->
@@ -1017,7 +1022,7 @@ html, body { height:100%; }
 
 
 <!-- ═══ TOP NAV ═══ -->
-<header id="dd-topnav" style="position:fixed;top:0;left:0;right:0;height:60px;background:#fff;border-bottom:1px solid #e8e8e8;z-index:1000;display:flex;align-items:center;padding:0 16px;gap:10px">
+<header id="dd-topnav" style="position:fixed;top:0;left:0;right:0;height:60px;background:#fff !important;border-bottom:1px solid #e8e8e8;z-index:1000;display:flex;align-items:center;padding:0 16px;gap:10px">
 
   <!-- Logo -->
   <div onclick="showPage('home')" style="cursor:pointer;display:flex;align-items:center;gap:7px;flex-shrink:0">
@@ -1117,7 +1122,7 @@ html, body { height:100%; }
   </aside>
 
   <!-- Main -->
-  <main id="home-main" style="flex:1;min-width:0;padding:0;overflow-y:auto;height:100%;min-height:0;background:#f7f8fa">
+  <main id="home-main" style="flex:1;min-width:0;padding:0;overflow-y:auto;height:100%;min-height:0;background:#f6f8ff">
     <div style="padding:24px 28px" id="home-top">
 
       <h1 id="home-welcome" style="font-size:22px;font-weight:800;color:#111;font-family:var(--font);margin:0 0 18px;letter-spacing:-.02em">Welcome to Droveia</h1>
@@ -1173,7 +1178,7 @@ html, body { height:100%; }
   
     <aside class="dd-sidebar" id="cat-sidebar"><!-- filled by JS --></aside>
 
-  <main style="flex:1;min-width:0;padding:28px 32px;overflow-y:auto;height:100%;background:#f7f8fa">
+  <main style="flex:1;min-width:0;padding:28px 32px;overflow-y:auto;height:100%;background:#f6f8ff">
 
     <h1 id="cat-heading" style="font-size:24px;font-weight:800;color:#111;font-family:var(--font);letter-spacing:-.02em;margin:0 0 6px"></h1>
     <div id="cat-item-count" style="font-size:13px;color:#9ca3af;margin-bottom:20px"></div>
@@ -1239,7 +1244,7 @@ html, body { height:100%; }
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Admin Console
     </div>
   </aside>
-  <main style="flex:1;min-width:0;padding:28px 32px;overflow-y:auto;height:100%;background:#f7f8fa">
+  <main style="flex:1;min-width:0;padding:28px 32px;overflow-y:auto;height:100%;background:#f6f8ff">
 
     <!-- Header + search filter -->
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
@@ -1306,7 +1311,7 @@ html, body { height:100%; }
   </aside>
 
   <!-- Main -->
-  <main style="flex:1;min-width:0;padding:28px 32px;overflow-y:auto;height:100%;background:#f7f8fa">
+  <main style="flex:1;min-width:0;padding:28px 32px;overflow-y:auto;height:100%;background:#f6f8ff">
 
     <!-- Header -->
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;gap:12px;flex-wrap:wrap">
@@ -1406,7 +1411,7 @@ html, body { height:100%; }
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Admin Console
     </div>
   </aside>
-  <main class="dd-page-main" style="background:#f7f8fa">
+  <main class="dd-page-main" style="background:#f6f8ff">
   <div class="orders-layout">
     <h2 style="font-size:22px;font-weight:800;margin-bottom:20px;letter-spacing:-.02em">My Orders</h2>
     <div id="active-order-section" style="display:none">
@@ -1494,7 +1499,7 @@ html, body { height:100%; }
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Admin Console
     </div>
   </aside>
-  <main class="dd-page-main" style="background:#f7f8fa">
+  <main class="dd-page-main" style="background:#f6f8ff">
   <div class="account-layout">
     <div class="account-sidebar">
       <div class="account-profile">

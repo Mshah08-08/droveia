@@ -1156,7 +1156,7 @@ function showPage(id) {
     if (_adm) { showPage("admin"); return; }  // admins go to admin panel
     var _prt = window._isPartnerUser || false;
     if (!_prt) { showToast("Partner access only"); showPage("home"); return; }
-    renderPartnerApiPage();
+    var _w = document.getElementById('biz-page-content'); if (_w) renderBizApiKey(_w);
     return;
   }
   window.scrollTo(0,0);
@@ -2762,7 +2762,7 @@ window.renderPartnerApiPage = async function() {
         '<div style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:14px;padding:24px;text-align:center">',
           '<div style="font-size:16px;font-weight:700;color:#ef4444;margin-bottom:6px">Something went wrong</div>',
           '<div style="font-size:13px;color:var(--muted);margin-bottom:16px">' + e.message + '</div>',
-          '<button onclick="renderPartnerApiPage()" style="padding:9px 20px;background:var(--blue);color:#fff;border:none;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font)">Try Again</button>',
+          '<button onclick="(function(){var w=document.getElementById(\'biz-page-content\');if(w)renderBizApiKey(w);})()" style="padding:9px 20px;background:var(--blue);color:#fff;border:none;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font)">Try Again</button>',
         '</div>',
       '</div>'
     ].join('');
@@ -2792,7 +2792,7 @@ window.partnerDisableKey = async function(docId) {
       try {
         await fb.updateDoc(fb.doc(fb.db, "apiKeys", docId), { active: false });
         showToast("Key disabled");
-        renderPartnerApiPage();
+        var _w = document.getElementById('biz-page-content'); if (_w) await renderBizApiKey(_w);
       } catch(e) { showToast("Error: " + e.message); }
     }
   });
@@ -2803,7 +2803,7 @@ window.partnerEnableKey = async function(docId) {
   try {
     await fb.updateDoc(fb.doc(fb.db, "apiKeys", docId), { active: true });
     showToast("✓ Key re-enabled");
-    renderPartnerApiPage();
+    var _w2=document.getElementById('biz-page-content');if(_w2)await renderBizApiKey(_w2);
   } catch(e) { showToast("Error: " + e.message); }
 };
 
@@ -2818,7 +2818,7 @@ window.partnerDeleteKey = async function(docId) {
       try {
         await fb.deleteDoc(fb.doc(fb.db, "apiKeys", docId));
         showToast("Key deleted");
-        renderPartnerApiPage();
+        var _w = document.getElementById('biz-page-content'); if (_w) await renderBizApiKey(_w);
       } catch(e) { showToast("Error: " + e.message); }
     }
   });
@@ -2943,7 +2943,8 @@ async function _generateNewKey(label) {
     active: true,
     createdAt: fb.serverTimestamp()
   });
-  renderPartnerApiPage();
+  var _w = document.getElementById('biz-page-content');
+  if (_w) await renderBizApiKey(_w);
 }
 
 window.partnerRevealKey = function(docId) {
@@ -4460,7 +4461,7 @@ window.partnerMarkReady = async function(btn) {
     });
     showToast("✓ Order approved — drone will dispatch automatically");
     // Re-render the partner page to reflect new status
-    renderPartnerApiPage();
+    var _w3=document.getElementById('biz-page-content');if(_w3)await renderBizApiKey(_w3);
   } catch(e) {
     showToast("Error: " + e.message);
     btn.disabled = false;

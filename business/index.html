@@ -936,7 +936,7 @@ body.landing-mode .biz-sidebar { justify-content:flex-end; padding-bottom:16px; 
         </div>
         <span style="font-size:16px;font-weight:800;letter-spacing:-.03em">Droveia</span>
       </div>
-      <button onclick="document.getElementById('auth-overlay').classList.add('hidden')" style="width:30px;height:30px;border-radius:8px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+      <button onclick="document.getElementById('auth-overlay').classList.add('hidden')" style="width:30px;height:30px;border-radius:8px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">X</button>
     </div>
 
     <div class="auth-tabs">
@@ -1118,7 +1118,7 @@ function catIcon(cat, color) {
 
 function stars(r) {
   var s="";
-  for (var i=1;i<=5;i++) s+='<span class="star'+(i>Math.floor(r)?' empty':'')+'">★</span>';
+  for (var i=1;i<=5;i++) s+='<span class="star'+(i>Math.floor(r)?' empty':'')+'">&#9733;</span>';
   return '<div class="stars">'+s+'</div><span class="rating-text">'+r+'</span>';
 }
 
@@ -2496,7 +2496,7 @@ async function adminLoadOrders() {
     }
     wrap.innerHTML = orders.map(function(o) {
       var statusColors = { delivered: "var(--green)", returned: "#22c55e", in_flight: "var(--blue)", cancelled: "#ef4444" };
-      var statusIcons  = { delivered: "✈", returned: "✓", in_flight: "⟳", cancelled: "✕" };
+      var statusIcons  = { delivered: "In Flight", returned: "✓", in_flight: "⟳", cancelled: "X" };
       var statusColor  = statusColors[o.status] || "var(--muted)";
       var statusLabel  = (o.status||"").replace(/_/g," ").toUpperCase();
       var statusIcon   = statusIcons[o.status] || "·";
@@ -2553,7 +2553,7 @@ async function adminLoadOrders() {
           '<div style="background:var(--bg3);border-radius:10px;padding:10px 12px">' +
             '<div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">Deliver To</div>' +
             '<div style="font-size:13px;font-weight:600">' + addr + '</div>' +
-            (o.address && o.address.dropLat ? '<a href="https://maps.google.com/?q=' + o.address.dropLat + ',' + o.address.dropLng + '" target="_blank" style="font-size:11px;color:var(--blue);margin-top:4px;display:inline-block">📍 View drop pin (' + o.address.dropLat.toFixed(5) + ', ' + o.address.dropLng.toFixed(5) + ')</a>' : '') +
+            (o.address && o.address.dropLat ? '<a href="https://maps.google.com/?q=' + o.address.dropLat + ',' + o.address.dropLng + '" target="_blank" style="font-size:11px;color:var(--blue);margin-top:4px;display:inline-block"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> View drop pin (' + o.address.dropLat.toFixed(5) + ', ' + o.address.dropLng.toFixed(5) + ')</a>' : '') +
             (dropNotes ? '<div style="font-size:11px;color:var(--muted);margin-top:2px">' + dropNotes + '</div>' : '') +
           '</div>' +
           '<div style="background:var(--bg3);border-radius:10px;padding:10px 12px">' +
@@ -3216,9 +3216,9 @@ function renderPartnerOrders(deliveries) {
       '</div>' +
 
       // Items + address
-      '<div style="font-size:13px;color:var(--text2);margin-bottom:4px">📦 ' + items + '</div>' +
-      '<div style="font-size:12px;color:var(--muted);margin-bottom:8px">📍 ' + (d.deliveryAddress||"—") + '</div>' +
-      (d.notes ? '<div style="font-size:12px;color:var(--muted);margin-bottom:8px">📝 ' + d.notes + '</div>' : '') +
+      '<div style="font-size:13px;color:var(--text2);margin-bottom:4px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg> ' + items + '</div>' +
+      '<div style="font-size:12px;color:var(--muted);margin-bottom:8px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> ' + (d.deliveryAddress||"—") + '</div>' +
+      (d.notes ? '<div style="font-size:12px;color:var(--muted);margin-bottom:8px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> ' + d.notes + '</div>' : '') +
       '<div style="font-size:11px;color:var(--dim)">#' + d._id.slice(0,10).toUpperCase() + (date ? ' · ' + date : '') + '</div>' +
 
       // Mark Ready button — only shown when pending
@@ -3985,7 +3985,7 @@ window.showConfirm = function(opts) {
   var msg   = document.getElementById('confirm-msg');
   var okBtn = document.getElementById('confirm-ok-btn');
   var color = opts.color || 'blue';
-  var icons = { red:'✕', amber:'!', green:'✓', blue:'?' };
+  var icons = { red:'X', amber:'!', green:'✓', blue:'?' };
   if (icon)  { icon.className = 'confirm-box-icon ' + color; icon.textContent = icons[color] || '?'; }
   if (title) { title.textContent = opts.title || 'Are you sure?'; }
   if (msg)   { msg.textContent   = opts.msg   || ''; }
@@ -4030,7 +4030,7 @@ function reviewStars(r, size) {
   size = size || 14;
   var s = "";
   for (var i = 1; i <= 5; i++) {
-    s += '<span class="review-star'+(i > r ? ' empty' : '')+'" style="font-size:'+size+'px">★</span>';
+    s += '<span class="review-star'+(i > r ? ' empty' : '')+'" style="font-size:'+size+'px">&#9733;</span>';
   }
   return '<div class="review-stars">'+s+'</div>';
 }
@@ -4197,17 +4197,17 @@ window.adminLoadDeliveries = async function() {
           '<div style="display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap">' +
             '<div style="flex:1;min-width:200px">' +
               '<div style="font-weight:700;font-size:14px;margin-bottom:4px">' + (d.customerName||"—") + (d.customerPhone?' <span style="font-size:12px;color:var(--muted);font-weight:400">'+d.customerPhone+'</span>':'') + '</div>' +
-              '<div style="font-size:13px;color:var(--text2);margin-bottom:3px">📦 ' + items + '</div>' +
-              '<div style="font-size:12px;color:var(--muted)">📍 ' + (d.deliveryAddress||"—") + '</div>' +
-              (d.notes?'<div style="font-size:12px;color:var(--muted);margin-top:2px">📝 '+d.notes+'</div>':'') +
+              '<div style="font-size:13px;color:var(--text2);margin-bottom:3px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg> ' + items + '</div>' +
+              '<div style="font-size:12px;color:var(--muted)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> ' + (d.deliveryAddress||"—") + '</div>' +
+              (d.notes?'<div style="font-size:12px;color:var(--muted);margin-top:2px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> '+d.notes+'</div>':'') +
               '<div style="font-size:11px;color:var(--dim);margin-top:8px">Partner: <strong>'+(d.partnerName||d.partnerEmail||"—")+'</strong> · Station: <strong>'+(d.stationId||"—")+'</strong>'+(date?' · '+date:'')+'</div>' +
             '</div>' +
             '<div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;flex-shrink:0">' +
               '<span style="font-size:11px;font-weight:700;padding:4px 12px;border-radius:7px;white-space:nowrap;background:'+sc.replace("var(--","rgba(").replace(")",",0.1)")+';color:'+sc+'">'+(d.status||"").replace(/_/g," ")+'</span>' +
               (isPend
-                ? '<div style="font-size:11px;color:#d97706;font-weight:600;margin-top:6px">⏳ Waiting for partner to confirm package is in station</div>' +
+                ? '<div style="font-size:11px;color:#d97706;font-weight:600;margin-top:6px">Pending Waiting for partner to confirm package is in station</div>' +
                   '<button data-did="'+d._id+'" onclick="adminForceApprove(this)" style="margin-top:6px;padding:5px 12px;border-radius:7px;background:var(--surface2);color:var(--muted);border:1px solid var(--border);font-size:11px;font-weight:600;cursor:pointer;font-family:var(--font)">Force approve</button>' +
-                  '<button data-did="'+d._id+'" onclick="adminRejectDelivery(this.dataset.did)" style="padding:7px 16px;border-radius:9px;background:rgba(239,68,68,.08);color:#ef4444;border:1px solid rgba(239,68,68,.2);font-size:13px;font-weight:700;cursor:pointer">✕ Reject</button>'
+                  '<button data-did="'+d._id+'" onclick="adminRejectDelivery(this.dataset.did)" style="padding:7px 16px;border-radius:9px;background:rgba(239,68,68,.08);color:#ef4444;border:1px solid rgba(239,68,68,.2);font-size:13px;font-weight:700;cursor:pointer">X Reject</button>'
                 : '') +
             '</div>' +
           '</div>' +
@@ -4671,7 +4671,7 @@ window.loadPartnerStock = async function() {
       var canEdit = item.status === 'approved';
       return '<div class="stock-row" id="srow-'+item._id+'">'
         +(item.imgUrl?'<img src="'+item.imgUrl+'" style="width:44px;height:44px;border-radius:8px;object-fit:cover;flex-shrink:0">'
-          :'<div style="width:44px;height:44px;border-radius:8px;background:#f0f4ff;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:18px">📦</div>')
+          :'<div style="width:44px;height:44px;border-radius:8px;background:#f0f4ff;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:18px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div>')
         +'<div style="flex:1;min-width:0">'
         +'<div style="font-size:14px;font-weight:600;color:#111">'+item.name+'</div>'
         +'<div style="font-size:11px;color:#9ca3af;margin-top:2px">'+item.cat+(item.qty>1?' · '+item.qty+' units':'')+(item.pph?' · $'+item.pph+'/hr':'')+(date?' · '+date:'')+'</div>'
@@ -4689,78 +4689,93 @@ window.loadPartnerStock = async function() {
 window.renderPartnerLanding = function(mode) {
   if (mode === 'signin') {
     return '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;padding:40px 24px">'
-      + '<div style="width:72px;height:72px;border-radius:20px;background:linear-gradient(135deg,#1a6ef0,#3b82f6);display:flex;align-items:center;justify-content:center;font-size:32px;margin-bottom:24px;box-shadow:0 8px 24px rgba(26,110,240,.25)">🚁</div>'
+      + '<div style="width:72px;height:72px;border-radius:20px;background:linear-gradient(135deg,#1a6ef0,#3b82f6);display:flex;align-items:center;justify-content:center;font-size:32px;margin-bottom:24px;box-shadow:0 8px 24px rgba(26,110,240,.25)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a6ef0" stroke-width="1.8" stroke-linecap="round"><path d="M12 14c-4 0-7-1.5-7-3s3-3 7-3 7 1.5 7 3-3 3-7 3z"/><path d="M5 11V7m14 4V7M8 7h8M12 14v4"/><circle cx="12" cy="19" r="1"/></svg></div>'
       + '<h2 style="font-size:26px;font-weight:800;color:#111;margin-bottom:10px">Partner Portal</h2>'
       + '<p style="color:#6b7280;font-size:15px;margin-bottom:32px;max-width:380px;line-height:1.6">Sign in with your partner account to manage inventory, track orders, and access your API.</p>'
       + '<button onclick="showAuth()" style="background:#1a6ef0;color:#fff;border:none;border-radius:10px;padding:14px 36px;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--font);box-shadow:0 4px 14px rgba(26,110,240,.35)">Sign In</button>'
       + '</div>';
   }
 
-  return '<div style="overflow-y:auto;padding-bottom:40px">'
+  return '<div style="overflow-y:auto;padding-bottom:60px">'
 
-    // ── Hero ──────────────────────────────────────────────────────────────────
-    + '<div style="background:linear-gradient(135deg,#0f172a 0%,#1e3a8a 55%,#1a6ef0 100%);padding:56px 40px 48px;text-align:center">'
-    + '<div style="display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:11px;font-weight:800;padding:6px 16px;border-radius:20px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:22px">🚁 Partner Program</div>'
-    + '<h1 style="font-size:36px;font-weight:900;color:#fff;letter-spacing:-.04em;line-height:1.15;margin-bottom:14px">Deliver anything.<br><span style="color:#60a5fa">In under 30 minutes.</span></h1>'
-    + '<p style="color:rgba(255,255,255,.75);font-size:15px;line-height:1.7;max-width:480px;margin:0 auto 32px">List your tools and products on Droveia. We fly them to customers — you just pack the order and earn 98% of every sale.</p>'
-    + '<a href="mailto:partners@droveia.com" style="display:inline-block;background:#fff;color:#1a6ef0;font-size:15px;font-weight:800;padding:14px 36px;border-radius:10px;text-decoration:none;box-shadow:0 4px 20px rgba(0,0,0,.25)">Apply to Partner →</a>'
-    + '</div>'
+    // ── Hero ─────────────────────────────────────────────────────────────────
+    + '<div style="background:linear-gradient(145deg,#0f172a 0%,#1e3a8a 60%,#1a6ef0 100%);padding:60px 40px 52px;text-align:center;position:relative;overflow:hidden">'
+    + '<div style="position:absolute;inset:0;background:radial-gradient(circle at 70% 50%,rgba(96,165,250,.15),transparent 60%);pointer-events:none"></div>'
+    + '<div style="position:relative">'
+    + '<div style="display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#93c5fd;font-size:11px;font-weight:800;padding:6px 16px;border-radius:20px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:22px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a6ef0" stroke-width="1.8" stroke-linecap="round"><path d="M12 14c-4 0-7-1.5-7-3s3-3 7-3 7 1.5 7 3-3 3-7 3z"/><path d="M5 11V7m14 4V7M8 7h8M12 14v4"/><circle cx="12" cy="19" r="1"/></svg> Droveia Partner Program</div>'
+    + '<h1 style="font-size:38px;font-weight:900;color:#fff;letter-spacing:-.04em;line-height:1.15;margin-bottom:14px">Deliver anything.<br><span style="color:#60a5fa">In under 30 minutes.</span></h1>'
+    + '<p style="color:rgba(255,255,255,.7);font-size:15px;line-height:1.7;max-width:500px;margin:0 auto 36px">List your tools and products on Droveia. We fly them directly to customers — you just pack the order and keep 98% of every sale.</p>'
+    + '<div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">'
+    + '<a href="mailto:partners@droveia.com" style="display:inline-flex;align-items:center;gap:8px;background:#fff;color:#1a6ef0;font-size:14px;font-weight:800;padding:13px 28px;border-radius:10px;text-decoration:none;box-shadow:0 4px 20px rgba(0,0,0,.25)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>Apply to Partner</a>'
+    + '<button onclick="showAuth()" style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.3);color:#fff;font-size:14px;font-weight:700;padding:13px 24px;border-radius:10px;cursor:pointer;font-family:var(--font)">Already a partner? Sign in →</button>'
+    + '</div></div></div>'
 
     // ── Stats ─────────────────────────────────────────────────────────────────
-    + '<div style="display:grid;grid-template-columns:repeat(3,1fr);background:#fff;border-bottom:2px solid #f0f0f0">'
-    + '<div style="padding:28px 16px;text-align:center;border-right:1px solid #f0f0f0">'
-    +   '<div style="font-size:30px;font-weight:900;color:#1a6ef0;letter-spacing:-.03em">&lt;30<span style="font-size:16px">min</span></div>'
-    +   '<div style="font-size:12px;color:#9ca3af;margin-top:4px;font-weight:500">Avg delivery</div></div>'
-    + '<div style="padding:28px 16px;text-align:center;border-right:1px solid #f0f0f0">'
-    +   '<div style="font-size:30px;font-weight:900;color:#1a6ef0;letter-spacing:-.03em">98<span style="font-size:16px">%</span></div>'
-    +   '<div style="font-size:12px;color:#9ca3af;margin-top:4px;font-weight:500">Revenue to you</div></div>'
-    + '<div style="padding:28px 16px;text-align:center">'
-    +   '<div style="font-size:30px;font-weight:900;color:#1a6ef0;letter-spacing:-.03em">$2k</div>'
-    +   '<div style="font-size:12px;color:#9ca3af;margin-top:4px;font-weight:500">Setup cost</div></div>'
+    + '<div style="display:grid;grid-template-columns:repeat(4,1fr);background:#fff;border-bottom:1px solid #e8edf5">'
+    + '<div style="padding:24px 16px;text-align:center;border-right:1px solid #e8edf5"><div style="font-size:28px;font-weight:900;color:#1a6ef0;letter-spacing:-.03em">&lt;30<span style="font-size:14px">min</span></div><div style="font-size:11px;color:#9ca3af;margin-top:4px;font-weight:600;text-transform:uppercase;letter-spacing:.05em">Avg delivery</div></div>'
+    + '<div style="padding:24px 16px;text-align:center;border-right:1px solid #e8edf5"><div style="font-size:28px;font-weight:900;color:#1a6ef0;letter-spacing:-.03em">98<span style="font-size:14px">%</span></div><div style="font-size:11px;color:#9ca3af;margin-top:4px;font-weight:600;text-transform:uppercase;letter-spacing:.05em">Revenue to you</div></div>'
+    + '<div style="padding:24px 16px;text-align:center;border-right:1px solid #e8edf5"><div style="font-size:28px;font-weight:900;color:#1a6ef0;letter-spacing:-.03em">24hr</div><div style="font-size:11px;color:#9ca3af;margin-top:4px;font-weight:600;text-transform:uppercase;letter-spacing:.05em">Approval time</div></div>'
+    + '<div style="padding:24px 16px;text-align:center"><div style="font-size:28px;font-weight:900;color:#1a6ef0;letter-spacing:-.03em">$0</div><div style="font-size:11px;color:#9ca3af;margin-top:4px;font-weight:600;text-transform:uppercase;letter-spacing:.05em">Setup cost</div></div>'
     + '</div>'
 
     // ── How it works ──────────────────────────────────────────────────────────
-    + '<div style="padding:36px 32px 0">'
-    + '<div style="font-size:11px;font-weight:800;color:#9ca3af;text-transform:uppercase;letter-spacing:.1em;margin-bottom:20px">How it works</div>'
-    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:32px">'
-    + _bizCard('1','Submit inventory','List your tools through this portal. Approved within 24hrs.','#1a6ef0','#eff6ff')
-    + _bizCard('2','Get your station','We install a drone dock at your location. Zero cost.','#16a34a','#f0fdf4')
-    + _bizCard('3','Orders fly out','Customer orders → your station dispatches automatically.','#d97706','#fffbeb')
-    + _bizCard('4','Get paid weekly','98% of every rental, transferred every Monday.','#9333ea','#fdf4ff')
+    + '<div style="padding:40px 32px 0;background:#f8faff">'
+    + '<div style="font-size:11px;font-weight:800;color:#1a6ef0;text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px">How it works</div>'
+    + '<div style="font-size:22px;font-weight:900;color:#0f172a;margin-bottom:24px;letter-spacing:-.02em">Up and running in days</div>'
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:40px">'
+    + _bizCard('1','Submit inventory','List your tools through this portal. We review and approve within 24 hours.','#1a6ef0','#eff6ff')
+    + _bizCard('2','Get your station','We install a Droveia drone dock at your location. Zero cost to you.','#1a6ef0','#dbeafe')
+    + _bizCard('3','Orders fly out','A customer orders → your station dispatches the drone automatically.','#1a6ef0','#eff6ff')
+    + _bizCard('4','Get paid weekly','98% of every rental or sale, transferred every Monday morning.','#1a6ef0','#dbeafe')
     + '</div>'
 
-    // ── Features ──────────────────────────────────────────────────────────────
-    + '<div style="font-size:11px;font-weight:800;color:#9ca3af;text-transform:uppercase;letter-spacing:.1em;margin-bottom:16px">What you get</div>'
-    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:32px">'
-    + _bizFeat('📊','Live dashboard','Track orders, revenue, and stock in real time.')
-    + _bizFeat('🔑','API access','Integrate Droveia into your own systems.')
-    + _bizFeat('📍','Live tracking','Customers watch their drone delivery on a map.')
-    + _bizFeat('💸','Weekly payouts','Auto-transfers every Monday. No invoices needed.')
+    // ── Why Droveia ───────────────────────────────────────────────────────────
+    + '<div style="font-size:11px;font-weight:800;color:#1a6ef0;text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px">Why partner with us</div>'
+    + '<div style="font-size:22px;font-weight:900;color:#0f172a;margin-bottom:20px;letter-spacing:-.02em">Everything you need to sell</div>'
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:40px">'
+    + _bizFeat('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1a6ef0" stroke-width="1.8" stroke-linecap="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>','Your inventory, our network','List any tool or product. Rent it out, sell it, or both.')
+    + _bizFeat('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1a6ef0" stroke-width="1.8" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg>','Real-time dashboard','Track every order, delivery status, and revenue from one place.')
+    + _bizFeat('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1a6ef0" stroke-width="1.8" stroke-linecap="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.778 7.778 5.5 5.5 0 017.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>','Developer API','Integrate Droveia into your own systems with our REST API.')
+    + _bizFeat('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1a6ef0" stroke-width="1.8" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>','Live drone tracking','Customers watch their delivery live on a map.')
+    + _bizFeat('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1a6ef0" stroke-width="1.8" stroke-linecap="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>','Weekly auto-payouts','No invoices. No chasing payments. Transfers every Monday.')
+    + _bizFeat('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1a6ef0" stroke-width="1.8" stroke-linecap="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>','Same-day delivery','Sub-30 minute delivery radius from your station.')
     + '</div>'
+
+    // ── Testimonial / Trust ───────────────────────────────────────────────────
+    + '<div style="background:linear-gradient(135deg,#1a6ef0,#2563eb);border-radius:16px;padding:32px;margin-bottom:40px">'
+    + '<div style="display:flex;gap:20px;align-items:flex-start">'
+    + '<div style="flex:1">'
+    + '<div style="font-size:15px;color:rgba(255,255,255,.9);line-height:1.7;margin-bottom:16px;font-style:italic">"We listed 12 tools on Droveia and made back our first month\'s costs in under two weeks. The setup was surprisingly painless."</div>'
+    + '<div style="font-size:13px;font-weight:700;color:#fff">— Early Partner, Plano TX</div>'
+    + '</div>'
+    + '<div style="width:56px;height:56px;border-radius:14px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0"><svg width="22" height="22" viewBox="0 0 24 24" fill="#1a6ef0" stroke="#1a6ef0" stroke-width="1.5" stroke-linecap="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>'
+    + '</div></div>'
 
     // ── CTA ───────────────────────────────────────────────────────────────────
-    + '<div style="background:linear-gradient(120deg,#1a6ef0,#2563eb);border-radius:16px;padding:32px;text-align:center;margin-bottom:16px">'
-    + '<div style="font-size:20px;font-weight:900;color:#fff;margin-bottom:8px;letter-spacing:-.02em">Ready to launch?</div>'
-    + '<div style="font-size:14px;color:rgba(255,255,255,.8);margin-bottom:22px">We onboard new partners every week. Get in touch — we&rsquo;ll have you live within days.</div>'
-    + '<a href="mailto:partners@droveia.com" style="display:inline-block;background:#fff;color:#1a6ef0;font-size:14px;font-weight:800;padding:12px 28px;border-radius:8px;text-decoration:none;margin-right:10px">Email Us</a>'
-    + '<button onclick="showAuth()" style="background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.35);color:#fff;font-size:14px;font-weight:700;padding:12px 20px;border-radius:8px;cursor:pointer;font-family:var(--font)">Already a partner?</button>'
-    + '</div>'
+    + '<div style="background:#fff;border:1.5px solid #e8edf5;border-radius:16px;padding:32px;text-align:center;box-shadow:0 2px 12px rgba(26,110,240,.06)">'
+    + '<div style="font-size:22px;font-weight:900;color:#0f172a;margin-bottom:8px;letter-spacing:-.02em">Ready to launch?</div>'
+    + '<div style="font-size:14px;color:#6b7280;margin-bottom:24px;line-height:1.6;max-width:400px;margin-left:auto;margin-right:auto">We onboard new partners every week. Get in touch and we\'ll have you live within days.</div>'
+    + '<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">'
+    + '<a href="mailto:partners@droveia.com" style="display:inline-flex;align-items:center;gap:8px;background:#1a6ef0;color:#fff;font-size:14px;font-weight:800;padding:13px 28px;border-radius:10px;text-decoration:none;box-shadow:0 4px 14px rgba(26,110,240,.3)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>Email Us</a>'
+    + '<button onclick="showAuth()" style="display:inline-flex;align-items:center;gap:8px;background:#fff;border:1.5px solid #e2e8f0;color:#374151;font-size:14px;font-weight:700;padding:13px 20px;border-radius:10px;cursor:pointer;font-family:var(--font)">Already a partner? →</button>'
+    + '</div></div>'
 
     + '</div></div>';
 };
 
+
 function _bizCard(num, title, desc, color, bg) {
-  return '<div style="background:'+bg+';border-radius:12px;padding:18px;border:1px solid '+color+'22">'
-    + '<div style="width:32px;height:32px;border-radius:9px;background:'+color+';color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;margin-bottom:12px">'+num+'</div>'
-    + '<div style="font-size:13px;font-weight:800;color:#111;margin-bottom:5px">'+title+'</div>'
+  return '<div style="background:'+bg+';border-radius:14px;padding:20px;border:1px solid rgba(26,110,240,.15);box-shadow:0 1px 4px rgba(26,110,240,.06)">'
+    + '<div style="width:34px;height:34px;border-radius:10px;background:#1a6ef0;color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;margin-bottom:14px">'+num+'</div>'
+    + '<div style="font-size:13px;font-weight:800;color:#0f172a;margin-bottom:5px">'+title+'</div>'
     + '<div style="font-size:12px;color:#6b7280;line-height:1.5">'+desc+'</div>'
     + '</div>';
 }
 function _bizFeat(icon, title, desc) {
-  return '<div style="background:#fff;border:1.5px solid #e8e8e8;border-radius:12px;padding:16px">'
-    + '<div style="font-size:20px;margin-bottom:8px">'+icon+'</div>'
-    + '<div style="font-size:13px;font-weight:700;color:#111;margin-bottom:3px">'+title+'</div>'
-    + '<div style="font-size:12px;color:#9ca3af;line-height:1.5">'+desc+'</div>'
+  return '<div style="background:#fff;border:1px solid #e8edf5;border-radius:14px;padding:18px;box-shadow:0 1px 4px rgba(0,0,0,.05)">'
+    + '<div style="width:36px;height:36px;border-radius:10px;background:#eff6ff;display:flex;align-items:center;justify-content:center;margin-bottom:12px">'+icon+'</div>'
+    + '<div style="font-size:13px;font-weight:700;color:#0f172a;margin-bottom:4px">'+title+'</div>'
+    + '<div style="font-size:12px;color:#6b7280;line-height:1.5">'+desc+'</div>'
     + '</div>';
 }
 

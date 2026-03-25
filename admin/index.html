@@ -943,7 +943,7 @@ body{background:#f6f8ff;font-family:'Sora',sans-serif;padding-top:0!important;ma
         </div>
         <span style="font-size:16px;font-weight:800;letter-spacing:-.03em">Droveia</span>
       </div>
-      <button onclick="document.getElementById('auth-overlay').classList.add('hidden')" style="width:30px;height:30px;border-radius:8px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+      <button onclick="document.getElementById('auth-overlay').classList.add('hidden')" style="width:30px;height:30px;border-radius:8px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">X</button>
     </div>
 
     <div class="auth-tabs">
@@ -1138,7 +1138,7 @@ function catIcon(cat, color) {
 
 function stars(r) {
   var s="";
-  for (var i=1;i<=5;i++) s+='<span class="star'+(i>Math.floor(r)?' empty':'')+'">★</span>';
+  for (var i=1;i<=5;i++) s+='<span class="star'+(i>Math.floor(r)?' empty':'')+'">&#9733;</span>';
   return '<div class="stars">'+s+'</div><span class="rating-text">'+r+'</span>';
 }
 
@@ -2535,7 +2535,7 @@ async function adminLoadOrders() {
     }
     wrap.innerHTML = orders.map(function(o) {
       var statusColors = { delivered: "var(--green)", returned: "#22c55e", in_flight: "var(--blue)", cancelled: "#ef4444" };
-      var statusIcons  = { delivered: "✈", returned: "✓", in_flight: "⟳", cancelled: "✕" };
+      var statusIcons  = { delivered: "In Flight", returned: "✓", in_flight: "⟳", cancelled: "X" };
       var statusColor  = statusColors[o.status] || "var(--muted)";
       var statusLabel  = (o.status||"").replace(/_/g," ").toUpperCase();
       var statusIcon   = statusIcons[o.status] || "·";
@@ -2581,7 +2581,7 @@ async function adminLoadOrders() {
           '<div style="background:var(--bg3);border-radius:10px;padding:10px 12px">' +
             '<div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">Deliver To</div>' +
             '<div style="font-size:13px;font-weight:600">' + addr + '</div>' +
-            (o.address && o.address.dropLat ? '<a href="https://maps.google.com/?q=' + o.address.dropLat + ',' + o.address.dropLng + '" target="_blank" style="font-size:11px;color:var(--blue);margin-top:4px;display:inline-block">📍 View drop pin (' + o.address.dropLat.toFixed(5) + ', ' + o.address.dropLng.toFixed(5) + ')</a>' : '') +
+            (o.address && o.address.dropLat ? '<a href="https://maps.google.com/?q=' + o.address.dropLat + ',' + o.address.dropLng + '" target="_blank" style="font-size:11px;color:var(--blue);margin-top:4px;display:inline-block"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> View drop pin (' + o.address.dropLat.toFixed(5) + ', ' + o.address.dropLng.toFixed(5) + ')</a>' : '') +
             (dropNotes ? '<div style="font-size:11px;color:var(--muted);margin-top:2px">' + dropNotes + '</div>' : '') +
           '</div>' +
           '<div style="background:var(--bg3);border-radius:10px;padding:10px 12px">' +
@@ -3279,9 +3279,9 @@ function renderPartnerOrders(deliveries) {
       '</div>' +
 
       // Items + address
-      '<div style="font-size:13px;color:var(--text2);margin-bottom:4px">📦 ' + items + '</div>' +
-      '<div style="font-size:12px;color:var(--muted);margin-bottom:8px">📍 ' + (d.deliveryAddress||"—") + '</div>' +
-      (d.notes ? '<div style="font-size:12px;color:var(--muted);margin-bottom:8px">📝 ' + d.notes + '</div>' : '') +
+      '<div style="font-size:13px;color:var(--text2);margin-bottom:4px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg> ' + items + '</div>' +
+      '<div style="font-size:12px;color:var(--muted);margin-bottom:8px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> ' + (d.deliveryAddress||"—") + '</div>' +
+      (d.notes ? '<div style="font-size:12px;color:var(--muted);margin-bottom:8px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> ' + d.notes + '</div>' : '') +
       '<div style="font-size:11px;color:var(--dim)">#' + d._id.slice(0,10).toUpperCase() + (date ? ' · ' + date : '') + '</div>' +
 
       // Mark Ready button — only shown when pending
@@ -4053,7 +4053,7 @@ window.showConfirm = function(opts) {
   var msg   = document.getElementById('confirm-msg');
   var okBtn = document.getElementById('confirm-ok-btn');
   var color = opts.color || 'blue';
-  var icons = { red:'✕', amber:'!', green:'✓', blue:'?' };
+  var icons = { red:'X', amber:'!', green:'✓', blue:'?' };
   if (icon)  { icon.className = 'confirm-box-icon ' + color; icon.textContent = icons[color] || '?'; }
   if (title) { title.textContent = opts.title || 'Are you sure?'; }
   if (msg)   { msg.textContent   = opts.msg   || ''; }
@@ -4098,7 +4098,7 @@ function reviewStars(r, size) {
   size = size || 14;
   var s = "";
   for (var i = 1; i <= 5; i++) {
-    s += '<span class="review-star'+(i > r ? ' empty' : '')+'" style="font-size:'+size+'px">★</span>';
+    s += '<span class="review-star'+(i > r ? ' empty' : '')+'" style="font-size:'+size+'px">&#9733;</span>';
   }
   return '<div class="review-stars">'+s+'</div>';
 }
@@ -4265,17 +4265,17 @@ window.adminLoadDeliveries = async function() {
           '<div style="display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap">' +
             '<div style="flex:1;min-width:200px">' +
               '<div style="font-weight:700;font-size:14px;margin-bottom:4px">' + (d.customerName||"—") + (d.customerPhone?' <span style="font-size:12px;color:var(--muted);font-weight:400">'+d.customerPhone+'</span>':'') + '</div>' +
-              '<div style="font-size:13px;color:var(--text2);margin-bottom:3px">📦 ' + items + '</div>' +
-              '<div style="font-size:12px;color:var(--muted)">📍 ' + (d.deliveryAddress||"—") + '</div>' +
-              (d.notes?'<div style="font-size:12px;color:var(--muted);margin-top:2px">📝 '+d.notes+'</div>':'') +
+              '<div style="font-size:13px;color:var(--text2);margin-bottom:3px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg> ' + items + '</div>' +
+              '<div style="font-size:12px;color:var(--muted)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> ' + (d.deliveryAddress||"—") + '</div>' +
+              (d.notes?'<div style="font-size:12px;color:var(--muted);margin-top:2px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> '+d.notes+'</div>':'') +
               '<div style="font-size:11px;color:var(--dim);margin-top:8px">Partner: <strong>'+(d.partnerName||d.partnerEmail||"—")+'</strong> · Station: <strong>'+(d.stationId||"—")+'</strong>'+(date?' · '+date:'')+'</div>' +
             '</div>' +
             '<div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;flex-shrink:0">' +
               '<span style="font-size:11px;font-weight:700;padding:4px 12px;border-radius:7px;white-space:nowrap;background:'+sc.replace("var(--","rgba(").replace(")",",0.1)")+';color:'+sc+'">'+(d.status||"").replace(/_/g," ")+'</span>' +
               (isPend
-                ? '<div style="font-size:11px;color:#d97706;font-weight:600;margin-top:6px">⏳ Waiting for partner to confirm package is in station</div>' +
+                ? '<div style="font-size:11px;color:#d97706;font-weight:600;margin-top:6px">Pending Waiting for partner to confirm package is in station</div>' +
           +'<td>'+(isPending?'<button class="adm-btn-green" onclick="adminForceApprove(this.dataset.id)" data-id="'+d._id+'" style="font-size:11px;padding:5px 10px">Force Approve</button>':'—')+'</td>'
-                  +'<button data-did="'+d._id+'" onclick="adminRejectDelivery(this.dataset.did)" style="padding:7px 16px;border-radius:9px;background:rgba(239,68,68,.08);color:#ef4444;border:1px solid rgba(239,68,68,.2);font-size:13px;font-weight:700;cursor:pointer">✕ Reject</button>'
+                  +'<button data-did="'+d._id+'" onclick="adminRejectDelivery(this.dataset.did)" style="padding:7px 16px;border-radius:9px;background:rgba(239,68,68,.08);color:#ef4444;border:1px solid rgba(239,68,68,.2);font-size:13px;font-weight:700;cursor:pointer">X Reject</button>'
                 : '') +
             '</div>' +
           '</div>' +
@@ -4701,7 +4701,7 @@ window.renderAdmInventory = async function(wrap) {
     '<tbody id="adm-inv-body">',
     droTools.map(function(t){
       var avail=t.available!==false;
-      var img=t.img&&t.img!=='x'?'<img src="'+t.img+'" style="width:36px;height:36px;border-radius:6px;object-fit:contain;background:#f8f8f8">':'<div style="width:36px;height:36px;border-radius:6px;background:#f0f4ff;display:flex;align-items:center;justify-content:center;font-size:16px">🔧</div>';
+      var img=t.img&&t.img!=='x'?'<img src="'+t.img+'" style="width:36px;height:36px;border-radius:6px;object-fit:contain;background:#f8f8f8">':'<div style="width:36px;height:36px;border-radius:6px;background:#f0f4ff;display:flex;align-items:center;justify-content:center;font-size:16px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg></div>';
       return '<tr>'
         +'<td>'+img+'</td>'
         +'<td><div style="font-weight:600;font-size:13px">'+t.name+'</div><div style="font-size:11px;color:#9ca3af">ID: '+t.id+'</div></td>'
@@ -4730,7 +4730,7 @@ window.admFilterInventory = function() {
   if (!body) return;
   body.innerHTML = filtered.map(function(t){
     var avail=t.available!==false;
-    var img=t.img&&t.img!=='x'?'<img src="'+t.img+'" style="width:36px;height:36px;border-radius:6px;object-fit:contain;background:#f8f8f8">':'<div style="width:36px;height:36px;border-radius:6px;background:#f0f4ff;display:flex;align-items:center;justify-content:center;font-size:16px">🔧</div>';
+    var img=t.img&&t.img!=='x'?'<img src="'+t.img+'" style="width:36px;height:36px;border-radius:6px;object-fit:contain;background:#f8f8f8">':'<div style="width:36px;height:36px;border-radius:6px;background:#f0f4ff;display:flex;align-items:center;justify-content:center;font-size:16px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg></div>';
     return '<tr>'
       +'<td>'+img+'</td>'
       +'<td><div style="font-weight:600;font-size:13px">'+t.name+'</div><div style="font-size:11px;color:#9ca3af">ID: '+t.id+'</div></td>'
@@ -4769,7 +4769,7 @@ window.loadAdmPendingInventory = async function() {
       var itemsHtml = partner.items.map(function(item) {
         return '<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid #f0f0f0" id="pend-row-'+item._id+'">'
           + (item.imgUrl ? '<img src="'+item.imgUrl+'" style="width:40px;height:40px;border-radius:8px;object-fit:cover;flex-shrink:0">'
-            : '<div style="width:40px;height:40px;border-radius:8px;background:#f0f4ff;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📦</div>')
+            : '<div style="width:40px;height:40px;border-radius:8px;background:#f0f4ff;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div>')
           + '<div style="flex:1;min-width:0">'
           + '<div style="font-size:13px;font-weight:600;color:#111">'+item.name+'</div>'
           + '<div style="font-size:11px;color:#9ca3af;margin-top:2px">'
@@ -4779,7 +4779,7 @@ window.loadAdmPendingInventory = async function() {
           + '</div></div>'
           + '<div style="display:flex;gap:6px;flex-shrink:0">'
           + '<button class="adm-btn-green" onclick="admApproveInventory(this)" data-id="'+item._id+'" data-item="'+encodeURIComponent(JSON.stringify(item))+'" style="font-size:11px;padding:6px 12px">✓ Approve</button>'
-          + '<button class="adm-btn-danger" onclick="admRejectInventory(this.dataset.id)" data-id="'+item._id+'" style="font-size:11px;padding:6px 12px">✕ Reject</button>'
+          + '<button class="adm-btn-danger" onclick="admRejectInventory(this.dataset.id)" data-id="'+item._id+'" style="font-size:11px;padding:6px 12px">X Reject</button>'
           + '</div></div>';
       }).join('');
       return '<div style="border:1px solid #e8e8e8;border-radius:10px;overflow:hidden;margin-bottom:12px">'
@@ -4868,7 +4868,7 @@ window.renderAdmOrders = async function(wrap) {
       return tb-ta;
     });
     var statusColors={in_flight:'background:#eff6ff;color:#1a6ef0;border:1px solid #bfdbfe',delivered:'background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0',cancelled:'background:#fef2f2;color:#ef4444;border:1px solid #fecaca',pending:'background:#fffbeb;color:#d97706;border:1px solid #fde68a',pending_approval:'background:#fffbeb;color:#d97706;border:1px solid #fde68a',returned:'background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0',delayed:'background:#fffbeb;color:#d97706;border:1px solid #fde68a',failed:'background:#fef2f2;color:#ef4444;border:1px solid #fecaca',refunded:'background:#f5f3ff;color:#7c3aed;border:1px solid #ddd6fe'};
-    var statusLabels={in_flight:'✈ In Flight',delivered:'✓ Delivered',cancelled:'✕ Cancelled',pending:'⏳ Pending',pending_approval:'⏳ Pending',returned:'↩ Returned',delayed:'⚠ Delayed',failed:'✕ Failed',refunded:'↩ Refunded'};
+    var statusLabels={in_flight:'In Flight',delivered:'Delivered',cancelled:'Cancelled',pending:'Pending',pending_approval:'Pending',returned:'Returned',delayed:'Delayed',failed:'Failed',refunded:'Refunded'};
     var rows = orders.length ? orders.map(function(o){
       var sc  = statusColors[o.status]||'gray';
       var date = o.createdAt&&o.createdAt.toDate ? o.createdAt.toDate().toLocaleDateString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
@@ -4883,7 +4883,7 @@ window.renderAdmOrders = async function(wrap) {
         +'<td style="font-size:11px;color:#9ca3af">'+date+'</td>'
         +'<td><div style="display:flex;gap:6px">'
         +'<select onchange="admSetOrderStatus(this.dataset.oid,this.value);this.value=\'\'" data-oid="'+o._id+'" style="font-size:11px;padding:5px 10px;border-radius:8px;border:1px solid #e2e8f0;background:#fff;cursor:pointer;font-family:var(--font);font-weight:600;color:#374151;box-shadow:0 1px 3px rgba(0,0,0,.06)">'
-        +'<option value="">⚡ Status</option>'
+        +'<option value=""><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Status</option>'
         +'<option value="in_flight">In Flight</option>'
         +'<option value="delivered">Delivered</option>'
         +'<option value="returned">Returned</option>'
@@ -4936,7 +4936,7 @@ window.renderAdmDeliveries = async function(wrap) {
           +'<td><strong style="font-size:13px">'+(d.customerName||'—')+'</strong><br><span style="font-size:11px;color:#9ca3af">'+(d.deliveryAddress||'')+'</span></td>'
           +'<td style="font-size:12px">'+(d.partnerName||d.partnerEmail||'—')+'</td>'
           +'<td style="font-size:12px;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+items+'</td>'
-          +'<td>'+(isPending?'<span class="adm-badge adm-badge-amber">⏳ Waiting pickup</span>':'<span class="adm-badge adm-badge-'+color+'">'+d.status.replace(/_/g,' ')+'</span>')+'</td>'
+          +'<td>'+(isPending?'<span class="adm-badge adm-badge-amber">Pending Waiting pickup</span>':'<span class="adm-badge adm-badge-'+color+'">'+d.status.replace(/_/g,' ')+'</span>')+'</td>'
           +'<td style="font-size:11px;color:#9ca3af">'+date+'</td>'
           +'<td>'+(isPending?'<button class="adm-btn-green" onclick="adminForceApprove(this.dataset.id)" data-id="'+d._id+'" style="font-size:11px;padding:5px 10px">Force Approve</button>':'—')+'</td>'
           +'</tr>';
@@ -5016,7 +5016,7 @@ window.admOpenPartner = async function(partnerId, email) {
     var avail=t.available!==false;
     var img=t.img&&t.img!=='x'?t.img:null;
     return '<div class="ps-card">'
-      +'<div style="height:100px;background:#f8f9fa;display:flex;align-items:center;justify-content:center">'+(img?'<img src="'+img+'" style="max-width:90%;max-height:88px;object-fit:contain">':'<div style="font-size:32px">🔧</div>')+'</div>'
+      +'<div style="height:100px;background:#f8f9fa;display:flex;align-items:center;justify-content:center">'+(img?'<img src="'+img+'" style="max-width:90%;max-height:88px;object-fit:contain">':'<div style="font-size:32px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg></div>')+'</div>'
       +'<div style="padding:12px">'
       +'<div style="font-size:13px;font-weight:700;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px">'+t.name+'</div>'
       +'<div style="font-size:11px;color:#9ca3af;margin-bottom:8px"><span class="adm-badge adm-badge-blue" style="font-size:10px">'+t.cat+'</span> · $'+calcCost(t,1).toFixed(2)+'/hr</div>'
@@ -5028,14 +5028,14 @@ window.admOpenPartner = async function(partnerId, email) {
 
   var pendHtml = pending.length ? pending.map(function(item){
     return '<div class="ps-card" id="pend-row-'+item._id+'" style="border:1.5px solid #fde68a">'
-      +'<div style="height:100px;background:#fffbeb;display:flex;align-items:center;justify-content:center">'+(item.imgUrl?'<img src="'+item.imgUrl+'" style="max-width:90%;max-height:88px;object-fit:contain">':'<div style="font-size:32px">📦</div>')+'</div>'
+      +'<div style="height:100px;background:#fffbeb;display:flex;align-items:center;justify-content:center">'+(item.imgUrl?'<img src="'+item.imgUrl+'" style="max-width:90%;max-height:88px;object-fit:contain">':'<div style="font-size:32px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div>')+'</div>'
       +'<div style="padding:12px">'
       +'<div style="font-size:13px;font-weight:700;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px">'+item.name+'</div>'
       +'<div style="font-size:11px;color:#9ca3af;margin-bottom:8px"><span class="adm-badge adm-badge-amber" style="font-size:10px">'+item.cat+'</span> · $'+(item.pph||0).toFixed(2)+'/hr · qty '+item.qty+'</div>'
       +(item.desc?'<div style="font-size:11px;color:#6b7280;margin-bottom:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+item.desc+'</div>':'')
       +'<div style="display:flex;gap:6px">'
       +'<button class="adm-btn-green" onclick="admApproveInventory(this)" data-id="'+item._id+'" data-item="'+encodeURIComponent(JSON.stringify(item))+'" style="flex:1;font-size:11px;padding:6px">✓ Approve</button>'
-      +'<button class="adm-btn-danger" onclick="admRejectInventory(this.dataset.id)" data-id="'+item._id+'" style="flex:1;font-size:11px;padding:6px">✕ Reject</button>'
+      +'<button class="adm-btn-danger" onclick="admRejectInventory(this.dataset.id)" data-id="'+item._id+'" style="flex:1;font-size:11px;padding:6px">X Reject</button>'
       +'</div></div></div>';
   }).join('') : '<div style="color:#9ca3af;font-size:13px;padding:4px 0;grid-column:1/-1">No pending submissions.</div>';
 

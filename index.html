@@ -954,7 +954,7 @@ html, body { height:100%; }
         </div>
         <span style="font-size:16px;font-weight:800;letter-spacing:-.03em">Droveia</span>
       </div>
-      <button onclick="document.getElementById('auth-overlay').classList.add('hidden')" style="width:30px;height:30px;border-radius:8px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+      <button onclick="document.getElementById('auth-overlay').classList.add('hidden')" style="width:30px;height:30px;border-radius:8px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">X</button>
     </div>
 
     <div class="auth-tabs">
@@ -1076,7 +1076,7 @@ html, body { height:100%; }
   <div style="display:flex;align-items:center;height:40px;background:#f8f8f8;border-radius:8px;padding:0 12px;gap:8px">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
     <input id="nav-search-mobile" type="text" placeholder="Search Droveia" style="flex:1;border:none;outline:none;background:transparent;font-size:14px;color:#111;font-family:var(--font)" onkeydown="if(event.key==='Enter'){goSearchMobile();navToggleMobileSearch();}"/>
-    <button onclick="navToggleMobileSearch()" style="background:none;border:none;cursor:pointer;color:#9ca3af;font-size:18px;padding:0 4px">✕</button>
+    <button onclick="navToggleMobileSearch()" style="background:none;border:none;cursor:pointer;color:#9ca3af;font-size:18px;padding:0 4px">X</button>
   </div>
 </div>
 
@@ -1668,7 +1668,7 @@ html, body { height:100%; }
 <!-- Tool Modal -->
 <div class="modal-overlay hidden" id="tool-modal" onclick="closeModal(event)">
   <div class="modal-box">
-    <button class="modal-close" onclick="closeModalDirect()">✕</button>
+    <button class="modal-close" onclick="closeModalDirect()">X</button>
     <div id="modal-content"></div>
   </div>
 </div>
@@ -1761,7 +1761,7 @@ function catIcon(cat, color) {
 
 function stars(r) {
   var s="";
-  for (var i=1;i<=5;i++) s+='<span class="star'+(i>Math.floor(r)?' empty':'')+'">★</span>';
+  for (var i=1;i<=5;i++) s+='<span class="star'+(i>Math.floor(r)?' empty':'')+'">&#9733;</span>';
   return '<div class="stars">'+s+'</div><span class="rating-text">'+r+'</span>';
 }
 
@@ -3091,7 +3091,7 @@ async function adminLoadOrders() {
     }
     wrap.innerHTML = orders.map(function(o) {
       var statusColors = { delivered: "var(--green)", returned: "#22c55e", in_flight: "var(--blue)", cancelled: "#ef4444" };
-      var statusIcons  = { delivered: "✈", returned: "✓", in_flight: "⟳", cancelled: "✕" };
+      var statusIcons  = { delivered: "In Flight", returned: "✓", in_flight: "⟳", cancelled: "X" };
       var statusColor  = statusColors[o.status] || "var(--muted)";
       var statusLabel  = (o.status||"").replace(/_/g," ").toUpperCase();
       var statusIcon   = statusIcons[o.status] || "·";
@@ -3990,7 +3990,7 @@ window.showConfirm = function(opts) {
   var msg   = el('confirm-msg');
   var okBtn = el('confirm-ok-btn');
   var color = opts.color || 'blue';
-  var icons = { red:'✕', amber:'!', green:'✓', blue:'?' };
+  var icons = { red:'X', amber:'!', green:'✓', blue:'?' };
   if (icon)  { icon.className = 'confirm-box-icon ' + color; icon.textContent = icons[color] || '?'; }
   if (title) { title.textContent = opts.title || 'Are you sure?'; }
   if (msg)   { msg.textContent   = opts.msg   || ''; }
@@ -4029,7 +4029,7 @@ function reviewStars(r, size) {
   size = size || 14;
   var s = "";
   for (var i = 1; i <= 5; i++) {
-    s += '<span class="review-star'+(i > r ? ' empty' : '')+'" style="font-size:'+size+'px">★</span>';
+    s += '<span class="review-star'+(i > r ? ' empty' : '')+'" style="font-size:'+size+'px">&#9733;</span>';
   }
   return '<div class="review-stars">'+s+'</div>';
 }
@@ -4606,15 +4606,15 @@ window.homeSeeAllCat = function(cat) {
 <!-- Review Modal -->
 <div class="review-modal hidden" id="review-modal">
   <div class="review-box">
-    <button class="review-close" onclick="closeReviewModal()">✕</button>
+    <button class="review-close" onclick="closeReviewModal()">X</button>
     <div class="review-box-title" id="review-modal-title">Review Tool</div>
     <div class="review-box-sub" id="review-modal-sub">Share your experience</div>
     <div class="star-picker" id="star-picker">
-      <span class="star-pick" onclick="setReviewStar(1)">★</span>
-      <span class="star-pick" onclick="setReviewStar(2)">★</span>
-      <span class="star-pick" onclick="setReviewStar(3)">★</span>
-      <span class="star-pick" onclick="setReviewStar(4)">★</span>
-      <span class="star-pick" onclick="setReviewStar(5)">★</span>
+      <span class="star-pick" onclick="setReviewStar(1)">&#9733;</span>
+      <span class="star-pick" onclick="setReviewStar(2)">&#9733;</span>
+      <span class="star-pick" onclick="setReviewStar(3)">&#9733;</span>
+      <span class="star-pick" onclick="setReviewStar(4)">&#9733;</span>
+      <span class="star-pick" onclick="setReviewStar(5)">&#9733;</span>
     </div>
     <textarea class="review-textarea" id="review-text" placeholder="What did you think? Was it easy to use, in good condition..."></textarea>
     <button class="review-submit-btn" onclick="submitReview()">Submit Review</button>

@@ -5127,16 +5127,73 @@ window.admSaveNewPartner = async function() {
   } catch(e) { showToast('Error: '+e.message); }
 };
 
-window.admEditPartner = async function(id, name, email, stationId) {
-  if (typeof id !== "string") { var el=id; id=el.dataset.id; name=el.dataset.name; email=el.dataset.email; stationId=el.dataset.station; }
-  var newName    = prompt('Partner name:', name);
-  if (newName === null) return;
-  var newStation = prompt('Station ID:', stationId||'');
-  if (newStation === null) return;
+window.admEditPartner = function(id, name, email, stationId, status) {
+  if (typeof id !== "string") {
+    var el=id;
+    id        = el.dataset.id;
+    name      = el.dataset.name;
+    email     = el.dataset.email;
+    stationId = el.dataset.station;
+    status    = el.dataset.status;
+  }
+  // Remove existing modal
+  var existing = document.getElementById('partner-edit-modal');
+  if (existing) existing.remove();
+
+  var modal = document.createElement('div');
+  modal.id = 'partner-edit-modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(6px);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px';
+  modal.innerHTML = [
+    '<div style="background:#fff;border-radius:16px;padding:28px;width:100%;max-width:440px;box-shadow:0 24px 80px rgba(0,0,0,.2)">',
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">',
+        '<div style="font-size:17px;font-weight:800;color:#111">Edit Partner</div>',
+        '<button onclick="admClosePartnerModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#9ca3af;padding:0">&#x2715;</button>',
+      '</div>',
+      '<div style="font-size:12px;color:#9ca3af;margin-bottom:16px">'+email+'</div>',
+
+      '<label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#9ca3af;margin-bottom:6px">Partner Name</label>',
+      '<input id="pedit-name" value="'+name.replace(/"/g,'&quot;')+'" style="width:100%;box-sizing:border-box;border:1.5px solid #e2e8f0;border-radius:8px;padding:10px 12px;font-size:14px;font-family:var(--font);margin-bottom:14px;outline:none">',
+
+      '<label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#9ca3af;margin-bottom:6px">Station ID</label>',
+      '<input id="pedit-station" value="'+(stationId||'').replace(/"/g,'&quot;')+'" style="width:100%;box-sizing:border-box;border:1.5px solid #e2e8f0;border-radius:8px;padding:10px 12px;font-size:14px;font-family:var(--font);margin-bottom:14px;outline:none">',
+
+      '<label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#9ca3af;margin-bottom:6px">Status</label>',
+      '<select id="pedit-status" style="width:100%;box-sizing:border-box;border:1.5px solid #e2e8f0;border-radius:8px;padding:10px 12px;font-size:14px;font-family:var(--font);margin-bottom:20px;outline:none;background:#fff">',
+        '<option value="active"'+((!status||status==="active")?' selected':'')+'">Active</option>',
+        '<option value="inactive"'+(status==="inactive"?' selected':'')+'>Inactive</option>',
+        '<option value="suspended"'+(status==="suspended"?' selected':'')+'>Suspended</option>',
+      '</select>',
+
+      '<div style="display:flex;gap:10px">',
+        '<button onclick="admClosePartnerModal()" style="flex:1;padding:11px;border-radius:8px;background:#f3f4f6;border:none;color:#374151;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--font)">Cancel</button>',
+        '<button data-pid="'+id+'" onclick="admSavePartner(this.dataset.pid)" style="flex:2;padding:11px;border-radius:8px;background:#1a6ef0;border:none;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font)">Save Changes</button>',
+      '</div>',
+    '</div>'
+  ].join('');
+
+  modal.addEventListener('click', function(e){ if(e.target===modal) modal.remove(); });
+  document.body.appendChild(modal);
+  setTimeout(function(){ var n=document.getElementById('pedit-name'); if(n) n.focus(); }, 50);
+};
+
+window.admClosePartnerModal = function() { var m = document.getElementById('partner-edit-modal'); if(m) m.remove(); };
+
+window.admSavePartner = async function(id) {
+  var name      = (document.getElementById('pedit-name')||{value:''}).value.trim();
+  var stationId = (document.getElementById('pedit-station')||{value:''}).value.trim();
+  var status    = (document.getElementById('pedit-status')||{value:'active'}).value;
+  if (!name) { showToast('Name is required'); return; }
   var fb = window._fb;
   try {
-    await fb.updateDoc(fb.doc(fb.db,'partners',id), {name:newName, stationId:newStation});
-    showToast('✓ Partner updated');
+    await fb.updateDoc(fb.doc(fb.db,'partners',id), {
+      name: name,
+      stationId: stationId || null,
+      status: status,
+      updatedAt: fb.serverTimestamp()
+    });
+    var modal = document.getElementById('partner-edit-modal');
+    if (modal) modal.remove();
+    showToast('Partner updated');
     admTab('partners', document.getElementById('adm-nav-partners'));
   } catch(e) { showToast('Error: '+e.message); }
 };

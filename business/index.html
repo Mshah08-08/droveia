@@ -2887,6 +2887,87 @@ window.partnerGenerateKey = function() {
   }, 50);
 };
 
+
+window.partnerDisableKey = async function(docId) {
+  showConfirm({
+    title: 'Disable API Key?',
+    msg: 'This key will stop working immediately. You can re-enable it later.',
+    okLabel: 'Disable', color: 'amber',
+    onOk: async function() {
+      var fb = window._fb; if (!fb) return;
+      try {
+        await fb.updateDoc(fb.doc(fb.db, 'apiKeys', docId), { active: false });
+        showToast('Key disabled');
+        var w = document.getElementById('biz-page-content');
+        if (w) await renderBizApiKey(w);
+      } catch(e) { showToast('Error: ' + e.message); }
+    }
+  });
+};
+
+window.partnerEnableKey = async function(docId) {
+  showConfirm({
+    title: 'Re-enable API Key?',
+    msg: 'This key will start accepting requests again.',
+    okLabel: 'Re-enable', color: 'blue',
+    onOk: async function() {
+      var fb = window._fb; if (!fb) return;
+      try {
+        await fb.updateDoc(fb.doc(fb.db, 'apiKeys', docId), { active: true });
+        showToast('Key re-enabled');
+        var w = document.getElementById('biz-page-content');
+        if (w) await renderBizApiKey(w);
+      } catch(e) { showToast('Error: ' + e.message); }
+    }
+  });
+};
+
+window.partnerRegenerateKey = async function(docId) {
+  showConfirm({
+    title: 'Regenerate API Key?',
+    msg: 'The old key will stop working immediately. A new key will be generated with the same label.',
+    okLabel: 'Regenerate', color: 'red',
+    onOk: async function() {
+      var fb = window._fb; if (!fb || !window.currentUser) return;
+      try {
+        // Get old key data
+        var snap = await fb.getDoc(fb.doc(fb.db, 'apiKeys', docId));
+        if (!snap.exists()) { showToast('Key not found'); return; }
+        var oldData = snap.data();
+        // Delete old key
+        await fb.deleteDoc(fb.doc(fb.db, 'apiKeys', docId));
+        // Generate new key
+        await _generateNewKey(oldData.label || 'Production');
+        showToast('Key regenerated');
+      } catch(e) { showToast('Error: ' + e.message); }
+    }
+  });
+};
+
+window.partnerRenameKey = async function(docId) {
+  var input = document.getElementById('pkey-name-' + docId);
+  if (!input) return;
+  var newLabel = input.value.trim();
+  if (!newLabel) return;
+  var fb = window._fb; if (!fb) return;
+  try {
+    await fb.updateDoc(fb.doc(fb.db, 'apiKeys', docId), { label: newLabel });
+    showToast('Key renamed');
+  } catch(e) { showToast('Error: ' + e.message); }
+};
+
+window.partnerCopyKey = function(docId) {
+  var el = document.getElementById('pkey-' + docId);
+  if (!el) return;
+  var key = el.dataset.key || '';
+  if (!key) { showToast('Reveal key first'); return; }
+  navigator.clipboard.writeText(key).then(function() {
+    showToast('Copied to clipboard');
+  }).catch(function() {
+    showToast('Could not copy');
+  });
+};
+
 window.partnerCloseGenModal = function() { var m = document.getElementById('pkey-gen-modal'); if(m) m.remove(); };
 
 window.partnerGenerateKeyConfirm = async function() {
@@ -4988,5 +5069,19 @@ setTimeout(function(){ var w=document.getElementById('biz-page-content'); if(w &
 if (window._fbReady) { initBusinessPage(); }
 else { document.addEventListener('fbready', initBusinessPage, {once:true}); }
 </script>
+
+<!-- Confirm Modal -->
+<div class="confirm-modal hidden" id="confirm-modal" style="position:fixed;inset:0;background:rgba(15,20,60,.55);backdrop-filter:blur(8px);z-index:9000;display:flex;align-items:center;justify-content:center;padding:16px">
+  <div class="confirm-box" style="background:#fff;border:1px solid #e8e8e8;border-radius:20px;padding:32px 28px;width:100%;max-width:380px;box-shadow:0 24px 80px rgba(0,0,0,.2)">
+    <div class="confirm-box-icon" id="confirm-icon" style="width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;margin:0 auto 16px;background:rgba(26,110,240,.1);color:#1a6ef0"></div>
+    <div class="confirm-box-title" id="confirm-title" style="font-size:17px;font-weight:800;color:#111;text-align:center;margin-bottom:8px">Are you sure?</div>
+    <div class="confirm-box-msg" id="confirm-msg" style="font-size:13px;color:#6b7280;text-align:center;margin-bottom:24px;line-height:1.5"></div>
+    <div class="confirm-box-actions" style="display:flex;gap:10px">
+      <button onclick="closeConfirm()" style="flex:1;padding:11px;border-radius:10px;background:#f3f4f6;border:none;color:#374151;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--font)">Cancel</button>
+      <button class="confirm-ok" id="confirm-ok-btn" onclick="confirmOk()" style="flex:1;padding:11px;border-radius:10px;border:none;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font);background:#1a6ef0;color:#fff">Confirm</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>

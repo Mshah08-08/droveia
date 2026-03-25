@@ -4867,7 +4867,8 @@ window.renderAdmOrders = async function(wrap) {
       var tb=b.createdAt&&b.createdAt.toMillis?b.createdAt.toMillis():0;
       return tb-ta;
     });
-    var statusColors={in_flight:'blue',delivered:'green',cancelled:'red',pending:'amber',returned:'gray'};
+    var statusColors={in_flight:'background:#eff6ff;color:#1a6ef0;border:1px solid #bfdbfe',delivered:'background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0',cancelled:'background:#fef2f2;color:#ef4444;border:1px solid #fecaca',pending:'background:#fffbeb;color:#d97706;border:1px solid #fde68a',pending_approval:'background:#fffbeb;color:#d97706;border:1px solid #fde68a',returned:'background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0',delayed:'background:#fffbeb;color:#d97706;border:1px solid #fde68a',failed:'background:#fef2f2;color:#ef4444;border:1px solid #fecaca',refunded:'background:#f5f3ff;color:#7c3aed;border:1px solid #ddd6fe'};
+    var statusLabels={in_flight:'✈ In Flight',delivered:'✓ Delivered',cancelled:'✕ Cancelled',pending:'⏳ Pending',pending_approval:'⏳ Pending',returned:'↩ Returned',delayed:'⚠ Delayed',failed:'✕ Failed',refunded:'↩ Refunded'};
     var rows = orders.length ? orders.map(function(o){
       var sc  = statusColors[o.status]||'gray';
       var date = o.createdAt&&o.createdAt.toDate ? o.createdAt.toDate().toLocaleDateString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
@@ -4878,10 +4879,10 @@ window.renderAdmOrders = async function(wrap) {
         +'<td style="font-size:12px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+items+'</td>'
         +'<td><strong>$'+(o.total||0).toFixed(2)+'</strong></td>'
         +'<td style="font-size:12px">'+addr+'</td>'
-        +'<td><span class="adm-badge adm-badge-'+sc+'">'+o.status+'</span></td>'
+        +'<td><span style="'+sc+';font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;white-space:nowrap">'+(statusLabels[o.status]||o.status||'—')+'</span></td>'
         +'<td style="font-size:11px;color:#9ca3af">'+date+'</td>'
         +'<td><div style="display:flex;gap:6px">'
-        +'<select onchange="admSetOrderStatus(this.dataset.oid,this.value);this.value=\'\'" data-oid="'+o._id+'" style="font-size:11px;padding:4px 6px;border-radius:6px;border:1px solid #e2e8f0;background:#fff;cursor:pointer;font-family:var(--font)">'
+        +'<select onchange="admSetOrderStatus(this.dataset.oid,this.value);this.value=\'\'" data-oid="'+o._id+'" style="font-size:11px;padding:5px 10px;border-radius:8px;border:1px solid #e2e8f0;background:#fff;cursor:pointer;font-family:var(--font);font-weight:600;color:#374151;box-shadow:0 1px 3px rgba(0,0,0,.06)">'
         +'<option value="">⚡ Status</option>'
         +'<option value="in_flight">In Flight</option>'
         +'<option value="delivered">Delivered</option>'

@@ -4588,10 +4588,7 @@ if (_savedPage && _savedPage !== "admin") {
 
 var _admTab = 'inventory';
 
-window.admShowStatusPicker = function(btn) {
-  var el = btn.closest ? btn.closest('[data-id]') : btn;
-  var orderId = el ? el.getAttribute('data-id') : null;
-  if (!orderId) return;
+window.admShowStatusPicker = function(orderId) {
   var picker = document.getElementById('spicker-' + orderId);
   if (!picker) return;
   if (picker.style.display !== 'none') { picker.style.display = 'none'; return; }
@@ -4884,7 +4881,7 @@ window.renderAdmOrders = async function(wrap) {
         +'<td><span class="adm-badge adm-badge-'+sc+'">'+o.status+'</span></td>'
         +'<td style="font-size:11px;color:#9ca3af">'+date+'</td>'
         +'<td><div style="display:flex;gap:6px">'
-        +'<button class="adm-btn-ghost" style="font-size:11px;padding:5px 10px;display:flex;align-items:center;gap:4px" onclick="admShowStatusPicker(this)" data-id="'+o._id+'"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/></svg>Status</button>'
+        +'<button class="adm-btn-ghost" style="font-size:11px;padding:5px 10px" onclick="admShowStatusPicker(\''+o._id+'\')">⚡ Status</button>'
         +'<button class="adm-btn-danger" style="font-size:11px;padding:5px 10px" onclick="admDeleteOrderById(this.dataset.id)" data-id="'+o._id+'">Delete</button>'
         +'</div>'
         +'<div id="spicker-'+o._id+'" style="display:none"></div>'

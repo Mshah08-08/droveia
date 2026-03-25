@@ -4,7 +4,7 @@ const { REST, Routes, SlashCommandBuilder } = require("discord.js");
 const commands = [
 
   // ── Inventory ───────────────────────────────────────────────────────────────
-  new SlashCommandBuilder()
+  new SlashCommandBuilder().setDMPermission(true)
     .setName("inventory")
     .setDescription("View all tools in Droveia inventory")
     .addStringOption(o => o
@@ -21,13 +21,13 @@ const commands = [
     ),
 
   // ── Single tool ─────────────────────────────────────────────────────────────
-  new SlashCommandBuilder()
+  new SlashCommandBuilder().setDMPermission(true)
     .setName("tool")
     .setDescription("View details for a specific tool")
     .addIntegerOption(o => o.setName("id").setDescription("Tool ID").setRequired(true)),
 
   // ── Add tool ─────────────────────────────────────────────────────────────────
-  new SlashCommandBuilder()
+  new SlashCommandBuilder().setDMPermission(true)
     .setName("addtool")
     .setDescription("Add a new tool to Droveia inventory")
     .addStringOption(o =>  o.setName("name").setDescription("Tool name").setRequired(true))
@@ -55,13 +55,13 @@ const commands = [
     .addNumberOption(o =>  o.setName("rating").setDescription("Rating (1-5)").setRequired(false)),
 
   // ── Remove tool ──────────────────────────────────────────────────────────────
-  new SlashCommandBuilder()
+  new SlashCommandBuilder().setDMPermission(true)
     .setName("removetool")
     .setDescription("Remove a tool from inventory")
     .addIntegerOption(o => o.setName("id").setDescription("Tool ID").setRequired(true)),
 
   // ── Edit tool ────────────────────────────────────────────────────────────────
-  new SlashCommandBuilder()
+  new SlashCommandBuilder().setDMPermission(true)
     .setName("edittool")
     .setDescription("Edit a field on an existing tool")
     .addIntegerOption(o => o.setName("id").setDescription("Tool ID").setRequired(true))
@@ -83,7 +83,7 @@ const commands = [
     .addStringOption(o => o.setName("value").setDescription("New value").setRequired(true)),
 
   // ── Orders ───────────────────────────────────────────────────────────────────
-  new SlashCommandBuilder()
+  new SlashCommandBuilder().setDMPermission(true)
     .setName("orders")
     .setDescription("View orders by status")
     .addStringOption(o => o.setName("status").setDescription("Order status to filter by").setRequired(false)
@@ -99,7 +99,7 @@ const commands = [
       )),
 
   // ── Order status update ───────────────────────────────────────────────────────
-  new SlashCommandBuilder()
+  new SlashCommandBuilder().setDMPermission(true)
     .setName("orderstatus")
     .setDescription("Update the status of an order")
     .addStringOption(o => o.setName("order_id").setDescription("Firestore order document ID").setRequired(true))
@@ -116,37 +116,37 @@ const commands = [
       )),
 
   // ── Partners ──────────────────────────────────────────────────────────────────
-  new SlashCommandBuilder()
+  new SlashCommandBuilder().setDMPermission(true)
     .setName("partners")
     .setDescription("View all active Droveia partners and their inventory"),
 
   // ── Pending inventory ─────────────────────────────────────────────────────────
-  new SlashCommandBuilder()
+  new SlashCommandBuilder().setDMPermission(true)
     .setName("pending")
     .setDescription("View pending partner inventory submissions awaiting approval"),
 
   // ── Stats ─────────────────────────────────────────────────────────────────────
-  new SlashCommandBuilder()
+  new SlashCommandBuilder().setDMPermission(true)
     .setName("stats")
     .setDescription("View live Droveia platform stats — inventory, orders, revenue"),
 
   // ── Admin management ──────────────────────────────────────────────────────────
-  new SlashCommandBuilder()
+  new SlashCommandBuilder().setDMPermission(true)
     .setName("addadmin")
     .setDescription("Grant admin access to a user by email")
     .addStringOption(o => o.setName("email").setDescription("Email address to grant admin access").setRequired(true)),
 
-  new SlashCommandBuilder()
+  new SlashCommandBuilder().setDMPermission(true)
     .setName("removeadmin")
     .setDescription("Revoke admin access from a user")
     .addStringOption(o => o.setName("email").setDescription("Email address to remove from admins").setRequired(true)),
 
-  new SlashCommandBuilder()
+  new SlashCommandBuilder().setDMPermission(true)
     .setName("listadmins")
     .setDescription("List all current admin emails"),
 
   // ── Partner management ────────────────────────────────────────────────────────
-  new SlashCommandBuilder()
+  new SlashCommandBuilder().setDMPermission(true)
     .setName("addpartner")
     .setDescription("Add a new Droveia partner")
     .addStringOption(o => o.setName("email").setDescription("Partner email address").setRequired(true))
@@ -154,12 +154,12 @@ const commands = [
     .addStringOption(o => o.setName("station").setDescription("Station ID (e.g. station-dallas-01) — auto-generated if blank").setRequired(false))
     .addStringOption(o => o.setName("logo").setDescription("Logo image URL").setRequired(false)),
 
-  new SlashCommandBuilder()
+  new SlashCommandBuilder().setDMPermission(true)
     .setName("removepartner")
     .setDescription("Deactivate a partner (does not delete — sets status to inactive)")
     .addStringOption(o => o.setName("email").setDescription("Partner email address").setRequired(true)),
 
-  new SlashCommandBuilder()
+  new SlashCommandBuilder().setDMPermission(true)
     .setName("partnerinfo")
     .setDescription("View full info and live inventory for a partner")
     .addStringOption(o => o.setName("email").setDescription("Partner email address").setRequired(true)),
@@ -170,9 +170,10 @@ const rest = new REST({ version: "10" }).setToken(process.env.DISCORD_TOKEN);
 
 (async () => {
   try {
-    console.log(`Registering ${commands.length} slash commands...`);
+    const clientId = process.env.CLIENT_ID || process.env.DISCORD_CLIENT_ID;
+    console.log(`Registering ${commands.length} global slash commands (DM-accessible)...`);
     await rest.put(
-      Routes.applicationGuildCommands(process.env.DISCORD_CLIENT_ID, process.env.DISCORD_GUILD_ID),
+      Routes.applicationCommands(clientId),
       { body: commands }
     );
     console.log("Commands registered successfully.");

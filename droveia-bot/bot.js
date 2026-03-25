@@ -28,10 +28,7 @@ const GRAY   = 0x6b7280;
 const PURPLE = 0x7c3aed;
 
 // ── Allowed admin Discord user IDs ────────────────────────────────────────────
-const ADMIN_IDS = [
-  "1477674502660821143",
-  "918558841929613333",
-];
+const ADMIN_IDS = (process.env.ADMIN_IDS || "1477674502660821143,918558841929613333").split(",");
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 async function getTools() {
@@ -223,7 +220,7 @@ async function handleAddTool(interaction) {
   await saveTools(tools);
 
   await interaction.editReply({ embeds: [toolEmbed(tool, GREEN, "Added")] });
-  await notifyChannel(interaction.client, process.env.INVENTORY_CHANNEL_ID, {
+  await notifyChannel(interaction.client, process.env.INVENTORY_CHANNEL_ID || process.env.ORDERS_CHANNEL_ID, {
     embeds: [new EmbedBuilder()
       .setColor(GREEN).setTitle("Tool Added")
       .setDescription(`**${tool.name}** added to inventory`)
@@ -295,7 +292,7 @@ async function handleEditTool(interaction) {
       .setFooter({ text: `Updated by ${interaction.user.tag}` }).setTimestamp()
   ]});
 
-  await notifyChannel(interaction.client, process.env.INVENTORY_CHANNEL_ID, {
+  await notifyChannel(interaction.client, process.env.INVENTORY_CHANNEL_ID || process.env.ORDERS_CHANNEL_ID, {
     embeds: [new EmbedBuilder().setColor(AMBER).setTitle("Tool Updated")
       .setDescription(`**${tool.name}** (#${id})  ·  \`${field}\` changed from **${oldVal}** → **${value}**`)
       .setFooter({ text: `By ${interaction.user.tag}` }).setTimestamp()
@@ -587,7 +584,7 @@ async function handleAddPartner(interaction) {
         .setFooter({ text: `Added by ${interaction.user.tag}` }).setTimestamp()
     ]});
 
-    await notifyChannel(interaction.client, process.env.INVENTORY_CHANNEL_ID, {
+    await notifyChannel(interaction.client, process.env.INVENTORY_CHANNEL_ID || process.env.ORDERS_CHANNEL_ID, {
       embeds: [new EmbedBuilder().setColor(GREEN).setTitle("New Partner Onboarded")
         .setDescription(`**${name || email}** has been added as a partner by ${interaction.user.tag}`)
         .addFields({ name: "Station", value: stationId, inline: true })

@@ -4881,10 +4881,20 @@ window.renderAdmOrders = async function(wrap) {
         +'<td><span class="adm-badge adm-badge-'+sc+'">'+o.status+'</span></td>'
         +'<td style="font-size:11px;color:#9ca3af">'+date+'</td>'
         +'<td><div style="display:flex;gap:6px">'
-        +'<button class="adm-btn-ghost" style="font-size:11px;padding:5px 10px" data-oid="'+o._id+'" onclick="admShowStatusPicker(this.dataset.oid)">⚡ Status</button>'
-        +'<button class="adm-btn-danger" style="font-size:11px;padding:5px 10px" onclick="admDeleteOrderById(this.dataset.id)" data-id="'+o._id+'">Delete</button>'
+        +'<select onchange="admSetOrderStatus(this.dataset.oid,this.value);this.value=\'\'" data-oid="'+o._id+'" style="font-size:11px;padding:4px 6px;border-radius:6px;border:1px solid #e2e8f0;background:#fff;cursor:pointer;font-family:var(--font)">'
+        +'<option value="">⚡ Status</option>'
+        +'<option value="in_flight">In Flight</option>'
+        +'<option value="delivered">Delivered</option>'
+        +'<option value="returned">Returned</option>'
+        +'<option value="cancelled">Cancelled</option>'
+        +'<option value="delayed">Delayed</option>'
+        +'<option value="failed">Failed</option>'
+        +'<option value="refunded">Refunded</option>'
+        +'<option value="pending_approval">Pending</option>'
+        +'</select>'
+        +'<button class="adm-btn-danger" style="font-size:11px;padding:5px 10px;margin-left:4px" onclick="admDeleteOrderById(this.dataset.id)" data-id="'+o._id+'">Delete</button>'
         +'</div>'
-        +'<div id="spicker-'+o._id+'" style="display:none"></div>'
+
         +'</td>'
         +'</tr>';
     }).join('') : '<tr><td colspan="7" style="text-align:center;padding:32px;color:#9ca3af">No orders yet.</td></tr>';

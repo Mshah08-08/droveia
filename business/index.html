@@ -4052,8 +4052,9 @@ window.closeConfirm = function() {
 };
 
 window.confirmOk = function() {
+  var cb = _confirmCallback;
   closeConfirm();
-  if (_confirmCallback) { _confirmCallback(); _confirmCallback = null; }
+  if (cb) cb();
 };
 
 // Close on backdrop click
@@ -5032,7 +5033,7 @@ else { document.addEventListener('fbready', initBusinessPage, {once:true}); }
 </script>
 
 <!-- Confirm Modal -->
-<div class="confirm-modal hidden" id="confirm-modal" class="hidden" style="position:fixed;inset:0;background:rgba(15,20,60,.55);backdrop-filter:blur(8px);z-index:9000;display:flex;align-items:center;justify-content:center;padding:16px">
+<div class="confirm-modal hidden" id="confirm-modal" class="hidden" style="position:fixed;inset:0;background:rgba(15,20,60,.55);backdrop-filter:blur(8px);z-index:9000;align-items:center;justify-content:center;padding:16px">
   <div class="confirm-box" style="background:#fff;border:1px solid #e8e8e8;border-radius:20px;padding:32px 28px;width:100%;max-width:380px;box-shadow:0 24px 80px rgba(0,0,0,.2)">
     <div class="confirm-box-icon" id="confirm-icon" style="width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;margin:0 auto 16px;background:rgba(26,110,240,.1);color:#1a6ef0"></div>
     <div class="confirm-box-title" id="confirm-title" style="font-size:17px;font-weight:800;color:#111;text-align:center;margin-bottom:8px">Are you sure?</div>

@@ -4881,7 +4881,7 @@ window.renderAdmOrders = async function(wrap) {
         +'<td><span class="adm-badge adm-badge-'+sc+'">'+o.status+'</span></td>'
         +'<td style="font-size:11px;color:#9ca3af">'+date+'</td>'
         +'<td><div style="display:flex;gap:6px">'
-        +'<button class="adm-btn-ghost" style="font-size:11px;padding:5px 10px" onclick="admShowStatusPicker(\''+o._id+'\')">⚡ Status</button>'
+        +'<button class="adm-btn-ghost" style="font-size:11px;padding:5px 10px" data-oid="'+o._id+'" onclick="admShowStatusPicker(this.dataset.oid)">⚡ Status</button>'
         +'<button class="adm-btn-danger" style="font-size:11px;padding:5px 10px" onclick="admDeleteOrderById(this.dataset.id)" data-id="'+o._id+'">Delete</button>'
         +'</div>'
         +'<div id="spicker-'+o._id+'" style="display:none"></div>'

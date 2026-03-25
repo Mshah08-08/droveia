@@ -2798,14 +2798,7 @@ window.partnerDisableKey = async function(docId) {
   });
 };
 
-window.partnerEnableKey = async function(docId) {
-  var fb = window._fb; if (!fb) return;
-  try {
-    await fb.updateDoc(fb.doc(fb.db, "apiKeys", docId), { active: true });
-    showToast("✓ Key re-enabled");
-    var _w2=document.getElementById('biz-page-content');if(_w2)await renderBizApiKey(_w2);
-  } catch(e) { showToast("Error: " + e.message); }
-};
+
 
 window.partnerDeleteKey = async function(docId) {
   showConfirm({
@@ -2888,22 +2881,7 @@ window.partnerGenerateKey = function() {
 };
 
 
-window.partnerDisableKey = async function(docId) {
-  showConfirm({
-    title: 'Disable API Key?',
-    msg: 'This key will stop working immediately. You can re-enable it later.',
-    okLabel: 'Disable', color: 'amber',
-    onOk: async function() {
-      var fb = window._fb; if (!fb) return;
-      try {
-        await fb.updateDoc(fb.doc(fb.db, 'apiKeys', docId), { active: false });
-        showToast('Key disabled');
-        var w = document.getElementById('biz-page-content');
-        if (w) await renderBizApiKey(w);
-      } catch(e) { showToast('Error: ' + e.message); }
-    }
-  });
-};
+
 
 window.partnerEnableKey = async function(docId) {
   showConfirm({
@@ -2990,24 +2968,7 @@ window.partnerGenerateKeyConfirm = async function() {
   }
 };
 
-window.partnerRegenerateKey = async function(oldDocId) {
-  showConfirm({
-    title: "Regenerate API Key?",
-    msg: "Your current key will stop working immediately. Any live integrations using it will break until you update them.",
-    okLabel: "Regenerate",
-    color: "amber",
-    onOk: async function() {
-      var fb = window._fb; if (!fb) return;
-      try {
-        // Delete old key
-        await fb.deleteDoc(fb.doc(fb.db, "apiKeys", oldDocId));
-        // Generate new
-        await _generateNewKey();
-        showToast("✓ New key generated — update your website");
-      } catch(e) { showToast("Error: " + e.message); }
-    }
-  });
-};
+
 
 async function _generateNewKey(label) {
   var fb = window._fb;
@@ -5071,7 +5032,7 @@ else { document.addEventListener('fbready', initBusinessPage, {once:true}); }
 </script>
 
 <!-- Confirm Modal -->
-<div class="confirm-modal hidden" id="confirm-modal" style="position:fixed;inset:0;background:rgba(15,20,60,.55);backdrop-filter:blur(8px);z-index:9000;display:flex;align-items:center;justify-content:center;padding:16px">
+<div class="confirm-modal hidden" id="confirm-modal" class="hidden" style="position:fixed;inset:0;background:rgba(15,20,60,.55);backdrop-filter:blur(8px);z-index:9000;display:flex;align-items:center;justify-content:center;padding:16px">
   <div class="confirm-box" style="background:#fff;border:1px solid #e8e8e8;border-radius:20px;padding:32px 28px;width:100%;max-width:380px;box-shadow:0 24px 80px rgba(0,0,0,.2)">
     <div class="confirm-box-icon" id="confirm-icon" style="width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;margin:0 auto 16px;background:rgba(26,110,240,.1);color:#1a6ef0"></div>
     <div class="confirm-box-title" id="confirm-title" style="font-size:17px;font-weight:800;color:#111;text-align:center;margin-bottom:8px">Are you sure?</div>

@@ -835,7 +835,7 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
 /* ── Tool cards (compact for horizontal rows) ─── */
 .ddtool-sm { background:#fff;border:1px solid #e8edf5;border-radius:12px;overflow:hidden;cursor:pointer;transition:.18s;box-shadow:0 1px 4px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04) }
 .ddtool-sm:hover { box-shadow:0 2px 16px rgba(0,0,0,.1);transform:translateY(-1px) }
-.ddtool-sm-img { height:140px;background:#f8faff;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;width:100%;flex-shrink:0 }
+.ddtool-sm-img { height:140px;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;width:100%;flex-shrink:0 }
 .ddtool-sm-img img { width:100%;height:100%;object-fit:contain;padding:8px }
 .ddtool-sm-body { padding:10px 10px }
 .ddtool-sm-name { font-size:13px;font-weight:700;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px }
@@ -924,7 +924,7 @@ html, body { height:100%; }
 /* Tool cards */
 .ddtool { background:#fff;border:1px solid #e8edf5;border-radius:12px;overflow:hidden;cursor:pointer;transition:.18s;display:flex;flex-direction:column;height:100%;box-shadow:0 1px 4px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04) }
 .ddtool:hover { box-shadow:0 2px 16px rgba(0,0,0,.1); transform:translateY(-1px) }
-.ddtool-img { height:160px;background:#f8faff;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;width:100%;flex-shrink:0 }
+.ddtool-img { height:160px;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;width:100%;flex-shrink:0 }
 .ddtool-img img { width:100%;height:100%;object-fit:contain;padding:8px }
 .ddtool-body { padding:10px 12px }
 .ddtool-name { font-size:13px;font-weight:700;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px }
@@ -2110,10 +2110,6 @@ window.renderPartnerStoreItems = function(email, cat) {
   if (!wrap) return;
 
   wrap.innerHTML =
-    // Back button
-    '<div style="padding:16px 20px 0"><button onclick="showPage('browse-all')" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#374151;background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:7px 14px;cursor:pointer;font-family:var(--font);box-shadow:0 1px 3px rgba(0,0,0,.06)">'
-    + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>Back to Stores</button></div>'
-
     + '<div style="display:flex;gap:0;align-items:flex-start">'
 
     // ── LEFT INFO PANEL ───────────────────────────────────────────────────
@@ -2173,7 +2169,10 @@ window.renderPartnerStoreItems = function(email, cat) {
         : '<div style="text-align:center;padding:80px 0;color:#9ca3af;font-size:14px">No items in this category.</div>')
 
     + '</div>'
-    + '</div>';
+    + '</div>';  // Wire back button
+  var backBtn = document.getElementById('partner-back-btn');
+  if (backBtn) backBtn.onclick = function(){ showPage('browse-all'); };
+
 };
 
 

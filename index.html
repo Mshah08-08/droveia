@@ -4688,21 +4688,51 @@ function makeToolCard(t, small) {
 window.homeRenderSections = function() {
   var wrap = document.getElementById('home-sections');
   if (!wrap) return;
-  var cats = ['Workshop','Electronics','Crafts','Office','Food'];
-  var html = '';
-  cats.forEach(function(cat) {
-    var tools = TOOLS.filter(function(t){ return t.cat === cat && toolMatchesMode(t); });
-    if (!tools.length) return;
-    html += '<div class="home-section" id="home-sec-'+cat.toLowerCase()+'">';
-    html += '<div class="home-section-hd">';
-    html += '<span class="home-section-title">'+cat+'</span>';
-    html += '<button class="home-section-seeall" data-cat="'+cat+'" onclick="homeSeeAllCat(this.dataset.cat)">See all</button>';
-    html += '</div>';
-    html += '<div class="home-section-row">';
-    html += tools.slice(0,10).map(function(t){ return makeToolCard(t, true); }).join('');
-    html += '</div></div>';
+
+  // Build partner map same as renderBrowsePage
+  var partnerMap = {};
+  TOOLS.forEach(function(t) {
+    if (!t.partnerEmail) return;
+    if (!partnerMap[t.partnerEmail]) {
+      partnerMap[t.partnerEmail] = { email:t.partnerEmail, name:t.partnerName||t.partnerEmail, tools:[], cats:[], rating:0 };
+    }
+    var p = partnerMap[t.partnerEmail];
+    p.tools.push(t);
+    if (t.cat && p.cats.indexOf(t.cat)<0) p.cats.push(t.cat);
+    p.rating += parseFloat(t.rating)||4.5;
   });
-  wrap.innerHTML = html || '<div style="color:#9ca3af;font-size:14px;padding:20px 0">No tools loaded yet.</div>';
+  var partners = Object.values(partnerMap).map(function(p){
+    p.rating = (p.rating/p.tools.length).toFixed(1); return p;
+  });
+
+  var droTools = TOOLS.filter(function(t){ return !t.partnerEmail; });
+  var droRating = droTools.length ? (droTools.reduce(function(s,t){return s+(parseFloat(t.rating)||4.5);},0)/droTools.length).toFixed(1) : '4.8';
+  var droCats = []; droTools.forEach(function(t){if(t.cat&&droCats.indexOf(t.cat)<0)droCats.push(t.cat);});
+
+  var html = '';
+
+  // Droveia store card
+  if (droTools.length) {
+    html += '<div style="font-size:18px;font-weight:800;color:#111;margin-bottom:14px;letter-spacing:-.02em">Droveia</div>';
+    html += '<div class="stores-grid" style="margin-bottom:32px">';
+    html += storeCard({ email:'__droveia__', name:'Droveia', tools:droTools, cats:droCats, rating:droRating, badge:'Official', badgeColor:'#1a6ef0' });
+    html += '</div>';
+  }
+
+  // Partner stores
+  if (partners.length) {
+    html += '<div style="font-size:18px;font-weight:800;color:#111;margin-bottom:6px;letter-spacing:-.02em">Partner Stores</div>';
+    html += '<div style="font-size:13px;color:#9ca3af;margin-bottom:14px">'+partners.length+' store'+(partners.length!==1?'s':'')+' near you</div>';
+    html += '<div class="stores-grid">';
+    html += partners.map(function(p){
+      var feat = p.tools[0];
+      return storeCard({ email:p.email, name:p.name, tools:p.tools, cats:p.cats, rating:p.rating,
+        featured: feat ? feat.name+(feat.pph?' · $'+parseFloat(feat.pph).toFixed(2)+'/hr':'') : null });
+    }).join('');
+    html += '</div>';
+  }
+
+  wrap.innerHTML = html || '<div style="color:#9ca3af;font-size:14px;padding:20px 0">Loading stores...</div>';
 };
 
 window.homeRenderPartners = async function() {

@@ -786,6 +786,21 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
 .ddnav-item.active { color:#1a6ef0;font-weight:700;background:#eff6ff }
 .ddnav-item.active svg { opacity:1;color:#1a6ef0 }
 
+
+/* ── Store cards (DoorDash style) ─────────────────────────────────────── */
+.store-card { background:#fff;border-radius:16px;overflow:hidden;cursor:pointer;transition:.2s;border:1px solid #e8edf5;box-shadow:0 1px 4px rgba(0,0,0,.05) }
+.store-card:hover { transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.1);border-color:rgba(26,110,240,.2) }
+.store-card-banner { width:100%;height:140px;object-fit:cover;background:linear-gradient(135deg,#1e3a8a,#1a6ef0);display:flex;align-items:center;justify-content:center;font-size:48px;font-weight:900;color:rgba(255,255,255,.3);letter-spacing:-.02em;position:relative }
+.store-card-body { padding:14px }
+.store-card-name { font-size:15px;font-weight:800;color:#111;margin-bottom:4px;letter-spacing:-.01em }
+.store-card-meta { display:flex;align-items:center;gap:6px;font-size:12px;color:#6b7280;margin-bottom:6px;flex-wrap:wrap }
+.store-card-cats { display:flex;gap:5px;flex-wrap:wrap }
+.store-card-cat { font-size:11px;font-weight:600;color:#6b7280;background:#f3f4f6;border-radius:4px;padding:2px 7px }
+.store-card-featured { font-size:12px;color:#374151;margin-top:8px;font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis }
+.stores-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;margin-bottom:32px }
+.br-section-title { font-size:20px;font-weight:800;color:#111;margin-bottom:16px;letter-spacing:-.02em }
+.br-section-sub { font-size:13px;color:#6b7280;margin-top:-10px;margin-bottom:16px }
+
 </style>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDcuU4-XXzzEU8O84rs3W7cWgVStNicBTo&callback=Function.prototype" async defer></script>
@@ -1282,29 +1297,33 @@ html, body { height:100%; }
 
 <!-- ═══ BROWSE ═══ -->
 <div class="page" id="page-browse">
-<div style="height:100%;overflow-y:auto">
+<div style="display:flex;height:calc(100vh - 60px);background:#fff;overflow:hidden">
 
   <!-- Sidebar -->
   <aside class="dd-sidebar" style="width:220px">
     <div class="ddnav-item" data-navpage="home" onclick="showPage('home')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home
     </div>
-    <div class="ddnav-item" id="br-all" onclick="brFilter('All',this)">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>All Tools
+    <div style="height:1px;background:#f0f0f0;margin:6px 0"></div>
+    <div class="ddnav-item active" id="brcat-All" onclick="brSetCat('All',this)">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>All Stores
     </div>
-    <div class="ddnav-item" id="br-workshop" onclick="brFilter('Workshop',this)">
+    <div class="ddnav-item" id="brcat-Workshop" onclick="brSetCat('Workshop',this)">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>Workshop
     </div>
-    <div class="ddnav-item" id="br-electronics" onclick="brFilter('Electronics',this)">
+    <div class="ddnav-item" id="brcat-Electronics" onclick="brSetCat('Electronics',this)">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Electronics
     </div>
-    <div class="ddnav-item" id="br-crafts" onclick="brFilter('Crafts',this)">
+    <div class="ddnav-item" id="brcat-Crafts" onclick="brSetCat('Crafts',this)">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>Crafts
     </div>
-    <div class="ddnav-item" id="br-office" onclick="brFilter('Office',this)">
+    <div class="ddnav-item" id="brcat-Office" onclick="brSetCat('Office',this)">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Office
     </div>
-    <div style="height:1px;background:#f0f0f0;margin:8px 0"></div>
+    <div class="ddnav-item" id="brcat-Food" onclick="brSetCat('Food',this)">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>Food & Drinks
+    </div>
+    <div style="height:1px;background:#f0f0f0;margin:6px 0"></div>
     <div class="ddnav-item" data-navpage="orders" onclick="showPage('orders')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Orders
     </div>
@@ -1314,52 +1333,22 @@ html, body { height:100%; }
   </aside>
 
   <!-- Main -->
-  <main style="flex:1;min-width:0;padding:28px 32px;overflow-y:auto;height:100%;background:#f6f8ff">
+  <main style="flex:1;min-width:0;overflow-y:auto;height:100%;background:#f8faff">
+    <div style="max-width:1100px;margin:0 auto;padding:28px 32px 60px">
 
-    <!-- Header -->
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;gap:12px;flex-wrap:wrap">
-      <h1 id="browse-heading" style="font-size:22px;font-weight:800;color:#111;font-family:var(--font);margin:0;letter-spacing:-.02em">Browse</h1>
-      <div style="display:flex;align-items:center;gap:8px;background:#f4f4f4;border-radius:8px;padding:8px 14px">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-        <input id="browse-search" type="text" placeholder="Search tools..." oninput="brSearch(this.value)" style="border:none;outline:none;background:transparent;font-size:14px;color:#111;font-family:var(--font);width:180px"/>
+      <!-- Search -->
+      <div style="display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid #e8edf5;border-radius:12px;padding:11px 16px;margin-bottom:24px;box-shadow:0 1px 4px rgba(0,0,0,.04)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input id="browse-search" type="text" placeholder="Search stores or items..." oninput="renderBrowsePage()" style="border:none;outline:none;background:transparent;font-size:14px;color:#111;font-family:var(--font);flex:1"/>
       </div>
+
+      <!-- Droveia first — always shown -->
+      <div id="br-droveia-section"></div>
+
+      <!-- Partner stores -->
+      <div id="br-partners-section"></div>
+
     </div>
-
-    <!-- Category icon tiles (DoorDash-style) -->
-    <div id="br-cat-tiles" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px;margin-bottom:28px">
-      <div class="br-tile active" onclick="brFilter('All',null)" data-cat="All">
-        <div class="br-tile-icon" style="background:#fff3e0"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg></div>
-        <div class="br-tile-name">All Tools</div>
-      </div>
-      <div class="br-tile" onclick="brFilter('Workshop',null)" data-cat="Workshop">
-        <div class="br-tile-icon" style="background:#e8f5e9"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>️</div>
-        <div class="br-tile-name">Workshop</div>
-      </div>
-      <div class="br-tile" onclick="brFilter('Electronics',null)" data-cat="Electronics">
-        <div class="br-tile-icon" style="background:#e3f2fd"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
-        <div class="br-tile-name">Electronics</div>
-      </div>
-      <div class="br-tile" onclick="brFilter('Crafts',null)" data-cat="Crafts">
-        <div class="br-tile-icon" style="background:#fce4ec"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div>
-        <div class="br-tile-name">Crafts</div>
-      </div>
-      <div class="br-tile" onclick="brFilter('Office',null)" data-cat="Office">
-        <div class="br-tile-icon" style="background:#f3e5f5"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>️</div>
-        <div class="br-tile-name">Office</div>
-      </div>
-    </div>
-
-    <!-- Item count + section title -->
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-      <div id="browse-section-title" style="font-size:18px;font-weight:800;color:#111;font-family:var(--font)">Explore Tools Near You</div>
-      <div id="browse-count" style="font-size:13px;color:#6b7280"></div>
-    </div>
-
-    <!-- Tools grid — DoorDash card style -->
-    <div id="br-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;padding-bottom:40px">
-      <div style="grid-column:1/-1;text-align:center;padding:60px;color:#9ca3af">Loading...</div>
-    </div>
-
   </main>
 </div>
 </div>
@@ -1374,46 +1363,11 @@ html, body { height:100%; }
 
 
 <!-- ══ PARTNER STORE PAGE ══════════════════════════════════════════════ -->
-<div class="page" id="page-partner">
-<div class="dd-page-layout">
-  <aside class="dd-sidebar" id="partner-sidebar-nav">
-    <div class="ddnav-item" data-navpage="home" onclick="showPage('home')">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home
-    </div>
-    <div class="ddnav-item" data-navpage="cat-workshop" onclick="showCategory('Workshop')">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>Workshop
-    </div>
-    <div class="ddnav-item" data-navpage="cat-electronics" onclick="showCategory('Electronics')">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Electronics
-    </div>
-    <div class="ddnav-item" data-navpage="cat-crafts" onclick="showCategory('Crafts')">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>Crafts
-    </div>
-    <div class="ddnav-item" data-navpage="cat-office" onclick="showCategory('Office')">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Office
-    </div>
-    <div class="ddnav-item" data-navpage="cat-food" onclick="showCategory('Food')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>Food &amp; Drinks
-    </div>
-    <div class="ddnav-item" id="sbnav-browse" data-navpage="browse-all" onclick="showPage('browse-all')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>Browse All
-    </div>
-    <div style="height:1px;background:#f0f0f0;margin:8px 0"></div>
-    <div class="ddnav-item" data-navpage="orders" onclick="showPage('orders')">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Orders
-    </div>
-    <div class="ddnav-item" data-navpage="account" onclick="showPage('account')">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Account
-    </div>
-    <div style="height:1px;background:#f0f0f0;margin:8px 0"></div>
-    <div class="ddnav-item" onclick="window.open('https://business.droveia.com')" style="color:#1a6ef0">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>For Businesses
-    </div>
-    <div class="ddnav-item" id="adm-link-orders" onclick="window.open('https://admin.droveia.com')" style="display:none;color:#ef4444">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Admin Console
-    </div>
-  </aside>
-  <main class="dd-main" style="padding:0;overflow-y:auto">
-    <div id="partner-store-content" style="padding:24px"></div>
-  </main>
+id="page-partner">
+<div style="height:calc(100vh - 60px);overflow-y:auto;background:#f8faff">
+  <div style="max-width:1280px;margin:0 auto;padding:28px 32px 60px">
+    <div id="partner-store-content"></div>
+  </div>
 </div>
 </div>
 
@@ -2124,9 +2078,11 @@ window.renderPartnerStoreItems = function(email, cat) {
     el.classList.toggle('active', el.id === 'pcat-' + cat);
   });
 
-  var allTools = TOOLS.filter(function(t){ return t.partnerEmail === email; });
+  var allTools = email === '__droveia__'
+    ? (window._droveiaToolsOverride || TOOLS.filter(function(t){ return !t.partnerEmail; }))
+    : TOOLS.filter(function(t){ return t.partnerEmail === email; });
   var tools    = cat === 'All' ? allTools : allTools.filter(function(t){ return t.cat === cat; });
-  var pName    = (allTools[0]||{}).partnerName || email;
+  var pName    = email === '__droveia__' ? 'Droveia' : ((allTools[0]||{}).partnerName || email);
   var rentCnt  = allTools.filter(function(t){ return t.type !== 'buy'; }).length;
   var buyCnt   = allTools.filter(function(t){ return t.type==='buy'||t.type==='both'; }).length;
   var avgRat   = allTools.length ? (allTools.reduce(function(s,t){ return s+(parseFloat(t.rating)||4.5); },0)/allTools.length).toFixed(1) : '4.5';
@@ -2173,6 +2129,181 @@ window.renderPartnerStoreItems = function(email, cat) {
     + (tools.length
         ? '<div class="tools-grid" style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr))">' + tools.map(makeToolCard).join('') + '</div>'
         : '<div style="text-align:center;padding:80px 0;color:#9ca3af;font-size:14px">No items in this category.</div>');
+};
+
+
+var _brStoreCat = 'All';
+
+window.brSetCat = function(cat, btn) {
+  _brStoreCat = cat;
+  document.querySelectorAll('[id^="brcat-"]').forEach(function(el){ el.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  else { var b = document.getElementById('brcat-' + cat); if(b) b.classList.add('active'); }
+  renderBrowsePage();
+};
+
+window.renderBrowsePage = function() {
+  var q = (document.getElementById('browse-search')||{value:''}).value.toLowerCase().trim();
+  var cat = _brStoreCat || 'All';
+
+  // ── Build partner store list from TOOLS ───────────────────────────────
+  var partnerMap = {};
+  TOOLS.forEach(function(t) {
+    if (!t.partnerEmail) return;
+    if (!partnerMap[t.partnerEmail]) {
+      partnerMap[t.partnerEmail] = {
+        email: t.partnerEmail,
+        name:  t.partnerName || t.partnerEmail,
+        tools: [],
+        cats:  [],
+        rating: 0
+      };
+    }
+    var p = partnerMap[t.partnerEmail];
+    p.tools.push(t);
+    if (t.cat && p.cats.indexOf(t.cat) < 0) p.cats.push(t.cat);
+    p.rating += parseFloat(t.rating) || 4.5;
+  });
+  var partners = Object.values(partnerMap).map(function(p) {
+    p.rating = (p.rating / p.tools.length).toFixed(1);
+    return p;
+  });
+
+  // Filter by category
+  if (cat !== 'All') {
+    partners = partners.filter(function(p){
+      return p.tools.some(function(t){ return t.cat === cat; });
+    });
+  }
+
+  // Filter by search
+  if (q) {
+    partners = partners.filter(function(p){
+      return p.name.toLowerCase().indexOf(q) >= 0
+        || p.tools.some(function(t){ return t.name.toLowerCase().indexOf(q) >= 0; });
+    });
+  }
+
+  // ── Droveia (own inventory) ───────────────────────────────────────────
+  var droTools = TOOLS.filter(function(t){ return !t.partnerEmail; });
+  if (cat !== 'All') droTools = droTools.filter(function(t){ return t.cat === cat; });
+  if (q) droTools = droTools.filter(function(t){ return t.name.toLowerCase().indexOf(q) >= 0; });
+
+  var droCats = [];
+  droTools.forEach(function(t){ if(t.cat && droCats.indexOf(t.cat)<0) droCats.push(t.cat); });
+  var droRating = droTools.length ? (droTools.reduce(function(s,t){return s+(parseFloat(t.rating)||4.5);},0)/droTools.length).toFixed(1) : '4.8';
+  var featDro = droTools.slice(0,1)[0];
+
+  var droSection = document.getElementById('br-droveia-section');
+  var partSection = document.getElementById('br-partners-section');
+  if (!droSection || !partSection) return;
+
+  // Droveia store card
+  if (droTools.length) {
+    droSection.innerHTML =
+      '<div class="br-section-title">Droveia</div>'
+      + '<div class="stores-grid">' + storeCard({
+          email: '__droveia__',
+          name: 'Droveia',
+          tools: droTools,
+          cats: droCats,
+          rating: droRating,
+          badge: 'Official',
+          badgeColor: '#1a6ef0',
+          featured: featDro ? featDro.name + (featDro.pph ? ' · $' + parseFloat(featDro.pph).toFixed(2) + '/hr' : '') : null
+        }) + '</div>';
+  } else {
+    droSection.innerHTML = '';
+  }
+
+  // Partner store cards
+  if (partners.length) {
+    partSection.innerHTML =
+      '<div class="br-section-title" style="margin-top:8px">Partner Stores</div>'
+      + '<div class="br-section-sub">' + partners.length + ' store' + (partners.length!==1?'s':'') + ' near you</div>'
+      + '<div class="stores-grid">'
+      + partners.map(function(p) {
+          var feat = p.tools.filter(function(t){ return cat==='All'||t.cat===cat; })[0];
+          return storeCard({
+            email: p.email,
+            name: p.name,
+            tools: p.tools,
+            cats: p.cats,
+            rating: p.rating,
+            featured: feat ? feat.name + (feat.pph ? ' · $' + parseFloat(feat.pph).toFixed(2) + '/hr' : '') : null
+          });
+        }).join('')
+      + '</div>';
+  } else if (!droTools.length) {
+    partSection.innerHTML = '<div style="text-align:center;padding:60px 0;color:#9ca3af;font-size:14px">No stores found' + (q?' for "'+q+'"':'') + '</div>';
+  } else {
+    partSection.innerHTML = '';
+  }
+};
+
+function storeCard(p) {
+  var cats = p.cats.slice(0,3);
+  var toolCount = p.tools.length;
+  var eta = p.tools.length ? (p.tools[0].eta || '< 30 min') : '< 30 min';
+  var colors = ['#1e3a8a','#1a6ef0','#0f172a','#2563eb','#1d4ed8'];
+  var bg = colors[Math.abs(p.name.charCodeAt(0)||0) % colors.length];
+  var initials = p.name.split(' ').slice(0,2).map(function(w){return w[0];}).join('').toUpperCase();
+
+  var onclick = p.email === '__droveia__'
+    ? "brOpenDroveia()"
+    : "openPartnerStore('" + p.email + "')";
+
+  return '<div class="store-card" onclick="' + onclick + '">'
+    // Banner
+    + '<div class="store-card-banner" style="background:linear-gradient(135deg,' + bg + ',#1a6ef0)">'
+    + (p.badge ? '<div style="position:absolute;top:10px;left:10px;background:' + p.badgeColor + ';color:#fff;font-size:10px;font-weight:800;padding:3px 9px;border-radius:20px;letter-spacing:.04em">' + p.badge + '</div>' : '')
+    + '<span style="font-size:52px;font-weight:900;color:rgba(255,255,255,.18);letter-spacing:-.03em;user-select:none">' + initials + '</span>'
+    + '</div>'
+    // Body
+    + '<div class="store-card-body">'
+    + '<div class="store-card-name">' + p.name + '</div>'
+    + '<div class="store-card-meta">'
+    + '<span style="color:#f59e0b">&#9733;</span> ' + p.rating
+    + ' &nbsp;·&nbsp; ' + toolCount + ' item' + (toolCount!==1?'s':'')
+    + ' &nbsp;·&nbsp; ~' + eta
+    + '</div>'
+    + '<div class="store-card-cats">' + cats.map(function(c){ return '<span class="store-card-cat">' + c + '</span>'; }).join('') + '</div>'
+    + (p.featured ? '<div class="store-card-featured" style="margin-top:8px;font-size:12px;color:#6b7280">' + p.featured + '</div>' : '')
+    + '</div>'
+    + '</div>';
+}
+
+window.brOpenDroveia = function() {
+  // Open Droveia's own store — just goes to browse-all / category
+  var tools = TOOLS.filter(function(t){ return !t.partnerEmail; });
+  var pName = 'Droveia';
+  var cats = [];
+  tools.forEach(function(t){ if(t.cat && cats.indexOf(t.cat)<0) cats.push(t.cat); });
+
+  var wrap = document.getElementById('partner-store-content');
+  var sb = document.getElementById('partner-sidebar-nav');
+
+  // Reuse partner store page but with Droveia data
+  if (sb) {
+    var shtml = '<div style="padding:20px 16px 8px">'
+      + '<button onclick="showPage(\'browse\')" style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:#9ca3af;background:none;border:none;cursor:pointer;font-family:var(--font);padding:0;margin-bottom:16px">'
+      + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>Browse</button>'
+      + '<div style="font-size:15px;font-weight:800;color:#111;margin-bottom:2px">Droveia</div>'
+      + '<div style="font-size:11px;color:#9ca3af;margin-bottom:4px">' + tools.length + ' items</div>'
+      + '</div><div style="height:1px;background:#ebebeb;margin:0 0 6px"></div>';
+    shtml += '<div class="ddnav-item active" id="pcat-All" data-e="__droveia__" onclick="window.renderPartnerStoreItems(this.dataset.e,\'All\')">'
+      + '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>All Items</div>';
+    cats.forEach(function(c) {
+      shtml += '<div class="ddnav-item" id="pcat-' + c + '" data-e="__droveia__" data-c="' + c + '" onclick="window.renderPartnerStoreItems(this.dataset.e,this.dataset.c)">'
+        + catIcon(c, '#374151') + c + '</div>';
+    });
+    sb.innerHTML = shtml;
+  }
+
+  // Patch renderPartnerStoreItems to handle __droveia__
+  window._droveiaToolsOverride = tools;
+  window.renderPartnerStoreItems('__droveia__', 'All');
+  showPage('partner');
 };
 
 

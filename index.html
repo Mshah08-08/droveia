@@ -873,6 +873,7 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
 /* ── Persistent sidebar layout for inner pages ─── */
 .dd-sidebar { width:220px;flex-shrink:0;background:#fff;border-right:1px solid #ebebeb;padding:8px 0;height:calc(100vh - 60px);overflow-y:auto;overscroll-behavior:contain;position:relative;z-index:10 }
 .dd-page-layout { display:flex;height:calc(100vh - 60px);background:#fff;overflow:hidden }
+.dd-main { flex:1;min-width:0;overflow:hidden;height:100% }
 .dd-page-main { flex:1;min-width:0;overflow-y:auto;height:100% }
 .dd-page-main { flex:1;min-width:0;overflow-y:auto;height:100% }
 @media(max-width:768px){ .dd-sidebar{display:none} }
@@ -1381,8 +1382,8 @@ html, body { height:100%; }
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Admin Console
     </div>
   </aside>
-  <main class="dd-main" style="padding:0;overflow-y:auto;background:#f8faff">
-    <div id="partner-store-content"></div>
+  <main class="dd-main" style="padding:0;background:#f8faff">
+    <div id="partner-store-content" style="display:flex;height:100%"></div>
   </main>
 </div>
 </div>
@@ -2109,8 +2110,6 @@ window.renderPartnerStoreItems = function(email, cat) {
   if (!wrap) return;
 
   // Layout: full height flex row — left store panel (fixed) + right scrollable content
-  wrap.style.cssText = 'display:flex;height:calc(100vh - 60px);overflow:hidden';
-
   wrap.innerHTML =
 
     // ── LEFT STORE INFO PANEL (220px, scrolls independently) ──────────────
@@ -2175,7 +2174,7 @@ window.renderPartnerStoreItems = function(email, cat) {
 
   // Wire back button
   var bb = document.getElementById('partner-back-btn');
-  if (bb) bb.onclick = function(){ wrap.style.cssText=''; showPage('browse-all'); };
+  if (bb) bb.onclick = function(){ showPage('browse-all'); };
 };
 
 

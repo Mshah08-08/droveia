@@ -299,7 +299,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:var(--nav-h);backgro
 .see-all-btn:hover{color:#60a5fa}
 
 /* ── Tool Cards (improved) ──────────────────── */
-.tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;width:100%}
+.tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;width:100%}
 .tool-card{background:#ffffff;border:1px solid var(--border);border-radius:var(--radius);padding:20px;cursor:pointer;transition:.22s;position:relative;overflow:hidden;display:flex;flex-direction:column;gap:10px}
 .tool-card::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent,rgba(26,110,240,.03));opacity:0;transition:.2s;pointer-events:none}
 .tool-card:hover{border-color:rgba(26,110,240,.35);transform:translateY(-3px);box-shadow:0 12px 36px rgba(26,110,240,.12)}
@@ -813,7 +813,7 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
 .home-section-hd { display:flex;align-items:center;justify-content:space-between;margin-bottom:14px }
 .home-section-title { font-size:18px;font-weight:800;color:#111;font-family:var(--font) }
 .home-section-seeall { font-size:13px;color:#1a6ef0;background:none;border:none;cursor:pointer;font-family:var(--font);font-weight:600 }
-.home-section-row { display:flex;gap:12px;overflow-x:auto;scrollbar-width:none;padding-bottom:8px }
+.home-section-row { display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px }
 .home-section-row::-webkit-scrollbar { display:none }
 
 /* ── Browse All category cards ─── */
@@ -833,7 +833,7 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
 .bcat-name { font-size:12px;font-weight:600;color:#111 }
 
 /* ── Tool cards (compact for horizontal rows) ─── */
-.ddtool-sm { width:160px;flex-shrink:0;background:#fff;border:1px solid #e8edf5;border-radius:12px;overflow:hidden;cursor:pointer;transition:.18s;box-shadow:0 1px 4px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04) }
+.ddtool-sm { background:#fff;border:1px solid #e8edf5;border-radius:12px;overflow:hidden;cursor:pointer;transition:.18s;box-shadow:0 1px 4px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04) }
 .ddtool-sm:hover { box-shadow:0 2px 16px rgba(0,0,0,.1);transform:translateY(-1px) }
 .ddtool-sm-img { height:110px;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative }
 .ddtool-sm-img img { width:100%;height:100%;object-fit:contain;padding:8px }
@@ -922,7 +922,7 @@ html, body { height:100%; }
 .ddchip.active { background:#1a6ef0; border-color:#1a6ef0; color:#fff }
 
 /* Tool cards */
-.ddtool { background:#fff;border:1px solid #e8edf5;border-radius:12px;overflow:hidden;cursor:pointer;transition:.18s;box-shadow:0 1px 4px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04) }
+.ddtool { background:#fff;border:1px solid #e8edf5;border-radius:12px;overflow:hidden;cursor:pointer;transition:.18s;display:flex;flex-direction:column;box-shadow:0 1px 4px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04) }
 .ddtool:hover { box-shadow:0 2px 16px rgba(0,0,0,.1); transform:translateY(-1px) }
 .ddtool-img { aspect-ratio:4/3;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative }
 .ddtool-img img { width:100%;height:100%;object-fit:contain;padding:8px }
@@ -2055,53 +2055,89 @@ window.openPartnerStore = function(email) {
 };
 
 window.renderPartnerStoreItems = function(email, cat) {
-  // Sidebar active state
-  document.querySelectorAll('[id^="pcat-"]').forEach(function(el){
-    el.classList.toggle('active', el.id === 'pcat-' + cat);
-  });
-
   var allTools = email === '__droveia__'
     ? (window._droveiaToolsOverride || TOOLS.filter(function(t){ return !t.partnerEmail; }))
     : TOOLS.filter(function(t){ return t.partnerEmail === email; });
-  var tools    = cat === 'All' ? allTools : allTools.filter(function(t){ return t.cat === cat; });
-  var pName    = email === '__droveia__' ? 'Droveia' : ((allTools[0]||{}).partnerName || email);
-  var rentCnt  = allTools.filter(function(t){ return t.type !== 'buy'; }).length;
-  var buyCnt   = allTools.filter(function(t){ return t.type==='buy'||t.type==='both'; }).length;
-  var avgRat   = allTools.length ? (allTools.reduce(function(s,t){ return s+(parseFloat(t.rating)||4.5); },0)/allTools.length).toFixed(1) : '4.5';
-  var cats     = []; allTools.forEach(function(t){ if(t.cat&&cats.indexOf(t.cat)<0) cats.push(t.cat); });
+  var tools   = cat === 'All' ? allTools : allTools.filter(function(t){ return t.cat === cat; });
+  var pName   = email === '__droveia__' ? 'Droveia' : ((allTools[0]||{}).partnerName || email);
+  var rentCnt = allTools.filter(function(t){ return t.type !== 'buy'; }).length;
+  var buyCnt  = allTools.filter(function(t){ return t.type==='buy'||t.type==='both'; }).length;
+  var avgRat  = allTools.length ? (allTools.reduce(function(s,t){ return s+(parseFloat(t.rating)||4.5); },0)/allTools.length).toFixed(1) : '4.5';
+  var allCats = []; allTools.forEach(function(t){ if(t.cat && allCats.indexOf(t.cat)<0) allCats.push(t.cat); });
+  var eta     = (allTools[0]||{}).eta || '30 min';
+  // Top sellers = highest rated tools
+  var topTools = allTools.slice().sort(function(a,b){ return (parseFloat(b.rating)||0)-(parseFloat(a.rating)||0); }).slice(0,3);
 
-  function stars(r) {
-    var s=''; for(var i=1;i<=5;i++) s+='<span style="color:'+(i<=Math.round(r)?'#f59e0b':'#e5e7eb')+';font-size:13px">&#9733;</span>'; return s;
+  function starsHtml(r) {
+    var s=''; for(var i=1;i<=5;i++) s+='<span style="color:'+(i<=Math.round(r)?'#f59e0b':'#e5e7eb')+';font-size:12px">&#9733;</span>'; return s;
   }
 
   var wrap = document.getElementById('partner-store-content');
   if (!wrap) return;
 
   wrap.innerHTML =
-    // Hero
-    '<div style="background:linear-gradient(135deg,#0f172a 0%,#1e3a8a 55%,#1a6ef0 100%);border-radius:16px;padding:28px 24px;margin-bottom:24px;position:relative;overflow:hidden">'
-    + '<div style="position:absolute;inset:0;background:radial-gradient(circle at 75% 50%,rgba(96,165,250,.2),transparent 60%);pointer-events:none"></div>'
-    + '<div style="position:relative;display:flex;align-items:center;gap:18px">'
-    + '<div style="width:68px;height:68px;border-radius:18px;background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900;color:#fff;flex-shrink:0">' + pName[0].toUpperCase() + '</div>'
-    + '<div style="flex:1;min-width:0">'
-    + '<div style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);border-radius:20px;padding:3px 10px;font-size:10px;font-weight:700;color:#93c5fd;letter-spacing:.06em;text-transform:uppercase;margin-bottom:7px"><svg width="9" height="9" viewBox="0 0 24 24" fill="#93c5fd"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>Verified Partner</div>'
-    + '<div style="font-size:22px;font-weight:900;color:#fff;letter-spacing:-.02em;margin-bottom:5px">' + pName + '</div>'
-    + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">'
-    + stars(avgRat) + '<span style="font-size:12px;color:rgba(255,255,255,.65)">' + avgRat + ' avg · ' + allTools.length + ' listings</span>'
-    + '</div>'
-    + '<div style="display:flex;gap:7px;flex-wrap:wrap">'
-    + '<span style="font-size:11px;font-weight:600;color:rgba(255,255,255,.9);background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);padding:3px 10px;border-radius:20px">' + rentCnt + ' for rent</span>'
-    + (buyCnt?'<span style="font-size:11px;font-weight:600;color:rgba(255,255,255,.9);background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);padding:3px 10px;border-radius:20px">' + buyCnt + ' to buy</span>':'')
-    + '<span style="font-size:11px;font-weight:600;color:rgba(255,255,255,.9);background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);padding:3px 10px;border-radius:20px">Drone delivery</span>'
-    + '</div>'
-    + '</div></div></div>'
+    '<div style="display:flex;gap:0;min-height:100%">'
 
-    // Grid
+    // ── LEFT INFO PANEL ───────────────────────────────────────────────────
+    + '<div style="width:260px;flex-shrink:0;background:#fff;border-right:1px solid #f0f0f0;padding:24px 20px;position:sticky;top:0;align-self:flex-start">'
+
+    // Store avatar + name
+    + '<div style="width:64px;height:64px;border-radius:14px;background:linear-gradient(135deg,#0f172a,#1a6ef0);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:900;color:rgba(255,255,255,.25);margin-bottom:12px">'+pName[0].toUpperCase()+'</div>'
+    + '<div style="font-size:18px;font-weight:900;color:#111;margin-bottom:3px;letter-spacing:-.01em">'+pName+'</div>'
+    + '<div style="display:inline-flex;align-items:center;gap:4px;background:#eff6ff;border:1px solid #dbeafe;border-radius:20px;padding:2px 10px;font-size:11px;font-weight:700;color:#1a6ef0;margin-bottom:12px">Verified Partner</div>'
+
+    // Store info
+    + '<div style="font-size:13px;color:#374151;margin-bottom:5px;font-weight:600">Store Info</div>'
+    + '<div style="display:flex;align-items:center;gap:5px;font-size:13px;color:#374151;margin-bottom:6px">'+starsHtml(avgRat)+' <strong>'+avgRat+'</strong> <span style="color:#d1d5db">·</span> <span style="color:#6b7280">'+allTools.length+' items</span></div>'
+    + '<div style="font-size:13px;color:#6b7280;margin-bottom:4px;display:flex;align-items:center;gap:5px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1a6ef0" stroke-width="2.5" stroke-linecap="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Drone · ~'+eta+'</div>'
+    + (rentCnt?'<div style="font-size:12px;color:#6b7280;margin-bottom:3px">'+rentCnt+' item'+(rentCnt!==1?'s':'')+' available to rent</div>':'')
+    + (buyCnt? '<div style="font-size:12px;color:#6b7280;margin-bottom:3px">'+buyCnt+ ' item'+(buyCnt!==1?'s':'')+' available to buy</div>':'')
+
+    // Top selling
+    + (topTools.length?
+        '<div style="height:1px;background:#f0f0f0;margin:14px 0"></div>'
+        + '<div style="font-size:12px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">Top Items</div>'
+        + topTools.map(function(t){
+            var price = t.type==='buy' ? '$'+parseFloat(t.buyPrice||0).toFixed(2) : '$'+parseFloat(t.pph||0).toFixed(2)+'/hr';
+            return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f9fafb">'
+              + '<div style="width:36px;height:36px;border-radius:8px;background:#f3f4f6;flex-shrink:0;overflow:hidden">'
+              + (t.img&&t.img!=='x'?'<img src="'+t.img+'" style="width:100%;height:100%;object-fit:cover">':'')
+              + '</div>'
+              + '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+t.name+'</div>'
+              + '<div style="font-size:11px;color:#6b7280">'+price+'</div></div>'
+              + '</div>';
+          }).join('')
+        : '')
+
+    // Divider + category menu
+    + '<div style="height:1px;background:#f0f0f0;margin:14px 0"></div>'
+    + '<div style="font-size:12px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Menu</div>'
+    + ['All'].concat(allCats).map(function(c){
+        var active = c === cat;
+        var cnt = c==='All' ? allTools.length : allTools.filter(function(t){return t.cat===c;}).length;
+        return '<div onclick="window.renderPartnerStoreItems(\''+email+'\',\''+c+'\')" '
+          + 'style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-radius:8px;cursor:pointer;margin-bottom:2px;font-size:13px;'
+          + 'font-weight:'+(active?'700':'500')+';color:'+(active?'#1a6ef0':'#374151')+';background:'+(active?'#eff6ff':'transparent')+'">'
+          + '<span>'+c+'</span><span style="font-size:11px;color:#9ca3af">'+cnt+'</span></div>';
+      }).join('')
+    + '</div>'
+
+    // ── RIGHT CONTENT ─────────────────────────────────────────────────────
+    + '<div style="flex:1;min-width:0;padding:24px 28px;background:#f8faff">'
+    + '<div style="font-size:17px;font-weight:800;color:#111;margin-bottom:18px;letter-spacing:-.01em">'
+    + (cat==='All'?'All Items':cat)
+    + ' <span style="font-size:14px;font-weight:400;color:#9ca3af">('+tools.length+')</span></div>'
+
     + (tools.length
-        ? '<div class="tools-grid" style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr))">' + tools.map(makeToolCard).join('') + '</div>'
+        ? '<div class="tools-grid">'
+          + tools.map(makeToolCard).join('')
+          + '</div>'
         : '<div style="text-align:center;padding:80px 0;color:#9ca3af;font-size:14px">No items in this category.</div>')
-    + '</div></div>';
+
+    + '</div>'
+    + '</div>';
 };
+
 
 
 var _brStoreCat = 'All';

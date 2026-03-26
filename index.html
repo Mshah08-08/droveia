@@ -1363,12 +1363,20 @@ html, body { height:100%; }
 
 <!-- ═══ CART ═══ -->
 <div class="page" id="page-cart">
-  <div class="cart-layout" style="padding-top:32px">
-    <div style="grid-column:1/-1;margin-bottom:8px"><h2 style="font-size:22px;font-weight:800;letter-spacing:-.02em">Your Cart</h2></div>
-    <div>
-      <div id="cart-items-container"></div>
-    </div>
+  <div class="cart-layout" style="padding-top:28px">
+    <div id="cart-items-container"></div>
     <div id="cart-summary-container"></div>
+  </div>
+</div>
+
+
+<!-- ══ PARTNER STORE PAGE ══════════════════════════════════════════════ -->
+<div class="page" id="page-partner">
+  <div class="dd-page-layout">
+    <aside class="dd-sidebar" id="partner-sidebar"></aside>
+    <main class="dd-main" style="padding:0">
+      <div id="partner-store-content" style="padding:24px"></div>
+    </main>
   </div>
 </div>
 
@@ -4415,6 +4423,7 @@ function makeToolCard(t, small) {
       +(!avail?'<div class="ddtool-unavail">Unavailable</div>':'')
       +'</div><div class="ddtool-body"><div class="ddtool-name">'+t.name+'</div>'
       +'<div class="ddtool-eta"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> ~'+t.eta+'</div>'
+      +(t.partnerEmail?'<button onclick="event.stopPropagation();openPartnerStore(\''+t.partnerEmail+'\')" style="font-size:10px;font-weight:700;color:#1a6ef0;background:#eff6ff;border:none;border-radius:5px;padding:2px 8px;cursor:pointer;font-family:var(--font);margin-top:4px;display:block">'+(t.partnerName||'Partner Store')+' →</button>':'')
       +'<div class="ddtool-footer">'+largePriceHtml
       +(avail?'<button class="ddtool-add" onclick="event.stopPropagation();handleAddToCart('+t.id+')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>':'')
       +'</div></div></div>';

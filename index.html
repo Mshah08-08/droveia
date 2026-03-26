@@ -2034,6 +2034,63 @@ document.addEventListener("click", function(e){
 });
 
 // ── Modal ─────────────────────────────────────────────────────────────────────
+
+
+window.openPartnerStore = function(email) {
+  var tools = TOOLS.filter(function(t){ return t.partnerEmail === email; });
+  if (!tools.length) { showToast('No items from this partner'); return; }
+  var pName = tools[0].partnerName || email;
+  var cats = [];
+  tools.forEach(function(t){ if (t.cat && cats.indexOf(t.cat)<0) cats.push(t.cat); });
+  var sb = document.getElementById('partner-sidebar');
+  if (sb) {
+    var html = '<div style="padding:20px 16px 12px;border-bottom:1px solid #ebebeb;margin-bottom:8px">'
+      + '<div style="font-size:15px;font-weight:800;color:#111;margin-bottom:2px">' + pName + '</div>'
+      + '<div style="font-size:12px;color:#9ca3af">' + tools.length + ' item' + (tools.length!==1?'s':'') + '</div>'
+      + '</div>';
+    html += '<div class="ddnav-item active" id="pcat-All" onclick="window.renderPartnerStoreItems(this.dataset.e,\'All\')" data-e="' + email + '">'
+      + '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>All Items</div>';
+    cats.forEach(function(c) {
+      html += '<div class="ddnav-item" id="pcat-' + c + '" onclick="window.renderPartnerStoreItems(this.dataset.e,this.dataset.c)" data-e="' + email + '" data-c="' + c + '">'
+        + catIcon(c,'#374151') + c + '</div>';
+    });
+    html += '<div style="height:1px;background:#ebebeb;margin:8px 0"></div>'
+      + '<div class="ddnav-item" onclick="showPage(\'browse\')">'
+      + '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>Back to Browse</div>';
+    sb.innerHTML = html;
+  }
+  window.renderPartnerStoreItems(email, 'All');
+  showPage('partner');
+};
+
+window.renderPartnerStoreItems = function(email, cat) {
+  document.querySelectorAll('[id^="pcat-"]').forEach(function(el){
+    el.classList.toggle('active', el.id === 'pcat-' + cat);
+  });
+  var tools = TOOLS.filter(function(t){ return t.partnerEmail===email && (cat==='All'||t.cat===cat); });
+  var pd = TOOLS.find(function(t){ return t.partnerEmail===email; }) || {};
+  var pName = pd.partnerName || email;
+  var rentCnt = TOOLS.filter(function(t){ return t.partnerEmail===email && t.type!=='buy'; }).length;
+  var buyCnt  = TOOLS.filter(function(t){ return t.partnerEmail===email && (t.type==='buy'||t.type==='both'); }).length;
+  var wrap = document.getElementById('partner-store-content');
+  if (!wrap) return;
+  wrap.innerHTML =
+    '<div style="background:linear-gradient(135deg,#0f172a,#1e3a8a,#1a6ef0);border-radius:16px;padding:28px 24px;margin-bottom:24px;display:flex;align-items:center;gap:20px">'
+    + '<div style="width:60px;height:60px;border-radius:16px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:#fff;flex-shrink:0">' + pName[0].toUpperCase() + '</div>'
+    + '<div style="flex:1"><div style="font-size:20px;font-weight:800;color:#fff;margin-bottom:6px">' + pName + '</div>'
+    + '<div style="display:flex;gap:8px;flex-wrap:wrap">'
+    + '<span style="font-size:12px;color:rgba(255,255,255,.85);background:rgba(255,255,255,.12);padding:3px 10px;border-radius:20px">' + rentCnt + ' for rent</span>'
+    + (buyCnt ? '<span style="font-size:12px;color:rgba(255,255,255,.85);background:rgba(255,255,255,.12);padding:3px 10px;border-radius:20px">' + buyCnt + ' to buy</span>' : '')
+    + '<span style="font-size:12px;color:rgba(255,255,255,.85);background:rgba(255,255,255,.12);padding:3px 10px;border-radius:20px">Drone delivery</span>'
+    + '</div></div></div>'
+    + '<div style="font-size:12px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px">'
+    + (cat==='All'?'All Items':cat) + ' &middot; ' + tools.length + ' item' + (tools.length!==1?'s':'') + '</div>'
+    + (tools.length
+        ? '<div class="tools-grid" style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr))">' + tools.map(makeToolCard).join('') + '</div>'
+        : '<div style="text-align:center;padding:60px 0;color:#9ca3af;font-size:14px">No items in this category.</div>');
+};
+
+
 function openModal(id) {
   currentTool  = getTool(id);
   currentHours = 4;
@@ -3267,8 +3324,23 @@ function startApp() {
     cartTimer = setTimeout(function(){
       fb.setDoc(cRef(currentUser.uid), {
         items: cart.map(function(i){
-          return {id:i.id,name:i.name,cat:i.cat,pph:i.pph,retail:i.retail,
-                  rating:i.rating,desc:i.desc,eta:i.eta,hours:i.hours};
+          var item = {
+            id:    i.id    || 0,
+            name:  i.name  || '',
+            cat:   i.cat   || '',
+            hours: i.hours || 0,
+            type:  i.type  || 'rent'
+          };
+          if (i.type === 'buy') {
+            item.buyPrice = parseFloat(i.buyPrice || i.price) || 0;
+          } else {
+            item.pph    = i.pph    || 0;
+            item.retail = i.retail || 0;
+            item.rating = i.rating || 0;
+            item.desc   = i.desc   || '';
+            item.eta    = i.eta    || '';
+          }
+          return item;
         }),
         updatedAt: fb.serverTimestamp()
       }).catch(function(e){ console.error("saveCart",e); });
@@ -4507,8 +4579,8 @@ window.quickBuy = function(id) {
   if (!t || !t.available) return;
   var price = parseFloat(t.buyPrice) || 0;
   cart.push({
-    id: t.id, name: t.name, img: t.img, cat: t.cat,
-    qty: 1, hours: 0, price: price, total: price,
+    id: t.id, name: t.name, img: t.img || '', cat: t.cat || '',
+    qty: 1, hours: 0, price: price, buyPrice: price, total: price,
     type: 'buy'
   });
   updateBadge(); saveCart();

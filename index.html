@@ -1231,19 +1231,19 @@ html, body { height:100%; }
     <div class="ddnav-item" id="sbnav-home" data-navpage="home" onclick="showPage('home')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home
     </div>
-    <div class="ddnav-item" id="sbnav-workshop" data-navpage="cat-workshop" onclick="showCategory('Workshop')">
+    <div class="ddnav-item" id="brcat-Workshop" onclick="brSetCat('Workshop',this)">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>Workshop
     </div>
-    <div class="ddnav-item" id="sbnav-electronics" data-navpage="cat-electronics" onclick="showCategory('Electronics')">
+    <div class="ddnav-item" id="brcat-Electronics" onclick="brSetCat('Electronics',this)">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Electronics
     </div>
-    <div class="ddnav-item" id="sbnav-crafts" data-navpage="cat-crafts" onclick="showCategory('Crafts')">
+    <div class="ddnav-item" id="brcat-Crafts" onclick="brSetCat('Crafts',this)">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>Crafts
     </div>
-    <div class="ddnav-item" id="sbnav-office" data-navpage="cat-office" onclick="showCategory('Office')">
+    <div class="ddnav-item" id="brcat-Office" onclick="brSetCat('Office',this)">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Office
     </div>
-    <div class="ddnav-item" id="sbnav-browse" data-navpage="cat-food" onclick="showCategory('Food')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>Food &amp; Drinks
+    <div class="ddnav-item" id="brcat-Food" onclick="brSetCat('Food',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>Food &amp; Drinks
     </div>
     <div class="ddnav-item" id="sbnav-browse" data-navpage="browse-all" onclick="showPage('browse-all')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>Browse All
     </div>
@@ -1262,34 +1262,22 @@ html, body { height:100%; }
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Admin Console
     </div>
   </aside>
-  <main style="flex:1;min-width:0;padding:28px 32px;overflow-y:auto;height:100%;background:#f6f8ff">
+  <main style="flex:1;min-width:0;overflow-y:auto;height:100%;background:#f8faff">
+    <div style="max-width:1100px;margin:0 auto;padding:28px 32px 60px">
 
-    <!-- Header + search filter -->
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
-      <h1 id="browse-all-heading" style="font-size:22px;font-weight:800;color:#111;font-family:var(--font);letter-spacing:-.02em;margin:0">Browse</h1>
-      <div style="display:flex;align-items:center;gap:8px;background:#f4f4f4;border-radius:8px;padding:8px 14px">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-        <input id="ba-search" type="text" placeholder="Search tools..." oninput="baSearch(this.value)" style="border:none;outline:none;background:transparent;font-size:14px;color:#111;font-family:var(--font);width:180px"/>
+      <!-- Search -->
+      <div style="display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid #e8edf5;border-radius:12px;padding:11px 16px;margin-bottom:24px;box-shadow:0 1px 4px rgba(0,0,0,.04)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input id="browse-search" type="text" placeholder="Search stores or items..." oninput="renderBrowsePage()" style="border:none;outline:none;background:transparent;font-size:14px;color:#111;font-family:var(--font);flex:1"/>
       </div>
+
+      <!-- Droveia store -->
+      <div id="br-droveia-section"></div>
+
+      <!-- Partner stores -->
+      <div id="br-partners-section"></div>
+
     </div>
-
-    <!-- Category chips -->
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px" id="ba-chips">
-      <button class="ddchip active" onclick="baChip(this,'All')">All</button>
-      <button class="ddchip" onclick="baChip(this,'Workshop')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg> Workshop</button>
-      <button class="ddchip" onclick="baChip(this,'Electronics')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Electronics</button>
-      <button class="ddchip" onclick="baChip(this,'Crafts')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg> Crafts</button>
-      <button class="ddchip" onclick="baChip(this,'Office')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> Office</button>
-    </div>
-
-    <!-- Tool count -->
-    <div id="ba-count" style="font-size:13px;color:#6b7280;margin-bottom:16px"></div>
-
-    <!-- Grid -->
-    <div id="browse-all-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;padding-bottom:40px">
-      <div style="grid-column:1/-1;text-align:center;padding:60px;color:#9ca3af">Loading...</div>
-    </div>
-
   </main>
 </div>
 </div>
@@ -1791,7 +1779,7 @@ function showPage(id) {
   }
   qsa(".page").forEach(function(p){ p.classList.remove("active"); });
   var pg = el("page-"+id); if(pg) pg.classList.add("active");
-  if (id === 'browse-all' && window.onShowBrowseAll) onShowBrowseAll();
+  if (id === 'browse-all') { setTimeout(function(){ renderBrowsePage(); }, 50); }
   if (id === 'browse') { _brCat='All'; _brSearch=''; setTimeout(function(){ brRender(); }, 50); }
   if (window.location.hash) history.replaceState(null, "", window.location.pathname);
   sessionStorage.setItem("currentPage", id);
@@ -4527,7 +4515,8 @@ window.renderBrowseAllGrid = function() {
     : '<div style="grid-column:1/-1;text-align:center;padding:60px;color:#9ca3af">No tools found</div>';
 };
 
-window.onShowBrowseAll = function() {
+window.onShowBrowseAll = function(){ renderBrowsePage(); }
+window._onShowBrowseAll_orig = function() {
   _baCat = 'All'; _baSearch = '';
   var h = document.getElementById('browse-all-heading'); if(h) h.textContent = 'Browse';
   var inp = document.getElementById('ba-search'); if(inp) inp.value = '';

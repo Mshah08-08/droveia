@@ -1264,19 +1264,12 @@ html, body { height:100%; }
   </aside>
   <main style="flex:1;min-width:0;overflow-y:auto;height:100%;background:#f8faff">
     <div style="max-width:1100px;margin:0 auto;padding:28px 32px 60px">
-
-      <!-- Search -->
       <div style="display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid #e8edf5;border-radius:12px;padding:11px 16px;margin-bottom:24px;box-shadow:0 1px 4px rgba(0,0,0,.04)">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
         <input id="browse-search" type="text" placeholder="Search stores or items..." oninput="renderBrowsePage()" style="border:none;outline:none;background:transparent;font-size:14px;color:#111;font-family:var(--font);flex:1"/>
       </div>
-
-      <!-- Droveia store -->
       <div id="br-droveia-section"></div>
-
-      <!-- Partner stores -->
       <div id="br-partners-section"></div>
-
     </div>
   </main>
 </div>
@@ -1351,11 +1344,12 @@ html, body { height:100%; }
 
 
 <!-- ══ PARTNER STORE PAGE ══════════════════════════════════════════════ -->
-id="page-partner">
+<div class="page" id="page-partner">
 <div style="height:calc(100vh - 60px);overflow-y:auto;background:#f8faff">
   <div style="max-width:1280px;margin:0 auto;padding:28px 32px 60px">
     <div id="partner-store-content"></div>
   </div>
+</div>
 </div>
 </div>
 
@@ -4528,23 +4522,12 @@ window._onShowBrowseAll_orig = function() {
 var _catCurrent = 'Workshop', _catSort = 'popular';
 
 window.showCategory = function(cat) {
-  _catCurrent = cat;
-  _catSort = 'popular';
-  // Build sidebar first (so items exist before we mark active)
-  var sidebar = document.getElementById('cat-sidebar');
-  if (sidebar) sidebar.innerHTML = buildSidebarHTML(cat);
-  showPage('category');
-  // Mark active on ALL sidebars (home sidebar + cat-sidebar)
-  function setActive() {
-    document.querySelectorAll('.ddnav-item').forEach(function(el){ el.classList.remove('active'); });
-    var key = 'cat-' + cat.toLowerCase();
-    document.querySelectorAll('.ddnav-item[data-navpage="'+key+'"]').forEach(function(el){ el.classList.add('active'); });
-    // by ID on home sidebar
-    var m = {Workshop:'sbnav-workshop',Electronics:'sbnav-electronics',Crafts:'sbnav-crafts',Office:'sbnav-office'};
-    var sbId = m[cat]; if(sbId){var sb=document.getElementById(sbId);if(sb)sb.classList.add('active');}
-  }
-  setActive();
-  setTimeout(function() { renderCatPage(); setActive(); }, 60);
+  _brStoreCat = cat;
+  // Update sidebar active states
+  document.querySelectorAll('[id^="brcat-"]').forEach(function(el){ el.classList.remove('active'); });
+  var b = document.getElementById('brcat-' + cat);
+  if (b) b.classList.add('active');
+  showPage('browse-all');
 };
 
 function buildSidebarHTML(activeCat) {

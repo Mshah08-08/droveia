@@ -1811,9 +1811,13 @@ function showPage(id) {
   sessionStorage.setItem("currentPage", id);
 
   // ── URL routing — droveia.com/orders, droveia.com/electronics, etc. ──────
-  var urlSlug = id;
-  if (id === 'browse-all') urlSlug = 'browse';
-  history.replaceState({page: id}, '', '/' + urlSlug);
+  // URL routing — categories handled by showCategory directly
+  if (id !== '_skip_url') {
+    var urlSlug = id;
+    if (id === 'browse-all') urlSlug = _brStoreCat && _brStoreCat !== 'All' ? _brStoreCat.toLowerCase() : 'browse';
+    if (id === 'home') urlSlug = '';
+    history.replaceState({page: id}, '', urlSlug ? '/' + urlSlug : '/');
+  }
 
   // ── Sidebar active states — update ALL sidebars ──────────────────────────
   if (id !== 'category') {
@@ -1899,6 +1903,8 @@ function toolCard(t) {
 function renderTools() {
   var q = (el("browse-search")||el("search-input")||{value:""}).value.toLowerCase();
   var list = TOOLS.filter(function(t){
+    if (!toolMatchesMode(t)) return false;
+    if (t.available === false) return false;
     if (currentCat!=="All" && t.cat!==currentCat) return false;
     if (t.name.toLowerCase().indexOf(q)<0) return false;
     if (currentAvailFilter==="available" && t.available===false) return false;
@@ -2111,7 +2117,8 @@ window.renderPartnerStoreItems = function(email, cat) {
   var allTools = email === '__droveia__'
     ? (window._droveiaToolsOverride || TOOLS.filter(function(t){ return !t.partnerEmail; }))
     : TOOLS.filter(function(t){ return t.partnerEmail === email; });
-  var tools   = cat === 'All' ? allTools : allTools.filter(function(t){ return t.cat === cat; });
+  var allToolsFiltered = allTools.filter(function(t){ return toolMatchesMode(t) && t.available !== false; });
+  var tools   = cat === 'All' ? allToolsFiltered : allToolsFiltered.filter(function(t){ return t.cat === cat; });
   var pName   = email === '__droveia__' ? 'Droveia' : ((allTools[0]||{}).partnerName || email);
   var rentCnt = allTools.filter(function(t){ return t.type !== 'buy'; }).length;
   var buyCnt  = allTools.filter(function(t){ return t.type==='buy'||t.type==='both'; }).length;
@@ -2227,6 +2234,7 @@ window.renderBrowsePage = function() {
       };
     }
     var p = partnerMap[t.partnerEmail];
+    if (!toolMatchesMode(t) || t.available === false) return; // skip unavailable/wrong mode
     p.tools.push(t);
     if (t.cat && p.cats.indexOf(t.cat) < 0) p.cats.push(t.cat);
     p.rating += parseFloat(t.rating) || 4.5;
@@ -2236,7 +2244,8 @@ window.renderBrowsePage = function() {
     return p;
   });
 
-  // Filter by category
+  // Filter by category and remove empty partners
+  partners = partners.filter(function(p){ return p.tools.length > 0; });
   if (cat !== 'All') {
     partners = partners.filter(function(p){
       return p.tools.some(function(t){ return t.cat === cat; });
@@ -2252,7 +2261,7 @@ window.renderBrowsePage = function() {
   }
 
   // ── Droveia (own inventory) ───────────────────────────────────────────
-  var droTools = TOOLS.filter(function(t){ return !t.partnerEmail; });
+  var droTools = TOOLS.filter(function(t){ return !t.partnerEmail && toolMatchesMode(t) && t.available !== false; });
   if (cat !== 'All') droTools = droTools.filter(function(t){ return t.cat === cat; });
   if (q) droTools = droTools.filter(function(t){ return t.name.toLowerCase().indexOf(q) >= 0; });
 
@@ -4608,6 +4617,8 @@ window.renderBrowseAllGrid = function() {
     return;
   }
   var list = TOOLS.filter(function(t){
+    if (!toolMatchesMode(t)) return false;
+    if (t.available === false) return false;
     if (_baCat && _baCat !== 'All' && t.cat !== _baCat) return false;
     if (_baSearch && t.name.toLowerCase().indexOf(_baSearch.toLowerCase()) < 0) return false;
     return true;
@@ -4633,14 +4644,16 @@ var _catCurrent = 'Workshop', _catSort = 'popular';
 
 window.showCategory = function(cat) {
   _brStoreCat = cat;
-  // Clear ALL ddnav-item active states across every sidebar
+  // showPage first (it clears active states), then re-apply category active
+  showPage('browse-all');
+  // Re-apply after showPage clears everything
+  var catLower = cat.toLowerCase();
   document.querySelectorAll('.ddnav-item').forEach(function(el){ el.classList.remove('active'); });
-  // Set active on every matching category nav item (multiple sidebars may have it)
-  var catId = 'brcat-' + cat;
-  document.querySelectorAll('[id="'+catId+'"], [data-navpage="cat-'+cat.toLowerCase()+'"]').forEach(function(el){
+  document.querySelectorAll('[id="brcat-'+cat+'"], [data-navpage="cat-'+catLower+'"]').forEach(function(el){
     el.classList.add('active');
   });
-  showPage('browse-all');
+  // Also update URL to /workshop, /electronics etc
+  history.replaceState({page:'browse-all', cat:cat}, '', '/'+catLower);
 };
 
 function buildSidebarHTML(activeCat) {
@@ -4691,7 +4704,7 @@ window.renderCatPage = function() {
   if (!grid) return;
   if (!window.TOOLS || !TOOLS.length) { grid.innerHTML = '<div style="text-align:center;padding:60px;color:#9ca3af">Loading...</div>'; setTimeout(window.renderCatPage, 500); return; }
 
-  var list = TOOLS.filter(function(t){ return t.cat === _catCurrent && toolMatchesMode(t); });
+  var list = TOOLS.filter(function(t){ return t.cat === _catCurrent && toolMatchesMode(t) && t.available !== false; });
   if (_catSort === 'price-asc')  list.sort(function(a,b){ return calcCost(a,1)-calcCost(b,1); });
   if (_catSort === 'price-desc') list.sort(function(a,b){ return calcCost(b,1)-calcCost(a,1); });
   if (_catSort === 'eta')        list.sort(function(a,b){ return parseFloat(a.eta)-parseFloat(b.eta); });
@@ -4811,6 +4824,7 @@ window.homeRenderSections = function() {
   var partnerMap = {};
   TOOLS.forEach(function(t) {
     if (!t.partnerEmail) return;
+    if (!toolMatchesMode(t) || t.available === false) return;
     if (!partnerMap[t.partnerEmail]) {
       partnerMap[t.partnerEmail] = { email:t.partnerEmail, name:t.partnerName||t.partnerEmail, tools:[], cats:[], rating:0 };
     }
@@ -4823,7 +4837,7 @@ window.homeRenderSections = function() {
     p.rating = (p.rating/p.tools.length).toFixed(1); return p;
   });
 
-  var droTools = TOOLS.filter(function(t){ return !t.partnerEmail; });
+  var droTools = TOOLS.filter(function(t){ return !t.partnerEmail && toolMatchesMode(t) && t.available !== false; });
   var droRating = droTools.length ? (droTools.reduce(function(s,t){return s+(parseFloat(t.rating)||4.5);},0)/droTools.length).toFixed(1) : '4.8';
   var droCats = []; droTools.forEach(function(t){if(t.cat&&droCats.indexOf(t.cat)<0)droCats.push(t.cat);});
 

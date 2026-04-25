@@ -1050,9 +1050,9 @@ html, body { height:100%; }
   </div>
 
   <!-- Rent/Buy toggle -->
-  <div id="mode-toggle" style="display:flex;align-items:center;background:#f0f0f0;border-radius:20px;padding:3px;gap:2px;flex-shrink:0">
+  <div id="mode-toggle" style="display:flex;align-items:center;background:#dbeafe;border-radius:20px;padding:3px;gap:2px;flex-shrink:0">
     <button id="mode-btn-rent" onclick="setAppMode('rent')" style="background:#1a6ef0;color:#fff;border:none;border-radius:17px;padding:5px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font);transition:.15s">Rent</button>
-    <button id="mode-btn-buy" onclick="setAppMode('buy')" style="background:transparent;color:#6b7280;border:none;border-radius:17px;padding:5px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font);transition:.15s">Buy</button>
+    <button id="mode-btn-buy" onclick="setAppMode('buy')" style="background:transparent;color:#3b82f6;border:none;border-radius:17px;padding:5px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font);transition:.15s">Buy</button>
   </div>
 
   <!-- Search — hidden on mobile -->
@@ -1798,8 +1798,6 @@ window.showToast = showToast;
 
 // ── Navigation ────────────────────────────────────────────────────────────────
 function showPage(id) {
-  // Allow scrolling on non-home pages
-  // Lock scroll for fixed-height pages
   var _fixedPages = ['home','category','browse-all'];
   if (_fixedPages.indexOf(id) >= 0) {
     document.documentElement.classList.add('page-fixed');
@@ -1809,16 +1807,34 @@ function showPage(id) {
   qsa(".page").forEach(function(p){ p.classList.remove("active"); });
   var pg = el("page-"+id); if(pg) pg.classList.add("active");
   if (id === 'browse-all') { setTimeout(function(){ renderBrowsePage(); }, 50); }
-  if (id === 'browse') { _brCat='All'; _brSearch=''; setTimeout(function(){ brRender(); }, 50); }
-  if (window.location.hash) history.replaceState(null, "", window.location.pathname);
+  if (id === 'browse') { _brCat='All'; _brSearch=''; setTimeout(function(){ if(window.brRender) brRender(); }, 50); }
   sessionStorage.setItem("currentPage", id);
-  // Update sidebar active states
+
+  // ── URL routing — droveia.com/orders, droveia.com/electronics, etc. ──────
+  var urlSlug = id;
+  if (id === 'browse-all') urlSlug = 'browse';
+  history.replaceState({page: id}, '', '/' + urlSlug);
+
+  // ── Sidebar active states — update ALL sidebars ──────────────────────────
   if (id !== 'category') {
     document.querySelectorAll('.ddnav-item').forEach(function(el){ el.classList.remove('active'); });
+    // Match by data-navpage attribute
     document.querySelectorAll('.ddnav-item[data-navpage="'+id+'"]').forEach(function(el){ el.classList.add('active'); });
-    var idMap = {home:'sbnav-home','browse-all':'sbnav-browse'};
-    if (idMap[id]) { var sb = document.getElementById(idMap[id]); if(sb) sb.classList.add('active'); }
+    // Special mappings
+    var idMap = {'home':'home', 'browse-all':'browse-all', 'orders':'orders', 'account':'account', 'partner':'browse-all'};
+    if (idMap[id]) {
+      document.querySelectorAll('.ddnav-item[data-navpage="'+idMap[id]+'"]').forEach(function(el){ el.classList.add('active'); });
+    }
   }
+
+  // ── Keep admin console button always visible for admins ──────────────────
+  if (window.isAdmin && isAdmin) {
+    document.querySelectorAll('.ddnav-item[onclick*="admin"]').forEach(function(el){ el.style.display = 'flex'; });
+    ['sbnav-admin-link','adm-link-orders','adm-link-account','adm-link-browse-all'].forEach(function(aid){
+      var ae = document.getElementById(aid); if(ae) ae.style.display = 'flex';
+    });
+  }
+
   qsa(".nav-link").forEach(function(l){ l.classList.remove("active"); });
   var nl = el("nav-"+id); if(nl) nl.classList.add("active");
   if (id === "admin") { renderAdmin(); }
@@ -2090,6 +2106,8 @@ window.openPartnerStore = function(email) {
 };
 
 window.renderPartnerStoreItems = function(email, cat) {
+  window._currentPartnerEmail = email;
+  window._currentPartnerCat   = cat;
   var allTools = email === '__droveia__'
     ? (window._droveiaToolsOverride || TOOLS.filter(function(t){ return !t.partnerEmail; }))
     : TOOLS.filter(function(t){ return t.partnerEmail === email; });
@@ -4520,16 +4538,36 @@ if (window._fbReady) {
   document.addEventListener("fbready", startApp, {once:true});
 }
 
-// Hash routing — open admin page if #admin in URL
-if (sessionStorage.getItem("openAdmin") === "1") {
-  sessionStorage.removeItem("openAdmin");
-  window._openAdminOnAuth = true;
-}
-// Restore last visited page on refresh
-var _savedPage = sessionStorage.getItem("currentPage");
-if (_savedPage && _savedPage !== "admin") {
-  showPage(_savedPage);
-}
+// URL-based routing — restore page from URL path on load
+(function() {
+  var path = window.location.pathname.replace(/^\//, '').replace(/\/$/, '').toLowerCase();
+  var catMap = { workshop:'Workshop', electronics:'Electronics', crafts:'Crafts', office:'Office', food:'Food' };
+  var pageMap = {
+    'orders':'orders', 'account':'account', 'cart':'cart',
+    'browse':'browse-all', 'admin':'admin', 'partner':'browse-all'
+  };
+  if (sessionStorage.getItem("openAdmin") === "1") {
+    sessionStorage.removeItem("openAdmin");
+    window._openAdminOnAuth = true;
+  }
+  if (catMap[path]) {
+    // Category URL like /workshop
+    _brStoreCat = catMap[path];
+    showPage('browse-all');
+    setTimeout(function() {
+      document.querySelectorAll('.ddnav-item').forEach(function(el){ el.classList.remove('active'); });
+      document.querySelectorAll('[data-navpage="cat-'+path+'"]').forEach(function(el){ el.classList.add('active'); });
+    }, 100);
+  } else if (pageMap[path]) {
+    showPage(pageMap[path]);
+  } else if (path === 'home' || path === '') {
+    showPage('home');
+  } else {
+    // Fallback to sessionStorage
+    var _saved = sessionStorage.getItem("currentPage");
+    if (_saved && _saved !== "admin") showPage(_saved);
+  }
+})();
 
 var _baCat = 'All', _baSearch = '';
 
@@ -4595,10 +4633,13 @@ var _catCurrent = 'Workshop', _catSort = 'popular';
 
 window.showCategory = function(cat) {
   _brStoreCat = cat;
-  // Update sidebar active states
-  document.querySelectorAll('[id^="brcat-"]').forEach(function(el){ el.classList.remove('active'); });
-  var b = document.getElementById('brcat-' + cat);
-  if (b) b.classList.add('active');
+  // Clear ALL ddnav-item active states across every sidebar
+  document.querySelectorAll('.ddnav-item').forEach(function(el){ el.classList.remove('active'); });
+  // Set active on every matching category nav item (multiple sidebars may have it)
+  var catId = 'brcat-' + cat;
+  document.querySelectorAll('[id="'+catId+'"], [data-navpage="cat-'+cat.toLowerCase()+'"]').forEach(function(el){
+    el.classList.add('active');
+  });
   showPage('browse-all');
 };
 
@@ -4885,25 +4926,29 @@ window.toolMatchesMode = function(t) {
 
 window.setAppMode = function(mode) {
   _appMode = mode;
-  // Update toggle buttons
+  // Update toggle colors — rent=solid blue, buy=teal/green-ish blue
   var rentBtn = document.getElementById('mode-btn-rent');
   var buyBtn  = document.getElementById('mode-btn-buy');
   if (rentBtn) {
     rentBtn.style.background = mode === 'rent' ? '#1a6ef0' : 'transparent';
-    rentBtn.style.color      = mode === 'rent' ? '#fff'    : '#6b7280';
+    rentBtn.style.color      = mode === 'rent' ? '#fff'    : '#3b82f6';
   }
   if (buyBtn) {
-    buyBtn.style.background = mode === 'buy' ? '#1a6ef0' : 'transparent';
-    buyBtn.style.color      = mode === 'buy' ? '#fff'    : '#6b7280';
+    buyBtn.style.background = mode === 'buy' ? '#0ea5e9' : 'transparent';
+    buyBtn.style.color      = mode === 'buy' ? '#fff'    : '#3b82f6';
   }
-  // Re-render current view
+  // Re-render all visible pages
   homeRenderSections();
-  if (document.getElementById('page-browse-all') && document.getElementById('page-browse-all').classList.contains('active')) {
-    renderBrowseAllGrid();
-  }
-  if (document.getElementById('page-category') && document.getElementById('page-category').classList.contains('active')) {
-    renderCatPage();
-  }
+  var pages = ['browse-all','browse','category','cart','partner'];
+  pages.forEach(function(pg) {
+    var el = document.getElementById('page-' + pg);
+    if (!el || !el.classList.contains('active')) return;
+    if (pg === 'browse-all') renderBrowsePage();
+    if (pg === 'browse')     renderBrowsePage();
+    if (pg === 'category')   renderCatPage();
+    if (pg === 'cart')       renderCart();
+    if (pg === 'partner' && window._currentPartnerEmail) renderPartnerStoreItems(window._currentPartnerEmail, window._currentPartnerCat || 'All');
+  });
 };
 
 window.homeSeeAllCat = function(cat) {

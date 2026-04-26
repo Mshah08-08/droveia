@@ -2340,7 +2340,7 @@ window.renderBrowsePage = function() {
             tools: p.tools,
             cats: p.cats,
             rating: p.rating,
-            featured: feat ? feat.name + (feat.pph ? ' · $' + parseFloat(feat.pph).toFixed(2) + '/hr' : '') : null
+            featured: feat ? feat.name + ' · $' + calcCost(feat,1).toFixed(2) + '/hr' : null
           });
         }).join('')
       + '</div>';
@@ -2363,7 +2363,7 @@ function storeCard(p) {
   var onclick = p.email==='__droveia__' ? 'brOpenDroveia()' : "openPartnerStore('"+p.email+"')";
   var feat    = p.tools.filter(function(t){return t.img&&t.img!=='x';})[0] || p.tools[0];
   var fName   = feat ? feat.name : '';
-  var fPrice  = feat ? (feat.type==='buy' ? '$'+parseFloat(feat.buyPrice||0).toFixed(2) : '$'+parseFloat(feat.pph||0).toFixed(2)+'/hr') : '';
+  var fPrice  = feat ? (feat.type==='buy' ? '$'+parseFloat(feat.buyPrice||0).toFixed(2) : '$'+calcCost(feat,1).toFixed(2)+'/hr') : '';
 
   return '<div class="store-card" onclick="'+onclick+'">'
     +'<div class="store-card-banner" style="background:'+bg+'">'
@@ -4893,7 +4893,7 @@ window.homeRenderSections = function() {
     html += partners.map(function(p){
       var feat = p.tools[0];
       return storeCard({ email:p.email, name:p.name, tools:p.tools, cats:p.cats, rating:p.rating,
-        featured: feat ? feat.name+(feat.pph?' · $'+parseFloat(feat.pph).toFixed(2)+'/hr':'') : null });
+        featured: feat ? feat.name+' · $'+calcCost(feat,1).toFixed(2)+'/hr' : null });
     }).join('');
     html += '</div>';
   }

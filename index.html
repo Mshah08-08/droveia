@@ -1811,13 +1811,11 @@ function showPage(id) {
   sessionStorage.setItem("currentPage", id);
 
   // ── URL routing — droveia.com/orders, droveia.com/electronics, etc. ──────
-  // URL routing — categories handled by showCategory directly
-  if (id !== '_skip_url') {
-    var urlSlug = id;
-    if (id === 'browse-all') urlSlug = _brStoreCat && _brStoreCat !== 'All' ? _brStoreCat.toLowerCase() : 'browse';
-    if (id === 'home') urlSlug = '';
-    history.replaceState({page: id}, '', urlSlug ? '/' + urlSlug : '/');
-  }
+  // Hash-based routing — safe for GitHub Pages (no 404s)
+  var urlHash = id;
+  if (id === 'browse-all') urlHash = _brStoreCat && _brStoreCat !== 'All' ? _brStoreCat.toLowerCase() : 'browse';
+  if (id === 'home') urlHash = '';
+  history.replaceState({page: id}, '', urlHash ? '#' + urlHash : window.location.pathname);
 
   // ── Sidebar active states — update ALL sidebars ──────────────────────────
   if (id !== 'category') {
@@ -4549,7 +4547,7 @@ if (window._fbReady) {
 
 // URL-based routing — restore page from URL path on load
 (function() {
-  var path = window.location.pathname.replace(/^\//, '').replace(/\/$/, '').toLowerCase();
+  var path = (window.location.hash.replace(/^#/, '') || window.location.pathname.replace(/^\//, '').replace(/\/$/, '')).toLowerCase();
   var catMap = { workshop:'Workshop', electronics:'Electronics', crafts:'Crafts', office:'Office', food:'Food' };
   var pageMap = {
     'orders':'orders', 'account':'account', 'cart':'cart',
@@ -4653,7 +4651,7 @@ window.showCategory = function(cat) {
     el.classList.add('active');
   });
   // Also update URL to /workshop, /electronics etc
-  history.replaceState({page:'browse-all', cat:cat}, '', '/'+catLower);
+  history.replaceState({page:'browse-all', cat:cat}, '', '#'+catLower);
 };
 
 function buildSidebarHTML(activeCat) {

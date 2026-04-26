@@ -4646,11 +4646,17 @@ var _catCurrent = 'Workshop', _catSort = 'popular';
 window.showCategory = function(cat) {
   _brStoreCat = cat;
   var catLower = cat.toLowerCase();
-  // showPage first (it clears active states), then re-apply
-  showPage('browse-all');
-  // Clear everything, then mark ALL matching items active across ALL sidebars
+  // Switch page content without touching sidebar active states
+  var _fixedPages = ['home','category','browse-all'];
+  document.documentElement.classList.add('page-fixed');
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+  var pg = document.getElementById('page-browse-all');
+  if (pg) pg.classList.add('active');
+  setTimeout(function(){ renderBrowsePage(); }, 50);
+  sessionStorage.setItem('currentPage', 'browse-all');
+  updateMobileNav('browse-all');
+  // Set active ONLY on the category items — clear browse-all first
   document.querySelectorAll('.ddnav-item').forEach(function(el){ el.classList.remove('active'); });
-  // Match by brcat-X id, data-navpage="cat-x", or sbnav-X id
   var selectors = [
     '[id="brcat-'+cat+'"]',
     '[id="sbnav-'+catLower+'"]',

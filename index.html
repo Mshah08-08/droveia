@@ -1120,9 +1120,9 @@ html, body { height:100%; }
     <div class="ddnav-item" id="sbnav-office" data-navpage="cat-office" onclick="showCategory('Office')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Office
     </div>
-    <div class="ddnav-item" id="sbnav-browse" data-navpage="cat-food" onclick="showCategory('Food')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>Food &amp; Drinks
+    <div class="ddnav-item" id="sbnav-browse" data-navpage="browse-all" onclick="brSetCat('All')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>Food &amp; Drinks
     </div>
-    <div class="ddnav-item" id="sbnav-browse" data-navpage="browse-all" onclick="showPage('browse-all')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>Browse All
+    <div class="ddnav-item" id="sbnav-browse" data-navpage="browse-all" onclick="brSetCat('All')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>Browse All
     </div>
     <div style="height:1px;background:#f0f0f0;margin:8px 0"></div>
     <div class="ddnav-item" data-navpage="orders" onclick="showPage('orders')">
@@ -1246,7 +1246,7 @@ html, body { height:100%; }
     </div>
     <div class="ddnav-item" id="brcat-Food" data-navpage="cat-food" onclick="brSetCat('Food',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>Food &amp; Drinks
     </div>
-    <div class="ddnav-item" id="sbnav-browse" data-navpage="browse-all" onclick="showPage('browse-all')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>Browse All
+    <div class="ddnav-item" id="sbnav-browse" data-navpage="browse-all" onclick="brSetCat('All')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>Browse All
     </div>
     <div style="height:1px;background:#f0f0f0;margin:8px 0"></div>
     <div class="ddnav-item" data-navpage="orders" onclick="showPage('orders')">
@@ -1365,7 +1365,7 @@ html, body { height:100%; }
     </div>
     <div class="ddnav-item" data-navpage="cat-food" onclick="showCategory('Food')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>Food &amp; Drinks
     </div>
-    <div class="ddnav-item" id="sbnav-browse" data-navpage="browse-all" onclick="showPage('browse-all')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>Browse All
+    <div class="ddnav-item" id="sbnav-browse" data-navpage="browse-all" onclick="brSetCat('All')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>Browse All
     </div>
     <div style="height:1px;background:#f0f0f0;margin:8px 0"></div>
     <div class="ddnav-item" data-navpage="orders" onclick="showPage('orders')">
@@ -1410,7 +1410,7 @@ html, body { height:100%; }
     </div>
     <div class="ddnav-item" data-navpage="cat-food" onclick="showCategory('Food')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>Food &amp; Drinks
     </div>
-    <div class="ddnav-item" id="sbnav-browse" data-navpage="browse-all" onclick="showPage('browse-all')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>Browse All
+    <div class="ddnav-item" id="sbnav-browse" data-navpage="browse-all" onclick="brSetCat('All')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>Browse All
     </div>
     <div style="height:1px;background:#f0f0f0;margin:8px 0"></div>
     <div class="ddnav-item" data-navpage="orders" onclick="showPage('orders')">
@@ -1498,7 +1498,7 @@ html, body { height:100%; }
     </div>
     <div class="ddnav-item" data-navpage="cat-food" onclick="showCategory('Food')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>Food &amp; Drinks
     </div>
-    <div class="ddnav-item" id="sbnav-browse" data-navpage="browse-all" onclick="showPage('browse-all')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>Browse All
+    <div class="ddnav-item" id="sbnav-browse" data-navpage="browse-all" onclick="brSetCat('All')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>Browse All
     </div>
     <div style="height:1px;background:#f0f0f0;margin:8px 0"></div>
     <div class="ddnav-item" data-navpage="orders" onclick="showPage('orders')">
@@ -2220,24 +2220,33 @@ var _brStoreCat = 'All';
 
 window.brSetCat = function(cat, btn) {
   _brStoreCat = cat;
-  var catLower = cat.toLowerCase();
-  // Update hash
-  if (cat === 'All') {
-    history.replaceState({page:'browse-all'}, '', '#browse');
-  } else {
-    history.replaceState({page:'browse-all', cat:cat}, '', '#' + catLower);
+  var catLower = cat === 'All' ? 'all' : cat.toLowerCase();
+
+  // Navigate to browse-all page if not already there
+  var pg = document.getElementById('page-browse-all');
+  if (!pg.classList.contains('active')) {
+    document.documentElement.classList.add('page-fixed');
+    document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+    pg.classList.add('active');
+    sessionStorage.setItem('currentPage', 'browse-all');
+    updateMobileNav('browse-all');
   }
-  // Clear ALL sidebar nav items then activate the right one
+
+  // Update hash
+  history.replaceState({page:'browse-all', cat:cat}, '', cat === 'All' ? '#browse' : '#' + catLower);
+
+  // Clear ALL sidebar active states
   document.querySelectorAll('.ddnav-item').forEach(function(el){ el.classList.remove('active'); });
+
+  // Set correct active item
   if (cat === 'All') {
-    // Browse All mode — activate Browse All item
     document.querySelectorAll('[data-navpage="browse-all"]').forEach(function(el){ el.classList.add('active'); });
   } else {
-    // Category mode — activate category items across all sidebars
     document.querySelectorAll(
       '[id="brcat-'+cat+'"], [id="sbnav-'+catLower+'"], [data-navpage="cat-'+catLower+'"]'
     ).forEach(function(el){ el.classList.add('active'); });
   }
+
   renderBrowsePage();
 };
 

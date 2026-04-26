@@ -1806,7 +1806,14 @@ function showPage(id) {
   }
   qsa(".page").forEach(function(p){ p.classList.remove("active"); });
   var pg = el("page-"+id); if(pg) pg.classList.add("active");
-  if (id === 'browse-all') { setTimeout(function(){ renderBrowsePage(); }, 50); }
+  if (id === 'browse-all') {
+    // Reset category filter when navigating to Browse All directly
+    if (!_brStoreCat || _brStoreCat === 'All') {
+      _brStoreCat = 'All';
+      history.replaceState({page:'browse-all'}, '', '#browse');
+    }
+    setTimeout(function(){ renderBrowsePage(); }, 50);
+  }
   if (id === 'browse') { _brCat='All'; _brSearch=''; setTimeout(function(){ if(window.brRender) brRender(); }, 50); }
   sessionStorage.setItem("currentPage", id);
 
@@ -2213,9 +2220,24 @@ var _brStoreCat = 'All';
 
 window.brSetCat = function(cat, btn) {
   _brStoreCat = cat;
-  document.querySelectorAll('[id^="brcat-"]').forEach(function(el){ el.classList.remove('active'); });
-  if (btn) btn.classList.add('active');
-  else { var b = document.getElementById('brcat-' + cat); if(b) b.classList.add('active'); }
+  var catLower = cat.toLowerCase();
+  // Update hash
+  if (cat === 'All') {
+    history.replaceState({page:'browse-all'}, '', '#browse');
+  } else {
+    history.replaceState({page:'browse-all', cat:cat}, '', '#' + catLower);
+  }
+  // Clear ALL sidebar nav items then activate the right one
+  document.querySelectorAll('.ddnav-item').forEach(function(el){ el.classList.remove('active'); });
+  if (cat === 'All') {
+    // Browse All mode — activate Browse All item
+    document.querySelectorAll('[data-navpage="browse-all"]').forEach(function(el){ el.classList.add('active'); });
+  } else {
+    // Category mode — activate category items across all sidebars
+    document.querySelectorAll(
+      '[id="brcat-'+cat+'"], [id="sbnav-'+catLower+'"], [data-navpage="cat-'+catLower+'"]'
+    ).forEach(function(el){ el.classList.add('active'); });
+  }
   renderBrowsePage();
 };
 
@@ -4646,26 +4668,17 @@ window._onShowBrowseAll_orig = function() {
 var _catCurrent = 'Workshop', _catSort = 'popular';
 
 window.showCategory = function(cat) {
-  _brStoreCat = cat;
-  var catLower = cat.toLowerCase();
-
-  // Switch page
-  document.documentElement.classList.add('page-fixed');
-  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
-  var pg = document.getElementById('page-browse-all');
-  if (pg) pg.classList.add('active');
-  setTimeout(function(){ renderBrowsePage(); }, 50);
-  sessionStorage.setItem('currentPage', 'browse-all');
-  updateMobileNav('browse-all');
-
-  // Update URL
-  history.replaceState({page:'browse-all', cat:cat}, '', '#' + catLower);
-
-  // Set sidebar active — clear ALL then activate only the category
-  document.querySelectorAll('.ddnav-item').forEach(function(el){ el.classList.remove('active'); });
-  document.querySelectorAll(
-    '[id="brcat-'+cat+'"], [id="sbnav-'+catLower+'"], [data-navpage="cat-'+catLower+'"]'
-  ).forEach(function(el){ el.classList.add('active'); });
+  // Make sure we're on browse-all page first
+  if (!document.getElementById('page-browse-all').classList.contains('active')) {
+    document.documentElement.classList.add('page-fixed');
+    document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+    document.getElementById('page-browse-all').classList.add('active');
+    sessionStorage.setItem('currentPage', 'browse-all');
+    updateMobileNav('browse-all');
+    setTimeout(function(){ brSetCat(cat); }, 50);
+  } else {
+    brSetCat(cat);
+  }
 };
 
 function buildSidebarHTML(activeCat) {
